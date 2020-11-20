@@ -31,87 +31,85 @@
  */
 package com.oracle.javafx.scenebuilder.kit.editor.job;
 
-import com.oracle.javafx.scenebuilder.kit.editor.job.atomic.ReIndexObjectJob;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
+import com.oracle.javafx.scenebuilder.kit.editor.job.atomic.ReIndexObjectJob;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.ObjectSelectionGroup;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.Selection;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
+/** */
 public class SendBackwardJob extends InlineDocumentJob {
 
-    public SendBackwardJob(EditorController editorController) {
-        super(editorController);
-    }
+  public SendBackwardJob(EditorController editorController) {
+    super(editorController);
+  }
 
-    @Override
-    public boolean isExecutable() {
-        final Selection selection = getEditorController().getSelection();
-        if (selection.getGroup() instanceof ObjectSelectionGroup == false) {
-            return false;
+  @Override
+  public boolean isExecutable() {
+    final Selection selection = getEditorController().getSelection();
+    if (selection.getGroup() instanceof ObjectSelectionGroup == false) {
+      return false;
+    }
+    final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
+    for (FXOMObject item : osg.getSortedItems()) {
+      final FXOMObject previousSlibing = item.getPreviousSlibing();
+      if (previousSlibing == null) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @Override
+  protected List<Job> makeAndExecuteSubJobs() {
+
+    assert isExecutable(); // (1)
+    final List<Job> result = new ArrayList<>();
+
+    final Selection selection = getEditorController().getSelection();
+    assert selection.getGroup() instanceof ObjectSelectionGroup; // Because of (1)
+    final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
+    final List<FXOMObject> candidates = osg.getSortedItems();
+
+    for (FXOMObject candidate : candidates) {
+      final FXOMObject previousSlibing = candidate.getPreviousSlibing();
+      if (previousSlibing != null) {
+        final ReIndexObjectJob subJob =
+            new ReIndexObjectJob(candidate, previousSlibing, getEditorController());
+        if (subJob.isExecutable()) {
+          subJob.execute();
+          result.add(subJob);
         }
-        final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
-        for (FXOMObject item : osg.getSortedItems()) {
-            final FXOMObject previousSlibing = item.getPreviousSlibing();
-            if (previousSlibing == null) {
-                return false;
-            }
-        }
-        return true;
+      }
     }
 
-    @Override
-    protected List<Job> makeAndExecuteSubJobs() {
+    return result;
+  }
 
-        assert isExecutable(); // (1)
-        final List<Job> result = new ArrayList<>();
-
-        final Selection selection = getEditorController().getSelection();
-        assert selection.getGroup() instanceof ObjectSelectionGroup; // Because of (1)
-        final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
-        final List<FXOMObject> candidates = osg.getSortedItems();
-
-        for (FXOMObject candidate : candidates) {
-            final FXOMObject previousSlibing = candidate.getPreviousSlibing();
-            if (previousSlibing != null) {
-                final ReIndexObjectJob subJob = new ReIndexObjectJob(
-                        candidate, previousSlibing, getEditorController());
-                if (subJob.isExecutable()) {
-                    subJob.execute();
-                    result.add(subJob);
-                }
-            }
-        }
-
-        return result;
+  @Override
+  protected String makeDescription() {
+    final String result;
+    switch (getSubJobs().size()) {
+      case 0:
+        result = "Unexecutable Send Backward"; // NO18N
+        break;
+      case 1: // one arrange Z order
+        result = getSubJobs().get(0).getDescription();
+        break;
+      default:
+        result = makeMultipleSelectionDescription();
+        break;
     }
+    return result;
+  }
 
-    @Override
-    protected String makeDescription() {
-        final String result;
-        switch (getSubJobs().size()) {
-            case 0:
-                result = "Unexecutable Send Backward"; // NO18N
-                break;
-            case 1: // one arrange Z order
-                result = getSubJobs().get(0).getDescription();
-                break;
-            default:
-                result = makeMultipleSelectionDescription();
-                break;
-        }
-        return result;
-    }
-
-    private String makeMultipleSelectionDescription() {
-        final StringBuilder result = new StringBuilder();
-        result.append("Send Backward ");
-        result.append(getSubJobs().size());
-        result.append(" Objects");
-        return result.toString();
-    }
+  private String makeMultipleSelectionDescription() {
+    final StringBuilder result = new StringBuilder();
+    result.append("Send Backward ");
+    result.append(getSubJobs().size());
+    result.append(" Objects");
+    return result.toString();
+  }
 }

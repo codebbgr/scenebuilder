@@ -56,227 +56,229 @@ import javafx.scene.layout.Priority;
 import javafx.stage.Window;
 
 /**
- * ListCell for the Library panel.
- * Used to dynamically construct items and their graphic, as well as set the cursor.
+ * ListCell for the Library panel. Used to dynamically construct items and their graphic, as well as
+ * set the cursor.
+ *
  * @param <T>
  */
 class LibraryListCell extends ListCell<LibraryListItem> {
-    private final EditorController editorController;
-    
-    private final HBox graphic = new HBox();
-    private final ImageView iconImageView = new ImageView();
-    private final Label classNameLabel = new Label();
-    private final Label qualifierLabel = new Label();
-    private final Label sectionLabel = new Label();
-    private final URL missingIconURL = ImageUtils.getNodeIconURL("MissingIcon.png"); //NOI18N
-    private static final String EMPTY_QUALIFIER_ID = " (empty)"; //NOI18N
-    
-    public LibraryListCell(final EditorController ec) {
-        super();
-        this.editorController = ec;
-        
-        graphic.getStyleClass().add("list-cell-graphic"); //NOI18N
-        classNameLabel.getStyleClass().add("library-classname-label"); //NOI18N
-        qualifierLabel.getStyleClass().add("library-qualifier-label"); //NOI18N
-        sectionLabel.getStyleClass().add("library-section-label"); //NOI18N
-        
-        graphic.getChildren().add(iconImageView);
-        graphic.getChildren().add(classNameLabel);
-        graphic.getChildren().add(qualifierLabel);
-        graphic.getChildren().add(sectionLabel);
-        
-        HBox.setHgrow(sectionLabel, Priority.ALWAYS);
-        sectionLabel.setMaxWidth(Double.MAX_VALUE);
-        
-        final EventHandler<MouseEvent> mouseEventHandler = e -> handleMouseEvent(e);
-        // Mouse events
-        this.addEventHandler(MouseEvent.ANY, mouseEventHandler);
-        
-        setOnDragDetected(t -> {
-//                System.out.println("LibraryListCell - setOnDragDetected.handle");
-            final LibraryListItem listItem = LibraryListCell.this.getItem();
-            final FXOMDocument fxomDocument = editorController.getFxomDocument();
-            
-            if ((listItem != null) && (fxomDocument != null)) {
-                final LibraryItem item = LibraryListCell.this.getItem().getLibItem();
-                if (item != null) {
-                    final ListView<LibraryListItem> list = LibraryListCell.this.getListView();
-                    final Dragboard db = list.startDragAndDrop(TransferMode.COPY);
+  private final EditorController editorController;
 
-                    final Window ownerWindow = getScene().getWindow();
-                    final LibraryDragSource dragSource 
-                            = new LibraryDragSource(item, fxomDocument, ownerWindow);
-                    assert editorController.getDragController().getDragSource() == null;
-                    assert dragSource.isAcceptable();
-                    editorController.getDragController().begin(dragSource);
+  private final HBox graphic = new HBox();
+  private final ImageView iconImageView = new ImageView();
+  private final Label classNameLabel = new Label();
+  private final Label qualifierLabel = new Label();
+  private final Label sectionLabel = new Label();
+  private final URL missingIconURL = ImageUtils.getNodeIconURL("MissingIcon.png"); // NOI18N
+  private static final String EMPTY_QUALIFIER_ID = " (empty)"; // NOI18N
 
-                    db.setContent(dragSource.makeClipboardContent());
-                    db.setDragView(dragSource.makeDragView());
-                }
+  public LibraryListCell(final EditorController ec) {
+    super();
+    this.editorController = ec;
+
+    graphic.getStyleClass().add("list-cell-graphic"); // NOI18N
+    classNameLabel.getStyleClass().add("library-classname-label"); // NOI18N
+    qualifierLabel.getStyleClass().add("library-qualifier-label"); // NOI18N
+    sectionLabel.getStyleClass().add("library-section-label"); // NOI18N
+
+    graphic.getChildren().add(iconImageView);
+    graphic.getChildren().add(classNameLabel);
+    graphic.getChildren().add(qualifierLabel);
+    graphic.getChildren().add(sectionLabel);
+
+    HBox.setHgrow(sectionLabel, Priority.ALWAYS);
+    sectionLabel.setMaxWidth(Double.MAX_VALUE);
+
+    final EventHandler<MouseEvent> mouseEventHandler = e -> handleMouseEvent(e);
+    // Mouse events
+    this.addEventHandler(MouseEvent.ANY, mouseEventHandler);
+
+    setOnDragDetected(
+        t -> {
+          //                System.out.println("LibraryListCell - setOnDragDetected.handle");
+          final LibraryListItem listItem = LibraryListCell.this.getItem();
+          final FXOMDocument fxomDocument = editorController.getFxomDocument();
+
+          if ((listItem != null) && (fxomDocument != null)) {
+            final LibraryItem item = LibraryListCell.this.getItem().getLibItem();
+            if (item != null) {
+              final ListView<LibraryListItem> list = LibraryListCell.this.getListView();
+              final Dragboard db = list.startDragAndDrop(TransferMode.COPY);
+
+              final Window ownerWindow = getScene().getWindow();
+              final LibraryDragSource dragSource =
+                  new LibraryDragSource(item, fxomDocument, ownerWindow);
+              assert editorController.getDragController().getDragSource() == null;
+              assert dragSource.isAcceptable();
+              editorController.getDragController().begin(dragSource);
+
+              db.setContent(dragSource.makeClipboardContent());
+              db.setDragView(dragSource.makeDragView());
             }
+          }
         });
+  }
+
+  @Override
+  public void updateItem(LibraryListItem item, boolean empty) {
+    super.updateItem(item, empty);
+    setText(null);
+
+    if (!empty && item != null) {
+      updateLayout(item);
+      if (item.getLibItem() != null) {
+        // A qualifier needed to discriminate items is kept in the ID:
+        // this applies to orientation as well as empty qualifiers.
+        // FX8 qualifier is not kept as there's no ambiguity there.
+        String id = item.getLibItem().getName();
+        if (id.contains(BuiltinLibrary.getFX8Qualifier())) {
+          id = id.substring(0, id.indexOf(BuiltinLibrary.getFX8Qualifier()));
+        }
+        // If QE were about to test a localized version the ID should
+        // remain unchanged.
+        if (id.contains(BuiltinLibrary.getEmptyQualifier())) {
+          id = id.replace(BuiltinLibrary.getEmptyQualifier(), EMPTY_QUALIFIER_ID);
+        }
+        graphic.setId(id); // for QE
+      }
+
+      setGraphic(graphic);
+    } else {
+      setGraphic(null);
+    }
+  }
+
+  private Cursor getOpenHandCursor() {
+    // DTL-6477
+    if (EditorPlatform.IS_WINDOWS) {
+      return ImageUtils.getOpenHandCursor();
+    } else {
+      return Cursor.OPEN_HAND;
+    }
+  }
+
+  private Cursor getClosedHandCursor() {
+    // DTL-6477
+    if (EditorPlatform.IS_WINDOWS) {
+      return ImageUtils.getClosedHandCursor();
+    } else {
+      return Cursor.CLOSED_HAND;
+    }
+  }
+
+  private void handleMouseEvent(MouseEvent me) {
+    // Handle cursor
+    final Scene scene = getScene();
+
+    if (scene == null) {
+      return;
     }
 
-    @Override
-    public void updateItem(LibraryListItem item, boolean empty) {
-        super.updateItem(item, empty);
-        setText(null);
-
-        if (!empty && item != null) {
-            updateLayout(item);
-            if (item.getLibItem() != null) {
-                // A qualifier needed to discriminate items is kept in the ID:
-                // this applies to orientation as well as empty qualifiers.
-                // FX8 qualifier is not kept as there's no ambiguity there.
-                String id = item.getLibItem().getName();
-                if (id.contains(BuiltinLibrary.getFX8Qualifier())) {
-                    id = id.substring(0, id.indexOf(BuiltinLibrary.getFX8Qualifier()));
-                }
-                // If QE were about to test a localized version the ID should
-                // remain unchanged.
-                if (id.contains(BuiltinLibrary.getEmptyQualifier())) {
-                    id = id.replace(BuiltinLibrary.getEmptyQualifier(), EMPTY_QUALIFIER_ID);
-                }
-                graphic.setId(id); // for QE
-            }
-            
-            setGraphic(graphic);
-        } else {
-            setGraphic(null);
-        }
+    // When another window is focused (just like the preview window),
+    // we use default cursor
+    if (scene.getWindow() != null && !scene.getWindow().isFocused()) {
+      setCursor(Cursor.DEFAULT);
+      return;
     }
 
-    private Cursor getOpenHandCursor() {
-        // DTL-6477
-        if (EditorPlatform.IS_WINDOWS) {
-            return ImageUtils.getOpenHandCursor();
-        } else {
-            return Cursor.OPEN_HAND;
-        }
+    final LibraryListItem listItem = getItem();
+    LibraryItem item = null;
+
+    if (listItem != null) {
+      item = listItem.getLibItem();
     }
 
-    private Cursor getClosedHandCursor() {
-        // DTL-6477
-        if (EditorPlatform.IS_WINDOWS) {
-            return ImageUtils.getClosedHandCursor();
-        } else {
-            return Cursor.CLOSED_HAND;
-        }
-    }
-    
-    private void handleMouseEvent(MouseEvent me) {
-        // Handle cursor
-        final Scene scene = getScene();
-        
-        if (scene == null) {
-            return;
-        }
-        
-        // When another window is focused (just like the preview window), 
-        // we use default cursor
-        if (scene.getWindow() != null && !scene.getWindow().isFocused()) {
-            setCursor(Cursor.DEFAULT);
-            return;
-        }
-        
-        final LibraryListItem listItem = getItem();
-        LibraryItem item = null;
-        
-        if (listItem != null) {
-            item = listItem.getLibItem();
-        }
-        
-        boolean isSection = false;
-        if (listItem != null && listItem.getSectionName() != null) {
-            isSection = true;
-        }
-
-        if (me.getEventType() == MouseEvent.MOUSE_ENTERED) {
-            if (isEmpty() || isSection) {
-                setCursor(Cursor.DEFAULT);
-            } else {
-                setCursor(getOpenHandCursor());
-            }
-        } else if (me.getEventType() == MouseEvent.MOUSE_PRESSED) {
-            if (isEmpty() || isSection) {
-                setCursor(Cursor.DEFAULT);
-            } else {
-                setCursor(getClosedHandCursor());
-            }
-        } else if (me.getEventType() == MouseEvent.MOUSE_RELEASED) {
-            if (isEmpty() || isSection) {
-                setCursor(Cursor.DEFAULT);
-            } else {
-                setCursor(getOpenHandCursor());
-            }
-        } else if (me.getEventType() == MouseEvent.MOUSE_EXITED) {
-            setCursor(Cursor.DEFAULT);
-        } else if (me.getEventType() == MouseEvent.MOUSE_CLICKED) {
-             // On double click ask for addition of the drag able item on Content
-            if (me.getClickCount() == 2 && me.getButton() == MouseButton.PRIMARY) {
-                if (!isEmpty() && !isSection && item != null) {
-                    if (editorController.canPerformInsert(item)) {
-                        editorController.performInsert(item);
-                    }
-                }
-            }
-        }
+    boolean isSection = false;
+    if (listItem != null && listItem.getSectionName() != null) {
+      isSection = true;
     }
 
-    private void updateLayout(LibraryListItem listItem) {
-        assert listItem != null;
-        
-        if (listItem.getLibItem() != null) {
-            final LibraryItem item = listItem.getLibItem();
-            // The classname shall be space character free (it is an API name).
-            // If there is a space character then it means a qualifier comes
-            // right after. In the case there is several qualifiers in a row
-            // only the latest one is taken as is, others are kept with class
-            // name.
-            String classname = getClassName(item.getName());
-            iconImageView.setManaged(true);
-            classNameLabel.setManaged(true);
-            qualifierLabel.setManaged(true);
-            sectionLabel.setManaged(false);
-            iconImageView.setVisible(true);
-            classNameLabel.setVisible(true);
-            qualifierLabel.setVisible(true);
-            sectionLabel.setVisible(false);
-            classNameLabel.setText(classname);
-            qualifierLabel.setText(getQualifier(item.getName()));
-            // getIconURL can return null, this is deliberate.
-            URL iconURL = item.getIconURL();
-            // Use missing icon 
-            if (iconURL == null) {
-                iconURL = missingIconURL;
-            }
-            iconImageView.setImage(new Image(iconURL.toExternalForm()));
-        } else if (listItem.getSectionName() != null) {
-            iconImageView.setManaged(false);
-            classNameLabel.setManaged(false);
-            qualifierLabel.setManaged(false);
-            sectionLabel.setManaged(true);
-            iconImageView.setVisible(false);
-            classNameLabel.setVisible(false);
-            qualifierLabel.setVisible(false);
-            sectionLabel.setVisible(true);
-            sectionLabel.setText(listItem.getSectionName());
+    if (me.getEventType() == MouseEvent.MOUSE_ENTERED) {
+      if (isEmpty() || isSection) {
+        setCursor(Cursor.DEFAULT);
+      } else {
+        setCursor(getOpenHandCursor());
+      }
+    } else if (me.getEventType() == MouseEvent.MOUSE_PRESSED) {
+      if (isEmpty() || isSection) {
+        setCursor(Cursor.DEFAULT);
+      } else {
+        setCursor(getClosedHandCursor());
+      }
+    } else if (me.getEventType() == MouseEvent.MOUSE_RELEASED) {
+      if (isEmpty() || isSection) {
+        setCursor(Cursor.DEFAULT);
+      } else {
+        setCursor(getOpenHandCursor());
+      }
+    } else if (me.getEventType() == MouseEvent.MOUSE_EXITED) {
+      setCursor(Cursor.DEFAULT);
+    } else if (me.getEventType() == MouseEvent.MOUSE_CLICKED) {
+      // On double click ask for addition of the drag able item on Content
+      if (me.getClickCount() == 2 && me.getButton() == MouseButton.PRIMARY) {
+        if (!isEmpty() && !isSection && item != null) {
+          if (editorController.canPerformInsert(item)) {
+            editorController.performInsert(item);
+          }
         }
+      }
     }
-    
-    private String getClassName(String input) {
-        if (!input.contains(" ")) { //NOI18N
-            return input;
-        } else {
-            return input.substring(0, input.lastIndexOf(' ')); //NOI18N
-        }
+  }
+
+  private void updateLayout(LibraryListItem listItem) {
+    assert listItem != null;
+
+    if (listItem.getLibItem() != null) {
+      final LibraryItem item = listItem.getLibItem();
+      // The classname shall be space character free (it is an API name).
+      // If there is a space character then it means a qualifier comes
+      // right after. In the case there is several qualifiers in a row
+      // only the latest one is taken as is, others are kept with class
+      // name.
+      String classname = getClassName(item.getName());
+      iconImageView.setManaged(true);
+      classNameLabel.setManaged(true);
+      qualifierLabel.setManaged(true);
+      sectionLabel.setManaged(false);
+      iconImageView.setVisible(true);
+      classNameLabel.setVisible(true);
+      qualifierLabel.setVisible(true);
+      sectionLabel.setVisible(false);
+      classNameLabel.setText(classname);
+      qualifierLabel.setText(getQualifier(item.getName()));
+      // getIconURL can return null, this is deliberate.
+      URL iconURL = item.getIconURL();
+      // Use missing icon
+      if (iconURL == null) {
+        iconURL = missingIconURL;
+      }
+      iconImageView.setImage(new Image(iconURL.toExternalForm()));
+    } else if (listItem.getSectionName() != null) {
+      iconImageView.setManaged(false);
+      classNameLabel.setManaged(false);
+      qualifierLabel.setManaged(false);
+      sectionLabel.setManaged(true);
+      iconImageView.setVisible(false);
+      classNameLabel.setVisible(false);
+      qualifierLabel.setVisible(false);
+      sectionLabel.setVisible(true);
+      sectionLabel.setText(listItem.getSectionName());
     }
-    
-    private String getQualifier(String input) {
-        if (!input.contains(" ")) { //NOI18N
-            return ""; //NOI18N
-        } else {
-            return input.substring(input.lastIndexOf(' '), input.length()); //NOI18N
-        }
+  }
+
+  private String getClassName(String input) {
+    if (!input.contains(" ")) { // NOI18N
+      return input;
+    } else {
+      return input.substring(0, input.lastIndexOf(' ')); // NOI18N
     }
+  }
+
+  private String getQualifier(String input) {
+    if (!input.contains(" ")) { // NOI18N
+      return ""; // NOI18N
+    } else {
+      return input.substring(input.lastIndexOf(' '), input.length()); // NOI18N
+    }
+  }
 }

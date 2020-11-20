@@ -38,58 +38,71 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.image.Image;
 
-/**
- *
- * 
- */
+/** */
 public class ImagePropertyMetadata extends ComplexPropertyMetadata<DesignImage> {
 
-    private final StringPropertyMetadata urlMetadata
-            = new StringPropertyMetadata(new PropertyName("url"), 
-            true, null, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata requestedWidthMetadata
-            = new DoublePropertyMetadata(new PropertyName("requestedWidth"), 
-            DoublePropertyMetadata.DoubleKind.SIZE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata requestedHeightMetadata
-            = new DoublePropertyMetadata(new PropertyName("requestedHeight"), 
-            DoublePropertyMetadata.DoubleKind.SIZE, true, 0.0, InspectorPath.UNUSED);
-    private final BooleanPropertyMetadata preserveRatioMetadata
-            = new BooleanPropertyMetadata(new PropertyName("preserveRatio"),
-            true /* readWrite */, false /* defaultValue */, InspectorPath.UNUSED);
-    private final BooleanPropertyMetadata smoothMetadata
-            = new BooleanPropertyMetadata(new PropertyName("smooth"),
-            true /* readWrite */, false /* defaultValue */, InspectorPath.UNUSED);
-    private final BooleanPropertyMetadata backgroundLoading
-            = new BooleanPropertyMetadata(new PropertyName("backgroundLoading"),
-            true /* readWrite */, false /* defaultValue */, InspectorPath.UNUSED);
-    
-    public ImagePropertyMetadata(PropertyName name, boolean readWrite, 
-            DesignImage defaultValue, InspectorPath inspectorPath) {
-        super(name, DesignImage.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final StringPropertyMetadata urlMetadata =
+      new StringPropertyMetadata(new PropertyName("url"), true, null, InspectorPath.UNUSED);
+  private final DoublePropertyMetadata requestedWidthMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("requestedWidth"),
+          DoublePropertyMetadata.DoubleKind.SIZE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata requestedHeightMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("requestedHeight"),
+          DoublePropertyMetadata.DoubleKind.SIZE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final BooleanPropertyMetadata preserveRatioMetadata =
+      new BooleanPropertyMetadata(
+          new PropertyName("preserveRatio"),
+          true /* readWrite */,
+          false /* defaultValue */,
+          InspectorPath.UNUSED);
+  private final BooleanPropertyMetadata smoothMetadata =
+      new BooleanPropertyMetadata(
+          new PropertyName("smooth"),
+          true /* readWrite */,
+          false /* defaultValue */,
+          InspectorPath.UNUSED);
+  private final BooleanPropertyMetadata backgroundLoading =
+      new BooleanPropertyMetadata(
+          new PropertyName("backgroundLoading"),
+          true /* readWrite */,
+          false /* defaultValue */,
+          InspectorPath.UNUSED);
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(DesignImage value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, Image.class);
-        
-        urlMetadata.setValue(result, value.getLocation());
-        requestedWidthMetadata.setValue(result, value.getImage().getRequestedWidth());
-        requestedHeightMetadata.setValue(result, value.getImage().getRequestedHeight());
-        preserveRatioMetadata.setValue(result, value.getImage().isPreserveRatio());
-        smoothMetadata.setValue(result, value.getImage().isSmooth());
-        backgroundLoading.setValue(result, value.getImage().isBackgroundLoading());
+  public ImagePropertyMetadata(
+      PropertyName name, boolean readWrite, DesignImage defaultValue, InspectorPath inspectorPath) {
+    super(name, DesignImage.class, readWrite, defaultValue, inspectorPath);
+  }
 
-        return result;
-    }
-    
-    @Override
-    public DesignImage makeValueFromFxomInstance(FXOMInstance valueFxomInstance) {
-        final String location = urlMetadata.getValue(valueFxomInstance);
-        final Image image = (Image)valueFxomInstance.getSceneGraphObject();
-        return new DesignImage(image, location);
-    }
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(DesignImage value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, Image.class);
+
+    urlMetadata.setValue(result, value.getLocation());
+    requestedWidthMetadata.setValue(result, value.getImage().getRequestedWidth());
+    requestedHeightMetadata.setValue(result, value.getImage().getRequestedHeight());
+    preserveRatioMetadata.setValue(result, value.getImage().isPreserveRatio());
+    smoothMetadata.setValue(result, value.getImage().isSmooth());
+    backgroundLoading.setValue(result, value.getImage().isBackgroundLoading());
+
+    return result;
+  }
+
+  @Override
+  public DesignImage makeValueFromFxomInstance(FXOMInstance valueFxomInstance) {
+    final String location = urlMetadata.getValue(valueFxomInstance);
+    final Image image = (Image) valueFxomInstance.getSceneGraphObject();
+    return new DesignImage(image, location);
+  }
 }

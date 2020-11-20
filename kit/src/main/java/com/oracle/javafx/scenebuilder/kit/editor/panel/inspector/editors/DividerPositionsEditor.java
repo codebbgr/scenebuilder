@@ -32,116 +32,110 @@
 package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors;
 
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
-/**
- * Editor for SplitPnae divider positions (list of DOuble).
- *
- *
- */
+/** Editor for SplitPnae divider positions (list of DOuble). */
 public class DividerPositionsEditor extends PropertyEditor {
 
-    private final VBox vbox = new VBox(5);
+  private final VBox vbox = new VBox(5);
 
-    public DividerPositionsEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super(propMeta, selectedClasses);
-        setLayoutFormat(PropertyEditor.LayoutFormat.SIMPLE_LINE_TOP);
-    }
+  public DividerPositionsEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super(propMeta, selectedClasses);
+    setLayoutFormat(PropertyEditor.LayoutFormat.SIMPLE_LINE_TOP);
+  }
 
-    @Override
-    public Node getValueEditor() {
-        return super.handleGenericModes(vbox);
-    }
+  @Override
+  public Node getValueEditor() {
+    return super.handleGenericModes(vbox);
+  }
 
-    @Override
-    public Object getValue() {
-        Double[] values = new Double[getDoubleFields().size()];
-        int index = 0;
-        for (Node node : getDoubleFields()) {
-            assert node instanceof DoubleField;
-            DoubleField doubleField = (DoubleField) node;
-            String val = doubleField.getText();
-            if (val.isEmpty()) {
-                val = "0"; //NOI18N
-                doubleField.setText(val);
-            } else {
-                try {
-                    Double.parseDouble(val);
-                } catch (NumberFormatException e) {
-                    // should not happen, DoubleField should prevent any error
-                    return null;
-                }
-            }
-            values[index] = Double.valueOf(val);
-            index++;
+  @Override
+  public Object getValue() {
+    Double[] values = new Double[getDoubleFields().size()];
+    int index = 0;
+    for (Node node : getDoubleFields()) {
+      assert node instanceof DoubleField;
+      DoubleField doubleField = (DoubleField) node;
+      String val = doubleField.getText();
+      if (val.isEmpty()) {
+        val = "0"; // NOI18N
+        doubleField.setText(val);
+      } else {
+        try {
+          Double.parseDouble(val);
+        } catch (NumberFormatException e) {
+          // should not happen, DoubleField should prevent any error
+          return null;
         }
-        return Arrays.asList(values);
+      }
+      values[index] = Double.valueOf(val);
+      index++;
+    }
+    return Arrays.asList(values);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public void setValue(Object value) {
+    setValueGeneric(value);
+    if (isSetValueDone()) {
+      return;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public void setValue(Object value) {
-        setValueGeneric(value);
-        if (isSetValueDone()) {
-            return;
-        }
+    assert value != null;
+    assert value instanceof List;
+    List<Double> doubleList = (List<Double>) value;
 
-        assert value != null;
-        assert value instanceof List;
-        List<Double> doubleList = (List<Double>) value;
-
-        // Round values : 4 decimals seems enough
-        List<Double> roundedValues = new ArrayList<>();
-        for (double val : doubleList) {
-            roundedValues.add(EditorUtils.round(val, 10000));
-        }
-
-        fillVBox(roundedValues);
+    // Round values : 4 decimals seems enough
+    List<Double> roundedValues = new ArrayList<>();
+    for (double val : doubleList) {
+      roundedValues.add(EditorUtils.round(val, 10000));
     }
 
-    @Override
-    public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super.reset(propMeta, selectedClasses);
-        vbox.getChildren().clear();
-        setLayoutFormat(PropertyEditor.LayoutFormat.SIMPLE_LINE_TOP);
-    }
+    fillVBox(roundedValues);
+  }
 
-    @Override
-    protected void valueIsIndeterminate() {
-        // Add a simple text field with the indeterminate char
-        List<Double> value = new ArrayList<>();
-        value.add(0.0);
-        fillVBox(value);
-        handleIndeterminate(getDoubleFields().get(0));
-    }
+  @Override
+  public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super.reset(propMeta, selectedClasses);
+    vbox.getChildren().clear();
+    setLayoutFormat(PropertyEditor.LayoutFormat.SIMPLE_LINE_TOP);
+  }
 
-    @Override
-    public void requestFocus() {
-        EditorUtils.doNextFrame(() -> getDoubleFields().get(0).requestFocus());
-    }
+  @Override
+  protected void valueIsIndeterminate() {
+    // Add a simple text field with the indeterminate char
+    List<Double> value = new ArrayList<>();
+    value.add(0.0);
+    fillVBox(value);
+    handleIndeterminate(getDoubleFields().get(0));
+  }
 
-    private void fillVBox(List<Double> values) {
-        vbox.getChildren().clear();
-        for (Double value : values) {
-            double val = (value != null) ? value : 0;
-            DoubleField doubleField = new DoubleField();
-            doubleField.setText(EditorUtils.valAsStr(val));
-            vbox.getChildren().add(doubleField);
-            EventHandler<ActionEvent> valueListener = event -> userUpdateValueProperty(getValue());
-            setNumericEditorBehavior(this, doubleField, valueListener, false);
-        }
-    }
+  @Override
+  public void requestFocus() {
+    EditorUtils.doNextFrame(() -> getDoubleFields().get(0).requestFocus());
+  }
 
-    private List<Node> getDoubleFields() {
-        return vbox.getChildren();
+  private void fillVBox(List<Double> values) {
+    vbox.getChildren().clear();
+    for (Double value : values) {
+      double val = (value != null) ? value : 0;
+      DoubleField doubleField = new DoubleField();
+      doubleField.setText(EditorUtils.valAsStr(val));
+      vbox.getChildren().add(doubleField);
+      EventHandler<ActionEvent> valueListener = event -> userUpdateValueProperty(getValue());
+      setNumericEditorBehavior(this, doubleField, valueListener, false);
     }
+  }
+
+  private List<Node> getDoubleFields() {
+    return vbox.getChildren();
+  }
 }

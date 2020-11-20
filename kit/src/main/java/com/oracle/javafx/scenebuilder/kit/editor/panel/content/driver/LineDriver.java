@@ -41,33 +41,30 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import javafx.scene.shape.Line;
 
-/**
- *
- */
+/** */
 public class LineDriver extends AbstractNodeDriver {
 
-    public LineDriver(ContentPanelController contentPanelController) {
-        super(contentPanelController);
-    }
+  public LineDriver(ContentPanelController contentPanelController) {
+    super(contentPanelController);
+  }
 
-    /*
-     * AbstractDriver
-     */
-    
-    @Override
-    public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof Line;
-        assert fxomObject instanceof FXOMInstance;
-        return new LineHandles(contentPanelController, (FXOMInstance)fxomObject);
-    }
-    
-    @Override
-    public AbstractCurveEditor<?> makeCurveEditor(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof Line;
-        assert fxomObject instanceof FXOMInstance;
+  /*
+   * AbstractDriver
+   */
 
-        final Line line = (Line) fxomObject.getSceneGraphObject();
-        return new LineEditor(line);
-    }
-    
+  @Override
+  public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof Line;
+    assert fxomObject instanceof FXOMInstance;
+    return new LineHandles(contentPanelController, (FXOMInstance) fxomObject);
+  }
+
+  @Override
+  public AbstractCurveEditor<?> makeCurveEditor(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof Line;
+    assert fxomObject instanceof FXOMInstance;
+
+    final Line line = (Line) fxomObject.getSceneGraphObject();
+    return new LineEditor(line);
+  }
 }

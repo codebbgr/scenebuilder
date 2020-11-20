@@ -42,99 +42,100 @@ import javafx.scene.control.TreeItem;
 /**
  * Used to schedule :
  *
- * - tree items expand tasks
- * - graphic tree item place holder
+ * <p>- tree items expand tasks - graphic tree item place holder
  *
- * when DND within hierarchy.
+ * <p>when DND within hierarchy.
  *
- * p
+ * <p>p
+ *
  * @treatAsPrivate
  */
 public class HierarchyTaskScheduler {
 
-    private final AbstractHierarchyPanelController panelController;
-    private final long timerDelay = 1000;
-    private Timer timer;
-    private TimerTask timerTask;
-    private boolean isAddEmptyGraphicTaskScheduled = false;
+  private final AbstractHierarchyPanelController panelController;
+  private final long timerDelay = 1000;
+  private Timer timer;
+  private TimerTask timerTask;
+  private boolean isAddEmptyGraphicTaskScheduled = false;
 
-    public HierarchyTaskScheduler(final AbstractHierarchyPanelController c) {
-        super();
-        this.panelController = c;
-    }
+  public HierarchyTaskScheduler(final AbstractHierarchyPanelController c) {
+    super();
+    this.panelController = c;
+  }
 
-    public void scheduleExpandTask(final TreeItem<HierarchyItem> treeItem) {
-        timerTask = new HierarchyTimerTask(treeItem);
-        assert timerTask != null;
-        getTimer().schedule(timerTask, timerDelay);
-    }
+  public void scheduleExpandTask(final TreeItem<HierarchyItem> treeItem) {
+    timerTask = new HierarchyTimerTask(treeItem);
+    assert timerTask != null;
+    getTimer().schedule(timerTask, timerDelay);
+  }
 
-    public void scheduleAddEmptyGraphicTask(final TreeItem<HierarchyItem> treeItem) {
-        final HierarchyItem item = treeItem.getValue();
-        assert item != null;
-        final DesignHierarchyMask owner = item.getMask();
-        assert owner != null;
-        timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                // JavaFX data should only be accessed on the JavaFX thread. 
-                // => we must wrap the code into a Runnable object and call the Platform.runLater
-                Platform.runLater(() -> {
-                    final TreeItem<HierarchyItem> graphicTreeItem
-                            = panelController.makeTreeItemGraphic(owner, null);
-                    // Add Graphic at first position
-                    treeItem.getChildren().add(0, graphicTreeItem);
-                    treeItem.setExpanded(true);
-                    final Cell<?> cell = panelController.getCell(treeItem);
-                    assert cell != null;
-                    panelController.setBorder(cell, BorderSide.TOP_RIGHT_BOTTOM_LEFT);
-                    isAddEmptyGraphicTaskScheduled = false;
-                });
-            }
-        };
-        assert timerTask != null;
-        getTimer().schedule(timerTask, timerDelay);
-        isAddEmptyGraphicTaskScheduled = true;
-    }
-
-    public void cancelTimer() {
-        if (timer != null) {
-            timer.cancel();
-            isAddEmptyGraphicTaskScheduled = false;
-            timer = null;
-        }
-    }
-
-    public boolean isAddEmptyGraphicTaskScheduled() {
-        return isAddEmptyGraphicTaskScheduled;
-    }
-
-    private Timer getTimer() {
-        if (timer == null) {
-            timer = new Timer(true);
-        }
-        return timer;
-    }
-
-    /**
-     * *************************************************************************
-     * Static inner class
-     * *************************************************************************
-     */
-    private static class HierarchyTimerTask extends TimerTask {
-
-        private final TreeItem<HierarchyItem> treeItem;
-
-        HierarchyTimerTask(final TreeItem<HierarchyItem> treeItem) {
-            super();
-            this.treeItem = treeItem;
-        }
-
-        @Override
-        public void run() {
-            // JavaFX data should only be accessed on the JavaFX thread. 
+  public void scheduleAddEmptyGraphicTask(final TreeItem<HierarchyItem> treeItem) {
+    final HierarchyItem item = treeItem.getValue();
+    assert item != null;
+    final DesignHierarchyMask owner = item.getMask();
+    assert owner != null;
+    timerTask =
+        new TimerTask() {
+          @Override
+          public void run() {
+            // JavaFX data should only be accessed on the JavaFX thread.
             // => we must wrap the code into a Runnable object and call the Platform.runLater
-            Platform.runLater(() -> treeItem.setExpanded(true));
-        }
+            Platform.runLater(
+                () -> {
+                  final TreeItem<HierarchyItem> graphicTreeItem =
+                      panelController.makeTreeItemGraphic(owner, null);
+                  // Add Graphic at first position
+                  treeItem.getChildren().add(0, graphicTreeItem);
+                  treeItem.setExpanded(true);
+                  final Cell<?> cell = panelController.getCell(treeItem);
+                  assert cell != null;
+                  panelController.setBorder(cell, BorderSide.TOP_RIGHT_BOTTOM_LEFT);
+                  isAddEmptyGraphicTaskScheduled = false;
+                });
+          }
+        };
+    assert timerTask != null;
+    getTimer().schedule(timerTask, timerDelay);
+    isAddEmptyGraphicTaskScheduled = true;
+  }
+
+  public void cancelTimer() {
+    if (timer != null) {
+      timer.cancel();
+      isAddEmptyGraphicTaskScheduled = false;
+      timer = null;
     }
+  }
+
+  public boolean isAddEmptyGraphicTaskScheduled() {
+    return isAddEmptyGraphicTaskScheduled;
+  }
+
+  private Timer getTimer() {
+    if (timer == null) {
+      timer = new Timer(true);
+    }
+    return timer;
+  }
+
+  /**
+   * ************************************************************************* Static inner class
+   * *************************************************************************
+   */
+  private static class HierarchyTimerTask extends TimerTask {
+
+    private final TreeItem<HierarchyItem> treeItem;
+
+    HierarchyTimerTask(final TreeItem<HierarchyItem> treeItem) {
+      super();
+      this.treeItem = treeItem;
+    }
+
+    @Override
+    public void run() {
+      // JavaFX data should only be accessed on the JavaFX thread.
+      // => we must wrap the code into a Runnable object and call the Platform.runLater
+      Platform.runLater(() -> treeItem.setExpanded(true));
+    }
+  }
 }

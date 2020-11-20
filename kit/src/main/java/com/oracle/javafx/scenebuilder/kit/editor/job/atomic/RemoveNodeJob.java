@@ -38,54 +38,50 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMNode;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMProperty;
 
-/**
- *
- */
+/** */
 public class RemoveNodeJob extends Job {
-    
-    private final Job subJob;
-    
-    public RemoveNodeJob(FXOMNode targetNode, EditorController editorController) {
-        super(editorController);
-        
-        assert (targetNode instanceof FXOMObject) || (targetNode instanceof FXOMProperty);
-        
-        if (targetNode instanceof FXOMObject) {
-            subJob = new RemoveObjectJob((FXOMObject)targetNode, editorController);
-        } else {
-            assert targetNode instanceof FXOMProperty;
-            subJob = new RemovePropertyJob((FXOMProperty)targetNode, editorController);
-        }
-    }
-    
-    
-    /*
-     * Job
-     */
 
-    @Override
-    public boolean isExecutable() {
-        return subJob.isExecutable();
-    }
+  private final Job subJob;
 
-    @Override
-    public void execute() {
-        subJob.execute();
-    }
+  public RemoveNodeJob(FXOMNode targetNode, EditorController editorController) {
+    super(editorController);
 
-    @Override
-    public void undo() {
-        subJob.undo();
-    }
+    assert (targetNode instanceof FXOMObject) || (targetNode instanceof FXOMProperty);
 
-    @Override
-    public void redo() {
-        subJob.redo();
+    if (targetNode instanceof FXOMObject) {
+      subJob = new RemoveObjectJob((FXOMObject) targetNode, editorController);
+    } else {
+      assert targetNode instanceof FXOMProperty;
+      subJob = new RemovePropertyJob((FXOMProperty) targetNode, editorController);
     }
+  }
 
-    @Override
-    public String getDescription() {
-        return getClass().getSimpleName(); // Should not reach end user
-    }
-    
+  /*
+   * Job
+   */
+
+  @Override
+  public boolean isExecutable() {
+    return subJob.isExecutable();
+  }
+
+  @Override
+  public void execute() {
+    subJob.execute();
+  }
+
+  @Override
+  public void undo() {
+    subJob.undo();
+  }
+
+  @Override
+  public void redo() {
+    subJob.redo();
+  }
+
+  @Override
+  public String getDescription() {
+    return getClass().getSimpleName(); // Should not reach end user
+  }
 }

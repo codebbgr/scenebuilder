@@ -45,99 +45,96 @@ import java.util.List;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 
-/**
- *
- */
+/** */
 public class InsertRowConstraintsJob extends Job {
 
-    private static final RowConstraintsListPropertyMetadata rowContraintsMeta =
-            new RowConstraintsListPropertyMetadata(
-                new PropertyName("rowConstraints"), //NOI18N
-                true, /* readWrite */
-                Collections.emptyList(), /* defaultValue */
-                InspectorPath.UNUSED);
+  private static final RowConstraintsListPropertyMetadata rowContraintsMeta =
+      new RowConstraintsListPropertyMetadata(
+          new PropertyName("rowConstraints"), // NOI18N
+          true, /* readWrite */
+          Collections.emptyList(), /* defaultValue */
+          InspectorPath.UNUSED);
 
-    private final FXOMInstance gridPaneObject;
-    private final int rowIndex;
-    private final int insertCount;
+  private final FXOMInstance gridPaneObject;
+  private final int rowIndex;
+  private final int insertCount;
 
-    public InsertRowConstraintsJob(FXOMObject gridPaneObject, 
-            int rowIndex, int insertCount, EditorController editorController) {
-        super(editorController);
-        
-        assert gridPaneObject instanceof FXOMInstance;
-        assert gridPaneObject.getSceneGraphObject() instanceof GridPane;
-        assert rowIndex >= 0;
-        assert rowIndex <= rowContraintsMeta.getValue((FXOMInstance)gridPaneObject).size();
-        assert insertCount >= 1;
-        
-        this.gridPaneObject = (FXOMInstance)gridPaneObject;
-        this.rowIndex = rowIndex;
-        this.insertCount = insertCount;
-    }
+  public InsertRowConstraintsJob(
+      FXOMObject gridPaneObject, int rowIndex, int insertCount, EditorController editorController) {
+    super(editorController);
 
-    /*
-     * Job
-     */
-    @Override
-    public boolean isExecutable() {
-        return true;
-    }
+    assert gridPaneObject instanceof FXOMInstance;
+    assert gridPaneObject.getSceneGraphObject() instanceof GridPane;
+    assert rowIndex >= 0;
+    assert rowIndex <= rowContraintsMeta.getValue((FXOMInstance) gridPaneObject).size();
+    assert insertCount >= 1;
 
-    @Override
-    public void execute() {
-        // Same as redo()
-        redo();
-    }
+    this.gridPaneObject = (FXOMInstance) gridPaneObject;
+    this.rowIndex = rowIndex;
+    this.insertCount = insertCount;
+  }
 
-    @Override
-    public void undo() {
-        final List<RowConstraints> constraintsList 
-                = new ArrayList<>(rowContraintsMeta.getValue(gridPaneObject));
-        assert rowIndex < constraintsList.size();
-        for (int i = 0; i < insertCount; i++) {
-            constraintsList.remove(rowIndex);
-        }
-        rowContraintsMeta.setValue(gridPaneObject, constraintsList);
-    }
+  /*
+   * Job
+   */
+  @Override
+  public boolean isExecutable() {
+    return true;
+  }
 
-    @Override
-    public void redo() {
-        final List<RowConstraints> constraintsList 
-                = new ArrayList<>(rowContraintsMeta.getValue(gridPaneObject));
-        final RowConstraints template;
-        if (rowIndex >= 1) {
-            template = constraintsList.get(rowIndex-1);
-        } else {
-            template = null;
-        }
-        for (int i = 0; i < insertCount; i++) {
-            constraintsList.add(rowIndex, makeRowConstraints(template));
-        }
-        rowContraintsMeta.setValue(gridPaneObject, constraintsList);
-    }
+  @Override
+  public void execute() {
+    // Same as redo()
+    redo();
+  }
 
-    @Override
-    public String getDescription() {
-        return getClass().getSimpleName();
+  @Override
+  public void undo() {
+    final List<RowConstraints> constraintsList =
+        new ArrayList<>(rowContraintsMeta.getValue(gridPaneObject));
+    assert rowIndex < constraintsList.size();
+    for (int i = 0; i < insertCount; i++) {
+      constraintsList.remove(rowIndex);
     }
-    
-    
-    /*
-     * Private
-     */
-    
-    private RowConstraints makeRowConstraints(RowConstraints template) {
-        final RowConstraints result = new RowConstraints();
-        if (rowIndex >= 1) {
-            result.setFillHeight(template.isFillHeight());
-            result.setValignment(template.getValignment());
-            result.setVgrow(template.getVgrow());
-            result.setMaxHeight(template.getMaxHeight());
-            result.setMinHeight(template.getMinHeight());
-            result.setPercentHeight(template.getPercentHeight());
-            result.setPrefHeight(template.getPrefHeight());
-        }
-        return result;
+    rowContraintsMeta.setValue(gridPaneObject, constraintsList);
+  }
+
+  @Override
+  public void redo() {
+    final List<RowConstraints> constraintsList =
+        new ArrayList<>(rowContraintsMeta.getValue(gridPaneObject));
+    final RowConstraints template;
+    if (rowIndex >= 1) {
+      template = constraintsList.get(rowIndex - 1);
+    } else {
+      template = null;
     }
+    for (int i = 0; i < insertCount; i++) {
+      constraintsList.add(rowIndex, makeRowConstraints(template));
+    }
+    rowContraintsMeta.setValue(gridPaneObject, constraintsList);
+  }
+
+  @Override
+  public String getDescription() {
+    return getClass().getSimpleName();
+  }
+
+  /*
+   * Private
+   */
+
+  private RowConstraints makeRowConstraints(RowConstraints template) {
+    final RowConstraints result = new RowConstraints();
+    if (rowIndex >= 1) {
+      result.setFillHeight(template.isFillHeight());
+      result.setValignment(template.getValignment());
+      result.setVgrow(template.getVgrow());
+      result.setMaxHeight(template.getMaxHeight());
+      result.setMinHeight(template.getMinHeight());
+      result.setPercentHeight(template.getPercentHeight());
+      result.setPrefHeight(template.getPrefHeight());
+    }
+    return result;
+  }
 }

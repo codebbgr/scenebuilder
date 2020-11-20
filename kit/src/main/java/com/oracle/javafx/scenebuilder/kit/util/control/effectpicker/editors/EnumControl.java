@@ -32,11 +32,9 @@
 package com.oracle.javafx.scenebuilder.kit.util.control.effectpicker.editors;
 
 import com.oracle.javafx.scenebuilder.kit.util.control.effectpicker.EffectPickerController;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -51,60 +49,65 @@ import javafx.scene.layout.GridPane;
 
 public class EnumControl<T> extends GridPane {
 
-    @FXML
-    private Label editor_label;
-    @FXML
-    private ChoiceBox<T> editor_choicebox;
+  @FXML private Label editor_label;
+  @FXML private ChoiceBox<T> editor_choicebox;
 
-    private final ObjectProperty<T> value = new SimpleObjectProperty<>();
-    private final EffectPickerController effectPickerController;
+  private final ObjectProperty<T> value = new SimpleObjectProperty<>();
+  private final EffectPickerController effectPickerController;
 
-    public EnumControl(EffectPickerController effectPickerController,
-            String label, T[] values, T initValue) {
-        this.effectPickerController = effectPickerController;
-        initialize(label, values, initValue);
+  public EnumControl(
+      EffectPickerController effectPickerController, String label, T[] values, T initValue) {
+    this.effectPickerController = effectPickerController;
+    initialize(label, values, initValue);
+  }
+
+  public ObjectProperty<T> valueProperty() {
+    return value;
+  }
+
+  public T getValue() {
+    return value.get();
+  }
+
+  public void setValue(T v) {
+    value.set(v);
+  }
+
+  private void initialize(String label, T[] values, T initValue) {
+
+    final URL layoutURL = EnumControl.class.getResource("EnumControl.fxml"); // NOI18N
+    try (InputStream is = layoutURL.openStream()) {
+      final FXMLLoader loader = new FXMLLoader();
+      loader.setController(this);
+      loader.setRoot(this);
+      loader.setLocation(layoutURL);
+      final Parent p = (Parent) loader.load(is);
+      assert p == this;
+    } catch (IOException x) {
+      throw new RuntimeException(x);
     }
-    
-    public ObjectProperty<T> valueProperty() {
-        return value;
-    }
 
-    public T getValue() {
-        return value.get();
-    }
+    editor_label.setText(label);
+    editor_choicebox.getItems().addAll(values);
+    editor_choicebox.setValue(initValue);
+    editor_choicebox
+        .getSelectionModel()
+        .selectedItemProperty()
+        .addListener(
+            (ChangeListener<T>)
+                (ov, t, t1) -> {
+                  // First update the model
+                  setValue(t1);
+                  // Then notify the controller a change occured
+                  effectPickerController.incrementRevision();
+                });
 
-    public void setValue(T v) {
-        value.set(v);
-    }
+    setValue(initValue);
 
-    private void initialize(String label, T[] values, T initValue) {
-
-        final URL layoutURL = EnumControl.class.getResource("EnumControl.fxml"); //NOI18N
-        try (InputStream is = layoutURL.openStream()) {
-            final FXMLLoader loader = new FXMLLoader();
-            loader.setController(this);
-            loader.setRoot(this);
-            loader.setLocation(layoutURL);
-            final Parent p = (Parent) loader.load(is);
-            assert p == this;
-        } catch (IOException x) {
-            throw new RuntimeException(x);
-        }
-
-        editor_label.setText(label);
-        editor_choicebox.getItems().addAll(values);
-        editor_choicebox.setValue(initValue);
-        editor_choicebox.getSelectionModel().selectedItemProperty().addListener((ChangeListener<T>) (ov, t, t1) -> {
-            // First update the model
-            setValue(t1);
-            // Then notify the controller a change occured
-            effectPickerController.incrementRevision();
+    editor_choicebox.addEventHandler(
+        ActionEvent.ACTION,
+        (Event event) -> {
+          event.consume();
         });
-        
-        setValue(initValue);
-        
-        editor_choicebox.addEventHandler(ActionEvent.ACTION, (Event event) -> {
-            event.consume();
-        });
-    }
+  }
 }

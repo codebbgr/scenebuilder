@@ -44,61 +44,55 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Main class used for the wrap jobs using the new container CONTENT property.
- */
+/** Main class used for the wrap jobs using the new container CONTENT property. */
 public abstract class AbstractWrapInContentJob extends AbstractWrapInJob {
 
-    public AbstractWrapInContentJob(EditorController editorController) {
-        super(editorController);
+  public AbstractWrapInContentJob(EditorController editorController) {
+    super(editorController);
+  }
+
+  @Override
+  protected boolean canWrapIn() {
+    final boolean result;
+    if (super.canWrapIn()) { // (1)
+      // Can wrap in CONTENT property single selection only
+      final Selection selection = getEditorController().getSelection();
+      assert selection.getGroup() instanceof ObjectSelectionGroup; // Because of (1)
+      final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
+      result = osg.getItems().size() == 1;
+    } else {
+      result = false;
     }
+    return result;
+  }
 
-    @Override
-    protected boolean canWrapIn() {
-        final boolean result;
-        if (super.canWrapIn()) { // (1)
-            // Can wrap in CONTENT property single selection only
-            final Selection selection = getEditorController().getSelection();
-            assert selection.getGroup() instanceof ObjectSelectionGroup; // Because of (1)
-            final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
-            result = osg.getItems().size() == 1;
-        } else {
-            result = false;
-        }
-        return result;
-    }
-    
-    @Override
-    protected List<Job> wrapChildrenJobs(final List<FXOMObject> children) {
+  @Override
+  protected List<Job> wrapChildrenJobs(final List<FXOMObject> children) {
 
-        final List<Job> jobs = new ArrayList<>();
+    final List<Job> jobs = new ArrayList<>();
 
-        final DesignHierarchyMask newContainerMask
-                = new DesignHierarchyMask(newContainer);
-        assert newContainerMask.isAcceptingAccessory(Accessory.CONTENT);
+    final DesignHierarchyMask newContainerMask = new DesignHierarchyMask(newContainer);
+    assert newContainerMask.isAcceptingAccessory(Accessory.CONTENT);
 
-        // Retrieve the new container property name to be used
-        final PropertyName newContainerPropertyName
-                = new PropertyName("content"); //NOI18N
-        // Create the new container property
-        final FXOMPropertyC newContainerProperty = new FXOMPropertyC(
-                newContainer.getFxomDocument(), newContainerPropertyName);
+    // Retrieve the new container property name to be used
+    final PropertyName newContainerPropertyName = new PropertyName("content"); // NOI18N
+    // Create the new container property
+    final FXOMPropertyC newContainerProperty =
+        new FXOMPropertyC(newContainer.getFxomDocument(), newContainerPropertyName);
 
-        assert children.size() == 1;
-        // Update children before adding them to the new container
-        jobs.addAll(modifyChildrenJobs(children));
+    assert children.size() == 1;
+    // Update children before adding them to the new container
+    jobs.addAll(modifyChildrenJobs(children));
 
-        // Add the children to the new container
-        jobs.addAll(addChildrenJobs(newContainerProperty, children));
+    // Add the children to the new container
+    jobs.addAll(addChildrenJobs(newContainerProperty, children));
 
-        // Add the new container property to the new container instance
-        assert newContainerProperty.getParentInstance() == null;
-        final Job addPropertyJob = new AddPropertyJob(
-                newContainerProperty,
-                newContainer,
-                -1, getEditorController());
-        jobs.add(addPropertyJob);
+    // Add the new container property to the new container instance
+    assert newContainerProperty.getParentInstance() == null;
+    final Job addPropertyJob =
+        new AddPropertyJob(newContainerProperty, newContainer, -1, getEditorController());
+    jobs.add(addPropertyJob);
 
-        return jobs;
-    }
+    return jobs;
+  }
 }

@@ -39,68 +39,67 @@ import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Paint;
 
-/**
- * Paint editor control.
- */
+/** Paint editor control. */
 public class PaintPicker extends Pane {
 
-    public enum Mode {
+  public enum Mode {
+    COLOR,
+    LINEAR,
+    RADIAL
+  }
 
-        COLOR, LINEAR, RADIAL
-    }
+  private final PaintPickerController controller;
 
-    private final PaintPickerController controller;
+  public PaintPicker(Delegate delegate) {
+    final FXMLLoader loader = new FXMLLoader();
+    loader.setLocation(PaintPicker.class.getResource("PaintPicker.fxml")); // NOI18N
 
-    public PaintPicker(Delegate delegate) {        
-        final FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(PaintPicker.class.getResource("PaintPicker.fxml")); //NOI18N
+    try {
+      // Loading
+      final Object rootObject = loader.load();
+      assert rootObject instanceof Node;
+      final Node rootNode = (Node) rootObject;
+      getChildren().add(rootNode);
 
-        try {
-            // Loading
-            final Object rootObject = loader.load();
-            assert rootObject instanceof Node;
-            final Node rootNode = (Node) rootObject;
-            getChildren().add(rootNode);
+      // Retrieving the controller
+      final Object ctl = loader.getController();
+      assert ctl instanceof PaintPickerController;
+      this.controller = (PaintPickerController) ctl;
+      this.controller.setDelegate(delegate);
+    } catch (IOException ex) {
+      throw new IllegalStateException(ex);
+    }
+  }
 
-            // Retrieving the controller
-            final Object ctl = loader.getController();
-            assert ctl instanceof PaintPickerController;
-            this.controller = (PaintPickerController) ctl;
-            this.controller.setDelegate(delegate);
-        } catch (IOException ex) {
-            throw new IllegalStateException(ex);
-        }
-    }
+  public PaintPicker(Delegate delegate, Mode mode) {
+    this(delegate);
+    controller.setSingleMode(mode);
+  }
 
-    public PaintPicker(Delegate delegate, Mode mode) {
-        this(delegate);
-        controller.setSingleMode(mode);
-    }
-    
-    public final ObjectProperty<Paint> paintProperty() {
-        return controller.paintProperty();
-    }
+  public final ObjectProperty<Paint> paintProperty() {
+    return controller.paintProperty();
+  }
 
-    public final void setPaintProperty(Paint value) {
-        // Update model
-        controller.setPaintProperty(value);
-        // Update UI
-        controller.updateUI(value);
-    }
+  public final void setPaintProperty(Paint value) {
+    // Update model
+    controller.setPaintProperty(value);
+    // Update UI
+    controller.updateUI(value);
+  }
 
-    public final Paint getPaintProperty() {
-        return controller.getPaintProperty();
-    }
-    
-    public final ReadOnlyBooleanProperty liveUpdateProperty() {
-        return controller.liveUpdateProperty();
-    }
+  public final Paint getPaintProperty() {
+    return controller.getPaintProperty();
+  }
 
-    public boolean isLiveUpdate() {
-        return controller.isLiveUpdate();
-    }
-    
-    public static interface Delegate {
-        public void handleError(String warningKey, Object... arguments);
-    }
+  public final ReadOnlyBooleanProperty liveUpdateProperty() {
+    return controller.liveUpdateProperty();
+  }
+
+  public boolean isLiveUpdate() {
+    return controller.isLiveUpdate();
+  }
+
+  public static interface Delegate {
+    public void handleError(String warningKey, Object... arguments);
+  }
 }

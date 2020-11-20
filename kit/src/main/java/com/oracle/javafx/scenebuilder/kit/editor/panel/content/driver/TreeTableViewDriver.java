@@ -43,52 +43,48 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.Region;
 
-/**
- *
- */
+/** */
 public class TreeTableViewDriver extends AbstractNodeDriver {
 
-    public TreeTableViewDriver(ContentPanelController contentPanelController) {
-        super(contentPanelController);
+  public TreeTableViewDriver(ContentPanelController contentPanelController) {
+    super(contentPanelController);
+  }
+
+  /*
+   * AbstractDriver
+   */
+
+  @Override
+  public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
+    assert fxomObject != null;
+    assert fxomObject instanceof FXOMInstance;
+    assert fxomObject.getSceneGraphObject() instanceof TreeTableView;
+    return new TreeTableViewHandles(contentPanelController, (FXOMInstance) fxomObject);
+  }
+
+  @Override
+  public AbstractResizer<?> makeResizer(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof TreeTableView;
+    return new RegionResizer((Region) fxomObject.getSceneGraphObject());
+  }
+
+  @Override
+  public FXOMObject refinePick(Node hitNode, double sceneX, double sceneY, FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof TreeTableView;
+
+    final TreeTableViewDesignInfoX di = new TreeTableViewDesignInfoX();
+    final TreeTableView<?> tv = (TreeTableView<?>) fxomObject.getSceneGraphObject();
+    final TreeTableColumn<?, ?> tc = di.lookupColumn(tv, sceneX, sceneY);
+    final FXOMObject result;
+
+    if (tc == null) {
+      result = fxomObject;
+    } else {
+      result = fxomObject.searchWithSceneGraphObject(tc);
+      assert result != null;
+      assert result.getSceneGraphObject() == tc;
     }
 
-    /*
-     * AbstractDriver
-     */
-    
-    @Override
-    public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
-        assert fxomObject != null;
-        assert fxomObject instanceof FXOMInstance;
-        assert fxomObject.getSceneGraphObject() instanceof TreeTableView;
-        return new TreeTableViewHandles(contentPanelController, (FXOMInstance) fxomObject);
-    }
-
-    
-    @Override
-    public AbstractResizer<?> makeResizer(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof TreeTableView;
-        return new RegionResizer((Region) fxomObject.getSceneGraphObject());
-    }
-    
-    @Override
-    public FXOMObject refinePick(Node hitNode, double sceneX, double sceneY, FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof TreeTableView;
-        
-        final TreeTableViewDesignInfoX di = new TreeTableViewDesignInfoX();
-        final TreeTableView<?> tv = (TreeTableView<?>) fxomObject.getSceneGraphObject();
-        final TreeTableColumn<?,?> tc = di.lookupColumn(tv, sceneX, sceneY);
-        final FXOMObject result;
-        
-        if (tc == null) {
-            result = fxomObject;
-        } else {
-            result = fxomObject.searchWithSceneGraphObject(tc);
-            assert result != null;
-            assert result.getSceneGraphObject() == tc;
-        }
-        
-        return result;
-    }
-    
+    return result;
+  }
 }

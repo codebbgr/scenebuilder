@@ -34,13 +34,11 @@ package com.oracle.javafx.scenebuilder.kit.editor.job.wrap;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import javafx.scene.layout.AnchorPane;
 
-/**
- * Job used to wrap selection in an AnchorPane.
- */
+/** Job used to wrap selection in an AnchorPane. */
 public class WrapInAnchorPaneJob extends AbstractWrapInSubComponentJob {
 
-    public WrapInAnchorPaneJob(EditorController editorController) {
-        super(editorController);
-        newContainerClass = AnchorPane.class;
-    }
+  public WrapInAnchorPaneJob(EditorController editorController) {
+    super(editorController);
+    newContainerClass = AnchorPane.class;
+  }
 }

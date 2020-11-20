@@ -42,51 +42,66 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.paint.ImagePattern;
 
-/**
- *
- */
+/** */
 public class ImagePatternPropertyMetadata extends ComplexPropertyMetadata<ImagePattern> {
 
-    private final ImagePropertyMetadata imageMetadata
-            = new ImagePropertyMetadata(new PropertyName("image"), 
-            true, null, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata xMetadata
-            = new DoublePropertyMetadata(new PropertyName("x"), 
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata yMetadata
-            = new DoublePropertyMetadata(new PropertyName("y"), 
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata widthMetadata
-            = new DoublePropertyMetadata(new PropertyName("width"), 
-            DoublePropertyMetadata.DoubleKind.SIZE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata heightMetadata
-            = new DoublePropertyMetadata(new PropertyName("height"), 
-            DoublePropertyMetadata.DoubleKind.SIZE, true, 0.0, InspectorPath.UNUSED);
-    private final BooleanPropertyMetadata proportionalMetadata
-            = new BooleanPropertyMetadata(new PropertyName("proportional"), 
-            true, true, InspectorPath.UNUSED);
+  private final ImagePropertyMetadata imageMetadata =
+      new ImagePropertyMetadata(new PropertyName("image"), true, null, InspectorPath.UNUSED);
+  private final DoublePropertyMetadata xMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("x"),
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata yMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("y"),
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata widthMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("width"),
+          DoublePropertyMetadata.DoubleKind.SIZE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata heightMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("height"),
+          DoublePropertyMetadata.DoubleKind.SIZE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final BooleanPropertyMetadata proportionalMetadata =
+      new BooleanPropertyMetadata(
+          new PropertyName("proportional"), true, true, InspectorPath.UNUSED);
 
-    public ImagePatternPropertyMetadata(PropertyName name, boolean readWrite, 
-            ImagePattern defaultValue, InspectorPath inspectorPath) {
-        super(name, ImagePattern.class, readWrite, defaultValue, inspectorPath);
-    }
+  public ImagePatternPropertyMetadata(
+      PropertyName name,
+      boolean readWrite,
+      ImagePattern defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, ImagePattern.class, readWrite, defaultValue, inspectorPath);
+  }
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(ImagePattern value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        imageMetadata.setValue(result, new DesignImage(value.getImage()));
-        xMetadata.setValue(result, value.getX());
-        yMetadata.setValue(result, value.getY());
-        widthMetadata.setValue(result, value.getWidth());
-        heightMetadata.setValue(result, value.getHeight());
-        proportionalMetadata.setValue(result, value.isProportional());
-        
-        return result;
-    }
-    
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(ImagePattern value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    imageMetadata.setValue(result, new DesignImage(value.getImage()));
+    xMetadata.setValue(result, value.getX());
+    yMetadata.setValue(result, value.getY());
+    widthMetadata.setValue(result, value.getWidth());
+    heightMetadata.setValue(result, value.getHeight());
+    proportionalMetadata.setValue(result, value.isProportional());
+
+    return result;
+  }
 }

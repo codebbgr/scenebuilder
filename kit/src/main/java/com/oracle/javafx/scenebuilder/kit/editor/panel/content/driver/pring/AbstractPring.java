@@ -38,49 +38,49 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import javafx.scene.Node;
 import javafx.scene.paint.Paint;
 
-/**
- *
- * 
- */
+/** */
 public abstract class AbstractPring<T> extends AbstractDecoration<T> {
-    
-    public static final String PARENT_RING_CLASS = "parent-ring"; //NOI18N
-    
-    public AbstractPring(ContentPanelController contentPanelController,
-            FXOMObject fxomObject, Class<T> sceneGraphClass) {
-        super(contentPanelController, fxomObject, sceneGraphClass);
+
+  public static final String PARENT_RING_CLASS = "parent-ring"; // NOI18N
+
+  public AbstractPring(
+      ContentPanelController contentPanelController,
+      FXOMObject fxomObject,
+      Class<T> sceneGraphClass) {
+    super(contentPanelController, fxomObject, sceneGraphClass);
+  }
+
+  public abstract void changeStroke(Paint stroke);
+
+  public abstract AbstractGesture findGesture(Node node);
+
+  private static final String PRING = "PRING"; // NOI18N
+
+  public static AbstractPring<?> lookupPring(Node node) {
+    assert node != null;
+    assert node.isMouseTransparent() == false;
+
+    final AbstractPring<?> result;
+    final Object value = node.getProperties().get(PRING);
+    if (value instanceof AbstractPring) {
+      result = (AbstractPring<?>) value;
+    } else {
+      assert value == null;
+      result = null;
     }
-    
-    public abstract void changeStroke(Paint stroke);
-    public abstract AbstractGesture findGesture(Node node);
-    
-    private static final String PRING = "PRING"; //NOI18N
-    
-    public static AbstractPring<?> lookupPring(Node node) {
-        assert node != null;
-        assert node.isMouseTransparent() == false;
-        
-        final AbstractPring<?> result;
-        final Object value = node.getProperties().get(PRING);
-        if (value instanceof AbstractPring) {
-            result = (AbstractPring<?>) value;
-        } else {
-            assert value == null;
-            result = null;
-        }
-        
-        return result;
+
+    return result;
+  }
+
+  public static void attachPring(Node node, AbstractPring<?> pring) {
+    assert node != null;
+    assert node.isMouseTransparent() == false;
+    assert lookupPring(node) == null;
+
+    if (pring == null) {
+      node.getProperties().remove(PRING);
+    } else {
+      node.getProperties().put(PRING, pring);
     }
-    
-    public static void attachPring(Node node, AbstractPring<?> pring) {
-        assert node != null;
-        assert node.isMouseTransparent() == false;
-        assert lookupPring(node) == null;
-        
-        if (pring == null) {
-            node.getProperties().remove(PRING);
-        } else {
-            node.getProperties().put(PRING, pring);
-        }
-    }
+  }
 }

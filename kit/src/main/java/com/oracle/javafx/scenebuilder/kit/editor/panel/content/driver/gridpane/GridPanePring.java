@@ -44,135 +44,134 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
-/**
- *
- */
+/** */
 public class GridPanePring extends AbstractPring<GridPane> {
 
-    private final GridPaneMosaic mosaic 
-            = new GridPaneMosaic("pring", //NOI18N
-                    true /* shouldShowTray */,
-                    false /* shouldCreateSensors */ );
-    
-    public GridPanePring(ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
-        super(contentPanelController, fxomInstance, GridPane.class);
-        
-        assert fxomInstance.getSceneGraphObject() instanceof GridPane;
-        getRootNode().getChildren().add(mosaic.getTopGroup());
+  private final GridPaneMosaic mosaic =
+      new GridPaneMosaic(
+          "pring", // NOI18N
+          true /* shouldShowTray */,
+          false /* shouldCreateSensors */);
+
+  public GridPanePring(ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
+    super(contentPanelController, fxomInstance, GridPane.class);
+
+    assert fxomInstance.getSceneGraphObject() instanceof GridPane;
+    getRootNode().getChildren().add(mosaic.getTopGroup());
+  }
+
+  public FXOMInstance getFxomInstance() {
+    return (FXOMInstance) getFxomObject();
+  }
+
+  /*
+   * AbstractDecoration
+   */
+  @Override
+  public Bounds getSceneGraphObjectBounds() {
+    return getSceneGraphObject().getLayoutBounds();
+  }
+
+  @Override
+  public Node getSceneGraphObjectProxy() {
+    return getSceneGraphObject();
+  }
+
+  @Override
+  protected void startListeningToSceneGraphObject() {
+    startListeningToLayoutBounds(getSceneGraphObject());
+    startListeningToLocalToSceneTransform(getSceneGraphObject());
+  }
+
+  @Override
+  protected void stopListeningToSceneGraphObject() {
+    stopListeningToLayoutBounds(getSceneGraphObject());
+    stopListeningToLocalToSceneTransform(getSceneGraphObject());
+  }
+
+  @Override
+  protected void layoutDecoration() {
+
+    if (mosaic.getGridPane() != getSceneGraphObject()) {
+      mosaic.setGridPane(getSceneGraphObject());
+    } else {
+      mosaic.update();
     }
 
-    public FXOMInstance getFxomInstance() {
-        return (FXOMInstance) getFxomObject();
+    // Mosaic update may have created new trays. Attach this pring to them.
+    for (Node node : this.mosaic.getNorthTrayNodes()) {
+      attachPring(node);
     }
-    
-    /*
-     * AbstractDecoration
-     */
-    @Override
-    public Bounds getSceneGraphObjectBounds() {
-        return getSceneGraphObject().getLayoutBounds();
+    for (Node node : this.mosaic.getSouthTrayNodes()) {
+      attachPring(node);
     }
-
-    @Override
-    public Node getSceneGraphObjectProxy() {
-        return getSceneGraphObject();
+    for (Node node : this.mosaic.getEastTrayNodes()) {
+      attachPring(node);
+    }
+    for (Node node : this.mosaic.getWestTrayNodes()) {
+      attachPring(node);
     }
 
-    @Override
-    protected void startListeningToSceneGraphObject() {
-        startListeningToLayoutBounds(getSceneGraphObject());
-        startListeningToLocalToSceneTransform(getSceneGraphObject());
-    }
+    // Update mosaic transform
+    mosaic.getTopGroup().getTransforms().clear();
+    mosaic.getTopGroup().getTransforms().add(getSceneGraphObjectToDecorationTransform());
+  }
 
-    @Override
-    protected void stopListeningToSceneGraphObject() {
-        stopListeningToLayoutBounds(getSceneGraphObject());
-        stopListeningToLocalToSceneTransform(getSceneGraphObject());
-    }
-    
-    @Override
-    protected void layoutDecoration() {
-        
-        if (mosaic.getGridPane() != getSceneGraphObject()) {
-            mosaic.setGridPane(getSceneGraphObject());
-        } else {
-            mosaic.update();
-        }
-        
-        // Mosaic update may have created new trays. Attach this pring to them.
-        for (Node node : this.mosaic.getNorthTrayNodes()) {
-            attachPring(node);
-        }
-        for (Node node : this.mosaic.getSouthTrayNodes()) {
-            attachPring(node);
-        }
-        for (Node node : this.mosaic.getEastTrayNodes()) {
-            attachPring(node);
-        }
-        for (Node node : this.mosaic.getWestTrayNodes()) {
-            attachPring(node);
-        }
-        
-        // Update mosaic transform
-        mosaic.getTopGroup().getTransforms().clear();
-        mosaic.getTopGroup().getTransforms().add(getSceneGraphObjectToDecorationTransform());
-    }
+  /*
+   * AbstractPring
+   */
 
-    /*
-     * AbstractPring
-     */
-    
-    @Override
-    public void changeStroke(Paint stroke) {
-        assert stroke instanceof Color;
-        mosaic.setTrayColor((Color) stroke);
-    }
+  @Override
+  public void changeStroke(Paint stroke) {
+    assert stroke instanceof Color;
+    mosaic.setTrayColor((Color) stroke);
+  }
 
-    @Override
-    public AbstractGesture findGesture(Node node) {
-        
-        final GridSelectionGroup.Type feature;
-        
-        int trayIndex = mosaic.getNorthTrayNodes().indexOf(node);
+  @Override
+  public AbstractGesture findGesture(Node node) {
+
+    final GridSelectionGroup.Type feature;
+
+    int trayIndex = mosaic.getNorthTrayNodes().indexOf(node);
+    if (trayIndex != -1) {
+      feature = GridSelectionGroup.Type.COLUMN;
+    } else {
+      trayIndex = mosaic.getSouthTrayNodes().indexOf(node);
+      if (trayIndex != -1) {
+        feature = GridSelectionGroup.Type.COLUMN;
+      } else {
+        trayIndex = mosaic.getWestTrayNodes().indexOf(node);
         if (trayIndex != -1) {
-            feature = GridSelectionGroup.Type.COLUMN;
+          feature = GridSelectionGroup.Type.ROW;
         } else {
-            trayIndex = mosaic.getSouthTrayNodes().indexOf(node);
-            if (trayIndex != -1) {
-                feature = GridSelectionGroup.Type.COLUMN;
-            } else {
-                trayIndex = mosaic.getWestTrayNodes().indexOf(node);
-                if (trayIndex != -1) {
-                    feature = GridSelectionGroup.Type.ROW;
-                } else {
-                    trayIndex = mosaic.getEastTrayNodes().indexOf(node);
-                    feature = GridSelectionGroup.Type.ROW;
-                }
-            }
+          trayIndex = mosaic.getEastTrayNodes().indexOf(node);
+          feature = GridSelectionGroup.Type.ROW;
         }
-        
-        final AbstractGesture result;
-        if (trayIndex == -1) {
-            result = null;
-        } else {
-            result = new SelectAndMoveInGridGesture(getContentPanelController(),
-                    getFxomInstance(), feature, trayIndex);
-        }
-        
-        return result;
+      }
     }
-    
-    /*
-     * Private
-     */
-    
-    /* 
-     * Wraper to avoid the 'leaking this in constructor' warning emitted by NB.
-     */
-    private void attachPring(Node node) {
-        if (AbstractPring.lookupPring(node) == null) {
-            attachPring(node, this);
-        }
+
+    final AbstractGesture result;
+    if (trayIndex == -1) {
+      result = null;
+    } else {
+      result =
+          new SelectAndMoveInGridGesture(
+              getContentPanelController(), getFxomInstance(), feature, trayIndex);
     }
-    
+
+    return result;
+  }
+
+  /*
+   * Private
+   */
+
+  /*
+   * Wraper to avoid the 'leaking this in constructor' warning emitted by NB.
+   */
+  private void attachPring(Node node) {
+    if (AbstractPring.lookupPring(node) == null) {
+      attachPring(node, this);
+    }
+  }
 }

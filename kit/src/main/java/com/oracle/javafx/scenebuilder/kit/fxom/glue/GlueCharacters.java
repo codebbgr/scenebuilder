@@ -31,113 +31,108 @@
  */
 package com.oracle.javafx.scenebuilder.kit.fxom.glue;
 
-/**
- *
- * 
- */
+/** */
 public class GlueCharacters extends GlueAuxiliary {
-    
-    public enum Type {
-        TEXT,
-        COMMENT
-    }
-    
-    private final Type type;
-    private String data;
-    
-    public GlueCharacters(GlueDocument document, Type type, String data) {
-        super(document);
-        this.type = type;
-        this.data = data;
-    }
 
-    public Type getType() {
-        return type;
-    }
+  public enum Type {
+    TEXT,
+    COMMENT
+  }
 
-    public String getData() {
-        return data;
-    }
+  private final Type type;
+  private String data;
 
-    public void setData(String data) {
-        this.data = data;
-    }
-    
-    public void adjustIndentBy(int delta) {
-        /*
-         * data
-         * 
-         * 'xxxxxxx\nbbbbbbxxxxxxx\nbbbbbbbbxxxxxxxxxx\nbbbbbxxxxx....'
-         * 
-         *  b : white space
-         *  x : any other char
-         * 
-         * Indenting means:
-         * - when delta > 0, inserting 'delta' spaces after each '\n' char
-         * - when delta < 0, removing 'delta' spaces after each '\n' char *when possible*
-         */
-        
-        final StringBuilder newValue = new StringBuilder();
-        
-        if (delta > 0) {
-            for (int i = 0, length = data.length(); i < length; i++) {
-                final char ch = data.charAt(i);
-                newValue.append(ch);
-                if (ch == '\n') {
-                    for (int n = 0; n < delta; n++) {
-                        newValue.append(' ');
-                    }
-                }
-            }
-        } else {
-            for (int i = 0, length = data.length(); i < length; i++) {
-                final char ch = data.charAt(i);
-                newValue.append(ch);
-                if (ch == '\n') {
-                    while ((i+1 < length) 
-                            && (data.charAt(i+1) == ' ')
-                            && (delta < 0)) {
-                        i++;
-                        delta++;
-                    }
-                }
-            }
+  public GlueCharacters(GlueDocument document, Type type, String data) {
+    super(document);
+    this.type = type;
+    this.data = data;
+  }
+
+  public Type getType() {
+    return type;
+  }
+
+  public String getData() {
+    return data;
+  }
+
+  public void setData(String data) {
+    this.data = data;
+  }
+
+  public void adjustIndentBy(int delta) {
+    /*
+     * data
+     *
+     * 'xxxxxxx\nbbbbbbxxxxxxx\nbbbbbbbbxxxxxxxxxx\nbbbbbxxxxx....'
+     *
+     *  b : white space
+     *  x : any other char
+     *
+     * Indenting means:
+     * - when delta > 0, inserting 'delta' spaces after each '\n' char
+     * - when delta < 0, removing 'delta' spaces after each '\n' char *when possible*
+     */
+
+    final StringBuilder newValue = new StringBuilder();
+
+    if (delta > 0) {
+      for (int i = 0, length = data.length(); i < length; i++) {
+        final char ch = data.charAt(i);
+        newValue.append(ch);
+        if (ch == '\n') {
+          for (int n = 0; n < delta; n++) {
+            newValue.append(' ');
+          }
         }
-        
-        data = newValue.toString();
-    }
-    
-    public int guessIndent() {
-        int result;
-        
-        /*
-         * If data match the following pattern
-         * 
-         * 'xxxxxxx\nbbbbbbxxxxxxx....'
-         * 
-         *  b : white space
-         *  x : any other char
-         * 
-         * then returns number of b characters else returns -1.
-         */
-        
-        int i = 0;
-        final int count = data.length();
-        while ((i < count) && data.charAt(i) != '\n') {
+      }
+    } else {
+      for (int i = 0, length = data.length(); i < length; i++) {
+        final char ch = data.charAt(i);
+        newValue.append(ch);
+        if (ch == '\n') {
+          while ((i + 1 < length) && (data.charAt(i + 1) == ' ') && (delta < 0)) {
             i++;
+            delta++;
+          }
         }
-        
-        if (i < count) {
-            i++;
-            result = 0;
-            while ((i < count) && data.charAt(i) == ' ') {
-                result++;
-                i++;
-            }
-        } else {
-            result = -1;
-        }
-        
-        return result;
+      }
     }
+
+    data = newValue.toString();
+  }
+
+  public int guessIndent() {
+    int result;
+
+    /*
+     * If data match the following pattern
+     *
+     * 'xxxxxxx\nbbbbbbxxxxxxx....'
+     *
+     *  b : white space
+     *  x : any other char
+     *
+     * then returns number of b characters else returns -1.
+     */
+
+    int i = 0;
+    final int count = data.length();
+    while ((i < count) && data.charAt(i) != '\n') {
+      i++;
+    }
+
+    if (i < count) {
+      i++;
+      result = 0;
+      while ((i < count) && data.charAt(i) == ' ') {
+        result++;
+        i++;
+      }
+    } else {
+      result = -1;
+    }
+
+    return result;
+  }
 }

@@ -43,25 +43,33 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
 
-/**
- *
- */
+/** */
 public abstract class AbstractDriver {
-    
-    protected final ContentPanelController contentPanelController;
-    
-    public AbstractDriver(ContentPanelController contentPanelController) {
-        assert contentPanelController != null;
-        this.contentPanelController = contentPanelController;
-    } 
-    
-    public abstract AbstractHandles<?> makeHandles(FXOMObject fxomObject);
-    public abstract AbstractPring<?> makePring(FXOMObject fxomObject);
-    public abstract AbstractTring<?> makeTring(AbstractDropTarget dropTarget);
-    public abstract AbstractResizer<?> makeResizer(FXOMObject fxomObject);
-    public abstract AbstractCurveEditor<?> makeCurveEditor(FXOMObject fxomObject);
-    public abstract FXOMObject refinePick(Node hitNode, double sceneX, double sceneY, FXOMObject fxomObject);
-    public abstract AbstractDropTarget makeDropTarget(FXOMObject fxomObject, double sceneX, double sceneY);
-    public abstract Node getInlineEditorBounds(FXOMObject fxomObject);
-    public abstract boolean intersectsBounds(FXOMObject fxomObject, Bounds bounds);
+
+  protected final ContentPanelController contentPanelController;
+
+  public AbstractDriver(ContentPanelController contentPanelController) {
+    assert contentPanelController != null;
+    this.contentPanelController = contentPanelController;
+  }
+
+  public abstract AbstractHandles<?> makeHandles(FXOMObject fxomObject);
+
+  public abstract AbstractPring<?> makePring(FXOMObject fxomObject);
+
+  public abstract AbstractTring<?> makeTring(AbstractDropTarget dropTarget);
+
+  public abstract AbstractResizer<?> makeResizer(FXOMObject fxomObject);
+
+  public abstract AbstractCurveEditor<?> makeCurveEditor(FXOMObject fxomObject);
+
+  public abstract FXOMObject refinePick(
+      Node hitNode, double sceneX, double sceneY, FXOMObject fxomObject);
+
+  public abstract AbstractDropTarget makeDropTarget(
+      FXOMObject fxomObject, double sceneX, double sceneY);
+
+  public abstract Node getInlineEditorBounds(FXOMObject fxomObject);
+
+  public abstract boolean intersectsBounds(FXOMObject fxomObject, Bounds bounds);
 }

@@ -41,63 +41,83 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCombination;
 
-/**
- *
- */
-public class KeyCharacterCombinationPropertyMetadata extends ComplexPropertyMetadata<KeyCharacterCombination> {
-    
-    /*
-     * NOTE : KeyCharacterCombination singularity
-     * 
-     * Same as KeyCodeCombination => see comments in KeyCodeCombination
-     */
-    private static final String DUMMY = "dummy"; //NOI18N
+/** */
+public class KeyCharacterCombinationPropertyMetadata
+    extends ComplexPropertyMetadata<KeyCharacterCombination> {
 
-    private final EnumerationPropertyMetadata altMetadata
-            = new EnumerationPropertyMetadata(new PropertyName("alt"), //NOI18N
-            KeyCombination.ModifierValue.class, DUMMY, true, 
-            InspectorPath.UNUSED);
-    private final EnumerationPropertyMetadata controlMetadata
-            = new EnumerationPropertyMetadata(new PropertyName("control"), //NOI18N
-            KeyCombination.ModifierValue.class, DUMMY, true, 
-            InspectorPath.UNUSED);
-    private final EnumerationPropertyMetadata metaMetadata
-            = new EnumerationPropertyMetadata(new PropertyName("meta"), //NOI18N
-            KeyCombination.ModifierValue.class, DUMMY, true, 
-            InspectorPath.UNUSED);
-    private final EnumerationPropertyMetadata shiftMetadata
-            = new EnumerationPropertyMetadata(new PropertyName("shift"), //NOI18N
-            KeyCombination.ModifierValue.class, DUMMY, true, 
-            InspectorPath.UNUSED);
-    private final EnumerationPropertyMetadata shortcutMetadata
-            = new EnumerationPropertyMetadata(new PropertyName("shortcut"), //NOI18N
-            KeyCombination.ModifierValue.class, DUMMY, true, 
-            InspectorPath.UNUSED);
-    private final StringPropertyMetadata characterMetadata
-            = new StringPropertyMetadata(new PropertyName("character"), //NOI18N
-            true, null, InspectorPath.UNUSED);
+  /*
+   * NOTE : KeyCharacterCombination singularity
+   *
+   * Same as KeyCodeCombination => see comments in KeyCodeCombination
+   */
+  private static final String DUMMY = "dummy"; // NOI18N
 
-    public KeyCharacterCombinationPropertyMetadata(PropertyName name, boolean readWrite, 
-            KeyCharacterCombination defaultValue, InspectorPath inspectorPath) {
-        super(name, KeyCharacterCombination.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final EnumerationPropertyMetadata altMetadata =
+      new EnumerationPropertyMetadata(
+          new PropertyName("alt"), // NOI18N
+          KeyCombination.ModifierValue.class,
+          DUMMY,
+          true,
+          InspectorPath.UNUSED);
+  private final EnumerationPropertyMetadata controlMetadata =
+      new EnumerationPropertyMetadata(
+          new PropertyName("control"), // NOI18N
+          KeyCombination.ModifierValue.class,
+          DUMMY,
+          true,
+          InspectorPath.UNUSED);
+  private final EnumerationPropertyMetadata metaMetadata =
+      new EnumerationPropertyMetadata(
+          new PropertyName("meta"), // NOI18N
+          KeyCombination.ModifierValue.class,
+          DUMMY,
+          true,
+          InspectorPath.UNUSED);
+  private final EnumerationPropertyMetadata shiftMetadata =
+      new EnumerationPropertyMetadata(
+          new PropertyName("shift"), // NOI18N
+          KeyCombination.ModifierValue.class,
+          DUMMY,
+          true,
+          InspectorPath.UNUSED);
+  private final EnumerationPropertyMetadata shortcutMetadata =
+      new EnumerationPropertyMetadata(
+          new PropertyName("shortcut"), // NOI18N
+          KeyCombination.ModifierValue.class,
+          DUMMY,
+          true,
+          InspectorPath.UNUSED);
+  private final StringPropertyMetadata characterMetadata =
+      new StringPropertyMetadata(
+          new PropertyName("character"), // NOI18N
+          true,
+          null,
+          InspectorPath.UNUSED);
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(KeyCharacterCombination value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        altMetadata.setValue(result, value.getAlt().toString());
-        controlMetadata.setValue(result, value.getControl().toString());
-        metaMetadata.setValue(result, value.getMeta().toString());
-        shiftMetadata.setValue(result, value.getShift().toString());
-        shortcutMetadata.setValue(result, value.getShortcut().toString());
-        characterMetadata.setValue(result, value.getCharacter());
+  public KeyCharacterCombinationPropertyMetadata(
+      PropertyName name,
+      boolean readWrite,
+      KeyCharacterCombination defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, KeyCharacterCombination.class, readWrite, defaultValue, inspectorPath);
+  }
 
-        return result;
-    }
-    
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(
+      KeyCharacterCombination value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    altMetadata.setValue(result, value.getAlt().toString());
+    controlMetadata.setValue(result, value.getControl().toString());
+    metaMetadata.setValue(result, value.getMeta().toString());
+    shiftMetadata.setValue(result, value.getShift().toString());
+    shortcutMetadata.setValue(result, value.getShortcut().toString());
+    characterMetadata.setValue(result, value.getCharacter());
+
+    return result;
+  }
 }

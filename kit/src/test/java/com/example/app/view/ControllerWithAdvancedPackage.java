@@ -32,5 +32,5 @@
 package com.example.app.view;
 
 public class ControllerWithAdvancedPackage {
-    // no-op
+  // no-op
 }

@@ -39,60 +39,55 @@ import javafx.scene.Node;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 
-/**
- *
- * 
- */
+/** */
 public class TreeTableColumnTring extends AbstractGenericTring<Object> {
 
-    private final TreeTableViewDesignInfoX tableViewDesignInfo
-            = new TreeTableViewDesignInfoX();
-    
-    public TreeTableColumnTring(ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
-        super(contentPanelController, fxomInstance, Object.class);
-        assert fxomInstance.getSceneGraphObject() instanceof TreeTableColumn;
-    }
-    
-    public FXOMInstance getFxomInstance() {
-        return (FXOMInstance) getFxomObject();
-    }
+  private final TreeTableViewDesignInfoX tableViewDesignInfo = new TreeTableViewDesignInfoX();
 
-    
-    /*
-     * AbstractGenericPring
-     */
-    
-    @Override
-    public Bounds getSceneGraphObjectBounds() {
-        return tableViewDesignInfo.getColumnBounds(getTreeTableColumn());
-    }
+  public TreeTableColumnTring(
+      ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
+    super(contentPanelController, fxomInstance, Object.class);
+    assert fxomInstance.getSceneGraphObject() instanceof TreeTableColumn;
+  }
 
-    @Override
-    public Node getSceneGraphObjectProxy() {
-        return getTreeTableColumn().getTreeTableView();
-    }
+  public FXOMInstance getFxomInstance() {
+    return (FXOMInstance) getFxomObject();
+  }
 
-    @Override
-    protected void startListeningToSceneGraphObject() {
-        final TreeTableView<?> tableView = getTreeTableColumn().getTreeTableView();
-        startListeningToLayoutBounds(tableView);
-        startListeningToLocalToSceneTransform(tableView);
-    }
+  /*
+   * AbstractGenericPring
+   */
 
-    @Override
-    protected void stopListeningToSceneGraphObject() {
-        final TreeTableView<?> tableView = getTreeTableColumn().getTreeTableView();
-        stopListeningToLayoutBounds(tableView);
-        stopListeningToLocalToSceneTransform(tableView);
-    }
+  @Override
+  public Bounds getSceneGraphObjectBounds() {
+    return tableViewDesignInfo.getColumnBounds(getTreeTableColumn());
+  }
 
+  @Override
+  public Node getSceneGraphObjectProxy() {
+    return getTreeTableColumn().getTreeTableView();
+  }
 
-    /*
-     * Private
-     */
-    
-    private TreeTableColumn<?,?> getTreeTableColumn() {
-        assert getSceneGraphObject() instanceof TreeTableColumn;
-        return (TreeTableColumn<?,?>) getSceneGraphObject();
-    }
+  @Override
+  protected void startListeningToSceneGraphObject() {
+    final TreeTableView<?> tableView = getTreeTableColumn().getTreeTableView();
+    startListeningToLayoutBounds(tableView);
+    startListeningToLocalToSceneTransform(tableView);
+  }
+
+  @Override
+  protected void stopListeningToSceneGraphObject() {
+    final TreeTableView<?> tableView = getTreeTableColumn().getTreeTableView();
+    stopListeningToLayoutBounds(tableView);
+    stopListeningToLocalToSceneTransform(tableView);
+  }
+
+  /*
+   * Private
+   */
+
+  private TreeTableColumn<?, ?> getTreeTableColumn() {
+    assert getSceneGraphObject() instanceof TreeTableColumn;
+    return (TreeTableColumn<?, ?>) getSceneGraphObject();
+  }
 }

@@ -34,28 +34,29 @@ package com.oracle.javafx.scenebuilder.kit.library;
 import java.util.Comparator;
 import java.util.Locale;
 
-/**
- *
- * 
- */
+/** */
 public class LibraryItemNameComparator implements Comparator<LibraryItem> {
-    
-    /**
-     * The comparison done here is performed on the name property of the
-     * LibraryItem, and it is done ignoring the case.
-     * @param li1 The first item we get name from.
-     * @param li2 The second item we get name from.
-     */
-    @Override
-    public int compare(LibraryItem li1, LibraryItem li2) {
-        int result;
 
-        if (li1 == li2) {
-            result = 0;
-        } else {
-            result = li1.getName().toUpperCase(Locale.ENGLISH).compareTo(li2.getName().toUpperCase(Locale.ENGLISH));
-        }
+  /**
+   * The comparison done here is performed on the name property of the LibraryItem, and it is done
+   * ignoring the case.
+   *
+   * @param li1 The first item we get name from.
+   * @param li2 The second item we get name from.
+   */
+  @Override
+  public int compare(LibraryItem li1, LibraryItem li2) {
+    int result;
 
-        return result;
+    if (li1 == li2) {
+      result = 0;
+    } else {
+      result =
+          li1.getName()
+              .toUpperCase(Locale.ENGLISH)
+              .compareTo(li2.getName().toUpperCase(Locale.ENGLISH));
     }
+
+    return result;
+  }
 }

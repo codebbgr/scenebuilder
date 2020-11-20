@@ -33,55 +33,49 @@
 package com.oracle.javafx.scenebuilder.kit.library.util;
 
 import com.oracle.javafx.scenebuilder.kit.library.util.JarReportEntry.Status;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-/**
- *
- * 
- */
+/** */
 public class JarExplorer extends ExplorerBase {
-    
-    private final Path jar;
-    
-    public JarExplorer(Path jar) {
-        assert jar != null;
-        assert jar.isAbsolute();
-        
-        this.jar = jar;
-    }
-    
-    public JarReport explore(ClassLoader classLoader) throws IOException {
-        final JarReport result = new JarReport(jar);
-        
-        try (JarFile jarFile = new JarFile(jar.toFile())) {
-            final Enumeration<JarEntry> e = jarFile.entries();
-            while (e.hasMoreElements()) {
-                final JarEntry entry = e.nextElement();
-                JarReportEntry explored = exploreEntry(entry, classLoader);
-                if (explored.getStatus() != Status.IGNORED)
-                    result.getEntries().add(explored);
-            }
-        }
-        
-        return result;
-    }
-    
-    /*
-     * Private
-     */
-    
-    private JarReportEntry exploreEntry(JarEntry entry, ClassLoader classLoader) {
-        if (entry.isDirectory()) {
-            return new JarReportEntry(entry.getName(), JarReportEntry.Status.IGNORED, null, null, null);
-        } else {
-            String className = makeClassName(entry.getName(), "/");
-            return super.exploreEntry(entry.getName(), classLoader, className);
-        }
+
+  private final Path jar;
+
+  public JarExplorer(Path jar) {
+    assert jar != null;
+    assert jar.isAbsolute();
+
+    this.jar = jar;
+  }
+
+  public JarReport explore(ClassLoader classLoader) throws IOException {
+    final JarReport result = new JarReport(jar);
+
+    try (JarFile jarFile = new JarFile(jar.toFile())) {
+      final Enumeration<JarEntry> e = jarFile.entries();
+      while (e.hasMoreElements()) {
+        final JarEntry entry = e.nextElement();
+        JarReportEntry explored = exploreEntry(entry, classLoader);
+        if (explored.getStatus() != Status.IGNORED) result.getEntries().add(explored);
+      }
     }
 
+    return result;
+  }
+
+  /*
+   * Private
+   */
+
+  private JarReportEntry exploreEntry(JarEntry entry, ClassLoader classLoader) {
+    if (entry.isDirectory()) {
+      return new JarReportEntry(entry.getName(), JarReportEntry.Status.IGNORED, null, null, null);
+    } else {
+      String className = makeClassName(entry.getName(), "/");
+      return super.exploreEntry(entry.getName(), classLoader, className);
+    }
+  }
 }

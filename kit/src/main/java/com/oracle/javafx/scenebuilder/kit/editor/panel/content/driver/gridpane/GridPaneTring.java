@@ -40,84 +40,78 @@ import com.oracle.javafx.scenebuilder.kit.editor.panel.content.driver.tring.Abst
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
 import javafx.scene.layout.GridPane;
 
-/**
- *
- */
+/** */
 public class GridPaneTring extends AbstractNodeTring<GridPane> {
 
-    private final GridPaneMosaic mosaic 
-            = new GridPaneMosaic("tring", //NOI18N
-                    false /* shouldShowTray */,
-                    false /* shouldCreateSensors */ );
-    
-    public GridPaneTring(ContentPanelController contentPanelController, 
-            FXOMInstance fxomObject) {
-        super(contentPanelController, fxomObject, GridPane.class);
-        getRootNode().getChildren().add(0, mosaic.getTopGroup()); // Below handles
+  private final GridPaneMosaic mosaic =
+      new GridPaneMosaic(
+          "tring", // NOI18N
+          false /* shouldShowTray */,
+          false /* shouldCreateSensors */);
+
+  public GridPaneTring(ContentPanelController contentPanelController, FXOMInstance fxomObject) {
+    super(contentPanelController, fxomObject, GridPane.class);
+    getRootNode().getChildren().add(0, mosaic.getTopGroup()); // Below handles
+  }
+
+  public void setupWithDropTarget(GridPaneDropTarget dropTarget) {
+    assert dropTarget != null;
+
+    final int targetColumnIndex = dropTarget.getTargetColumnIndex();
+    final int targetRowIndex = dropTarget.getTargetRowIndex();
+    final ColumnArea targetColumnArea = dropTarget.getTargetColumnArea();
+    final RowArea targetRowArea = dropTarget.getTargetRowArea();
+
+    if ((targetColumnArea == ColumnArea.CENTER) && (targetRowArea == RowArea.CENTER)) {
+      mosaic.setTargetCell(targetColumnIndex, targetRowIndex);
+    } else {
+      final int targetGapColumnIndex;
+      switch (targetColumnArea) {
+        case LEFT:
+          targetGapColumnIndex = targetColumnIndex;
+          break;
+        default:
+        case CENTER:
+          targetGapColumnIndex = -1;
+          break;
+        case RIGHT:
+          targetGapColumnIndex = targetColumnIndex + 1;
+          break;
+      }
+      final int targetGapRowIndex;
+      switch (targetRowArea) {
+        case TOP:
+          targetGapRowIndex = targetRowIndex;
+          break;
+        default:
+        case CENTER:
+          targetGapRowIndex = -1;
+          break;
+        case BOTTOM:
+          targetGapRowIndex = targetRowIndex + 1;
+          break;
+      }
+      mosaic.setTargetGap(targetGapColumnIndex, targetGapRowIndex);
+    }
+  }
+
+  /*
+   * AbstractGenericTring
+   */
+
+  @Override
+  protected void layoutDecoration() {
+
+    super.layoutDecoration();
+
+    if (mosaic.getGridPane() != getSceneGraphObject()) {
+      mosaic.setGridPane(getSceneGraphObject());
+    } else {
+      mosaic.update();
     }
 
-    public void setupWithDropTarget(GridPaneDropTarget dropTarget) {
-        assert dropTarget != null;
-        
-        final int targetColumnIndex
-                = dropTarget.getTargetColumnIndex();
-        final int targetRowIndex
-                = dropTarget.getTargetRowIndex();
-        final ColumnArea targetColumnArea
-                = dropTarget.getTargetColumnArea();
-        final RowArea targetRowArea
-                = dropTarget.getTargetRowArea();
-
-        if ((targetColumnArea == ColumnArea.CENTER) && (targetRowArea == RowArea.CENTER)) {
-            mosaic.setTargetCell(targetColumnIndex, targetRowIndex);
-        } else {
-            final int targetGapColumnIndex;
-            switch(targetColumnArea) {
-                case LEFT:
-                    targetGapColumnIndex = targetColumnIndex;
-                    break;
-                default:
-                case CENTER:
-                    targetGapColumnIndex = -1;
-                    break;
-                case RIGHT:
-                    targetGapColumnIndex = targetColumnIndex+1;
-                    break;
-            }
-            final int targetGapRowIndex;
-            switch(targetRowArea) {
-                case TOP:
-                    targetGapRowIndex = targetRowIndex;
-                    break;
-                default:
-                case CENTER:
-                    targetGapRowIndex = -1;
-                    break;
-                case BOTTOM:
-                    targetGapRowIndex = targetRowIndex+1;
-                    break;
-            }
-            mosaic.setTargetGap(targetGapColumnIndex, targetGapRowIndex);
-        }
-    }
-    
-    /*
-     * AbstractGenericTring
-     */
-        
-    @Override
-    protected void layoutDecoration() {
-        
-        super.layoutDecoration();
-        
-        if (mosaic.getGridPane() != getSceneGraphObject()) {
-            mosaic.setGridPane(getSceneGraphObject());
-        } else {
-            mosaic.update();
-        }
-        
-        // Update mosaic transform
-        mosaic.getTopGroup().getTransforms().clear();
-        mosaic.getTopGroup().getTransforms().add(getSceneGraphObjectToDecorationTransform());
-    }
+    // Update mosaic transform
+    mosaic.getTopGroup().getTransforms().clear();
+    mosaic.getTopGroup().getTransforms().add(getSceneGraphObjectToDecorationTransform());
+  }
 }

@@ -38,72 +38,72 @@ import com.oracle.javafx.scenebuilder.kit.editor.job.Job;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMDocument;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 
-/**
- */
+/** */
 public class SetFxomRootJob extends Job {
 
-    private final FXOMObject newRoot;
-    private FXOMObject oldRoot;
+  private final FXOMObject newRoot;
+  private FXOMObject oldRoot;
 
-    public SetFxomRootJob(FXOMObject newRoot, EditorController editorController) {
-        super(editorController);
+  public SetFxomRootJob(FXOMObject newRoot, EditorController editorController) {
+    super(editorController);
 
-        assert editorController.getFxomDocument() != null;
-        assert (newRoot == null) || (newRoot.getFxomDocument() == editorController.getFxomDocument());
+    assert editorController.getFxomDocument() != null;
+    assert (newRoot == null) || (newRoot.getFxomDocument() == editorController.getFxomDocument());
 
-        this.newRoot = newRoot;
-    }
+    this.newRoot = newRoot;
+  }
 
-    /*
-     * Job
-     */
-    @Override
-    public boolean isExecutable() {
-        return newRoot != getEditorController().getFxomDocument().getFxomRoot();
-    }
+  /*
+   * Job
+   */
+  @Override
+  public boolean isExecutable() {
+    return newRoot != getEditorController().getFxomDocument().getFxomRoot();
+  }
 
-    @Override
-    public void execute() {
-        assert oldRoot == null;
+  @Override
+  public void execute() {
+    assert oldRoot == null;
 
-        // Saves the current root
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        oldRoot = fxomDocument.getFxomRoot();
+    // Saves the current root
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    oldRoot = fxomDocument.getFxomRoot();
 
-        fxomDocument.beginUpdate();
-        fxomDocument.setFxomRoot(newRoot);
-        fxomDocument.endUpdate();
+    fxomDocument.beginUpdate();
+    fxomDocument.setFxomRoot(newRoot);
+    fxomDocument.endUpdate();
 
-        WarnThemeAlert.showAlertIfRequired(getEditorController(), newRoot, getEditorController().getOwnerWindow());
-    }
+    WarnThemeAlert.showAlertIfRequired(
+        getEditorController(), newRoot, getEditorController().getOwnerWindow());
+  }
 
-    @Override
-    public void undo() {
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        assert fxomDocument.getFxomRoot() == newRoot;
+  @Override
+  public void undo() {
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    assert fxomDocument.getFxomRoot() == newRoot;
 
-        fxomDocument.beginUpdate();
-        fxomDocument.setFxomRoot(oldRoot);
-        fxomDocument.endUpdate();
+    fxomDocument.beginUpdate();
+    fxomDocument.setFxomRoot(oldRoot);
+    fxomDocument.endUpdate();
 
-        assert fxomDocument.getFxomRoot() == oldRoot;
-    }
+    assert fxomDocument.getFxomRoot() == oldRoot;
+  }
 
-    @Override
-    public void redo() {
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        assert fxomDocument.getFxomRoot() == oldRoot;
+  @Override
+  public void redo() {
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    assert fxomDocument.getFxomRoot() == oldRoot;
 
-        fxomDocument.beginUpdate();
-        fxomDocument.setFxomRoot(newRoot);
-        fxomDocument.endUpdate();
+    fxomDocument.beginUpdate();
+    fxomDocument.setFxomRoot(newRoot);
+    fxomDocument.endUpdate();
 
-        assert fxomDocument.getFxomRoot() == newRoot;
-    }
+    assert fxomDocument.getFxomRoot() == newRoot;
+  }
 
-    @Override
-    public String getDescription() {
-        // Not expected to reach the user
-        return getClass().getSimpleName();
-    }
+  @Override
+  public String getDescription() {
+    // Not expected to reach the user
+    return getClass().getSimpleName();
+  }
 }

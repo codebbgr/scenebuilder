@@ -31,51 +31,48 @@
  */
 package com.oracle.javafx.scenebuilder.kit.metadata.property;
 
-import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import com.oracle.javafx.scenebuilder.kit.metadata.klass.ComponentClassMetadata;
+import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 
-/**
- *
- * 
- */
+/** */
 public class ComponentPropertyMetadata extends PropertyMetadata {
-    
-    private final ComponentClassMetadata classMetadata;
-    private final boolean collection;
 
-    public ComponentPropertyMetadata(PropertyName name, ComponentClassMetadata classMetadata, boolean collection) {
-        super(name);
-        this.classMetadata = classMetadata;
-        this.collection = collection;
+  private final ComponentClassMetadata classMetadata;
+  private final boolean collection;
+
+  public ComponentPropertyMetadata(
+      PropertyName name, ComponentClassMetadata classMetadata, boolean collection) {
+    super(name);
+    this.classMetadata = classMetadata;
+    this.collection = collection;
+  }
+
+  public ComponentClassMetadata getClassMetadata() {
+    return classMetadata;
+  }
+
+  public boolean isCollection() {
+    return collection;
+  }
+
+  /*
+   * Object
+   */
+
+  @Override
+  public int hashCode() { // To please FindBugs
+    return super.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) { // To please FindBugs
+    if (obj == null) {
+      return false;
+    }
+    if (PropertyMetadata.class != obj.getClass()) {
+      return false;
     }
 
-    public ComponentClassMetadata getClassMetadata() {
-        return classMetadata;
-    }
-
-    public boolean isCollection() {
-        return collection;
-    }
-
-    /*
-     * Object
-     */
-    
-    @Override
-    public int hashCode() { // To please FindBugs
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) { // To please FindBugs
-        if (obj == null) {
-            return false;
-        }
-        if (PropertyMetadata.class != obj.getClass()) {
-            return false;
-        }
-        
-        return super.equals(obj);
-    }
-    
+    return super.equals(obj);
+  }
 }

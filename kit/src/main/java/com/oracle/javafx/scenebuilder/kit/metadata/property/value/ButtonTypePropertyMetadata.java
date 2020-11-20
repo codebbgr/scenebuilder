@@ -40,58 +40,53 @@ import java.util.HashMap;
 import java.util.Map;
 import javafx.scene.control.ButtonType;
 
-/**
- *
- * 
- */
+/** */
 public class ButtonTypePropertyMetadata extends ComplexPropertyMetadata<ButtonType> {
-    
-    private static Map<ButtonType, String> buttonTypeMap;
-    
-    public ButtonTypePropertyMetadata(PropertyName name, boolean readWrite, 
-            ButtonType defaultValue, InspectorPath inspectorPath) {
-        super(name, ButtonType.class, readWrite, defaultValue, inspectorPath);
+
+  private static Map<ButtonType, String> buttonTypeMap;
+
+  public ButtonTypePropertyMetadata(
+      PropertyName name, boolean readWrite, ButtonType defaultValue, InspectorPath inspectorPath) {
+    super(name, ButtonType.class, readWrite, defaultValue, inspectorPath);
+  }
+
+  public static synchronized Map<ButtonType, String> getButtonTypeMap() {
+    if (buttonTypeMap == null) {
+      buttonTypeMap = new HashMap<>();
+      buttonTypeMap.put(ButtonType.APPLY, "APPLY"); // NOI18N
+      buttonTypeMap.put(ButtonType.CANCEL, "CANCEL"); // NOI18N
+      buttonTypeMap.put(ButtonType.CLOSE, "CLOSE"); // NOI18N
+      buttonTypeMap.put(ButtonType.FINISH, "FINISH"); // NOI18N
+      buttonTypeMap.put(ButtonType.NEXT, "NEXT"); // NOI18N
+      buttonTypeMap.put(ButtonType.NO, "NO"); // NOI18N
+      buttonTypeMap.put(ButtonType.OK, "OK"); // NOI18N
+      buttonTypeMap.put(ButtonType.PREVIOUS, "PREVIOUS"); // NOI18N
+      buttonTypeMap.put(ButtonType.YES, "YES"); // NOI18N
+      buttonTypeMap = Collections.unmodifiableMap(buttonTypeMap);
     }
 
-    public static synchronized Map<ButtonType, String> getButtonTypeMap() {
-        if (buttonTypeMap == null) {
-            buttonTypeMap = new HashMap<>();
-            buttonTypeMap.put(ButtonType.APPLY,   "APPLY"    ); //NOI18N
-            buttonTypeMap.put(ButtonType.CANCEL,  "CANCEL"   ); //NOI18N
-            buttonTypeMap.put(ButtonType.CLOSE,   "CLOSE"    ); //NOI18N
-            buttonTypeMap.put(ButtonType.FINISH,  "FINISH"   ); //NOI18N
-            buttonTypeMap.put(ButtonType.NEXT,    "NEXT"     ); //NOI18N
-            buttonTypeMap.put(ButtonType.NO,      "NO"       ); //NOI18N
-            buttonTypeMap.put(ButtonType.OK,      "OK"       ); //NOI18N
-            buttonTypeMap.put(ButtonType.PREVIOUS,"PREVIOUS" ); //NOI18N
-            buttonTypeMap.put(ButtonType.YES,     "YES"      ); //NOI18N
-            buttonTypeMap = Collections.unmodifiableMap(buttonTypeMap);
-        }
-        
-        return buttonTypeMap;
+    return buttonTypeMap;
+  }
+
+  /*
+   * ComplexPropertyMetadata
+   */
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(ButtonType value, FXOMDocument fxomDocument) {
+    final FXOMInstance result;
+
+    final String buttonName = getButtonTypeMap().get(value);
+    if (buttonName != null) {
+      // It's a standard button type
+      result = new FXOMInstance(fxomDocument, ButtonType.class);
+      result.setFxConstant(buttonName);
+    } else {
+      // Emergency code
+      assert false;
+      result = new FXOMInstance(fxomDocument, ButtonType.class);
+      result.setFxConstant(getButtonTypeMap().get(ButtonType.APPLY));
     }
-    
-    
-    /*
-     * ComplexPropertyMetadata
-     */
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(ButtonType value, FXOMDocument fxomDocument) {
-        final FXOMInstance result;
-        
-        final String buttonName = getButtonTypeMap().get(value);
-        if (buttonName != null) {
-            // It's a standard button type
-            result = new FXOMInstance(fxomDocument, ButtonType.class);
-            result.setFxConstant(buttonName);
-        } else {
-            // Emergency code
-            assert false;
-            result = new FXOMInstance(fxomDocument, ButtonType.class);
-            result.setFxConstant(getButtonTypeMap().get(ButtonType.APPLY));
-        }
-        
-        return result;
-    }
+
+    return result;
+  }
 }
-

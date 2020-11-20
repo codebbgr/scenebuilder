@@ -32,6 +32,10 @@
  */
 package com.oracle.javafx.scenebuilder.kit.library.user;
 
+import com.oracle.javafx.scenebuilder.kit.library.BuiltinSectionComparator;
+import com.oracle.javafx.scenebuilder.kit.library.Library;
+import com.oracle.javafx.scenebuilder.kit.library.LibraryItem;
+import com.oracle.javafx.scenebuilder.kit.library.util.JarReport;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -52,12 +56,6 @@ import java.util.List;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import com.oracle.javafx.scenebuilder.kit.library.BuiltinSectionComparator;
-import com.oracle.javafx.scenebuilder.kit.library.Library;
-import com.oracle.javafx.scenebuilder.kit.library.LibraryItem;
-import com.oracle.javafx.scenebuilder.kit.library.util.JarReport;
-
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
@@ -69,368 +67,371 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-/**
- *
- * 
- */
+/** */
 public class UserLibrary extends Library {
-    
-    public enum State { READY, WATCHING }
 
-    public static final String TAG_USER_DEFINED = "Custom"; //NOI18N
-    
-    private final String path;
-    private final BuiltinSectionComparator sectionComparator
-            = new BuiltinSectionComparator();
-    
-    private final ObservableList<JarReport> jarReports = FXCollections.observableArrayList();
-    private final ObservableList<JarReport> previousJarReports = FXCollections.observableArrayList();
-    private final ObservableList<Path> fxmlFileReports = FXCollections.observableArrayList();
-    private final ObservableList<Path> previousFxmlFileReports = FXCollections.observableArrayList();
-    private final SimpleIntegerProperty explorationCountProperty = new SimpleIntegerProperty();
-    private final SimpleObjectProperty<Date> explorationDateProperty = new SimpleObjectProperty<>();
-    private final ReadOnlyBooleanWrapper firstExplorationCompleted = new ReadOnlyBooleanWrapper(false);
-    private SimpleBooleanProperty exploring = new SimpleBooleanProperty();
+  public enum State {
+    READY,
+    WATCHING
+  }
 
-    private State state = State.READY;
-    private Exception exception;
-    private LibraryFolderWatcher watcher;
-    private Thread watcherThread;
-    // Where we store canonical class names of items we want to exclude from
-    // the user defined one displayed in the Library panel.
-    // As a consequence an empty file means we display all items.
-    private final String filterFileName = "filter.txt"; //NOI18N
+  public static final String TAG_USER_DEFINED = "Custom"; // NOI18N
 
-    private Supplier<List<Path>> additionalJarPaths;
-    private Supplier<List<String>> additionalFilter;
-    private Consumer<List<JarReport>> onFinishedUpdatingJarReports;
+  private final String path;
+  private final BuiltinSectionComparator sectionComparator = new BuiltinSectionComparator();
 
-    /*
-     * Public
-     */
+  private final ObservableList<JarReport> jarReports = FXCollections.observableArrayList();
+  private final ObservableList<JarReport> previousJarReports = FXCollections.observableArrayList();
+  private final ObservableList<Path> fxmlFileReports = FXCollections.observableArrayList();
+  private final ObservableList<Path> previousFxmlFileReports = FXCollections.observableArrayList();
+  private final SimpleIntegerProperty explorationCountProperty = new SimpleIntegerProperty();
+  private final SimpleObjectProperty<Date> explorationDateProperty = new SimpleObjectProperty<>();
+  private final ReadOnlyBooleanWrapper firstExplorationCompleted =
+      new ReadOnlyBooleanWrapper(false);
+  private SimpleBooleanProperty exploring = new SimpleBooleanProperty();
 
-    public UserLibrary(String path) {
-        this(path, null, null);
+  private State state = State.READY;
+  private Exception exception;
+  private LibraryFolderWatcher watcher;
+  private Thread watcherThread;
+  // Where we store canonical class names of items we want to exclude from
+  // the user defined one displayed in the Library panel.
+  // As a consequence an empty file means we display all items.
+  private final String filterFileName = "filter.txt"; // NOI18N
+
+  private Supplier<List<Path>> additionalJarPaths;
+  private Supplier<List<String>> additionalFilter;
+  private Consumer<List<JarReport>> onFinishedUpdatingJarReports;
+
+  /*
+   * Public
+   */
+
+  public UserLibrary(String path) {
+    this(path, null, null);
+  }
+
+  public UserLibrary(
+      String path,
+      Supplier<List<Path>> additionalJarPaths,
+      Supplier<List<String>> additionalFilter) {
+    this.path = path;
+    this.additionalJarPaths = additionalJarPaths;
+    this.additionalFilter = additionalFilter;
+  }
+
+  public void setAdditionalJarPaths(Supplier<List<Path>> additionalJarPaths) {
+    this.additionalJarPaths = additionalJarPaths;
+  }
+
+  public void setAdditionalFilter(Supplier<List<String>> additionalFilter) {
+    this.additionalFilter = additionalFilter;
+  }
+
+  public String getPath() {
+    return path;
+  }
+
+  public ObservableList<JarReport> getJarReports() {
+    return jarReports;
+  }
+
+  public ObservableList<JarReport> getPreviousJarReports() {
+    return previousJarReports;
+  }
+
+  public ObservableList<Path> getFxmlFileReports() {
+    return fxmlFileReports;
+  }
+
+  public ObservableList<Path> getPreviousFxmlFileReports() {
+    return previousFxmlFileReports;
+  }
+
+  public synchronized State getState() {
+    return state;
+  }
+
+  public synchronized void startWatching() {
+    assert state == State.READY;
+
+    if (state == State.READY) {
+      assert watcher == null;
+      assert watcherThread == null;
+
+      watcher = new LibraryFolderWatcher(this);
+      watcherThread = new Thread(watcher);
+      watcherThread.setName(watcher.getClass().getSimpleName() + "(" + path + ")"); // NOI18N
+      watcherThread.setDaemon(true);
+      watcherThread.start();
+      state = State.WATCHING;
+    }
+  }
+
+  public synchronized void stopWatching() {
+    assert state == State.WATCHING;
+
+    if (state == State.WATCHING) {
+      assert watcher != null;
+      assert watcherThread != null;
+      assert exception == null;
+
+      watcherThread.interrupt();
+
+      try {
+        watcherThread.join();
+      } catch (InterruptedException x) {
+        x.printStackTrace();
+      } finally {
+        watcher = null;
+        watcherThread = null;
+        state = State.READY;
+
+        // In READY state, we release the class loader.
+        // This enables library import to manipulate jar files.
+        changeClassLoader(null);
+        previousJarReports.clear();
+      }
+    }
+  }
+
+  public int getExplorationCount() {
+    return explorationCountProperty.get();
+  }
+
+  public ReadOnlyIntegerProperty explorationCountProperty() {
+    return explorationCountProperty;
+  }
+
+  public Object getExplorationDate() {
+    return explorationDateProperty.get();
+  }
+
+  public ReadOnlyObjectProperty<Date> explorationDateProperty() {
+    return explorationDateProperty;
+  }
+
+  public void setFilter(List<String> classnames) throws FileNotFoundException, IOException {
+    //        if (classnames != null && classnames.size() > 0) { // empty classnames means "no
+    // filter", so we need to clear filters.txt file
+    File filterFile = new File(getFilterFileName());
+    // TreeSet to get natural order sorting and no duplicates
+    TreeSet<String> allClassnames = new TreeSet<>();
+
+    for (String classname : classnames) {
+      allClassnames.add(classname);
     }
 
-    public UserLibrary(String path, Supplier<List<Path>> additionalJarPaths, Supplier<List<String>> additionalFilter) {
-        this.path = path;
-        this.additionalJarPaths = additionalJarPaths;
-        this.additionalFilter = additionalFilter;
-    }
+    Path filterFilePath = Paths.get(getPath(), filterFileName);
+    Path formerFilterFilePath = Paths.get(getPath(), filterFileName + ".tmp"); // NOI18N
+    Files.deleteIfExists(formerFilterFilePath);
 
-    public void setAdditionalJarPaths(Supplier<List<Path>> additionalJarPaths)
-    {
-        this.additionalJarPaths = additionalJarPaths;
-    }
+    try {
+      // Rename already existing filter file so that we can rollback
+      if (Files.exists(filterFilePath)) {
+        Files.move(filterFilePath, formerFilterFilePath, StandardCopyOption.ATOMIC_MOVE);
+      }
 
-    public void setAdditionalFilter(Supplier<List<String>> additionalFilter) {
-        this.additionalFilter = additionalFilter;
-    }
-    
-    public String getPath() {
-        return path;
-    }
-    
-    public ObservableList<JarReport> getJarReports() {
-        return jarReports;
-    }
-    
-    public ObservableList<JarReport> getPreviousJarReports() {
-        return previousJarReports;
-    }
-    
-    public ObservableList<Path> getFxmlFileReports() {
-        return fxmlFileReports;
-    }
-    
-    public ObservableList<Path> getPreviousFxmlFileReports() {
-        return previousFxmlFileReports;
-    }
-    
-    public synchronized State getState() {
-        return state;
-    }
-    
-    public synchronized void startWatching() {
-        assert state == State.READY;
-        
-        if (state == State.READY) {
-            assert watcher == null;
-            assert watcherThread == null;
+      // Create the new filter file
+      Files.createFile(filterFilePath);
 
-            watcher = new LibraryFolderWatcher(this);
-            watcherThread = new Thread(watcher);
-            watcherThread.setName(watcher.getClass().getSimpleName() + "(" + path  + ")"); //NOI18N
-            watcherThread.setDaemon(true);
-            watcherThread.start();
-            state = State.WATCHING;
+      // Write content of the new filter file
+      try (PrintWriter writer = new PrintWriter(filterFile, "UTF-8")) { // NOI18N
+        for (String classname : allClassnames) {
+          writer.write(classname + "\n"); // NOI18N
         }
+      }
+
+      // Delete the former filter file
+      if (Files.exists(formerFilterFilePath)) {
+        Files.delete(formerFilterFilePath);
+      }
+    } catch (IOException ioe) {
+      // Rollback
+      if (Files.exists(formerFilterFilePath)) {
+        Files.move(formerFilterFilePath, filterFilePath, StandardCopyOption.ATOMIC_MOVE);
+      }
+      throw (ioe);
     }
-    
-    public synchronized void stopWatching() {
-        assert state == State.WATCHING;
-        
-        if (state == State.WATCHING) {
-            assert watcher != null;
-            assert watcherThread != null;
-            assert exception == null;
-            
-            watcherThread.interrupt();
-            
-            try {
-                watcherThread.join();
-            } catch(InterruptedException x) {
-                x.printStackTrace();
-            } finally {
-                watcher = null;
-                watcherThread = null;
-                state = State.READY;
-                
-                // In READY state, we release the class loader.
-                // This enables library import to manipulate jar files.
-                changeClassLoader(null);
-                previousJarReports.clear();
-            }
+    //        }
+  }
+
+  public List<String> getFilter() throws FileNotFoundException, IOException {
+    List<String> res = new ArrayList<>();
+    File filterFile = new File(getFilterFileName());
+
+    if (filterFile.exists()) {
+      try (LineNumberReader reader =
+          new LineNumberReader(
+              new InputStreamReader(new FileInputStream(filterFile), "UTF-8"))) { // NOI18N
+        String line;
+        while ((line = reader.readLine()) != null) {
+          res.add(line);
         }
-    }
-    
-    public int getExplorationCount() {
-        return explorationCountProperty.get();
-    }
-    
-    public ReadOnlyIntegerProperty explorationCountProperty() {
-        return explorationCountProperty;
-    }
-    
-    public Object getExplorationDate() {
-        return explorationDateProperty.get();
+      }
     }
 
-    public ReadOnlyObjectProperty<Date> explorationDateProperty() {
-        return explorationDateProperty;
-    }
-    
-    public void setFilter(List<String> classnames) throws FileNotFoundException, IOException {
-//        if (classnames != null && classnames.size() > 0) { // empty classnames means "no filter", so we need to clear filters.txt file
-            File filterFile = new File(getFilterFileName());
-            // TreeSet to get natural order sorting and no duplicates
-            TreeSet<String> allClassnames = new TreeSet<>();
+    return res;
+  }
 
-            for (String classname : classnames) {
-                allClassnames.add(classname);
-            }
-            
-            Path filterFilePath = Paths.get(getPath(), filterFileName);
-            Path formerFilterFilePath = Paths.get(getPath(), filterFileName + ".tmp"); //NOI18N
-            Files.deleteIfExists(formerFilterFilePath);
+  public void setOnUpdatedJarReports(Consumer<List<JarReport>> onFinishedUpdatingJarReports) {
+    this.onFinishedUpdatingJarReports = onFinishedUpdatingJarReports;
+  }
 
-            try {
-                // Rename already existing filter file so that we can rollback
-                if (Files.exists(filterFilePath)) {
-                    Files.move(filterFilePath, formerFilterFilePath, StandardCopyOption.ATOMIC_MOVE);
-                }
+  public final ReadOnlyBooleanProperty firstExplorationCompletedProperty() {
+    return firstExplorationCompleted.getReadOnlyProperty();
+  }
 
-                // Create the new filter file
-                Files.createFile(filterFilePath);
+  public final boolean isFirstExplorationCompleted() {
+    return firstExplorationCompleted.get();
+  }
 
-                // Write content of the new filter file
-                try (PrintWriter writer = new PrintWriter(filterFile, "UTF-8")) { //NOI18N
-                    for (String classname : allClassnames) {
-                        writer.write(classname + "\n"); //NOI18N
-                    }
-                }
+  public SimpleBooleanProperty exploringProperty() {
+    return exploring;
+  }
 
-                // Delete the former filter file
-                if (Files.exists(formerFilterFilePath)) {
-                    Files.delete(formerFilterFilePath);
-                }
-            } catch (IOException ioe) {
-                // Rollback
-                if (Files.exists(formerFilterFilePath)) {
-                    Files.move(formerFilterFilePath, filterFilePath, StandardCopyOption.ATOMIC_MOVE);
-                }
-                throw (ioe);
-            }
-//        }
-    }
-    
-    public List<String> getFilter() throws FileNotFoundException, IOException {
-        List<String> res = new ArrayList<>();
-        File filterFile = new File(getFilterFileName());
+  public boolean isExploring() {
+    return exploringProperty().get();
+  }
 
-        if (filterFile.exists()) {
-            try (LineNumberReader reader = new LineNumberReader(new InputStreamReader(new FileInputStream(filterFile), "UTF-8"))) { //NOI18N
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    res.add(line);
-                }
-            }
-        }
+  public void setExploring(boolean value) {
+    if (Platform.isFxApplicationThread()) exploringProperty().set(value);
+    else Platform.runLater(() -> setExploring(value));
+  }
 
-        return res;
-    }
+  /*
+   * Package
+   */
 
-    public void setOnUpdatedJarReports(Consumer<List<JarReport>> onFinishedUpdatingJarReports) {
-        this.onFinishedUpdatingJarReports = onFinishedUpdatingJarReports;
-    }
+  String getFilterFileName() {
+    return getPath() + File.separator + filterFileName;
+  }
 
-    public final ReadOnlyBooleanProperty firstExplorationCompletedProperty() {
-        return firstExplorationCompleted.getReadOnlyProperty();
-    }
+  void updateJarReports(Collection<JarReport> newJarReports) {
+    previousJarReports.setAll(jarReports);
+    jarReports.setAll(newJarReports);
+  }
 
-    public final boolean isFirstExplorationCompleted() {
-        return firstExplorationCompleted.get();
-    }
-
-    public SimpleBooleanProperty exploringProperty() {
-        return exploring;
-    }
-
-    public boolean isExploring() {
-        return exploringProperty().get();
-    }
-
-    public void setExploring(boolean value) {
-        if (Platform.isFxApplicationThread())
-            exploringProperty().set(value);
-        else
-            Platform.runLater(() -> setExploring(value));
-    }
-
-
-    /*
-     * Package
-     */
-    
-    String getFilterFileName() {
-        return getPath() + File.separator + filterFileName;
-    }
-    
-    void updateJarReports(Collection<JarReport> newJarReports) {
-        previousJarReports.setAll(jarReports);
-        jarReports.setAll(newJarReports);
-    }
-    
-    void updateFxmlFileReports(Collection<Path> newFxmlFileReports) {
-        if (Platform.isFxApplicationThread()) {
+  void updateFxmlFileReports(Collection<Path> newFxmlFileReports) {
+    if (Platform.isFxApplicationThread()) {
+      previousFxmlFileReports.setAll(fxmlFileReports);
+      fxmlFileReports.setAll(newFxmlFileReports);
+    } else {
+      Platform.runLater(
+          () -> {
             previousFxmlFileReports.setAll(fxmlFileReports);
             fxmlFileReports.setAll(newFxmlFileReports);
-        } else {
-            Platform.runLater(() -> {
-                previousFxmlFileReports.setAll(fxmlFileReports);
-                fxmlFileReports.setAll(newFxmlFileReports);
-            });
-        }
+          });
     }
-    
-    void setItems(Collection<LibraryItem> items) {
-        if (Platform.isFxApplicationThread()) {
-            itemsProperty.setAll(items);
-        } else {
-            Platform.runLater(() -> itemsProperty.setAll(items));
-        }
-    }
-    
-    void addItems(Collection<LibraryItem> items) {
-        if (Platform.isFxApplicationThread()) {
-            itemsProperty.addAll(items);
-        } else {
-            Platform.runLater(() -> itemsProperty.addAll(items));
-        }
-    }
-    
-    void updateClassLoader(ClassLoader newClassLoader) {
-        if (Platform.isFxApplicationThread()) {
-            changeClassLoader(newClassLoader);
-        } else {
-            Platform.runLater(() -> changeClassLoader(newClassLoader));
-        }
-    }
-    
-    void updateExplorationCount(int count) {
-        if (Platform.isFxApplicationThread()) {
-            explorationCountProperty.set(count);
-        } else {
-            Platform.runLater(() -> explorationCountProperty.set(count));
-        }
-    }
-    
-    void updateExplorationDate(Date date) {
-        if (Platform.isFxApplicationThread()) {
-            explorationDateProperty.set(date);
-        } else {
-            Platform.runLater(() -> explorationDateProperty.set(date));
-        }
-    }
-    
-    void updateFirstExplorationCompleted() {
-        if (Platform.isFxApplicationThread()) {
-            firstExplorationCompleted.set(true);
-        } else {
-            Platform.runLater(() -> firstExplorationCompleted.set(true));
-        }
-    }
+  }
 
-    Supplier<List<Path>> getAdditionalJarPaths() {
-        return additionalJarPaths;
+  void setItems(Collection<LibraryItem> items) {
+    if (Platform.isFxApplicationThread()) {
+      itemsProperty.setAll(items);
+    } else {
+      Platform.runLater(() -> itemsProperty.setAll(items));
     }
+  }
 
-    Supplier<List<String>> getAdditionalFilter() {
-        return additionalFilter;
+  void addItems(Collection<LibraryItem> items) {
+    if (Platform.isFxApplicationThread()) {
+      itemsProperty.addAll(items);
+    } else {
+      Platform.runLater(() -> itemsProperty.addAll(items));
     }
+  }
 
-    Consumer<List<JarReport>> getOnFinishedUpdatingJarReports() {
-        return onFinishedUpdatingJarReports;
+  void updateClassLoader(ClassLoader newClassLoader) {
+    if (Platform.isFxApplicationThread()) {
+      changeClassLoader(newClassLoader);
+    } else {
+      Platform.runLater(() -> changeClassLoader(newClassLoader));
     }
+  }
+
+  void updateExplorationCount(int count) {
+    if (Platform.isFxApplicationThread()) {
+      explorationCountProperty.set(count);
+    } else {
+      Platform.runLater(() -> explorationCountProperty.set(count));
+    }
+  }
+
+  void updateExplorationDate(Date date) {
+    if (Platform.isFxApplicationThread()) {
+      explorationDateProperty.set(date);
+    } else {
+      Platform.runLater(() -> explorationDateProperty.set(date));
+    }
+  }
+
+  void updateFirstExplorationCompleted() {
+    if (Platform.isFxApplicationThread()) {
+      firstExplorationCompleted.set(true);
+    } else {
+      Platform.runLater(() -> firstExplorationCompleted.set(true));
+    }
+  }
+
+  Supplier<List<Path>> getAdditionalJarPaths() {
+    return additionalJarPaths;
+  }
+
+  Supplier<List<String>> getAdditionalFilter() {
+    return additionalFilter;
+  }
+
+  Consumer<List<JarReport>> getOnFinishedUpdatingJarReports() {
+    return onFinishedUpdatingJarReports;
+  }
+
+  /*
+   * Library
+   */
+  @Override
+  public Comparator<String> getSectionComparator() {
+    return sectionComparator;
+  }
+
+  /*
+   * Private
+   */
+
+  private void changeClassLoader(ClassLoader newClassLoader) {
+    assert Platform.isFxApplicationThread();
 
     /*
-     * Library
+     * Before changing to the new class loader,
+     * we invoke URLClassLoader.close() on the existing one
+     * so that it releases its associated jar files.
      */
-    @Override
-    public Comparator<String> getSectionComparator() {
-        return sectionComparator;
+    final ClassLoader classLoader = classLoaderProperty.get();
+    if (classLoader instanceof URLClassLoader) {
+      final URLClassLoader urlClassLoader = (URLClassLoader) classLoader;
+      try {
+        urlClassLoader.close();
+      } catch (IOException x) {
+        x.printStackTrace();
+      }
     }
-    
-    /*
-     * Private
-     */
-    
-    private void changeClassLoader(ClassLoader newClassLoader) {
-        assert Platform.isFxApplicationThread();
-        
-        /*
-         * Before changing to the new class loader,
-         * we invoke URLClassLoader.close() on the existing one
-         * so that it releases its associated jar files.
-         */
-        final ClassLoader classLoader = classLoaderProperty.get();
-        if (classLoader instanceof URLClassLoader) {
-            final URLClassLoader urlClassLoader = (URLClassLoader) classLoader;
-            try {
-                urlClassLoader.close();
-            } catch(IOException x) {
-                x.printStackTrace();
-            }
-        }
-        
-        // Now moves to the new class loader
-        classLoaderProperty.set(newClassLoader);
-    }
-    
-    /*
-     * Debug
-     */
-    
-    public static void main(String[] args) throws Exception {
-        final String path = "/Users/elp/Desktop/MyLib"; //NOI18N
-        final UserLibrary lib = new UserLibrary(path);
-        lib.startWatching();
-        System.out.println("Starting to watch for 20 s"); //NOI18N
-        Thread.sleep(20 * 1000);
-        System.out.println("Stopping to watch for 20 s"); //NOI18N
-        lib.stopWatching();
-        Thread.sleep(20 * 1000);
-        System.out.println("Exiting"); //NOI18N
-    }
+
+    // Now moves to the new class loader
+    classLoaderProperty.set(newClassLoader);
+  }
+
+  /*
+   * Debug
+   */
+
+  public static void main(String[] args) throws Exception {
+    final String path = "/Users/elp/Desktop/MyLib"; // NOI18N
+    final UserLibrary lib = new UserLibrary(path);
+    lib.startWatching();
+    System.out.println("Starting to watch for 20 s"); // NOI18N
+    Thread.sleep(20 * 1000);
+    System.out.println("Stopping to watch for 20 s"); // NOI18N
+    lib.stopWatching();
+    Thread.sleep(20 * 1000);
+    System.out.println("Exiting"); // NOI18N
+  }
 }

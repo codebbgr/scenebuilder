@@ -31,8 +31,15 @@
  */
 package com.oracle.javafx.scenebuilder.kit.editor.panel.content.driver.handles;
 
+import com.oracle.javafx.scenebuilder.kit.editor.panel.content.AbstractResilientHandles;
+import com.oracle.javafx.scenebuilder.kit.editor.panel.content.ContentPanelController;
+import com.oracle.javafx.scenebuilder.kit.editor.panel.content.driver.TableViewDesignInfoX;
+import com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.AbstractGesture;
+import com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.mouse.ResizeTableColumnGesture;
+import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
+import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
+import com.oracle.javafx.scenebuilder.kit.metadata.util.DesignHierarchyMask;
 import java.util.List;
-
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
@@ -44,228 +51,212 @@ import javafx.scene.control.TableView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
-import com.oracle.javafx.scenebuilder.kit.editor.panel.content.AbstractResilientHandles;
-import com.oracle.javafx.scenebuilder.kit.editor.panel.content.ContentPanelController;
-import com.oracle.javafx.scenebuilder.kit.editor.panel.content.driver.TableViewDesignInfoX;
-import com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.AbstractGesture;
-import com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.mouse.ResizeTableColumnGesture;
-import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
-import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
-import com.oracle.javafx.scenebuilder.kit.metadata.util.DesignHierarchyMask;
-
-/**
- *
- * 
- */
-
+/** */
 public class TableColumnHandles extends AbstractResilientHandles<Object> {
-    
-    /*
-     * Handles for TableColumn need a special treatment.
-     * 
-     * A TableColumn instance can be transiently disconnected from its parent TableView:
-     *  - TableColumn.getTableView() returns null
-     *  - TableView.getColumns().contains() returns false
-     * 
-     * When the TableColumn is disconnected, handles cannot be drawn.
-     * This Handles class inherits from AbstractResilientHandles to take
-     * care of this singularity.
-     */
-    
-    private final Group grips = new Group();
-    private final TableViewDesignInfoX tableViewDesignInfo
-            = new TableViewDesignInfoX();
-    private TableView<?> tableView;
-    private Node columnHeaderNode;
-    
-    public TableColumnHandles(ContentPanelController contentPanelController,
-            FXOMInstance fxomInstance) {
-        super(contentPanelController, fxomInstance, Object.class);
-        assert fxomInstance.getSceneGraphObject() instanceof TableColumn;
-        
-        getRootNode().getChildren().add(grips); // Above handles
-        
-        getTableColumn().tableViewProperty().addListener(
-                (ChangeListener<Object>) (ov, v1, v2) -> tableViewOrVisibilityDidChange());
-        getTableColumn().visibleProperty().addListener(
-                (ChangeListener<Object>) (ov, v1, v2) -> tableViewOrVisibilityDidChange());
-        
-        tableViewOrVisibilityDidChange();
+
+  /*
+   * Handles for TableColumn need a special treatment.
+   *
+   * A TableColumn instance can be transiently disconnected from its parent TableView:
+   *  - TableColumn.getTableView() returns null
+   *  - TableView.getColumns().contains() returns false
+   *
+   * When the TableColumn is disconnected, handles cannot be drawn.
+   * This Handles class inherits from AbstractResilientHandles to take
+   * care of this singularity.
+   */
+
+  private final Group grips = new Group();
+  private final TableViewDesignInfoX tableViewDesignInfo = new TableViewDesignInfoX();
+  private TableView<?> tableView;
+  private Node columnHeaderNode;
+
+  public TableColumnHandles(
+      ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
+    super(contentPanelController, fxomInstance, Object.class);
+    assert fxomInstance.getSceneGraphObject() instanceof TableColumn;
+
+    getRootNode().getChildren().add(grips); // Above handles
+
+    getTableColumn()
+        .tableViewProperty()
+        .addListener((ChangeListener<Object>) (ov, v1, v2) -> tableViewOrVisibilityDidChange());
+    getTableColumn()
+        .visibleProperty()
+        .addListener((ChangeListener<Object>) (ov, v1, v2) -> tableViewOrVisibilityDidChange());
+
+    tableViewOrVisibilityDidChange();
+  }
+
+  public FXOMInstance getFxomInstance() {
+    return (FXOMInstance) getFxomObject();
+  }
+
+  /*
+   * AbstractGenericHandles
+   */
+  @Override
+  public Bounds getSceneGraphObjectBounds() {
+    assert isReady();
+    assert tableView != null;
+    assert getTableColumn().isVisible();
+    return tableViewDesignInfo.getColumnBounds(getTableColumn());
+  }
+
+  @Override
+  public Node getSceneGraphObjectProxy() {
+    assert isReady();
+    assert tableView != null;
+    return tableView;
+  }
+
+  @Override
+  protected void startListeningToSceneGraphObject() {
+    assert isReady();
+    assert tableView != null;
+    startListeningToLayoutBounds(tableView);
+    startListeningToLocalToSceneTransform(tableView);
+
+    assert columnHeaderNode == null;
+    columnHeaderNode = tableViewDesignInfo.getColumnNode(getTableColumn());
+    startListeningToBoundsInParent(columnHeaderNode);
+  }
+
+  @Override
+  protected void stopListeningToSceneGraphObject() {
+    assert isReady();
+    assert tableView != null;
+    stopListeningToLayoutBounds(tableView);
+    stopListeningToLocalToSceneTransform(tableView);
+
+    assert columnHeaderNode != null;
+    stopListeningToBoundsInParent(columnHeaderNode);
+    columnHeaderNode = null;
+  }
+
+  @Override
+  protected void layoutDecoration() {
+    assert tableView != null;
+
+    super.layoutDecoration();
+
+    // Adjusts the number of grip lines to the number of dividers
+    adjustGripCount();
+
+    // Updates grip positions
+    for (int i = 0, count = getTableColumns().size(); i < count; i++) {
+      layoutGrip(i);
     }
-    
-    public FXOMInstance getFxomInstance() {
-        return (FXOMInstance) getFxomObject();
+  }
+
+  @Override
+  public AbstractGesture findGesture(Node node) {
+    final AbstractGesture result;
+
+    final int gripIndex = grips.getChildren().indexOf(node);
+    if (gripIndex != -1) {
+      final FXOMObject parentObject = getFxomInstance().getParentObject();
+      final DesignHierarchyMask m = new DesignHierarchyMask(parentObject);
+      final FXOMObject columnObject = m.getSubComponentAtIndex(gripIndex);
+      assert columnObject instanceof FXOMInstance;
+      result =
+          new ResizeTableColumnGesture(getContentPanelController(), (FXOMInstance) columnObject);
+    } else {
+      result = super.findGesture(node);
     }
 
-    /*
-     * AbstractGenericHandles
-     */
-    @Override
-    public Bounds getSceneGraphObjectBounds() {
-        assert isReady();
-        assert tableView != null;
-        assert getTableColumn().isVisible();
-        return tableViewDesignInfo.getColumnBounds(getTableColumn());
+    return result;
+  }
+
+  /*
+   * Private
+   */
+
+  private TableColumn<?, ?> getTableColumn() {
+    assert getSceneGraphObject() instanceof TableColumn;
+    return (TableColumn<?, ?>) getSceneGraphObject();
+  }
+
+  private void tableViewOrVisibilityDidChange() {
+    tableView = getTableColumn().getTableView();
+    setReady((tableView != null) && getTableColumn().isVisible());
+  }
+
+  private List<?> getTableColumns() {
+    final List<?> result;
+
+    final TableColumn<?, ?> tableColumn = getTableColumn();
+    if (tableColumn.getParentColumn() == null) {
+      result = tableView.getColumns();
+    } else {
+      result = tableColumn.getParentColumn().getColumns();
     }
 
-    @Override
-    public Node getSceneGraphObjectProxy() {
-        assert isReady();
-        assert tableView != null;
-        return tableView;
-    }
+    return result;
+  }
 
-    @Override
-    protected void startListeningToSceneGraphObject() {
-        assert isReady();
-        assert tableView != null;
-        startListeningToLayoutBounds(tableView);
-        startListeningToLocalToSceneTransform(tableView);
-        
-        assert columnHeaderNode == null;
-        columnHeaderNode = tableViewDesignInfo.getColumnNode(getTableColumn());
-        startListeningToBoundsInParent(columnHeaderNode);
-    }
+  /*
+   * Private (grips)
+   */
 
-    @Override
-    protected void stopListeningToSceneGraphObject() {
-        assert isReady();
-        assert tableView != null;
-        stopListeningToLayoutBounds(tableView);
-        stopListeningToLocalToSceneTransform(tableView);
-        
-        assert columnHeaderNode != null;
-        stopListeningToBoundsInParent(columnHeaderNode);
-        columnHeaderNode = null;
-    }
+  private void adjustGripCount() {
+    assert tableView != null;
 
-    @Override
-    protected void layoutDecoration() {
-        assert tableView != null;
-        
-        super.layoutDecoration();
-             
-        // Adjusts the number of grip lines to the number of dividers
-        adjustGripCount();
-        
-        // Updates grip positions
-        for (int i = 0, count = getTableColumns().size(); i < count; i++) {
-            layoutGrip(i);
-        }
-    }
+    final int columnCount = getTableColumns().size();
+    final List<Node> gripChildren = grips.getChildren();
 
-    @Override
-    public AbstractGesture findGesture(Node node) {
-        final AbstractGesture result;
-        
-        final int gripIndex = grips.getChildren().indexOf(node);
-        if (gripIndex != -1) {
-            final FXOMObject parentObject = getFxomInstance().getParentObject();
-            final DesignHierarchyMask m = new DesignHierarchyMask(parentObject);
-            final FXOMObject columnObject = m.getSubComponentAtIndex(gripIndex);
-            assert columnObject instanceof FXOMInstance;
-            result = new ResizeTableColumnGesture(getContentPanelController(), 
-                    (FXOMInstance)columnObject);
-        } else {
-            result = super.findGesture(node);
-        }
-        
-        return result;
+    while (gripChildren.size() < columnCount) {
+      gripChildren.add(makeGripLine());
     }
+    while (gripChildren.size() > columnCount) {
+      gripChildren.remove(gripChildren.size() - 1);
+    }
+  }
 
+  private Line makeGripLine() {
+    final Line result = new Line();
+    result.setStrokeWidth(SELECTION_HANDLES_SIZE);
+    result.setStroke(Color.TRANSPARENT);
+    result.setCursor(Cursor.H_RESIZE);
+    attachHandles(result);
+    return result;
+  }
 
-    /*
-     * Private
-     */
-    
-    private TableColumn<?,?> getTableColumn() {
-        assert getSceneGraphObject() instanceof TableColumn;
-        return (TableColumn<?,?>) getSceneGraphObject();
-    }
-    
-    private void tableViewOrVisibilityDidChange() {
-        tableView = getTableColumn().getTableView();
-        setReady((tableView != null) && getTableColumn().isVisible());
-    }
-    
-    private List<?> getTableColumns() {
-        final List<?> result;
+  private void layoutGrip(int gripIndex) {
+    assert grips.getChildren().get(gripIndex) instanceof Line;
+    assert getTableColumns().get(gripIndex) instanceof TableColumn<?, ?>;
 
-        final TableColumn<?,?> tableColumn = getTableColumn();
-        if (tableColumn.getParentColumn() == null) {
-            result = tableView.getColumns();
-        } else {
-            result = tableColumn.getParentColumn().getColumns();
-        }
-        
-        return result;
-    }
-    
-    
-    
-    /*
-     * Private (grips)
-     */
-    
-    private void adjustGripCount() {
-        assert tableView != null;
-        
-        final int columnCount = getTableColumns().size();
-        final List<Node> gripChildren = grips.getChildren();
-        
-        while (gripChildren.size() < columnCount) {
-            gripChildren.add(makeGripLine());
-        }
-        while (gripChildren.size() > columnCount) {
-            gripChildren.remove(gripChildren.size()-1);
-        }
-    }
-    
-    private Line makeGripLine() {
-        final Line result = new Line();
-        result.setStrokeWidth(SELECTION_HANDLES_SIZE);
-        result.setStroke(Color.TRANSPARENT);
-        result.setCursor(Cursor.H_RESIZE);
-        attachHandles(result);
-        return result;
-    }
-    
-    private void layoutGrip(int gripIndex) {
-        assert grips.getChildren().get(gripIndex) instanceof Line;
-        assert getTableColumns().get(gripIndex) instanceof TableColumn<?,?>;
-        
-        final List<?> columns = getTableColumns();
-        final TableColumn<?,?> tc = (TableColumn<?,?>)columns.get(gripIndex);
-        if (tc.isVisible()) {
-            final TableViewDesignInfoX di = new TableViewDesignInfoX();
-            final Bounds b = di.getColumnHeaderBounds(tc);
-            final double startX = b.getMaxX();
-            final double startY = b.getMinY();
-            final double endY = b.getMaxY();
+    final List<?> columns = getTableColumns();
+    final TableColumn<?, ?> tc = (TableColumn<?, ?>) columns.get(gripIndex);
+    if (tc.isVisible()) {
+      final TableViewDesignInfoX di = new TableViewDesignInfoX();
+      final Bounds b = di.getColumnHeaderBounds(tc);
+      final double startX = b.getMaxX();
+      final double startY = b.getMinY();
+      final double endY = b.getMaxY();
 
-            final boolean snapToPixel = true;
-            final Point2D startPoint = sceneGraphObjectToDecoration(startX, startY, snapToPixel);
-            final Point2D endPoint = sceneGraphObjectToDecoration(startX, endY, snapToPixel);
+      final boolean snapToPixel = true;
+      final Point2D startPoint = sceneGraphObjectToDecoration(startX, startY, snapToPixel);
+      final Point2D endPoint = sceneGraphObjectToDecoration(startX, endY, snapToPixel);
 
-            final Line gripLine = (Line) grips.getChildren().get(gripIndex);
-            gripLine.setVisible(true);
-            gripLine.setManaged(true);
-            gripLine.setStartX(startPoint.getX());
-            gripLine.setStartY(startPoint.getY());
-            gripLine.setEndX(endPoint.getX());
-            gripLine.setEndY(endPoint.getY());
-        } else {
-            final Line gripLine = (Line) grips.getChildren().get(gripIndex);
-            gripLine.setVisible(false);
-            gripLine.setManaged(false);
-        }
+      final Line gripLine = (Line) grips.getChildren().get(gripIndex);
+      gripLine.setVisible(true);
+      gripLine.setManaged(true);
+      gripLine.setStartX(startPoint.getX());
+      gripLine.setStartY(startPoint.getY());
+      gripLine.setEndX(endPoint.getX());
+      gripLine.setEndY(endPoint.getY());
+    } else {
+      final Line gripLine = (Line) grips.getChildren().get(gripIndex);
+      gripLine.setVisible(false);
+      gripLine.setManaged(false);
     }
-    
-    
-    /* 
-     * Wrapper to avoid the 'leaking this in constructor' warning emitted by NB.
-     */
-    private void attachHandles(Node node) {
-        attachHandles(node, this);
-    }
+  }
+
+  /*
+   * Wrapper to avoid the 'leaking this in constructor' warning emitted by NB.
+   */
+  private void attachHandles(Node node) {
+    attachHandles(node, this);
+  }
 }

@@ -33,86 +33,79 @@
 package com.oracle.javafx.scenebuilder.kit.template;
 
 import com.oracle.javafx.scenebuilder.kit.editor.panel.util.AbstractFxmlWindowController;
+import java.net.URL;
+import java.util.ResourceBundle;
+import java.util.function.Consumer;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import javafx.stage.WindowEvent;
-import java.net.URL;
-import java.util.ResourceBundle;
-import java.util.function.Consumer;
 
 public abstract class TemplatesBaseWindowController extends AbstractFxmlWindowController {
 
-    @FXML
-    protected Button basicDesktopApp;
-    @FXML
-    protected Button complexDesktopApp;
-    @FXML
-    protected Button emptyPhoneApp;
-    @FXML
-    protected Button basicPhoneApp;
+  @FXML protected Button basicDesktopApp;
+  @FXML protected Button complexDesktopApp;
+  @FXML protected Button emptyPhoneApp;
+  @FXML protected Button basicPhoneApp;
 
-    @FXML
-    protected VBox templateContainer;
+  @FXML protected VBox templateContainer;
 
-    private Consumer<Template> onTemplateChosen;
+  private Consumer<Template> onTemplateChosen;
 
-    public TemplatesBaseWindowController(URL fxmlURL, ResourceBundle resources, Stage owner) {
-        super(fxmlURL, resources, owner);
+  public TemplatesBaseWindowController(URL fxmlURL, ResourceBundle resources, Stage owner) {
+    super(fxmlURL, resources, owner);
+  }
+
+  @Override
+  public void onCloseRequest(WindowEvent event) {
+    getStage().hide();
+  }
+
+  /*
+   * AbstractWindowController
+   */
+  @Override
+  protected void controllerDidCreateStage() {
+    assert getRoot() != null;
+    assert getRoot().getScene() != null;
+    assert getRoot().getScene().getWindow() != null;
+  }
+
+  @Override
+  protected void controllerDidLoadFxml() {
+    super.controllerDidLoadFxml();
+    assert templateContainer != null;
+
+    basicDesktopApp.setUserData(Template.BASIC_DESKTOP_APP);
+    complexDesktopApp.setUserData(Template.COMPLEX_DESKTOP_APP);
+    emptyPhoneApp.setUserData(Template.EMPTY_PHONE_APP);
+    basicPhoneApp.setUserData(Template.BASIC_PHONE_APP);
+  }
+
+  protected void setupTemplateButtonHandlers() {
+    setupTemplateButtonHandlers(templateContainer);
+  }
+
+  private void setupTemplateButtonHandlers(Parent templateContainer) {
+    for (Node child : templateContainer.getChildrenUnmodifiable()) {
+      if (!(child instanceof Button) && child instanceof Parent) {
+        setupTemplateButtonHandlers((Parent) child);
+      }
+      if (child instanceof Button) {
+        Button button = (Button) child;
+        button.setOnAction(
+            event -> {
+              getStage().hide();
+              onTemplateChosen.accept((Template) button.getUserData());
+            });
+      }
     }
+  }
 
-
-    @Override
-    public void onCloseRequest(WindowEvent event) {
-        getStage().hide();
-    }
-
-    /*
-     * AbstractWindowController
-     */
-    @Override
-    protected void controllerDidCreateStage() {
-        assert getRoot() != null;
-        assert getRoot().getScene() != null;
-        assert getRoot().getScene().getWindow() != null;
-    }
-
-    @Override
-    protected void controllerDidLoadFxml() {
-        super.controllerDidLoadFxml();
-        assert templateContainer != null;
-
-        basicDesktopApp.setUserData(Template.BASIC_DESKTOP_APP);
-        complexDesktopApp.setUserData(Template.COMPLEX_DESKTOP_APP);
-        emptyPhoneApp.setUserData(Template.EMPTY_PHONE_APP);
-        basicPhoneApp.setUserData(Template.BASIC_PHONE_APP);
-    }
-
-    protected void setupTemplateButtonHandlers() {
-        setupTemplateButtonHandlers(templateContainer);
-    }
-
-    private void setupTemplateButtonHandlers(Parent templateContainer) {
-        for (Node child : templateContainer.getChildrenUnmodifiable()) {
-            if (!(child instanceof Button) && child instanceof Parent){
-                setupTemplateButtonHandlers((Parent)child);
-            }
-            if (child instanceof Button) {
-                Button button = (Button) child;
-                button.setOnAction(event -> {
-                    getStage().hide();
-                    onTemplateChosen.accept((Template)button.getUserData());
-                });
-            }
-        }
-    }
-
-    public void setOnTemplateChosen(Consumer<Template> onTemplateChosen) {
-        this.onTemplateChosen = onTemplateChosen;
-    }
+  public void setOnTemplateChosen(Consumer<Template> onTemplateChosen) {
+    this.onTemplateChosen = onTemplateChosen;
+  }
 }
-

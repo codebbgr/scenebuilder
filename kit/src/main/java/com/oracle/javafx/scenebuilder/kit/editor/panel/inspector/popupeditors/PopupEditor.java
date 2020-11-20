@@ -34,9 +34,7 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.popupeditors;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors.EditorUtils;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors.PropertyEditor;
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
-
 import java.util.Set;
-
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -44,139 +42,136 @@ import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.MenuButton;
 import javafx.scene.layout.Pane;
 
-/**
- * Abstract class for all popup editors (font, paint, ...).
- *
- */
+/** Abstract class for all popup editors (font, paint, ...). */
 public abstract class PopupEditor extends PropertyEditor implements PopupEditorValidation {
 
-    @FXML
-    MenuButton popupMb;
+  @FXML MenuButton popupMb;
 
-    @FXML
-    CustomMenuItem popupMenuItem;
+  @FXML CustomMenuItem popupMenuItem;
 
-    @FXML
-    Pane editorHost;
+  @FXML Pane editorHost;
 
-    private Object value;
-    private boolean initialized = false;
+  private Object value;
+  private boolean initialized = false;
 
-    public PopupEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super(propMeta, selectedClasses);
-        initializeEditor();
-    }
-    
-    // Separate method to please FindBugs
-    private void initializeEditor() {
-        EditorUtils.loadPopupFxml("PopupEditor.fxml", this);
-        // Lazy initialization of the editor,
-        // the first time the popup is opened.
-        popupMb.showingProperty().addListener((ChangeListener<Boolean>) (ov, previousVal, newVal) -> {
-            if (newVal) {
-                if (!initialized) {
-                    initializePopup();
-                    initialized = true;
-                }
-                setPopupContentValue(value);
-            }
-        });
-    }
+  public PopupEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super(propMeta, selectedClasses);
+    initializeEditor();
+  }
 
-    private void initializePopup() {
-        initializePopupContent();
-        editorHost.getChildren().add(getPopupContentNode());
-    }
+  // Separate method to please FindBugs
+  private void initializeEditor() {
+    EditorUtils.loadPopupFxml("PopupEditor.fxml", this);
+    // Lazy initialization of the editor,
+    // the first time the popup is opened.
+    popupMb
+        .showingProperty()
+        .addListener(
+            (ChangeListener<Boolean>)
+                (ov, previousVal, newVal) -> {
+                  if (newVal) {
+                    if (!initialized) {
+                      initializePopup();
+                      initialized = true;
+                    }
+                    setPopupContentValue(value);
+                  }
+                });
+  }
 
-    @Override
-    public Node getValueEditor() {
-        return super.handleGenericModes(popupMb);
-    }
+  private void initializePopup() {
+    initializePopupContent();
+    editorHost.getChildren().add(getPopupContentNode());
+  }
 
-    @Override
-    public Object getValue() {
-        return value;
-    }
+  @Override
+  public Node getValueEditor() {
+    return super.handleGenericModes(popupMb);
+  }
 
-    @Override
-    public void setValue(Object value) {
-//        System.out.println(getPropertyNameText() + " - setValue() : " + value);
-        setValueGeneric(value);
-        if (isSetValueDone()) {
-            return;
-        }
+  @Override
+  public Object getValue() {
+    return value;
+  }
 
-        if (popupMb.isShowing()) {
-            setPopupContentValue(value);
-        }
-
-        // Update the preview string
-        popupMb.setText(getPreviewString(value));
-
-        // Update the preview graphic
-        // (Paint editor only for now)
-        if (this instanceof PaintPopupEditor) {
-            popupMb.setGraphic(((PaintPopupEditor) this).getPreviewGraphic(value));
-        }
-
-        commitValue(value);
+  @Override
+  public void setValue(Object value) {
+    //        System.out.println(getPropertyNameText() + " - setValue() : " + value);
+    setValueGeneric(value);
+    if (isSetValueDone()) {
+      return;
     }
 
-    @Override
-    public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-//        System.out.println(getPropertyNameText() + " : resetPopupContent()");
-        super.reset(propMeta, selectedClasses);
-
-        popupMb.setText(null);
+    if (popupMb.isShowing()) {
+      setPopupContentValue(value);
     }
 
-    @Override
-    protected void valueIsIndeterminate() {
-        handleIndeterminate(popupMb);
+    // Update the preview string
+    popupMb.setText(getPreviewString(value));
+
+    // Update the preview graphic
+    // (Paint editor only for now)
+    if (this instanceof PaintPopupEditor) {
+      popupMb.setGraphic(((PaintPopupEditor) this).getPreviewGraphic(value));
     }
 
-    @Override
-    public void requestFocus() {
-        EditorUtils.doNextFrame(() -> popupMb.requestFocus());
-    }
+    commitValue(value);
+  }
 
-    /*
-     * PopupEditorValidation interface.
-     * Methods to be used by concrete popup editors
-     */
-    @Override
-    public void commitValue(Object value) {
-        userUpdateValueProperty(value);
-        popupMb.setText(getPreviewString(value));
-        this.value = value;
-    }
+  @Override
+  public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    //        System.out.println(getPropertyNameText() + " : resetPopupContent()");
+    super.reset(propMeta, selectedClasses);
 
-    @Override
-    public void transientValue(Object value) {
-        userUpdateTransientValueProperty(value);
-    }
+    popupMb.setText(null);
+  }
 
-    @Override
-    public void invalidValue(Object value) {
-        // TBD
-    }
+  @Override
+  protected void valueIsIndeterminate() {
+    handleIndeterminate(popupMb);
+  }
 
-    /*
-     *
-     * Methods to be implemented by concrete popup editors.
-     *
-     */
-    // Initialize the popup editor content, including fxml loading
-    public abstract void initializePopupContent();
+  @Override
+  public void requestFocus() {
+    EditorUtils.doNextFrame(() -> popupMb.requestFocus());
+  }
 
-    // Update the popup editor content from a value
-    public abstract Node getPopupContentNode();
+  /*
+   * PopupEditorValidation interface.
+   * Methods to be used by concrete popup editors
+   */
+  @Override
+  public void commitValue(Object value) {
+    userUpdateValueProperty(value);
+    popupMb.setText(getPreviewString(value));
+    this.value = value;
+  }
 
-    // Update the popup editor content from a value
-    public abstract void setPopupContentValue(Object value);
+  @Override
+  public void transientValue(Object value) {
+    userUpdateTransientValueProperty(value);
+  }
 
-    // Return the representaton of the input value as a string
-    // (to display it in the menu button text)
-    public abstract String getPreviewString(Object value);
+  @Override
+  public void invalidValue(Object value) {
+    // TBD
+  }
 
+  /*
+   *
+   * Methods to be implemented by concrete popup editors.
+   *
+   */
+  // Initialize the popup editor content, including fxml loading
+  public abstract void initializePopupContent();
+
+  // Update the popup editor content from a value
+  public abstract Node getPopupContentNode();
+
+  // Update the popup editor content from a value
+  public abstract void setPopupContentValue(Object value);
+
+  // Return the representaton of the input value as a string
+  // (to display it in the menu button text)
+  public abstract String getPreviewString(Object value);
 }

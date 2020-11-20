@@ -36,43 +36,45 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 
-/**
- *
- */
+/** */
 public abstract class TextEncodablePropertyMetadata<T> extends SingleValuePropertyMetadata<T> {
 
-    public TextEncodablePropertyMetadata(PropertyName name, Class<T> valueClass, 
-            boolean readWrite, T defaultValue, InspectorPath inspectorPath) {
-        super(name, valueClass, readWrite, defaultValue, inspectorPath);
-    }
-    
-    public String getValueString(FXOMInstance fxomInstance) {
-        return getValue(fxomInstance).toString();
-    }
+  public TextEncodablePropertyMetadata(
+      PropertyName name,
+      Class<T> valueClass,
+      boolean readWrite,
+      T defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, valueClass, readWrite, defaultValue, inspectorPath);
+  }
 
-    /*
-     * SingleValuePropertyMetadata
-     */
-    
-    @Override
-    public T makeValueFromFxomInstance(FXOMInstance valueFxomInstance) {
-        return getValueClass().cast(valueFxomInstance.getSceneGraphObject());
-    }
+  public String getValueString(FXOMInstance fxomInstance) {
+    return getValue(fxomInstance).toString();
+  }
 
-    @Override
-    public boolean canMakeStringFromValue(T value) {
-        return true;
-    }
+  /*
+   * SingleValuePropertyMetadata
+   */
 
-    @Override
-    public String makeStringFromValue(T value) {
-        assert value != null;
-        return value.toString();
-    }
+  @Override
+  public T makeValueFromFxomInstance(FXOMInstance valueFxomInstance) {
+    return getValueClass().cast(valueFxomInstance.getSceneGraphObject());
+  }
 
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(T value, FXOMDocument fxomDocument) {
-        throw new RuntimeException("Bug"); //NOI18N
-        // Should never be invoked because canMakeStringFromValue() always return true
-    }
- }
+  @Override
+  public boolean canMakeStringFromValue(T value) {
+    return true;
+  }
+
+  @Override
+  public String makeStringFromValue(T value) {
+    assert value != null;
+    return value.toString();
+  }
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(T value, FXOMDocument fxomDocument) {
+    throw new RuntimeException("Bug"); // NOI18N
+    // Should never be invoked because canMakeStringFromValue() always return true
+  }
+}

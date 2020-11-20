@@ -36,207 +36,230 @@ import com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.mouse.Edi
 import com.oracle.javafx.scenebuilder.kit.editor.panel.content.guides.EditCurveGuideController;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import com.oracle.javafx.scenebuilder.kit.util.MathUtils;
-import javafx.geometry.Point2D;
-
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javafx.geometry.Point2D;
 import javafx.scene.shape.CubicCurve;
 
 public class CubicCurveEditor extends AbstractCurveEditor<CubicCurve> {
 
-    private final double originalStartX;
-    private final double originalStartY;
-    private final double originalControlX1;
-    private final double originalControlY1;
-    private final double originalControlX2;
-    private final double originalControlY2;
-    private final double originalEndX;
-    private final double originalEndY;
-    
-    private final PropertyName startXName = new PropertyName("startX"); //NOI18N
-    private final PropertyName startYName = new PropertyName("startY"); //NOI18N
-    private final PropertyName controlX1Name = new PropertyName("controlX1"); //NOI18N
-    private final PropertyName controlY1Name = new PropertyName("controlY1"); //NOI18N
-    private final PropertyName controlX2Name = new PropertyName("controlX2"); //NOI18N
-    private final PropertyName controlY2Name = new PropertyName("controlY2"); //NOI18N
-    private final PropertyName endXName = new PropertyName("endX"); //NOI18N
-    private final PropertyName endYName = new PropertyName("endY"); //NOI18N
-    private final List<PropertyName> propertyNames = new ArrayList<>();
+  private final double originalStartX;
+  private final double originalStartY;
+  private final double originalControlX1;
+  private final double originalControlY1;
+  private final double originalControlX2;
+  private final double originalControlY2;
+  private final double originalEndX;
+  private final double originalEndY;
 
-    public CubicCurveEditor(CubicCurve sceneGraphObject) {
-        super(sceneGraphObject);
+  private final PropertyName startXName = new PropertyName("startX"); // NOI18N
+  private final PropertyName startYName = new PropertyName("startY"); // NOI18N
+  private final PropertyName controlX1Name = new PropertyName("controlX1"); // NOI18N
+  private final PropertyName controlY1Name = new PropertyName("controlY1"); // NOI18N
+  private final PropertyName controlX2Name = new PropertyName("controlX2"); // NOI18N
+  private final PropertyName controlY2Name = new PropertyName("controlY2"); // NOI18N
+  private final PropertyName endXName = new PropertyName("endX"); // NOI18N
+  private final PropertyName endYName = new PropertyName("endY"); // NOI18N
+  private final List<PropertyName> propertyNames = new ArrayList<>();
 
-        originalStartX = sceneGraphObject.getStartX();
-        originalStartY = sceneGraphObject.getStartY();
-        originalControlX1 = sceneGraphObject.getControlX1();
-        originalControlY1 = sceneGraphObject.getControlY1();
-        originalControlX2 = sceneGraphObject.getControlX2();
-        originalControlY2 = sceneGraphObject.getControlY2();
-        originalEndX = sceneGraphObject.getEndX();
-        originalEndY = sceneGraphObject.getEndY();
+  public CubicCurveEditor(CubicCurve sceneGraphObject) {
+    super(sceneGraphObject);
 
-        propertyNames.add(startXName);
-        propertyNames.add(startYName);
-        propertyNames.add(controlX1Name);
-        propertyNames.add(controlY1Name);
-        propertyNames.add(controlX2Name);
-        propertyNames.add(controlY2Name);
-        propertyNames.add(endXName);
-        propertyNames.add(endYName);
-    }
-    
-    @Override
-    public EditCurveGuideController createController(EnumMap<EditCurveGesture.Tunable, Integer> tunableMap) {
+    originalStartX = sceneGraphObject.getStartX();
+    originalStartY = sceneGraphObject.getStartY();
+    originalControlX1 = sceneGraphObject.getControlX1();
+    originalControlY1 = sceneGraphObject.getControlY1();
+    originalControlX2 = sceneGraphObject.getControlX2();
+    originalControlY2 = sceneGraphObject.getControlY2();
+    originalEndX = sceneGraphObject.getEndX();
+    originalEndY = sceneGraphObject.getEndY();
 
-        final EditCurveGuideController result;
-        if (tunableMap.containsKey(EditCurveGesture.Tunable.START)) {
-            result = new EditCurveGuideController();
-            Point2D point = sceneGraphObject.localToScene(sceneGraphObject.getControlX1(), sceneGraphObject.getControlY1(), true);
-            result.addCurvePoint(point);
-            point = sceneGraphObject.localToScene(sceneGraphObject.getControlX2(), sceneGraphObject.getControlY2(), true);
-            result.addCurvePoint(point);
-            point = sceneGraphObject.localToScene(sceneGraphObject.getEndX(), sceneGraphObject.getEndY(), true);
-            result.addCurvePoint(point);
-        } else if (tunableMap.containsKey(EditCurveGesture.Tunable.CONTROL1)) {
-            result = new EditCurveGuideController();
-            Point2D point = sceneGraphObject.localToScene(sceneGraphObject.getStartX(), sceneGraphObject.getStartY(), true);
-            result.addCurvePoint(point);
-            point = sceneGraphObject.localToScene(sceneGraphObject.getControlX2(), sceneGraphObject.getControlY2(), true);
-            result.addCurvePoint(point);
-            point = sceneGraphObject.localToScene(sceneGraphObject.getEndX(), sceneGraphObject.getEndY(), true);
-            result.addCurvePoint(point);
-        } else if (tunableMap.containsKey(EditCurveGesture.Tunable.CONTROL2)) {
-            result = new EditCurveGuideController();
-            Point2D point = sceneGraphObject.localToScene(sceneGraphObject.getStartX(), sceneGraphObject.getStartY(), true);
-            result.addCurvePoint(point);
-            point = sceneGraphObject.localToScene(sceneGraphObject.getControlX1(), sceneGraphObject.getControlY1(), true);
-            result.addCurvePoint(point);
-            point = sceneGraphObject.localToScene(sceneGraphObject.getEndX(), sceneGraphObject.getEndY(), true);
-            result.addCurvePoint(point);
-        } else if (tunableMap.containsKey(EditCurveGesture.Tunable.END)) {
-            result = new EditCurveGuideController();
-            Point2D point = sceneGraphObject.localToScene(sceneGraphObject.getStartX(), sceneGraphObject.getStartY(), true);
-            result.addCurvePoint(point);
-            point = sceneGraphObject.localToScene(sceneGraphObject.getControlX1(), sceneGraphObject.getControlY1(), true);
-            result.addCurvePoint(point);
-            point = sceneGraphObject.localToScene(sceneGraphObject.getControlX2(), sceneGraphObject.getControlY2(), true);
-            result.addCurvePoint(point);
-        } else {
-            // Emergency code
-            result = null;
-        }
+    propertyNames.add(startXName);
+    propertyNames.add(startYName);
+    propertyNames.add(controlX1Name);
+    propertyNames.add(controlY1Name);
+    propertyNames.add(controlX2Name);
+    propertyNames.add(controlY2Name);
+    propertyNames.add(endXName);
+    propertyNames.add(endYName);
+  }
 
-        return result;
-    }
-    
-    @Override
-    public void moveTunable(EnumMap<EditCurveGesture.Tunable, Integer> tunableMap, double newX, double newY) {
-        if (tunableMap.containsKey(EditCurveGesture.Tunable.START)) {
-            sceneGraphObject.setStartX(newX);
-            sceneGraphObject.setStartY(newY);            
-        } else if (tunableMap.containsKey(EditCurveGesture.Tunable.CONTROL1)) {
-            sceneGraphObject.setControlX1(newX);
-            sceneGraphObject.setControlY1(newY);            
-        } else if (tunableMap.containsKey(EditCurveGesture.Tunable.CONTROL2)) {
-            sceneGraphObject.setControlX2(newX);
-            sceneGraphObject.setControlY2(newY);            
-        } else if (tunableMap.containsKey(EditCurveGesture.Tunable.END)) {
-            sceneGraphObject.setEndX(newX);
-            sceneGraphObject.setEndY(newY);            
-        }
-    }
+  @Override
+  public EditCurveGuideController createController(
+      EnumMap<EditCurveGesture.Tunable, Integer> tunableMap) {
 
-    @Override
-    public void revertToOriginalState() {
-        sceneGraphObject.setStartX(originalStartX);
-        sceneGraphObject.setStartY(originalStartY);
-        sceneGraphObject.setControlX1(originalControlX1);
-        sceneGraphObject.setControlY1(originalControlY1);
-        sceneGraphObject.setControlX2(originalControlX2);
-        sceneGraphObject.setControlY2(originalControlY2);
-        sceneGraphObject.setEndX(originalEndX);
-        sceneGraphObject.setEndY(originalEndY);
+    final EditCurveGuideController result;
+    if (tunableMap.containsKey(EditCurveGesture.Tunable.START)) {
+      result = new EditCurveGuideController();
+      Point2D point =
+          sceneGraphObject.localToScene(
+              sceneGraphObject.getControlX1(), sceneGraphObject.getControlY1(), true);
+      result.addCurvePoint(point);
+      point =
+          sceneGraphObject.localToScene(
+              sceneGraphObject.getControlX2(), sceneGraphObject.getControlY2(), true);
+      result.addCurvePoint(point);
+      point =
+          sceneGraphObject.localToScene(
+              sceneGraphObject.getEndX(), sceneGraphObject.getEndY(), true);
+      result.addCurvePoint(point);
+    } else if (tunableMap.containsKey(EditCurveGesture.Tunable.CONTROL1)) {
+      result = new EditCurveGuideController();
+      Point2D point =
+          sceneGraphObject.localToScene(
+              sceneGraphObject.getStartX(), sceneGraphObject.getStartY(), true);
+      result.addCurvePoint(point);
+      point =
+          sceneGraphObject.localToScene(
+              sceneGraphObject.getControlX2(), sceneGraphObject.getControlY2(), true);
+      result.addCurvePoint(point);
+      point =
+          sceneGraphObject.localToScene(
+              sceneGraphObject.getEndX(), sceneGraphObject.getEndY(), true);
+      result.addCurvePoint(point);
+    } else if (tunableMap.containsKey(EditCurveGesture.Tunable.CONTROL2)) {
+      result = new EditCurveGuideController();
+      Point2D point =
+          sceneGraphObject.localToScene(
+              sceneGraphObject.getStartX(), sceneGraphObject.getStartY(), true);
+      result.addCurvePoint(point);
+      point =
+          sceneGraphObject.localToScene(
+              sceneGraphObject.getControlX1(), sceneGraphObject.getControlY1(), true);
+      result.addCurvePoint(point);
+      point =
+          sceneGraphObject.localToScene(
+              sceneGraphObject.getEndX(), sceneGraphObject.getEndY(), true);
+      result.addCurvePoint(point);
+    } else if (tunableMap.containsKey(EditCurveGesture.Tunable.END)) {
+      result = new EditCurveGuideController();
+      Point2D point =
+          sceneGraphObject.localToScene(
+              sceneGraphObject.getStartX(), sceneGraphObject.getStartY(), true);
+      result.addCurvePoint(point);
+      point =
+          sceneGraphObject.localToScene(
+              sceneGraphObject.getControlX1(), sceneGraphObject.getControlY1(), true);
+      result.addCurvePoint(point);
+      point =
+          sceneGraphObject.localToScene(
+              sceneGraphObject.getControlX2(), sceneGraphObject.getControlY2(), true);
+      result.addCurvePoint(point);
+    } else {
+      // Emergency code
+      result = null;
     }
 
-    @Override
-    public List<PropertyName> getPropertyNames() {
-        return propertyNames;
+    return result;
+  }
+
+  @Override
+  public void moveTunable(
+      EnumMap<EditCurveGesture.Tunable, Integer> tunableMap, double newX, double newY) {
+    if (tunableMap.containsKey(EditCurveGesture.Tunable.START)) {
+      sceneGraphObject.setStartX(newX);
+      sceneGraphObject.setStartY(newY);
+    } else if (tunableMap.containsKey(EditCurveGesture.Tunable.CONTROL1)) {
+      sceneGraphObject.setControlX1(newX);
+      sceneGraphObject.setControlY1(newY);
+    } else if (tunableMap.containsKey(EditCurveGesture.Tunable.CONTROL2)) {
+      sceneGraphObject.setControlX2(newX);
+      sceneGraphObject.setControlY2(newY);
+    } else if (tunableMap.containsKey(EditCurveGesture.Tunable.END)) {
+      sceneGraphObject.setEndX(newX);
+      sceneGraphObject.setEndY(newY);
+    }
+  }
+
+  @Override
+  public void revertToOriginalState() {
+    sceneGraphObject.setStartX(originalStartX);
+    sceneGraphObject.setStartY(originalStartY);
+    sceneGraphObject.setControlX1(originalControlX1);
+    sceneGraphObject.setControlY1(originalControlY1);
+    sceneGraphObject.setControlX2(originalControlX2);
+    sceneGraphObject.setControlY2(originalControlY2);
+    sceneGraphObject.setEndX(originalEndX);
+    sceneGraphObject.setEndY(originalEndY);
+  }
+
+  @Override
+  public List<PropertyName> getPropertyNames() {
+    return propertyNames;
+  }
+
+  @Override
+  public Object getValue(PropertyName propertyName) {
+    assert propertyName != null;
+    assert propertyNames.contains(propertyName);
+
+    final Object result;
+    if (propertyName.equals(startXName)) {
+      result = sceneGraphObject.getStartX();
+    } else if (propertyName.equals(startYName)) {
+      result = sceneGraphObject.getStartY();
+    } else if (propertyName.equals(controlX1Name)) {
+      result = sceneGraphObject.getControlX1();
+    } else if (propertyName.equals(controlY1Name)) {
+      result = sceneGraphObject.getControlY1();
+    } else if (propertyName.equals(controlX2Name)) {
+      result = sceneGraphObject.getControlX2();
+    } else if (propertyName.equals(controlY2Name)) {
+      result = sceneGraphObject.getControlY2();
+    } else if (propertyName.equals(endXName)) {
+      result = sceneGraphObject.getEndX();
+    } else if (propertyName.equals(endYName)) {
+      result = sceneGraphObject.getEndY();
+    } else {
+      // Emergency code
+      result = null;
     }
 
-    @Override
-    public Object getValue(PropertyName propertyName) {
-        assert propertyName != null;
-        assert propertyNames.contains(propertyName);
+    return result;
+  }
 
-        final Object result;
-        if (propertyName.equals(startXName)) {
-            result = sceneGraphObject.getStartX();
-        } else if (propertyName.equals(startYName)) {
-            result = sceneGraphObject.getStartY();
-        } else if (propertyName.equals(controlX1Name)) {
-            result = sceneGraphObject.getControlX1();
-        } else if (propertyName.equals(controlY1Name)) {
-            result = sceneGraphObject.getControlY1();
-        } else if (propertyName.equals(controlX2Name)) {
-            result = sceneGraphObject.getControlX2();
-        } else if (propertyName.equals(controlY2Name)) {
-            result = sceneGraphObject.getControlY2();
-        } else if (propertyName.equals(endXName)) {
-            result = sceneGraphObject.getEndX();
-        } else if (propertyName.equals(endYName)) {
-            result = sceneGraphObject.getEndY();
-        } else {
-            // Emergency code
-            result = null;
-        }
-
-        return result;
+  @Override
+  public Map<PropertyName, Object> getChangeMap() {
+    final Map<PropertyName, Object> result = new HashMap<>();
+    if (!MathUtils.equals(sceneGraphObject.getStartX(), originalStartX)) {
+      result.put(startXName, sceneGraphObject.getStartX());
     }
-
-    @Override
-    public Map<PropertyName, Object> getChangeMap() {
-        final Map<PropertyName, Object> result = new HashMap<>();
-        if (!MathUtils.equals(sceneGraphObject.getStartX(), originalStartX)) {
-            result.put(startXName, sceneGraphObject.getStartX());
-        }
-        if (!MathUtils.equals(sceneGraphObject.getStartY(), originalStartY)) {
-            result.put(startYName, sceneGraphObject.getStartY());
-        }
-        if (!MathUtils.equals(sceneGraphObject.getControlX1(), originalControlX1)) {
-            result.put(controlX1Name, sceneGraphObject.getControlX1());
-        }
-        if (!MathUtils.equals(sceneGraphObject.getControlY1(), originalControlY1)) {
-            result.put(controlY1Name, sceneGraphObject.getControlY1());
-        }
-        if (!MathUtils.equals(sceneGraphObject.getControlX2(), originalControlX2)) {
-            result.put(controlX2Name, sceneGraphObject.getControlX2());
-        }
-        if (!MathUtils.equals(sceneGraphObject.getControlY2(), originalControlY2)) {
-            result.put(controlY2Name, sceneGraphObject.getControlY2());
-        }
-        if (!MathUtils.equals(sceneGraphObject.getEndX(), originalEndX)) {
-            result.put(endXName, sceneGraphObject.getEndX());
-        }
-        if (!MathUtils.equals(sceneGraphObject.getEndY(), originalEndY)) {
-            result.put(endYName, sceneGraphObject.getEndY());
-        }
-        return result;
+    if (!MathUtils.equals(sceneGraphObject.getStartY(), originalStartY)) {
+      result.put(startYName, sceneGraphObject.getStartY());
     }
-
-    @Override
-    public List<Double> getPoints() {
-        return null;
+    if (!MathUtils.equals(sceneGraphObject.getControlX1(), originalControlX1)) {
+      result.put(controlX1Name, sceneGraphObject.getControlX1());
     }
-
-    @Override
-    public void addPoint(EnumMap<EditCurveGesture.Tunable, Integer> tunableMap, double newX, double newY) {
+    if (!MathUtils.equals(sceneGraphObject.getControlY1(), originalControlY1)) {
+      result.put(controlY1Name, sceneGraphObject.getControlY1());
     }
-
-    @Override
-    public void removePoint(EnumMap<EditCurveGesture.Tunable, Integer> tunableMap) {
+    if (!MathUtils.equals(sceneGraphObject.getControlX2(), originalControlX2)) {
+      result.put(controlX2Name, sceneGraphObject.getControlX2());
     }
-    
+    if (!MathUtils.equals(sceneGraphObject.getControlY2(), originalControlY2)) {
+      result.put(controlY2Name, sceneGraphObject.getControlY2());
+    }
+    if (!MathUtils.equals(sceneGraphObject.getEndX(), originalEndX)) {
+      result.put(endXName, sceneGraphObject.getEndX());
+    }
+    if (!MathUtils.equals(sceneGraphObject.getEndY(), originalEndY)) {
+      result.put(endYName, sceneGraphObject.getEndY());
+    }
+    return result;
+  }
+
+  @Override
+  public List<Double> getPoints() {
+    return null;
+  }
+
+  @Override
+  public void addPoint(
+      EnumMap<EditCurveGesture.Tunable, Integer> tunableMap, double newX, double newY) {}
+
+  @Override
+  public void removePoint(EnumMap<EditCurveGesture.Tunable, Integer> tunableMap) {}
 }

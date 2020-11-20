@@ -35,15 +35,14 @@ import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.hierarchy.treeview.HierarchyTreeViewController;
 
 /**
- * Concrete class to create and control the Hierarchy Panel of Scene Builder
- * Kit. Update this class inheritance in order to use either a TreeView or a
- * TreeTableView in hierarchy.
+ * Concrete class to create and control the Hierarchy Panel of Scene Builder Kit. Update this class
+ * inheritance in order to use either a TreeView or a TreeTableView in hierarchy.
  *
- * p
+ * <p>p
  */
 public class HierarchyPanelController extends HierarchyTreeViewController {
 
-    public HierarchyPanelController(EditorController editorController) {
-        super(editorController);
-    }
+  public HierarchyPanelController(EditorController editorController) {
+    super(editorController);
+  }
 }

@@ -39,60 +39,55 @@ import javafx.scene.Node;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
-/**
- *
- * 
- */
+/** */
 public class TableColumnTring extends AbstractGenericTring<Object> {
 
-    private final TableViewDesignInfoX tableViewDesignInfo
-            = new TableViewDesignInfoX();
-    
-    public TableColumnTring(ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
-        super(contentPanelController, fxomInstance, Object.class);
-        assert fxomInstance.getSceneGraphObject() instanceof TableColumn;
-    }
-    
-    public FXOMInstance getFxomInstance() {
-        return (FXOMInstance) getFxomObject();
-    }
+  private final TableViewDesignInfoX tableViewDesignInfo = new TableViewDesignInfoX();
 
-    
-    /*
-     * AbstractGenericPring
-     */
-    
-    @Override
-    public Bounds getSceneGraphObjectBounds() {
-        return tableViewDesignInfo.getColumnBounds(getTableColumn());
-    }
+  public TableColumnTring(
+      ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
+    super(contentPanelController, fxomInstance, Object.class);
+    assert fxomInstance.getSceneGraphObject() instanceof TableColumn;
+  }
 
-    @Override
-    public Node getSceneGraphObjectProxy() {
-        return getTableColumn().getTableView();
-    }
+  public FXOMInstance getFxomInstance() {
+    return (FXOMInstance) getFxomObject();
+  }
 
-    @Override
-    protected void startListeningToSceneGraphObject() {
-        final TableView<?> tableView = getTableColumn().getTableView();
-        startListeningToLayoutBounds(tableView);
-        startListeningToLocalToSceneTransform(tableView);
-    }
+  /*
+   * AbstractGenericPring
+   */
 
-    @Override
-    protected void stopListeningToSceneGraphObject() {
-        final TableView<?> tableView = getTableColumn().getTableView();
-        stopListeningToLayoutBounds(tableView);
-        stopListeningToLocalToSceneTransform(tableView);
-    }
+  @Override
+  public Bounds getSceneGraphObjectBounds() {
+    return tableViewDesignInfo.getColumnBounds(getTableColumn());
+  }
 
+  @Override
+  public Node getSceneGraphObjectProxy() {
+    return getTableColumn().getTableView();
+  }
 
-    /*
-     * Private
-     */
-    
-    private TableColumn<?,?> getTableColumn() {
-        assert getSceneGraphObject() instanceof TableColumn;
-        return (TableColumn<?,?>) getSceneGraphObject();
-    }
+  @Override
+  protected void startListeningToSceneGraphObject() {
+    final TableView<?> tableView = getTableColumn().getTableView();
+    startListeningToLayoutBounds(tableView);
+    startListeningToLocalToSceneTransform(tableView);
+  }
+
+  @Override
+  protected void stopListeningToSceneGraphObject() {
+    final TableView<?> tableView = getTableColumn().getTableView();
+    stopListeningToLayoutBounds(tableView);
+    stopListeningToLocalToSceneTransform(tableView);
+  }
+
+  /*
+   * Private
+   */
+
+  private TableColumn<?, ?> getTableColumn() {
+    assert getSceneGraphObject() instanceof TableColumn;
+    return (TableColumn<?, ?>) getSceneGraphObject();
+  }
 }

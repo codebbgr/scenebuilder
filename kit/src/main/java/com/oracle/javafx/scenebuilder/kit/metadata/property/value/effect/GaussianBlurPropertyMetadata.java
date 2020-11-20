@@ -40,34 +40,42 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.effect.GaussianBlur;
 
-/**
- *
- */
+/** */
 public class GaussianBlurPropertyMetadata extends ComplexPropertyMetadata<GaussianBlur> {
-    
-    private final EffectPropertyMetadata inputMetadata
-            = new EffectPropertyMetadata(new PropertyName("input"), //NOI18N
-            true /* readWrite */, null, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata radiusMetadata
-            = new DoublePropertyMetadata(new PropertyName("radius"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, 10.0, InspectorPath.UNUSED);
 
-    public GaussianBlurPropertyMetadata(PropertyName name, boolean readWrite, 
-            GaussianBlur defaultValue, InspectorPath inspectorPath) {
-        super(name, GaussianBlur.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final EffectPropertyMetadata inputMetadata =
+      new EffectPropertyMetadata(
+          new PropertyName("input"), // NOI18N
+          true /* readWrite */,
+          null,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata radiusMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("radius"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          10.0,
+          InspectorPath.UNUSED);
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(GaussianBlur value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        inputMetadata.setValue(result, value.getInput());
-        radiusMetadata.setValue(result, value.getRadius());
+  public GaussianBlurPropertyMetadata(
+      PropertyName name,
+      boolean readWrite,
+      GaussianBlur defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, GaussianBlur.class, readWrite, defaultValue, inspectorPath);
+  }
 
-        return result;
-    }
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(GaussianBlur value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    inputMetadata.setValue(result, value.getInput());
+    radiusMetadata.setValue(result, value.getRadius());
+
+    return result;
+  }
 }

@@ -39,59 +39,58 @@ import java.util.List;
 /**
  * This Job updates the FXOM document AND the selection at execution time.
  *
- * The sub jobs are created and executed just after.
+ * <p>The sub jobs are created and executed just after.
  */
 public abstract class InlineSelectionJob extends InlineDocumentJob {
 
-    private AbstractSelectionGroup oldSelectionGroup;
-    private AbstractSelectionGroup newSelectionGroup;
+  private AbstractSelectionGroup oldSelectionGroup;
+  private AbstractSelectionGroup newSelectionGroup;
 
-    public InlineSelectionJob(EditorController editorController) {
-        super(editorController);
+  public InlineSelectionJob(EditorController editorController) {
+    super(editorController);
+  }
+
+  protected final AbstractSelectionGroup getOldSelectionGroup() {
+    return oldSelectionGroup;
+  }
+
+  protected abstract AbstractSelectionGroup getNewSelectionGroup();
+
+  @Override
+  public final void execute() {
+    final Selection selection = getEditorController().getSelection();
+    try {
+      selection.beginUpdate();
+      oldSelectionGroup = selection.getGroup() == null ? null : selection.getGroup().clone();
+      super.execute();
+      newSelectionGroup = getNewSelectionGroup();
+      selection.select(newSelectionGroup);
+      selection.endUpdate();
+
+    } catch (CloneNotSupportedException x) {
+      // Emergency code
+      throw new RuntimeException(x);
     }
+  }
 
-    protected final AbstractSelectionGroup getOldSelectionGroup() {
-        return oldSelectionGroup;
-    }
+  @Override
+  public final void undo() {
+    final Selection selection = getEditorController().getSelection();
+    selection.beginUpdate();
+    super.undo();
+    selection.select(oldSelectionGroup);
+    selection.endUpdate();
+  }
 
-    protected abstract AbstractSelectionGroup getNewSelectionGroup();
+  @Override
+  public final void redo() {
+    final Selection selection = getEditorController().getSelection();
+    selection.beginUpdate();
+    super.redo();
+    selection.select(newSelectionGroup);
+    selection.endUpdate();
+  }
 
-    @Override
-    public final void execute() {
-        final Selection selection = getEditorController().getSelection();
-        try {
-            selection.beginUpdate();
-            oldSelectionGroup = selection.getGroup() == null ? null
-                    : selection.getGroup().clone();
-            super.execute();
-            newSelectionGroup = getNewSelectionGroup();
-            selection.select(newSelectionGroup);
-            selection.endUpdate();
-
-        } catch (CloneNotSupportedException x) {
-            // Emergency code
-            throw new RuntimeException(x);
-        }
-    }
-
-    @Override
-    public final void undo() {
-        final Selection selection = getEditorController().getSelection();
-        selection.beginUpdate();
-        super.undo();
-        selection.select(oldSelectionGroup);
-        selection.endUpdate();
-    }
-
-    @Override
-    public final void redo() {
-        final Selection selection = getEditorController().getSelection();
-        selection.beginUpdate();
-        super.redo();
-        selection.select(newSelectionGroup);
-        selection.endUpdate();
-    }
-
-    @Override
-    protected abstract List<Job> makeAndExecuteSubJobs();
+  @Override
+  protected abstract List<Job> makeAndExecuteSubJobs();
 }

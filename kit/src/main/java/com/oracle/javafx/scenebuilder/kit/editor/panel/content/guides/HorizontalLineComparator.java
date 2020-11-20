@@ -35,31 +35,28 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.content.guides;
 import com.oracle.javafx.scenebuilder.kit.util.MathUtils;
 import java.util.Comparator;
 
-/**
- *
- */
+/** */
 class HorizontalLineComparator implements Comparator<HorizontalSegment> {
 
-    @Override
-    public int compare(HorizontalSegment o1, HorizontalSegment o2) {
-        assert o1 != null;
-        assert o2 != null;
-        assert MathUtils.equals(o1.getY1(), o1.getY2());
-        assert MathUtils.equals(o2.getY1(), o2.getY2());
-        
-        final int result;
-        
-        if (o1 == o2) {
-            result = 0;
-        } else if (MathUtils.equals(o1.getY1(), o2.getY1())) {
-            result = 0;
-        } else if (o1.getY1() < o2.getY1()) {
-            result = +1;
-        } else {
-            result = -1;
-        }
-        
-        return result;
+  @Override
+  public int compare(HorizontalSegment o1, HorizontalSegment o2) {
+    assert o1 != null;
+    assert o2 != null;
+    assert MathUtils.equals(o1.getY1(), o1.getY2());
+    assert MathUtils.equals(o2.getY1(), o2.getY2());
+
+    final int result;
+
+    if (o1 == o2) {
+      result = 0;
+    } else if (MathUtils.equals(o1.getY1(), o2.getY1())) {
+      result = 0;
+    } else if (o1.getY1() < o2.getY1()) {
+      result = +1;
+    } else {
+      result = -1;
     }
-    
+
+    return result;
+  }
 }

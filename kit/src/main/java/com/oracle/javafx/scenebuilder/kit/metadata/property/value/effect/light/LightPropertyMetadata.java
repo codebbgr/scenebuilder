@@ -38,43 +38,40 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.effect.Light;
 
-/**
- *
- */
+/** */
 public class LightPropertyMetadata extends ComplexPropertyMetadata<Light> {
 
-    private final DistantLightPropertyMetadata distantLightMetadata;
-    private final PointLightPropertyMetadata pointLightMetadata;
-    private final SpotLightPropertyMetadata spotLightMetadata;
+  private final DistantLightPropertyMetadata distantLightMetadata;
+  private final PointLightPropertyMetadata pointLightMetadata;
+  private final SpotLightPropertyMetadata spotLightMetadata;
 
-    public LightPropertyMetadata(PropertyName name, boolean readWrite,
-            Light defaultValue, InspectorPath inspectorPath) {
-        super(name, Light.class, readWrite, defaultValue, inspectorPath);
-        distantLightMetadata = new DistantLightPropertyMetadata(name, readWrite, null, inspectorPath);
-        pointLightMetadata = new PointLightPropertyMetadata(name, readWrite, null, inspectorPath);
-        spotLightMetadata = new SpotLightPropertyMetadata(name, readWrite, null, inspectorPath);
+  public LightPropertyMetadata(
+      PropertyName name, boolean readWrite, Light defaultValue, InspectorPath inspectorPath) {
+    super(name, Light.class, readWrite, defaultValue, inspectorPath);
+    distantLightMetadata = new DistantLightPropertyMetadata(name, readWrite, null, inspectorPath);
+    pointLightMetadata = new PointLightPropertyMetadata(name, readWrite, null, inspectorPath);
+    spotLightMetadata = new SpotLightPropertyMetadata(name, readWrite, null, inspectorPath);
+  }
+
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Light value, FXOMDocument fxomDocument) {
+    final FXOMInstance result;
+
+    if (value instanceof Light.Distant) {
+      result = distantLightMetadata.makeFxomInstanceFromValue((Light.Distant) value, fxomDocument);
+    } else if (value instanceof Light.Spot) { // Warning : Spot extends Point !
+      result = spotLightMetadata.makeFxomInstanceFromValue((Light.Spot) value, fxomDocument);
+    } else if (value instanceof Light.Point) {
+      result = pointLightMetadata.makeFxomInstanceFromValue((Light.Point) value, fxomDocument);
+    } else {
+      assert false;
+      result = distantLightMetadata.makeFxomInstanceFromValue(new Light.Distant(), fxomDocument);
     }
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Light value, FXOMDocument fxomDocument) {
-        final FXOMInstance result;
-        
-        if (value instanceof Light.Distant) {
-            result = distantLightMetadata.makeFxomInstanceFromValue((Light.Distant) value, fxomDocument);
-        } else if (value instanceof Light.Spot) { // Warning : Spot extends Point !
-            result = spotLightMetadata.makeFxomInstanceFromValue((Light.Spot) value, fxomDocument);
-        } else if (value instanceof Light.Point) {
-            result = pointLightMetadata.makeFxomInstanceFromValue((Light.Point) value, fxomDocument);
-        } else {
-            assert false;
-            result = distantLightMetadata.makeFxomInstanceFromValue(new Light.Distant(), fxomDocument);
-        }
-        
-        return result;
-    }
-
+    return result;
+  }
 }

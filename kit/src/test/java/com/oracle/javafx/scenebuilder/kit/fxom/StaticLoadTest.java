@@ -31,68 +31,72 @@
  */
 package com.oracle.javafx.scenebuilder.kit.fxom;
 
+import static org.junit.Assert.assertFalse;
+
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import java.io.IOException;
 import java.net.URL;
 import javafx.application.Application;
 import javafx.stage.Stage;
-import static org.junit.Assert.assertFalse;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * Unit test for {@link com.oracle.javafx.scenebuilder.kit.util.Deprecation#setStaticLoad(javafx.fxml.FXMLLoader, boolean) }
+ * Unit test for {@link
+ * com.oracle.javafx.scenebuilder.kit.util.Deprecation#setStaticLoad(javafx.fxml.FXMLLoader,
+ * boolean) }
  */
 public class StaticLoadTest {
-    
-    private boolean thrown;
-    
-    public static class DummyApp extends Application {
-        @Override
-        public void start(Stage primaryStage) throws Exception {
-            // noop
-        }
-    }
 
-    @BeforeClass
-    public static void initJFX() {
-        Thread t = new Thread("JavaFX Init Thread") {
-            @Override
-            public void run() {
-                Application.launch(DummyApp.class, new String[0]);
-            }
+  private boolean thrown;
+
+  public static class DummyApp extends Application {
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+      // noop
+    }
+  }
+
+  @BeforeClass
+  public static void initJFX() {
+    Thread t =
+        new Thread("JavaFX Init Thread") {
+          @Override
+          public void run() {
+            Application.launch(DummyApp.class, new String[0]);
+          }
         };
-        t.setDaemon(true);
-        t.start();
+    t.setDaemon(true);
+    t.start();
+  }
+
+  @Test
+  public void testStaticLoadWithoutEventHandler() throws IOException {
+    thrown = false;
+    EditorController editorController = new EditorController();
+    final URL fxmlURL = StaticLoadTest.class.getResource("testStaticLoadWithoutEventHandler.fxml");
+    try {
+      final String fxmlText = FXOMDocument.readContentFromURL(fxmlURL);
+      editorController.setFxmlTextAndLocation(fxmlText, fxmlURL, false);
+    } catch (IOException e) {
+      thrown = true;
     }
-    
-    @Test
-    public void testStaticLoadWithoutEventHandler() throws IOException {
-        thrown = false;
-        EditorController editorController = new EditorController();
-        final URL fxmlURL = StaticLoadTest.class.getResource("testStaticLoadWithoutEventHandler.fxml");
-        try {
-            final String fxmlText = FXOMDocument.readContentFromURL(fxmlURL);
-            editorController.setFxmlTextAndLocation(fxmlText, fxmlURL, false);
-        } catch (IOException e) {
-           thrown = true;
-        }
 
-        assertFalse(thrown);
-    } 
-    
-    @Test
-    public void testStaticLoad() throws IOException {
-        thrown = false;
-        EditorController editorController = new EditorController();
-        final URL fxmlURL = StaticLoadTest.class.getResource("testStaticLoad.fxml");
-        try {
-            final String fxmlText = FXOMDocument.readContentFromURL(fxmlURL);
-            editorController.setFxmlTextAndLocation(fxmlText, fxmlURL, false);
-        } catch (IOException e) {
-           thrown = true;
-        }
+    assertFalse(thrown);
+  }
 
-        assertFalse(thrown);
-    } 
+  @Test
+  public void testStaticLoad() throws IOException {
+    thrown = false;
+    EditorController editorController = new EditorController();
+    final URL fxmlURL = StaticLoadTest.class.getResource("testStaticLoad.fxml");
+    try {
+      final String fxmlText = FXOMDocument.readContentFromURL(fxmlURL);
+      editorController.setFxmlTextAndLocation(fxmlText, fxmlURL, false);
+    } catch (IOException e) {
+      thrown = true;
+    }
+
+    assertFalse(thrown);
+  }
 }

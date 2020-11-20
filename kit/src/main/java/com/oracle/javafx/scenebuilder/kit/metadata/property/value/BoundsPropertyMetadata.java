@@ -37,52 +37,72 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.geometry.Bounds;
 
-/**
- *
- * 
- */
+/** */
 public class BoundsPropertyMetadata extends ComplexPropertyMetadata<Bounds> {
 
-    private final DoublePropertyMetadata minXMetadata
-            = new DoublePropertyMetadata(new PropertyName("minx"), 
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata minYMetadata
-            = new DoublePropertyMetadata(new PropertyName("minY"), 
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata minZMetadata
-            = new DoublePropertyMetadata(new PropertyName("minZ"), 
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata widthMetadata
-            = new DoublePropertyMetadata(new PropertyName("width"), 
-            DoublePropertyMetadata.DoubleKind.SIZE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata heightMetadata
-            = new DoublePropertyMetadata(new PropertyName("height"), 
-            DoublePropertyMetadata.DoubleKind.SIZE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata depthMetadata
-            = new DoublePropertyMetadata(new PropertyName("depth"), 
-            DoublePropertyMetadata.DoubleKind.SIZE, true, 0.0, InspectorPath.UNUSED);
-    
-    
-    public BoundsPropertyMetadata(PropertyName name, boolean readWrite, 
-            Bounds defaultValue, InspectorPath inspectorPath) {
-        super(name, Bounds.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final DoublePropertyMetadata minXMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("minx"),
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata minYMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("minY"),
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata minZMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("minZ"),
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata widthMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("width"),
+          DoublePropertyMetadata.DoubleKind.SIZE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata heightMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("height"),
+          DoublePropertyMetadata.DoubleKind.SIZE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata depthMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("depth"),
+          DoublePropertyMetadata.DoubleKind.SIZE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Bounds value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        minXMetadata.setValue(result, value.getMinX());
-        minYMetadata.setValue(result, value.getMinY());
-        minZMetadata.setValue(result, value.getMinZ());
-        widthMetadata.setValue(result, value.getWidth());
-        heightMetadata.setValue(result, value.getHeight());
-        depthMetadata.setValue(result, value.getDepth());
+  public BoundsPropertyMetadata(
+      PropertyName name, boolean readWrite, Bounds defaultValue, InspectorPath inspectorPath) {
+    super(name, Bounds.class, readWrite, defaultValue, inspectorPath);
+  }
 
-        return result;
-    }
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Bounds value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    minXMetadata.setValue(result, value.getMinX());
+    minYMetadata.setValue(result, value.getMinY());
+    minZMetadata.setValue(result, value.getMinZ());
+    widthMetadata.setValue(result, value.getWidth());
+    heightMetadata.setValue(result, value.getHeight());
+    depthMetadata.setValue(result, value.getDepth());
+
+    return result;
+  }
 }

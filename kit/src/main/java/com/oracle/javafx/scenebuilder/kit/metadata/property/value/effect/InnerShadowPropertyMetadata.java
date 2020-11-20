@@ -44,62 +44,94 @@ import javafx.scene.effect.BlurType;
 import javafx.scene.effect.InnerShadow;
 import javafx.scene.paint.Color;
 
-/**
- *
- */
+/** */
 public class InnerShadowPropertyMetadata extends ComplexPropertyMetadata<InnerShadow> {
-    
-    private final EnumerationPropertyMetadata blurTypeMetadata
-            = new EnumerationPropertyMetadata(new PropertyName("blurType"), //NOI18N
-            BlurType.class, true, BlurType.THREE_PASS_BOX, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata chokeMetadata
-            = new DoublePropertyMetadata(new PropertyName("choke"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.OPACITY, true /* readWrite */, 0.0, InspectorPath.UNUSED);
-    private final ColorPropertyMetadata colorMetadata
-            = new ColorPropertyMetadata(new PropertyName("color"), //NOI18N
-            true /* readWrite */, Color.BLACK, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata heightMetadata
-            = new DoublePropertyMetadata(new PropertyName("height"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.SIZE, true /* readWrite */, 21.0, InspectorPath.UNUSED);
-    private final EffectPropertyMetadata inputMetadata
-            = new EffectPropertyMetadata(new PropertyName("input"), //NOI18N
-            true /* readWrite */, null, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata offsetXMetadata
-            = new DoublePropertyMetadata(new PropertyName("offsetX"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata offsetYMetadata
-            = new DoublePropertyMetadata(new PropertyName("offsetY"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata radiusMetadata
-            = new DoublePropertyMetadata(new PropertyName("radius"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, 10.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata widthMetadata
-            = new DoublePropertyMetadata(new PropertyName("width"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.OPACITY, true /* readWrite */, 21.0, InspectorPath.UNUSED);
 
-    public InnerShadowPropertyMetadata(PropertyName name, boolean readWrite, 
-            InnerShadow defaultValue, InspectorPath inspectorPath) {
-        super(name, InnerShadow.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final EnumerationPropertyMetadata blurTypeMetadata =
+      new EnumerationPropertyMetadata(
+          new PropertyName("blurType"), // NOI18N
+          BlurType.class,
+          true,
+          BlurType.THREE_PASS_BOX,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata chokeMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("choke"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.OPACITY,
+          true /* readWrite */,
+          0.0,
+          InspectorPath.UNUSED);
+  private final ColorPropertyMetadata colorMetadata =
+      new ColorPropertyMetadata(
+          new PropertyName("color"), // NOI18N
+          true /* readWrite */,
+          Color.BLACK,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata heightMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("height"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.SIZE,
+          true /* readWrite */,
+          21.0,
+          InspectorPath.UNUSED);
+  private final EffectPropertyMetadata inputMetadata =
+      new EffectPropertyMetadata(
+          new PropertyName("input"), // NOI18N
+          true /* readWrite */,
+          null,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata offsetXMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("offsetX"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata offsetYMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("offsetY"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata radiusMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("radius"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          10.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata widthMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("width"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.OPACITY,
+          true /* readWrite */,
+          21.0,
+          InspectorPath.UNUSED);
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(InnerShadow value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        blurTypeMetadata.setValue(result, value.getBlurType().toString());
-        chokeMetadata.setValue(result, value.getChoke());
-        colorMetadata.setValue(result, value.getColor());
-        heightMetadata.setValue(result, value.getHeight());
-        inputMetadata.setValue(result, value.getInput());
-        offsetXMetadata.setValue(result, value.getOffsetX());
-        offsetYMetadata.setValue(result, value.getOffsetY());
-        radiusMetadata.setValue(result, value.getRadius());
-        widthMetadata.setValue(result, value.getWidth());
+  public InnerShadowPropertyMetadata(
+      PropertyName name, boolean readWrite, InnerShadow defaultValue, InspectorPath inspectorPath) {
+    super(name, InnerShadow.class, readWrite, defaultValue, inspectorPath);
+  }
 
-        return result;
-    }
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(InnerShadow value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    blurTypeMetadata.setValue(result, value.getBlurType().toString());
+    chokeMetadata.setValue(result, value.getChoke());
+    colorMetadata.setValue(result, value.getColor());
+    heightMetadata.setValue(result, value.getHeight());
+    inputMetadata.setValue(result, value.getInput());
+    offsetXMetadata.setValue(result, value.getOffsetX());
+    offsetYMetadata.setValue(result, value.getOffsetY());
+    radiusMetadata.setValue(result, value.getRadius());
+    widthMetadata.setValue(result, value.getWidth());
+
+    return result;
+  }
 }

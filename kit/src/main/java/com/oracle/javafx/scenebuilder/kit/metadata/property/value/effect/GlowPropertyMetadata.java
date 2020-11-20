@@ -40,34 +40,39 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.effect.Glow;
 
-/**
- *
- */
+/** */
 public class GlowPropertyMetadata extends ComplexPropertyMetadata<Glow> {
-    
-    private final EffectPropertyMetadata inputMetadata
-            = new EffectPropertyMetadata(new PropertyName("input"), //NOI18N
-            true /* readWrite */, null, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata levelMetadata
-            = new DoublePropertyMetadata(new PropertyName("level"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.OPACITY, true /* readWrite */, 0.3, InspectorPath.UNUSED);
 
-    public GlowPropertyMetadata(PropertyName name, boolean readWrite, 
-            Glow defaultValue, InspectorPath inspectorPath) {
-        super(name, Glow.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final EffectPropertyMetadata inputMetadata =
+      new EffectPropertyMetadata(
+          new PropertyName("input"), // NOI18N
+          true /* readWrite */,
+          null,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata levelMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("level"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.OPACITY,
+          true /* readWrite */,
+          0.3,
+          InspectorPath.UNUSED);
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Glow value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        inputMetadata.setValue(result, value.getInput());
-        levelMetadata.setValue(result, value.getLevel());
-        
-        return result;
-    }
+  public GlowPropertyMetadata(
+      PropertyName name, boolean readWrite, Glow defaultValue, InspectorPath inspectorPath) {
+    super(name, Glow.class, readWrite, defaultValue, inspectorPath);
+  }
+
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Glow value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    inputMetadata.setValue(result, value.getInput());
+    levelMetadata.setValue(result, value.getLevel());
+
+    return result;
+  }
 }

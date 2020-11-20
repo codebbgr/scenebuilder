@@ -31,36 +31,33 @@
  */
 package com.oracle.javafx.scenebuilder.kit.editor.messagelog;
 
-/**
- *
- */
+/** */
 public class MessageLogEntry {
-    
-    public enum Type {
-        INFO,
-        WARNING
-    };
-    
-    private final Type type;
-    private final String text;
-    private final String timestamp;
-    
-    public MessageLogEntry(Type type, String text, String timestamp) {
-        this.type = type;
-        this.text = text;
-        this.timestamp = timestamp;
-    }
 
-    public Type getType() {
-        return type;
-    }
+  public enum Type {
+    INFO,
+    WARNING
+  };
 
-    public String getText() {
-        return text;
-    }
+  private final Type type;
+  private final String text;
+  private final String timestamp;
 
-    public String getTimestamp() {
-        return timestamp;
-    }
-    
+  public MessageLogEntry(Type type, String text, String timestamp) {
+    this.type = type;
+    this.text = text;
+    this.timestamp = timestamp;
+  }
+
+  public Type getType() {
+    return type;
+  }
+
+  public String getText() {
+    return text;
+  }
+
+  public String getTimestamp() {
+    return timestamp;
+  }
 }

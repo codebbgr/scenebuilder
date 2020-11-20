@@ -35,118 +35,116 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * 
- */
+/** */
 public class GlueDocument extends GlueNode {
-    
-    private GlueElement rootElement;
-    private final List<GlueAuxiliary> header = new ArrayList<>();
-    
-    public GlueDocument() {
+
+  private GlueElement rootElement;
+  private final List<GlueAuxiliary> header = new ArrayList<>();
+
+  public GlueDocument() {}
+
+  public GlueDocument(String xmlText) throws IOException {
+    assert xmlText != null;
+    if (isEmptyXmlText(xmlText) == false) {
+      final GlueLoader loader = new GlueLoader(this);
+      loader.load(xmlText);
+      adjustRootElementIndentation();
     }
-    
-    public GlueDocument(String xmlText) throws IOException {
-        assert xmlText != null;
-        if (isEmptyXmlText(xmlText) == false) {
-            final GlueLoader loader = new GlueLoader(this);
-            loader.load(xmlText);
-            adjustRootElementIndentation();
+  }
+
+  public GlueElement getRootElement() {
+    return rootElement;
+  }
+
+  public void setRootElement(GlueElement newRootElement) {
+    if ((newRootElement != null) && (newRootElement.getParent() != null)) {
+      newRootElement.removeFromParent();
+    }
+    this.rootElement = newRootElement;
+  }
+
+  public List<GlueAuxiliary> getHeader() {
+    return header;
+  }
+
+  public void updateIndent() {
+    if (rootElement != null) {
+      rootElement.updateIndent(0);
+    }
+  }
+
+  /*
+   * Utilities
+   */
+
+  public List<GlueInstruction> collectInstructions(String target) {
+    final List<GlueInstruction> result = new ArrayList<>();
+
+    assert target != null;
+
+    for (GlueAuxiliary auxiliary : header) {
+      if (auxiliary instanceof GlueInstruction) {
+        final GlueInstruction i = (GlueInstruction) auxiliary;
+        if (target.equals(i.getTarget())) {
+          result.add(i);
         }
-    }
-    
-    public GlueElement getRootElement() {
-        return rootElement;
+      }
     }
 
-    public void setRootElement(GlueElement newRootElement) {
-        if ((newRootElement != null) && (newRootElement.getParent() != null)) {
-            newRootElement.removeFromParent();
-        }
-        this.rootElement = newRootElement;
-    }
+    return result;
+  }
 
-    public List<GlueAuxiliary> getHeader() {
-        return header;
+  public static boolean isEmptyXmlText(String xmlText) {
+    assert xmlText != null;
+    return xmlText.trim().isEmpty();
+  }
+
+  /*
+   * Object
+   */
+
+  @Override
+  public String toString() {
+    final String result;
+    if (rootElement == null) {
+      result = ""; // NOI18N
+    } else {
+      final GlueSerializer serializer = new GlueSerializer(this);
+      result = serializer.toString();
     }
-    
-    public void updateIndent() {
-        if (rootElement != null) {
-            rootElement.updateIndent(0);
-        }
-    }
-    
-    
+    return result;
+  }
+
+  /*
+   * Private
+   */
+
+  private void adjustRootElementIndentation() {
     /*
-     * Utilities
+     * By default, if a root element is empty and expressed like this:
+     *     <AnchorPane />
+     * indentation logic would keep the upcoming children on the same line:
+     *     <AnchorPane> <children> <Button/> </children> </AnchorPane>.
+     *
+     * With the adjustment below, indentation logic will produce:
+     *     <AnchorPane>
+     *        <children>
+     *           <Button />
+     *        </children>
+     *     </AnchorPane>
      */
 
-    public List<GlueInstruction> collectInstructions(String target) {
-        final List<GlueInstruction> result = new ArrayList<>();
-        
-        assert target != null;
-        
-        for (GlueAuxiliary auxiliary : header) {
-            if (auxiliary instanceof GlueInstruction) {
-                final GlueInstruction i = (GlueInstruction) auxiliary;
-                if (target.equals(i.getTarget())) {
-                    result.add(i);
-                }
-            }
-        }
-        
-        return result;
+    if ((rootElement != null) && rootElement.getChildren().isEmpty()) {
+      if (rootElement.getFront().isEmpty()) {
+        rootElement
+            .getFront()
+            .add(new GlueCharacters(this, GlueCharacters.Type.TEXT, "\n")); // NOI18N
+      }
+      if (rootElement.getTail().isEmpty()) {
+        rootElement
+            .getTail()
+            .add(new GlueCharacters(this, GlueCharacters.Type.TEXT, "\n")); // NOI18N
+      }
     }
-    
-    public static boolean isEmptyXmlText(String xmlText) {
-        assert xmlText != null;
-        return xmlText.trim().isEmpty();
-    }
-    
-    /*
-     * Object
-     */
-    
-    @Override
-    public String toString() {
-        final String result;
-        if (rootElement == null) {
-            result = ""; //NOI18N
-        } else {
-            final GlueSerializer serializer = new GlueSerializer(this);
-            result = serializer.toString();
-        }
-        return result;
-    }
-    
-    
-    /*
-     * Private
-     */
-    
-    private void adjustRootElementIndentation() {
-        /*
-         * By default, if a root element is empty and expressed like this:
-         *     <AnchorPane />
-         * indentation logic would keep the upcoming children on the same line:
-         *     <AnchorPane> <children> <Button/> </children> </AnchorPane>.
-         * 
-         * With the adjustment below, indentation logic will produce:
-         *     <AnchorPane> 
-         *        <children>
-         *           <Button />
-         *        </children>
-         *     </AnchorPane>
-         */
-        
-        if ((rootElement != null) && rootElement.getChildren().isEmpty()) {
-            if (rootElement.getFront().isEmpty()) {
-                rootElement.getFront().add(new GlueCharacters(this, GlueCharacters.Type.TEXT, "\n")); //NOI18N
-            }
-            if (rootElement.getTail().isEmpty()) {
-                rootElement.getTail().add(new GlueCharacters(this, GlueCharacters.Type.TEXT, "\n")); //NOI18N
-            }
-        }
-    }
+  }
 }

@@ -55,152 +55,141 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- *
- */
+/** */
 public class ReferencesUpdater {
-    
-    private final EditorController editorController;
-    private final FXOMDocument fxomDocument;
-    private final List<Job> executedJobs = new LinkedList<>();
-    private final Set<String> declaredFxIds = new HashSet<>();
-    private final FXOMCloner cloner;
-    
-    public ReferencesUpdater(EditorController editorController) {
-        assert editorController != null;
-        assert editorController.getFxomDocument() != null;
-        this.editorController = editorController;
-        this.fxomDocument = editorController.getFxomDocument();
-        this.cloner = new FXOMCloner(this.fxomDocument);
-    }
-    
-    public void update() {
-        if (fxomDocument.getFxomRoot() != null) {
-            declaredFxIds.clear();
-            update(fxomDocument.getFxomRoot());
-        }
-    }
-    
-    public List<Job> getExecutedJobs() {
-        return new LinkedList<>(executedJobs);
-    }
-    
-    
-    /*
-     * Private
-     */
-    
-    private void update(FXOMNode node) {
-        if (node instanceof FXOMCollection) {
-            updateCollection((FXOMCollection) node);
-        } else if (node instanceof FXOMInstance) {
-            updateInstance((FXOMInstance) node);
-        } else if (node instanceof FXOMIntrinsic) {
-            updateIntrinsic((FXOMIntrinsic) node);
-        } else if (node instanceof FXOMPropertyC) {
-            updatePropertyC((FXOMPropertyC) node);
-        } else if (node instanceof FXOMPropertyT) {
-            updatePropertyT((FXOMPropertyT) node);
-        } else {
-            throw new RuntimeException("Bug"); //NOI18N
-        }
-    }
-    
-    
-    private void updateCollection(FXOMCollection collection) {
-        if (collection.getFxId() != null) {
-            declaredFxIds.add(collection.getFxId());
-        }
-        final List<FXOMObject> items = collection.getItems();
-        for (int i = 0, count = items.size(); i < count; i++) {
-            update(items.get(i));
-        }
-    }
-    
-    
-    private void updateInstance(FXOMInstance instance) {
-        if (instance.getFxId() != null) {
-            declaredFxIds.add(instance.getFxId());
-        }
-        final Map<PropertyName, FXOMProperty> properties = instance.getProperties();
-        final List<PropertyName> names = new LinkedList<>(properties.keySet());
-        for (PropertyName propertyName : names) {
-            update(properties.get(propertyName));
-        }
-    }
-    
-    
-    private void updateIntrinsic(FXOMIntrinsic intrinsic) {
-        switch(intrinsic.getType()) {
-            case FX_REFERENCE:
-            case FX_COPY:
-                updateReference(intrinsic, intrinsic.getSource());
-                break;
-            default:
-                break;
-        }
-    }
-    
-    
-    private void updatePropertyC(FXOMPropertyC property) {
-        final List<FXOMObject> values = property.getValues();
-        for (int i = 0, count = values.size(); i < count; i++) {
-            update(values.get(i));
-        }
-    }
-    
-    
-    private void updatePropertyT(FXOMPropertyT property) {
-        final PrefixedValue pv = new PrefixedValue(property.getValue());
-        if (pv.isExpression()) {
-            final String suffix = pv.getSuffix();
-            if (JavaLanguage.isIdentifier(suffix)) {
-                updateReference(property, suffix);
-            }
-        }
-    }
-    
-    
-    private void updateReference(FXOMNode r, String fxId) {
-        assert (r instanceof FXOMPropertyT) || (r instanceof FXOMIntrinsic);
-        assert fxId != null;
-        
-        if (declaredFxIds.contains(fxId) == false) {
-            // r is a forward reference
-            //
-            // 0) r is a toggleGroup reference
-            //    => if toggle group exists, we swap it with the reference
-            //    => if not, replace the reference by a new toggle group
-            // 1) r is a weak reference (like labelFor)
-            //    => we remove the reference
-            // 2) else r is a strong reference
-            //    => we expand the reference
-            
-            
-            final FXOMObject declarer = fxomDocument.searchWithFxId(fxId);
 
-            // 0)
-            if (FXOMNodes.isToggleGroupReference(r)) {
-                final Job fixJob = new FixToggleGroupReferenceJob(r, editorController);
-                fixJob.execute();
-                executedJobs.add(fixJob);
-                declaredFxIds.add(fxId);
-            }
-            
-            // 1
-            else if (FXOMNodes.isWeakReference(r) || (declarer == null)) {
-                final Job removeJob = new RemoveNodeJob(r, editorController);
-                removeJob.execute();
-                executedJobs.add(removeJob);
-                
-            // 2)
-            } else {
-                
-                final Job expandJob = new ExpandReferenceJob(r, cloner, editorController);
-                expandJob.execute();
-                executedJobs.add(expandJob);
-            }
-        }
+  private final EditorController editorController;
+  private final FXOMDocument fxomDocument;
+  private final List<Job> executedJobs = new LinkedList<>();
+  private final Set<String> declaredFxIds = new HashSet<>();
+  private final FXOMCloner cloner;
+
+  public ReferencesUpdater(EditorController editorController) {
+    assert editorController != null;
+    assert editorController.getFxomDocument() != null;
+    this.editorController = editorController;
+    this.fxomDocument = editorController.getFxomDocument();
+    this.cloner = new FXOMCloner(this.fxomDocument);
+  }
+
+  public void update() {
+    if (fxomDocument.getFxomRoot() != null) {
+      declaredFxIds.clear();
+      update(fxomDocument.getFxomRoot());
     }
-    
+  }
+
+  public List<Job> getExecutedJobs() {
+    return new LinkedList<>(executedJobs);
+  }
+
+  /*
+   * Private
+   */
+
+  private void update(FXOMNode node) {
+    if (node instanceof FXOMCollection) {
+      updateCollection((FXOMCollection) node);
+    } else if (node instanceof FXOMInstance) {
+      updateInstance((FXOMInstance) node);
+    } else if (node instanceof FXOMIntrinsic) {
+      updateIntrinsic((FXOMIntrinsic) node);
+    } else if (node instanceof FXOMPropertyC) {
+      updatePropertyC((FXOMPropertyC) node);
+    } else if (node instanceof FXOMPropertyT) {
+      updatePropertyT((FXOMPropertyT) node);
+    } else {
+      throw new RuntimeException("Bug"); // NOI18N
+    }
+  }
+
+  private void updateCollection(FXOMCollection collection) {
+    if (collection.getFxId() != null) {
+      declaredFxIds.add(collection.getFxId());
+    }
+    final List<FXOMObject> items = collection.getItems();
+    for (int i = 0, count = items.size(); i < count; i++) {
+      update(items.get(i));
+    }
+  }
+
+  private void updateInstance(FXOMInstance instance) {
+    if (instance.getFxId() != null) {
+      declaredFxIds.add(instance.getFxId());
+    }
+    final Map<PropertyName, FXOMProperty> properties = instance.getProperties();
+    final List<PropertyName> names = new LinkedList<>(properties.keySet());
+    for (PropertyName propertyName : names) {
+      update(properties.get(propertyName));
+    }
+  }
+
+  private void updateIntrinsic(FXOMIntrinsic intrinsic) {
+    switch (intrinsic.getType()) {
+      case FX_REFERENCE:
+      case FX_COPY:
+        updateReference(intrinsic, intrinsic.getSource());
+        break;
+      default:
+        break;
+    }
+  }
+
+  private void updatePropertyC(FXOMPropertyC property) {
+    final List<FXOMObject> values = property.getValues();
+    for (int i = 0, count = values.size(); i < count; i++) {
+      update(values.get(i));
+    }
+  }
+
+  private void updatePropertyT(FXOMPropertyT property) {
+    final PrefixedValue pv = new PrefixedValue(property.getValue());
+    if (pv.isExpression()) {
+      final String suffix = pv.getSuffix();
+      if (JavaLanguage.isIdentifier(suffix)) {
+        updateReference(property, suffix);
+      }
+    }
+  }
+
+  private void updateReference(FXOMNode r, String fxId) {
+    assert (r instanceof FXOMPropertyT) || (r instanceof FXOMIntrinsic);
+    assert fxId != null;
+
+    if (declaredFxIds.contains(fxId) == false) {
+      // r is a forward reference
+      //
+      // 0) r is a toggleGroup reference
+      //    => if toggle group exists, we swap it with the reference
+      //    => if not, replace the reference by a new toggle group
+      // 1) r is a weak reference (like labelFor)
+      //    => we remove the reference
+      // 2) else r is a strong reference
+      //    => we expand the reference
+
+      final FXOMObject declarer = fxomDocument.searchWithFxId(fxId);
+
+      // 0)
+      if (FXOMNodes.isToggleGroupReference(r)) {
+        final Job fixJob = new FixToggleGroupReferenceJob(r, editorController);
+        fixJob.execute();
+        executedJobs.add(fixJob);
+        declaredFxIds.add(fxId);
+      }
+
+      // 1
+      else if (FXOMNodes.isWeakReference(r) || (declarer == null)) {
+        final Job removeJob = new RemoveNodeJob(r, editorController);
+        removeJob.execute();
+        executedJobs.add(removeJob);
+
+        // 2)
+      } else {
+
+        final Job expandJob = new ExpandReferenceJob(r, cloner, editorController);
+        expandJob.execute();
+        executedJobs.add(expandJob);
+      }
+    }
+  }
 }

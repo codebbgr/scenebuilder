@@ -41,74 +41,68 @@ import javafx.scene.Node;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
-/**
- *
- * 
- */
+/** */
 public class TableColumnPring extends AbstractGenericPring<Object> {
 
-    private final TableViewDesignInfoX tableViewDesignInfo
-            = new TableViewDesignInfoX();
-    
-    public TableColumnPring(ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
-        super(contentPanelController, fxomInstance, Object.class);
-        assert fxomInstance.getSceneGraphObject() instanceof TableColumn;
-    }
-    
-    public FXOMInstance getFxomInstance() {
-        return (FXOMInstance) getFxomObject();
+  private final TableViewDesignInfoX tableViewDesignInfo = new TableViewDesignInfoX();
+
+  public TableColumnPring(
+      ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
+    super(contentPanelController, fxomInstance, Object.class);
+    assert fxomInstance.getSceneGraphObject() instanceof TableColumn;
+  }
+
+  public FXOMInstance getFxomInstance() {
+    return (FXOMInstance) getFxomObject();
+  }
+
+  /*
+   * AbstractGenericPring
+   */
+
+  @Override
+  public Bounds getSceneGraphObjectBounds() {
+    return tableViewDesignInfo.getColumnBounds(getTableColumn());
+  }
+
+  @Override
+  public Node getSceneGraphObjectProxy() {
+    return getTableColumn().getTableView();
+  }
+
+  @Override
+  protected void startListeningToSceneGraphObject() {
+    final TableView<?> tableView = getTableColumn().getTableView();
+    startListeningToLayoutBounds(tableView);
+    startListeningToLocalToSceneTransform(tableView);
+  }
+
+  @Override
+  protected void stopListeningToSceneGraphObject() {
+    final TableView<?> tableView = getTableColumn().getTableView();
+    stopListeningToLayoutBounds(tableView);
+    stopListeningToLocalToSceneTransform(tableView);
+  }
+
+  @Override
+  public AbstractGesture findGesture(Node node) {
+    final AbstractGesture result;
+
+    if (node == ringPath) {
+      result = new SelectWithPringGesture(getContentPanelController(), getFxomInstance());
+    } else {
+      result = null;
     }
 
-    
-    /*
-     * AbstractGenericPring
-     */
-    
-    @Override
-    public Bounds getSceneGraphObjectBounds() {
-        return tableViewDesignInfo.getColumnBounds(getTableColumn());
-    }
+    return result;
+  }
 
-    @Override
-    public Node getSceneGraphObjectProxy() {
-        return getTableColumn().getTableView();
-    }
+  /*
+   * Private
+   */
 
-    @Override
-    protected void startListeningToSceneGraphObject() {
-        final TableView<?> tableView = getTableColumn().getTableView();
-        startListeningToLayoutBounds(tableView);
-        startListeningToLocalToSceneTransform(tableView);
-    }
-
-    @Override
-    protected void stopListeningToSceneGraphObject() {
-        final TableView<?> tableView = getTableColumn().getTableView();
-        stopListeningToLayoutBounds(tableView);
-        stopListeningToLocalToSceneTransform(tableView);
-    }
-
-    @Override
-    public AbstractGesture findGesture(Node node) {
-        final AbstractGesture result;
-        
-        if (node == ringPath) {
-            result = new SelectWithPringGesture(getContentPanelController(), 
-                    getFxomInstance());
-        } else {
-            result = null;
-        }
-        
-        return result;
-    }
-
-
-    /*
-     * Private
-     */
-    
-    private TableColumn<?,?> getTableColumn() {
-        assert getSceneGraphObject() instanceof TableColumn;
-        return (TableColumn<?,?>) getSceneGraphObject();
-    }
+  private TableColumn<?, ?> getTableColumn() {
+    assert getSceneGraphObject() instanceof TableColumn;
+    return (TableColumn<?, ?>) getSceneGraphObject();
+  }
 }

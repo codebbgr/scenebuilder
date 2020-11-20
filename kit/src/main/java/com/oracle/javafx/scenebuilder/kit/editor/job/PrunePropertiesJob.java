@@ -43,62 +43,59 @@ import com.oracle.javafx.scenebuilder.kit.metadata.Metadata;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
+/** */
 public class PrunePropertiesJob extends BatchDocumentJob {
-    
-    private final FXOMObject fxomObject;
-    private final FXOMObject targetParent;
 
-    public PrunePropertiesJob(FXOMObject fxomObject, FXOMObject targetParent, EditorController editorController) {
-        super(editorController);
-        
-        assert fxomObject != null;
-        
-        this.fxomObject = fxomObject;
-        this.targetParent = targetParent;
-    }
-    
+  private final FXOMObject fxomObject;
+  private final FXOMObject targetParent;
 
-    @Override
-    protected List<Job> makeSubJobs() {
-        final List<Job> result = new ArrayList<>();
-        final Metadata metadata = Metadata.getMetadata();
-        
-        if (fxomObject instanceof FXOMInstance) {
-            final FXOMInstance fxomInstance = (FXOMInstance) fxomObject;
-            
-            for (FXOMProperty p : fxomInstance.getProperties().values()) {
-                if (metadata.isPropertyTrimmingNeeded(p.getName())) {
-                    final Class<?> residentClass = p.getName().getResidenceClass();
-                    final boolean prune;
-                    if (residentClass == null) {
-                        prune = true;
-                    } else if (targetParent instanceof FXOMInstance) {
-                        final FXOMInstance parentInstance = (FXOMInstance) targetParent;
-                        prune = residentClass != parentInstance.getDeclaredClass();
-                    } else {
-                        assert (targetParent == null) || (targetParent instanceof FXOMCollection);
-                        prune = true;
-                    }
-                    if (prune) {
-                        result.add(new RemovePropertyJob(p, getEditorController()));
-                    }
-                }
-            }
+  public PrunePropertiesJob(
+      FXOMObject fxomObject, FXOMObject targetParent, EditorController editorController) {
+    super(editorController);
+
+    assert fxomObject != null;
+
+    this.fxomObject = fxomObject;
+    this.targetParent = targetParent;
+  }
+
+  @Override
+  protected List<Job> makeSubJobs() {
+    final List<Job> result = new ArrayList<>();
+    final Metadata metadata = Metadata.getMetadata();
+
+    if (fxomObject instanceof FXOMInstance) {
+      final FXOMInstance fxomInstance = (FXOMInstance) fxomObject;
+
+      for (FXOMProperty p : fxomInstance.getProperties().values()) {
+        if (metadata.isPropertyTrimmingNeeded(p.getName())) {
+          final Class<?> residentClass = p.getName().getResidenceClass();
+          final boolean prune;
+          if (residentClass == null) {
+            prune = true;
+          } else if (targetParent instanceof FXOMInstance) {
+            final FXOMInstance parentInstance = (FXOMInstance) targetParent;
+            prune = residentClass != parentInstance.getDeclaredClass();
+          } else {
+            assert (targetParent == null) || (targetParent instanceof FXOMCollection);
+            prune = true;
+          }
+          if (prune) {
+            result.add(new RemovePropertyJob(p, getEditorController()));
+          }
         }
-        
-        if ((fxomObject.getFxController() != null) && (targetParent != null)) {
-            result.add(new RemoveFxControllerJob(fxomObject, getEditorController()));
-        }
-        
-        return result;
+      }
     }
 
-    @Override
-    protected String makeDescription() {
-        return getClass().getSimpleName(); // Should not reach user
+    if ((fxomObject.getFxController() != null) && (targetParent != null)) {
+      result.add(new RemoveFxControllerJob(fxomObject, getEditorController()));
     }
-    
+
+    return result;
+  }
+
+  @Override
+  protected String makeDescription() {
+    return getClass().getSimpleName(); // Should not reach user
+  }
 }

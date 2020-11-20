@@ -60,115 +60,115 @@ import javafx.stage.FileChooser;
 
 public class ImageControl extends GridPane {
 
-    @FXML
-    private Button editor_button;
-    @FXML
-    private Label editor_label;
-    @FXML
-    private TextField editor_textfield;
+  @FXML private Button editor_button;
+  @FXML private Label editor_label;
+  @FXML private TextField editor_textfield;
 
-//    private final StringProperty value = new SimpleStringProperty();
-    private final ObjectProperty<Image> value = new SimpleObjectProperty<>();
-    private final EffectPickerController effectPickerController;
+  //    private final StringProperty value = new SimpleStringProperty();
+  private final ObjectProperty<Image> value = new SimpleObjectProperty<>();
+  private final EffectPickerController effectPickerController;
 
-    public ImageControl(EffectPickerController effectPickerController,
-            String labelString, Image initVal) {
-        this.effectPickerController = effectPickerController;
-        initialize(labelString, initVal);
-        if (EditorPlatform.IS_MAC) {
-            editor_button.setManaged(false);
-            editor_button.setVisible(false);
-        }
+  public ImageControl(
+      EffectPickerController effectPickerController, String labelString, Image initVal) {
+    this.effectPickerController = effectPickerController;
+    initialize(labelString, initVal);
+    if (EditorPlatform.IS_MAC) {
+      editor_button.setManaged(false);
+      editor_button.setVisible(false);
+    }
+  }
+
+  public ObjectProperty<Image> valueProperty() {
+    return value;
+  }
+
+  public Image getValue() {
+    return value.get();
+  }
+
+  public void setValue(Image image) {
+    value.set(image);
+  }
+
+  public Button getButton() {
+    return editor_button;
+  }
+
+  public TextField getTextField() {
+    return editor_textfield;
+  }
+
+  @FXML
+  void textfieldOnAction(ActionEvent e) {
+    final String location = editor_textfield.getText();
+    try {
+      final URI uri = new URI(location);
+      final File file = new File(uri);
+      if (file.exists()) {
+        final Image image = new Image(uri.toURL().toExternalForm());
+        // First update the model
+        setValue(image);
+        // Then notify the controller a change occured
+        effectPickerController.incrementRevision();
+      } else {
+        effectPickerController
+            .getEffectPickerDelegate()
+            .handleError("log.warning.image.location.does.not.exist", location);
+      }
+      editor_textfield.selectAll();
+    } catch (URISyntaxException | MalformedURLException ex) {
+      effectPickerController
+          .getEffectPickerDelegate()
+          .handleError("log.warning.image.location.does.not.exist", location);
+    } finally {
+      e.consume();
+    }
+  }
+
+  @FXML
+  void buttonOnAction(ActionEvent e) {
+    try {
+      final String[] extensions = {"*.jpg", "*.jpeg", "*.png", "*.gif"}; // NOI18N
+      final FileChooser fileChooser = new FileChooser();
+      fileChooser
+          .getExtensionFilters()
+          .add(
+              new FileChooser.ExtensionFilter(
+                  I18N.getString("inspector.select.image"), Arrays.asList(extensions)));
+      final File file = fileChooser.showOpenDialog(getScene().getWindow());
+      if ((file == null)) {
+        return;
+      }
+      String url;
+      url = file.toURI().toURL().toExternalForm();
+      final Image image = new Image(url);
+      // First update the model
+      setValue(image);
+      // Then notify the controller a change occured
+      effectPickerController.incrementRevision();
+    } catch (MalformedURLException ex) {
+      Logger.getLogger(ImageControl.class.getName()).log(Level.SEVERE, null, ex);
+    } finally {
+      e.consume();
+    }
+  }
+
+  private void initialize(String labelString, Image initVal) {
+
+    final URL layoutURL = ImageControl.class.getResource("ImageControl.fxml"); // NOI18N
+    try (InputStream is = layoutURL.openStream()) {
+      FXMLLoader loader = new FXMLLoader();
+      loader.setController(this);
+      loader.setRoot(this);
+      loader.setLocation(layoutURL);
+      Parent p = (Parent) loader.load(is);
+      assert p == this;
+    } catch (IOException x) {
+      throw new RuntimeException(x);
     }
 
-    public ObjectProperty<Image> valueProperty() {
-        return value;
-    }
-
-    public Image getValue() {
-        return value.get();
-    }
-
-    public void setValue(Image image) {
-        value.set(image);
-    }
-
-    public Button getButton() {
-        return editor_button;
-    }
-
-    public TextField getTextField() {
-        return editor_textfield;
-    }
-
-    @FXML
-    void textfieldOnAction(ActionEvent e) {
-        final String location = editor_textfield.getText();
-        try {
-            final URI uri = new URI(location);
-            final File file = new File(uri);
-            if (file.exists()) {
-                final Image image = new Image(uri.toURL().toExternalForm());
-                // First update the model
-                setValue(image);
-                // Then notify the controller a change occured
-                effectPickerController.incrementRevision();
-            } else {
-                effectPickerController.getEffectPickerDelegate().handleError(
-                        "log.warning.image.location.does.not.exist", location);
-            }
-            editor_textfield.selectAll();
-        } catch (URISyntaxException | MalformedURLException ex) {
-            effectPickerController.getEffectPickerDelegate().handleError(
-                    "log.warning.image.location.does.not.exist", location);
-        } finally {
-            e.consume();
-        }
-    }
-
-    @FXML
-    void buttonOnAction(ActionEvent e) {
-        try {
-            final String[] extensions = {"*.jpg", "*.jpeg", "*.png", "*.gif"}; //NOI18N
-            final FileChooser fileChooser = new FileChooser();
-            fileChooser.getExtensionFilters().add(
-                    new FileChooser.ExtensionFilter(
-                            I18N.getString("inspector.select.image"),
-                            Arrays.asList(extensions)));
-            final File file = fileChooser.showOpenDialog(getScene().getWindow());
-            if ((file == null)) {
-                return;
-            }
-            String url;
-            url = file.toURI().toURL().toExternalForm();
-            final Image image = new Image(url);
-            // First update the model
-            setValue(image);
-            // Then notify the controller a change occured
-            effectPickerController.incrementRevision();
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(ImageControl.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            e.consume();
-        }
-    }
-
-    private void initialize(String labelString, Image initVal) {
-
-        final URL layoutURL = ImageControl.class.getResource("ImageControl.fxml"); //NOI18N
-        try (InputStream is = layoutURL.openStream()) {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setController(this);
-            loader.setRoot(this);
-            loader.setLocation(layoutURL);
-            Parent p = (Parent) loader.load(is);
-            assert p == this;
-        } catch (IOException x) {
-            throw new RuntimeException(x);
-        }
-
-        editor_label.setText(labelString);
-        editor_textfield.setText(initVal == null ? "" : initVal.getUrl()); //NOI18N
-        setValue(initVal);
-    }
+    editor_label.setText(labelString);
+    editor_textfield.setText(initVal == null ? "" : initVal.getUrl()); // NOI18N
+    setValue(initVal);
+  }
 }

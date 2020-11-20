@@ -41,47 +41,63 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.effect.Light;
 import javafx.scene.paint.Color;
 
-/**
- *
- */
+/** */
 public class SpotLightPropertyMetadata extends ComplexPropertyMetadata<Light.Spot> {
-    
-    private final ColorPropertyMetadata colorMetadata
-            = new ColorPropertyMetadata(new PropertyName("color"), //NOI18N
-            true, Color.WHITE, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata pointsAtXMetadata
-            = new DoublePropertyMetadata(new PropertyName("pointsAtX"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata pointsAtYMetadata
-            = new DoublePropertyMetadata(new PropertyName("pointsAtY"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata pointsAtZMetadata
-            = new DoublePropertyMetadata(new PropertyName("pointsAtZ"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata specularExponentMetadata
-            = new DoublePropertyMetadata(new PropertyName("specularExponent"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 1.0, InspectorPath.UNUSED);
-    
-    public SpotLightPropertyMetadata(PropertyName name, boolean readWrite, 
-            Light.Spot defaultValue, InspectorPath inspectorPath) {
-        super(name, Light.Spot.class, readWrite, defaultValue, inspectorPath);
-    }
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Light.Spot value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, getValueClass());
-        
-        colorMetadata.setValue(result, value.getColor());
-        pointsAtXMetadata.setValue(result, value.getX());
-        pointsAtYMetadata.setValue(result, value.getY());
-        pointsAtZMetadata.setValue(result, value.getZ());
-        specularExponentMetadata.setValue(result, value.getSpecularExponent());
+  private final ColorPropertyMetadata colorMetadata =
+      new ColorPropertyMetadata(
+          new PropertyName("color"), // NOI18N
+          true,
+          Color.WHITE,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata pointsAtXMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("pointsAtX"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata pointsAtYMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("pointsAtY"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata pointsAtZMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("pointsAtZ"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata specularExponentMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("specularExponent"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          1.0,
+          InspectorPath.UNUSED);
 
-        return result;
-    }
-    
+  public SpotLightPropertyMetadata(
+      PropertyName name, boolean readWrite, Light.Spot defaultValue, InspectorPath inspectorPath) {
+    super(name, Light.Spot.class, readWrite, defaultValue, inspectorPath);
+  }
+
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Light.Spot value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, getValueClass());
+
+    colorMetadata.setValue(result, value.getColor());
+    pointsAtXMetadata.setValue(result, value.getX());
+    pointsAtYMetadata.setValue(result, value.getY());
+    pointsAtZMetadata.setValue(result, value.getZ());
+    specularExponentMetadata.setValue(result, value.getSpecularExponent());
+
+    return result;
+  }
 }

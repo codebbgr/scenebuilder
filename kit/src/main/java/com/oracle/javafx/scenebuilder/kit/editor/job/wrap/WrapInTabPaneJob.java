@@ -48,93 +48,79 @@ import java.util.List;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 
-/**
- * Job used to wrap selection in a TabPane.
- */
+/** Job used to wrap selection in a TabPane. */
 public class WrapInTabPaneJob extends AbstractWrapInJob {
 
-    public WrapInTabPaneJob(EditorController editorController) {
-        super(editorController);
-        newContainerClass = TabPane.class;
+  public WrapInTabPaneJob(EditorController editorController) {
+    super(editorController);
+    newContainerClass = TabPane.class;
+  }
+
+  @Override
+  protected boolean canWrapIn() {
+    final boolean result;
+    if (super.canWrapIn()) { // (1)
+      // Can wrap in CONTENT property single selection only
+      final Selection selection = getEditorController().getSelection();
+      assert selection.getGroup() instanceof ObjectSelectionGroup; // Because of (1)
+      final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
+      result = osg.getItems().size() == 1;
+    } else {
+      result = false;
     }
+    return result;
+  }
 
-    @Override
-    protected boolean canWrapIn() {
-        final boolean result;
-        if (super.canWrapIn()) { // (1)
-            // Can wrap in CONTENT property single selection only
-            final Selection selection = getEditorController().getSelection();
-            assert selection.getGroup() instanceof ObjectSelectionGroup; // Because of (1)
-            final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
-            result = osg.getItems().size() == 1;
-        } else {
-            result = false;
-        }
-        return result;
-    }
-    
-    @Override
-    protected List<Job> wrapChildrenJobs(final List<FXOMObject> children) {
+  @Override
+  protected List<Job> wrapChildrenJobs(final List<FXOMObject> children) {
 
-        final List<Job> jobs = new ArrayList<>();
+    final List<Job> jobs = new ArrayList<>();
 
-        final DesignHierarchyMask newContainerMask
-                = new DesignHierarchyMask(newContainer);
-        assert newContainerMask.isAcceptingSubComponent();
+    final DesignHierarchyMask newContainerMask = new DesignHierarchyMask(newContainer);
+    assert newContainerMask.isAcceptingSubComponent();
 
-        // Retrieve the new container property name to be used
-        final PropertyName newContainerPropertyName
-                = newContainerMask.getSubComponentPropertyName();
-        // Create the new container property
-        final FXOMPropertyC newContainerProperty = new FXOMPropertyC(
-                newContainer.getFxomDocument(), newContainerPropertyName);
+    // Retrieve the new container property name to be used
+    final PropertyName newContainerPropertyName = newContainerMask.getSubComponentPropertyName();
+    // Create the new container property
+    final FXOMPropertyC newContainerProperty =
+        new FXOMPropertyC(newContainer.getFxomDocument(), newContainerPropertyName);
 
-        // Create the Tab sub container
-        final FXOMInstance tabContainer = makeNewContainerInstance(Tab.class);
-        final DesignHierarchyMask tabContainerMask
-                = new DesignHierarchyMask(tabContainer);
-        assert tabContainerMask.isAcceptingAccessory(Accessory.CONTENT);
+    // Create the Tab sub container
+    final FXOMInstance tabContainer = makeNewContainerInstance(Tab.class);
+    final DesignHierarchyMask tabContainerMask = new DesignHierarchyMask(tabContainer);
+    assert tabContainerMask.isAcceptingAccessory(Accessory.CONTENT);
 
-        // Retrieve the Tab sub container property name to be used
-        final PropertyName tabContainerPropertyName
-                = new PropertyName("content"); //NOI18N
-        // Create the Tab sub container property
-        final FXOMPropertyC tabContainerProperty = new FXOMPropertyC(
-                tabContainer.getFxomDocument(), tabContainerPropertyName);
+    // Retrieve the Tab sub container property name to be used
+    final PropertyName tabContainerPropertyName = new PropertyName("content"); // NOI18N
+    // Create the Tab sub container property
+    final FXOMPropertyC tabContainerProperty =
+        new FXOMPropertyC(tabContainer.getFxomDocument(), tabContainerPropertyName);
 
-        // Add the Tab sub container to the new container
-        final Job addTabValueJob = new AddPropertyValueJob(
-                tabContainer,
-                newContainerProperty,
-                -1,
-                getEditorController());
-        jobs.add(addTabValueJob);
+    // Add the Tab sub container to the new container
+    final Job addTabValueJob =
+        new AddPropertyValueJob(tabContainer, newContainerProperty, -1, getEditorController());
+    jobs.add(addTabValueJob);
 
-        assert children.size() == 1;
-        // Update children before adding them to the new container
-        jobs.addAll(modifyChildrenJobs(children));
+    assert children.size() == 1;
+    // Update children before adding them to the new container
+    jobs.addAll(modifyChildrenJobs(children));
 
-        // Add the children to the Tab sub container
-        final List<Job> addChildrenJobs
-                = addChildrenJobs(tabContainerProperty, children);
-        jobs.addAll(addChildrenJobs);
+    // Add the children to the Tab sub container
+    final List<Job> addChildrenJobs = addChildrenJobs(tabContainerProperty, children);
+    jobs.addAll(addChildrenJobs);
 
-        // Add the Tab sub container property to the tab container instance
-        assert tabContainerProperty.getParentInstance() == null;
-        final Job addTabContainerPropertyJob = new AddPropertyJob(
-                tabContainerProperty,
-                tabContainer,
-                -1, getEditorController());
-        jobs.add(addTabContainerPropertyJob);
+    // Add the Tab sub container property to the tab container instance
+    assert tabContainerProperty.getParentInstance() == null;
+    final Job addTabContainerPropertyJob =
+        new AddPropertyJob(tabContainerProperty, tabContainer, -1, getEditorController());
+    jobs.add(addTabContainerPropertyJob);
 
-        // Add the new container property to the new container instance
-        assert newContainerProperty.getParentInstance() == null;
-        final Job addNewContainerPropertyJob = new AddPropertyJob(
-                newContainerProperty,
-                newContainer,
-                -1, getEditorController());
-        jobs.add(addNewContainerPropertyJob);
+    // Add the new container property to the new container instance
+    assert newContainerProperty.getParentInstance() == null;
+    final Job addNewContainerPropertyJob =
+        new AddPropertyJob(newContainerProperty, newContainer, -1, getEditorController());
+    jobs.add(addNewContainerPropertyJob);
 
-        return jobs;
-    }
+    return jobs;
+  }
 }

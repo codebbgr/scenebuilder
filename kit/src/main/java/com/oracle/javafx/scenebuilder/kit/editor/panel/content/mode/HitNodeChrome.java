@@ -40,113 +40,110 @@ import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.transform.Transform;
 
-/**
- *
- */
+/** */
 public class HitNodeChrome extends AbstractDecoration<Object> {
-    
-    private Node hitNode;
-    private final RegionRectangle chrome = new RegionRectangle();
-    private Node closestNode;
 
-    public HitNodeChrome(ContentPanelController contentPanelController, FXOMObject fxomObject, Node hitNode) {
-        super(contentPanelController, fxomObject, Object.class);
-        
-        assert hitNode != null;
-        assert hitNode.getScene() != null;
-        
-        this.hitNode = hitNode;
-        this.closestNode = findClosestNode();
-        assert closestNode != null;
-        assert closestNode.getScene() == hitNode.getScene();
-        
-        chrome.setMouseTransparent(true);
-        chrome.getRegion().getStyleClass().add("css-pick-chrome"); //NOI18N
-        getRootNode().getChildren().add(chrome);
+  private Node hitNode;
+  private final RegionRectangle chrome = new RegionRectangle();
+  private Node closestNode;
+
+  public HitNodeChrome(
+      ContentPanelController contentPanelController, FXOMObject fxomObject, Node hitNode) {
+    super(contentPanelController, fxomObject, Object.class);
+
+    assert hitNode != null;
+    assert hitNode.getScene() != null;
+
+    this.hitNode = hitNode;
+    this.closestNode = findClosestNode();
+    assert closestNode != null;
+    assert closestNode.getScene() == hitNode.getScene();
+
+    chrome.setMouseTransparent(true);
+    chrome.getRegion().getStyleClass().add("css-pick-chrome"); // NOI18N
+    getRootNode().getChildren().add(chrome);
+  }
+
+  public Node getHitNode() {
+    return hitNode;
+  }
+
+  /*
+   * AbstractDecoration
+   */
+
+  @Override
+  public Bounds getSceneGraphObjectBounds() {
+    return closestNode.getLayoutBounds();
+  }
+
+  @Override
+  public Node getSceneGraphObjectProxy() {
+    return closestNode;
+  }
+
+  @Override
+  protected void startListeningToSceneGraphObject() {
+    startListeningToLayoutBounds(closestNode);
+    startListeningToLocalToSceneTransform(closestNode);
+    startListeningToBoundsInParent(hitNode);
+  }
+
+  @Override
+  protected void stopListeningToSceneGraphObject() {
+    stopListeningToLayoutBounds(closestNode);
+    stopListeningToLocalToSceneTransform(closestNode);
+    stopListeningToBoundsInParent(hitNode);
+  }
+
+  @Override
+  protected void layoutDecoration() {
+    assert chrome.getScene() != null;
+
+    if (getState() != State.CLEAN) {
+      chrome.setVisible(false);
+    } else {
+      assert hitNode.getScene() != null;
+      assert hitNode.getScene() == closestNode.getScene();
+
+      final Transform t =
+          getContentPanelController().computeSceneGraphToRudderLayerTransform(hitNode);
+      chrome.getTransforms().clear();
+      chrome.getTransforms().add(t);
+      chrome.setLayoutBounds(hitNode.getLayoutBounds());
+      //            chrome.setLayoutBounds(new BoundingBox(0, 0, 20, 15));
+      chrome.setVisible(true);
+    }
+  }
+
+  @Override
+  public State getState() {
+    State result = super.getState();
+
+    if (result == State.CLEAN) {
+      final Node newClosestNode = findClosestNode();
+      if (closestNode != newClosestNode) {
+        result = State.NEEDS_RECONCILE;
+      }
     }
 
-    public Node getHitNode() {
-        return hitNode;
-    }
-    
-    
-    /*
-     * AbstractDecoration
-     */
+    return result;
+  }
 
-    @Override
-    public Bounds getSceneGraphObjectBounds() {
-        return closestNode.getLayoutBounds();
-    }
+  @Override
+  public void reconcile() {
+    super.reconcile();
+    hitNode = closestNode = findClosestNode();
+  }
 
-    @Override
-    public Node getSceneGraphObjectProxy() {
-        return closestNode;
-    }
+  /*
+   * Private
+   */
 
-    @Override
-    protected void startListeningToSceneGraphObject() {
-        startListeningToLayoutBounds(closestNode);
-        startListeningToLocalToSceneTransform(closestNode);
-        startListeningToBoundsInParent(hitNode);
-    }
-
-    @Override
-    protected void stopListeningToSceneGraphObject() {
-        stopListeningToLayoutBounds(closestNode);
-        stopListeningToLocalToSceneTransform(closestNode);
-        stopListeningToBoundsInParent(hitNode);
-    }
-
-    @Override
-    protected void layoutDecoration() {
-        assert chrome.getScene() != null;
-        
-        if (getState() != State.CLEAN) {
-            chrome.setVisible(false);
-        } else {
-            assert hitNode.getScene() != null;
-            assert hitNode.getScene() == closestNode.getScene();
-            
-            final Transform t = getContentPanelController().computeSceneGraphToRudderLayerTransform(hitNode);
-            chrome.getTransforms().clear();
-            chrome.getTransforms().add(t);
-            chrome.setLayoutBounds(hitNode.getLayoutBounds());
-//            chrome.setLayoutBounds(new BoundingBox(0, 0, 20, 15));
-            chrome.setVisible(true);
-        }
-    }
-
-    @Override
-    public State getState() {
-        State result = super.getState();
-        
-        if (result == State.CLEAN) {
-            final Node newClosestNode = findClosestNode();
-            if (closestNode != newClosestNode) {
-                result = State.NEEDS_RECONCILE;
-            }
-        }
-        
-        return result;
-    }
-
-    @Override
-    public void reconcile() {
-        super.reconcile();
-        hitNode = closestNode = findClosestNode();
-    }
-
-    
-    
-    /*
-     * Private
-     */
-    
-    private Node findClosestNode() {
-        final FXOMObject nodeObject = getFxomObject().getClosestNode();
-        assert nodeObject != null; // At least the root is a Node
-        assert nodeObject.getSceneGraphObject() instanceof Node;
-        return (Node) nodeObject.getSceneGraphObject();
-    }
+  private Node findClosestNode() {
+    final FXOMObject nodeObject = getFxomObject().getClosestNode();
+    assert nodeObject != null; // At least the root is a Node
+    assert nodeObject.getSceneGraphObject() instanceof Node;
+    return (Node) nodeObject.getSceneGraphObject();
+  }
 }

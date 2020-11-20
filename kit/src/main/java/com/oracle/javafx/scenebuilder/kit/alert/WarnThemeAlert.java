@@ -38,47 +38,51 @@
 package com.oracle.javafx.scenebuilder.kit.alert;
 
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
-import com.oracle.javafx.scenebuilder.kit.editor.EditorPlatform;
-import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMDocument;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
+import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 
 /**
- * Used when the user adds a Gluon control to the document or loads a document with a Gluon control and
- * Gluon Mobile theme is not set.
- * When a Gluon control is used, Gluon Mobile theme must be set in order for the control to work correctly.
+ * Used when the user adds a Gluon control to the document or loads a document with a Gluon control
+ * and Gluon Mobile theme is not set. When a Gluon control is used, Gluon Mobile theme must be set
+ * in order for the control to work correctly.
  */
 public class WarnThemeAlert extends SBAlert {
-    private static boolean hasBeenShown = false;
+  private static boolean hasBeenShown = false;
 
-    private WarnThemeAlert(EditorController editorController, Stage owner) {
-        super(AlertType.WARNING, owner);
+  private WarnThemeAlert(EditorController editorController, Stage owner) {
+    super(AlertType.WARNING, owner);
 
-        setTitle(I18N.getString("alert.theme.gluon.mobile.title"));
-        setHeaderText(I18N.getString("alert.theme.gluon.mobile.headertext"));
-        setContentText(I18N.getString("alert.theme.gluon.mobile.contenttext"));
+    setTitle(I18N.getString("alert.theme.gluon.mobile.title"));
+    setHeaderText(I18N.getString("alert.theme.gluon.mobile.headertext"));
+    setContentText(I18N.getString("alert.theme.gluon.mobile.contenttext"));
 
-        ButtonType setGluonTheme = new ButtonType(I18N.getString("alert.theme.gluon.mobile.setgluontheme"), ButtonBar.ButtonData.OK_DONE);
-        ButtonType ignore = new ButtonType(I18N.getString("alert.theme.gluon.mobile.ignore"), ButtonBar.ButtonData.CANCEL_CLOSE);
+    ButtonType setGluonTheme =
+        new ButtonType(
+            I18N.getString("alert.theme.gluon.mobile.setgluontheme"), ButtonBar.ButtonData.OK_DONE);
+    ButtonType ignore =
+        new ButtonType(
+            I18N.getString("alert.theme.gluon.mobile.ignore"), ButtonBar.ButtonData.CANCEL_CLOSE);
 
-        getButtonTypes().setAll(setGluonTheme, ignore);
+    getButtonTypes().setAll(setGluonTheme, ignore);
 
-        setOnShown(event -> hasBeenShown = true);
+    setOnShown(event -> hasBeenShown = true);
+  }
+
+  public static void showAlertIfRequired(
+      EditorController editorController, FXOMObject fxomObject, Stage owner) {
+    if (!hasBeenShown && fxomObject != null && fxomObject.isGluon()) {
+      new WarnThemeAlert(editorController, owner).showAndWait();
     }
+  }
 
-    public static void showAlertIfRequired(EditorController editorController, FXOMObject fxomObject, Stage owner) {
-        if (!hasBeenShown && fxomObject != null && fxomObject.isGluon()) {
-            new WarnThemeAlert(editorController, owner).showAndWait();
-        }
+  public static void showAlertIfRequired(
+      EditorController editorController, FXOMDocument fxomDocument, Stage owner) {
+    if (!hasBeenShown && fxomDocument != null && fxomDocument.hasGluonControls()) {
+      new WarnThemeAlert(editorController, owner).showAndWait();
     }
-
-    public static void showAlertIfRequired(EditorController editorController, FXOMDocument fxomDocument, Stage owner) {
-        if (!hasBeenShown && fxomDocument != null && fxomDocument.hasGluonControls()) {
-            new WarnThemeAlert(editorController, owner).showAndWait();
-        }
-    }
-
+  }
 }

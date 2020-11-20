@@ -34,40 +34,34 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.content.util;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 
-/**
- * A BoundsUnion instance allows to compute the union of multiple bounds.
- * 
- * 
- */
+/** A BoundsUnion instance allows to compute the union of multiple bounds. */
 public class BoundsUnion {
-    
-    private Bounds result;
-    
-    public void add(Bounds b) {
-        if (result == null) {
-            result = b;
-        } else {
-            result = compute(result, b);
-        }
+
+  private Bounds result;
+
+  public void add(Bounds b) {
+    if (result == null) {
+      result = b;
+    } else {
+      result = compute(result, b);
     }
-    
-    public Bounds getResult() {
-        return result;
-    }
+  }
 
-    public static Bounds compute(Bounds b1, Bounds b2) {
-        double minX, minY, minZ, maxX, maxY, maxZ;
+  public Bounds getResult() {
+    return result;
+  }
 
-        minX = Math.min(b1.getMinX(), b2.getMinX());
-        minY = Math.min(b1.getMinY(), b2.getMinY());
-        minZ = Math.min(b1.getMinZ(), b2.getMinZ());
+  public static Bounds compute(Bounds b1, Bounds b2) {
+    double minX, minY, minZ, maxX, maxY, maxZ;
 
-        maxX = Math.max(b1.getMaxX(), b2.getMaxX());
-        maxY = Math.max(b1.getMaxY(), b2.getMaxY());
-        maxZ = Math.max(b1.getMaxZ(), b2.getMaxZ());
+    minX = Math.min(b1.getMinX(), b2.getMinX());
+    minY = Math.min(b1.getMinY(), b2.getMinY());
+    minZ = Math.min(b1.getMinZ(), b2.getMinZ());
 
-        return new BoundingBox(minX, minY, minZ,
-                   maxX - minX, maxY - minY, maxZ - minZ);
+    maxX = Math.max(b1.getMaxX(), b2.getMaxX());
+    maxY = Math.max(b1.getMaxY(), b2.getMaxY());
+    maxZ = Math.max(b1.getMaxZ(), b2.getMaxZ());
 
-    }
+    return new BoundingBox(minX, minY, minZ, maxX - minX, maxY - minY, maxZ - minZ);
+  }
 }

@@ -33,30 +33,28 @@
 package com.oracle.javafx.scenebuilder.kit.editor.panel.content.guides;
 
 import com.oracle.javafx.scenebuilder.kit.util.MathUtils;
+import java.util.Comparator;
 import javafx.geometry.Point2D;
 
-import java.util.Comparator;
-
 class PointComparator implements Comparator<Point2D> {
-    
-    @Override
-    public int compare(Point2D o1, Point2D o2) {
-        assert o1 != null;
-        assert o2 != null;
 
-        final int result;
+  @Override
+  public int compare(Point2D o1, Point2D o2) {
+    assert o1 != null;
+    assert o2 != null;
 
-        if (o1 == o2) {
-            result = 0;
-        } else if (MathUtils.equals(o1.getX(), o2.getX()) && MathUtils.equals(o1.getY(), o2.getY())) {
-            result = 0;
-        } else {
-            double r1 = Math.sqrt(o1.getX() * o1.getX() + o1.getY() * o1.getY());
-            double r2 = Math.sqrt(o2.getX() * o2.getX() + o2.getY() * o2.getY());
-            result = Double.compare(r1, r2);
-        }
+    final int result;
 
-        return result;
+    if (o1 == o2) {
+      result = 0;
+    } else if (MathUtils.equals(o1.getX(), o2.getX()) && MathUtils.equals(o1.getY(), o2.getY())) {
+      result = 0;
+    } else {
+      double r1 = Math.sqrt(o1.getX() * o1.getX() + o1.getY() * o1.getY());
+      double r2 = Math.sqrt(o2.getX() * o2.getX() + o2.getY() * o2.getY());
+      result = Double.compare(r1, r2);
     }
-    
+
+    return result;
+  }
 }

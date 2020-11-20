@@ -39,63 +39,60 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PrefixedValue;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.control.ToggleGroup;
 
-/**
- *
- */
+/** */
 public class ToggleGroupPropertyMetadata extends SingleValuePropertyMetadata<String> {
 
-    public ToggleGroupPropertyMetadata(PropertyName name, boolean readWrite, String defaultValue, InspectorPath inspectorPath) {
-        super(name, String.class, readWrite, defaultValue, inspectorPath);
+  public ToggleGroupPropertyMetadata(
+      PropertyName name, boolean readWrite, String defaultValue, InspectorPath inspectorPath) {
+    super(name, String.class, readWrite, defaultValue, inspectorPath);
+  }
+
+  /*
+   * SingleValuePropertyMetadata
+   */
+
+  @Override
+  public String makeValueFromString(String string) {
+    final PrefixedValue pv = new PrefixedValue(string);
+    final String result;
+
+    if (pv.isExpression()) {
+      result = pv.getSuffix();
+    } else {
+      assert false : "Unexpected prefixed value " + string;
+      result = null;
     }
 
-    
-    /*
-     * SingleValuePropertyMetadata
-     */
-    
-    @Override
-    public String makeValueFromString(String string) {
-        final PrefixedValue pv = new PrefixedValue(string);
-        final String result;
-        
-        if (pv.isExpression()) {
-            result = pv.getSuffix();
-        } else {
-            assert false : "Unexpected prefixed value " + string;
-            result = null;
-        }
-        
-        return result;
+    return result;
+  }
+
+  @Override
+  public String makeValueFromFxomInstance(FXOMInstance valueFxomInstance) {
+    final String result;
+
+    if (valueFxomInstance.getDeclaredClass() == ToggleGroup.class) {
+      result = valueFxomInstance.getFxId();
+    } else {
+      assert false
+          : "unexpected declared class " + valueFxomInstance.getDeclaredClass().getSimpleName();
+      result = null;
     }
 
-    @Override
-    public String makeValueFromFxomInstance(FXOMInstance valueFxomInstance) {
-        final String result;
-        
-        if (valueFxomInstance.getDeclaredClass() == ToggleGroup.class) {
-            result = valueFxomInstance.getFxId();
-        } else {
-            assert false : "unexpected declared class "
-                    + valueFxomInstance.getDeclaredClass().getSimpleName();
-            result = null;
-        }
-        
-        return result;
-    }
+    return result;
+  }
 
-    @Override
-    public boolean canMakeStringFromValue(String value) {
-        throw new UnsupportedOperationException("Should not be invoked"); //NOI18N
-    }
+  @Override
+  public boolean canMakeStringFromValue(String value) {
+    throw new UnsupportedOperationException("Should not be invoked"); // NOI18N
+  }
 
-    @Override
-    public String makeStringFromValue(String value) {
-        throw new UnsupportedOperationException("Should not be invoked"); //NOI18N
-    }
+  @Override
+  public String makeStringFromValue(String value) {
+    throw new UnsupportedOperationException("Should not be invoked"); // NOI18N
+  }
 
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(String value, FXOMDocument fxomDocument) {
-        throw new UnsupportedOperationException("Should not be invoked"); //NOI18N
-    }
-    
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(String value, FXOMDocument fxomDocument) {
+    throw new UnsupportedOperationException("Should not be invoked"); // NOI18N
+  }
 }

@@ -47,68 +47,70 @@ import java.util.Collections;
 import java.util.List;
 import javafx.scene.layout.GridPane;
 
-/**
- *
- */
+/** */
 public class InsertColumnJob extends BatchSelectionJob {
 
-    private static final ColumnConstraintsListPropertyMetadata columnContraintsMeta =
-            new ColumnConstraintsListPropertyMetadata(
-                new PropertyName("columnConstraints"), //NOI18N
-                true, /* readWrite */
-                Collections.emptyList(), /* defaultValue */
-                InspectorPath.UNUSED);
+  private static final ColumnConstraintsListPropertyMetadata columnContraintsMeta =
+      new ColumnConstraintsListPropertyMetadata(
+          new PropertyName("columnConstraints"), // NOI18N
+          true, /* readWrite */
+          Collections.emptyList(), /* defaultValue */
+          InspectorPath.UNUSED);
 
-    private final FXOMInstance gridPaneObject;
-    private final int columnIndex;
-    private final int insertCount;
+  private final FXOMInstance gridPaneObject;
+  private final int columnIndex;
+  private final int insertCount;
 
-    public InsertColumnJob(FXOMObject gridPaneObject, 
-            int columnIndex, int insertCount, EditorController editorController) {
-        super(editorController);
-        
-        assert gridPaneObject instanceof FXOMInstance;
-        assert gridPaneObject.getSceneGraphObject() instanceof GridPane;
-        assert columnIndex >= 0;
-        assert columnIndex <= columnContraintsMeta.getValue((FXOMInstance)gridPaneObject).size();
-        assert insertCount >= 1;
-        
-        this.gridPaneObject = (FXOMInstance)gridPaneObject;
-        this.columnIndex = columnIndex;
-        this.insertCount = insertCount;
+  public InsertColumnJob(
+      FXOMObject gridPaneObject,
+      int columnIndex,
+      int insertCount,
+      EditorController editorController) {
+    super(editorController);
+
+    assert gridPaneObject instanceof FXOMInstance;
+    assert gridPaneObject.getSceneGraphObject() instanceof GridPane;
+    assert columnIndex >= 0;
+    assert columnIndex <= columnContraintsMeta.getValue((FXOMInstance) gridPaneObject).size();
+    assert insertCount >= 1;
+
+    this.gridPaneObject = (FXOMInstance) gridPaneObject;
+    this.columnIndex = columnIndex;
+    this.insertCount = insertCount;
+  }
+
+  /*
+   * CompositeJob
+   */
+
+  @Override
+  protected List<Job> makeSubJobs() {
+    final List<Job> result = new ArrayList<>();
+
+    final Job insertJob =
+        new InsertColumnConstraintsJob(
+            gridPaneObject, columnIndex, insertCount, getEditorController());
+    result.add(insertJob);
+
+    final int lastColumnIndex = columnContraintsMeta.getValue(gridPaneObject).size() - 1;
+    for (int c = lastColumnIndex; c >= columnIndex; c--) {
+      final Job moveJob =
+          new MoveColumnContentJob(gridPaneObject, c, +insertCount, getEditorController());
+      if (moveJob.isExecutable()) {
+        result.add(moveJob);
+      } // else column is empty : no children to move
     }
 
-    /*
-     * CompositeJob
-     */
-    
-    @Override
-    protected List<Job> makeSubJobs() {
-        final List<Job> result = new ArrayList<>();
-        
-        final Job insertJob 
-                = new InsertColumnConstraintsJob(gridPaneObject, columnIndex, insertCount, getEditorController());
-        result.add(insertJob);
-        
-        final int lastColumnIndex = columnContraintsMeta.getValue(gridPaneObject).size()-1;
-        for (int c = lastColumnIndex; c >= columnIndex; c--) {
-            final Job moveJob
-                    = new MoveColumnContentJob(gridPaneObject, c, +insertCount, getEditorController());
-            if (moveJob.isExecutable()) {
-                result.add(moveJob);
-            } // else column is empty : no children to move
-        }
-        
-        return result;
-    }
+    return result;
+  }
 
-    @Override
-    protected String makeDescription() {
-        return getClass().getSimpleName();
-    }
+  @Override
+  protected String makeDescription() {
+    return getClass().getSimpleName();
+  }
 
-    @Override
-    protected AbstractSelectionGroup getNewSelectionGroup() {
-        return new GridSelectionGroup(gridPaneObject, GridSelectionGroup.Type.COLUMN, columnIndex);
-    }
+  @Override
+  protected AbstractSelectionGroup getNewSelectionGroup() {
+    return new GridSelectionGroup(gridPaneObject, GridSelectionGroup.Type.COLUMN, columnIndex);
+  }
 }

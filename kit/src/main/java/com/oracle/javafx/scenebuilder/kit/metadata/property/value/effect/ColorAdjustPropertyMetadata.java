@@ -40,46 +40,63 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.effect.ColorAdjust;
 
-/**
- *
- */
+/** */
 public class ColorAdjustPropertyMetadata extends ComplexPropertyMetadata<ColorAdjust> {
-    
-    private final EffectPropertyMetadata inputMetadata
-            = new EffectPropertyMetadata(new PropertyName("input"), //NOI18N
-            true /* readWrite */, null, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata brightnessMetadata
-            = new DoublePropertyMetadata(new PropertyName("brightness"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata contrastMetadata
-            = new DoublePropertyMetadata(new PropertyName("contrast"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata hueMetadata
-            = new DoublePropertyMetadata(new PropertyName("hue"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata saturationMetadata
-            = new DoublePropertyMetadata(new PropertyName("saturation"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, 0.0, InspectorPath.UNUSED);
 
-    public ColorAdjustPropertyMetadata(PropertyName name, boolean readWrite, 
-            ColorAdjust defaultValue, InspectorPath inspectorPath) {
-        super(name, ColorAdjust.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final EffectPropertyMetadata inputMetadata =
+      new EffectPropertyMetadata(
+          new PropertyName("input"), // NOI18N
+          true /* readWrite */,
+          null,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata brightnessMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("brightness"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata contrastMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("contrast"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata hueMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("hue"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata saturationMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("saturation"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          0.0,
+          InspectorPath.UNUSED);
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(ColorAdjust value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, getValueClass());
-        
-        inputMetadata.setValue(result, value.getInput());
-        brightnessMetadata.setValue(result, value.getBrightness());
-        contrastMetadata.setValue(result, value.getContrast());
-        hueMetadata.setValue(result, value.getHue());
-        saturationMetadata.setValue(result, value.getSaturation());
+  public ColorAdjustPropertyMetadata(
+      PropertyName name, boolean readWrite, ColorAdjust defaultValue, InspectorPath inspectorPath) {
+    super(name, ColorAdjust.class, readWrite, defaultValue, inspectorPath);
+  }
 
-        return result;
-    }
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(ColorAdjust value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, getValueClass());
+
+    inputMetadata.setValue(result, value.getInput());
+    brightnessMetadata.setValue(result, value.getBrightness());
+    contrastMetadata.setValue(result, value.getContrast());
+    hueMetadata.setValue(result, value.getHue());
+    saturationMetadata.setValue(result, value.getSaturation());
+
+    return result;
+  }
 }

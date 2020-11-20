@@ -34,13 +34,11 @@ package com.oracle.javafx.scenebuilder.kit.editor.job.wrap;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import javafx.scene.layout.Pane;
 
-/**
- * Job used to wrap selection in a Pane.
- */
+/** Job used to wrap selection in a Pane. */
 public class WrapInPaneJob extends AbstractWrapInSubComponentJob {
 
-    public WrapInPaneJob(EditorController editorController) {
-        super(editorController);
-        newContainerClass = Pane.class;
-    }
+  public WrapInPaneJob(EditorController editorController) {
+    super(editorController);
+    newContainerClass = Pane.class;
+  }
 }

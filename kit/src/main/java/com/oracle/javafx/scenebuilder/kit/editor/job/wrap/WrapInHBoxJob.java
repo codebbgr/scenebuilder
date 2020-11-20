@@ -41,20 +41,18 @@ import java.util.List;
 import javafx.geometry.Orientation;
 import javafx.scene.layout.HBox;
 
-/**
- * Job used to wrap selection in an HBox.
- */
+/** Job used to wrap selection in an HBox. */
 public class WrapInHBoxJob extends AbstractWrapInSubComponentJob {
 
-    public WrapInHBoxJob(EditorController editorController) {
-        super(editorController);
-        newContainerClass = HBox.class;
-    }
+  public WrapInHBoxJob(EditorController editorController) {
+    super(editorController);
+    newContainerClass = HBox.class;
+  }
 
-    @Override
-    protected Collection<FXOMObject> sortChildren(List<FXOMObject> children) {
-        final List<FXOMObject> sorted = new ArrayList<>(children);
-        Collections.sort(sorted, UnidimensionalComparator.of(Orientation.HORIZONTAL));
-        return sorted;
-    }
+  @Override
+  protected Collection<FXOMObject> sortChildren(List<FXOMObject> children) {
+    final List<FXOMObject> sorted = new ArrayList<>(children);
+    Collections.sort(sorted, UnidimensionalComparator.of(Orientation.HORIZONTAL));
+    return sorted;
+  }
 }

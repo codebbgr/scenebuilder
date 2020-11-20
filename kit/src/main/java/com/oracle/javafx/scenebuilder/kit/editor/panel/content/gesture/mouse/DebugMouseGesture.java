@@ -34,65 +34,61 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.mouse;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.content.ContentPanelController;
 import javafx.scene.input.KeyEvent;
 
-/**
- *
- * 
- */
+/** */
 public class DebugMouseGesture extends AbstractMouseGesture {
 
-    private final String title;
-    
-    public DebugMouseGesture(ContentPanelController contentPanelController, String title) {
-        super(contentPanelController);
-        this.title = title;
-    }
+  private final String title;
 
-    /*
-     * AbstractMouseGesture
-     */
-    
-    @Override
-    protected void mousePressed() {
-        System.out.println("DebugMouseGesture.mousePressed");
-    }
+  public DebugMouseGesture(ContentPanelController contentPanelController, String title) {
+    super(contentPanelController);
+    this.title = title;
+  }
 
-    @Override
-    protected void mouseDragStarted() {
-        System.out.println("DebugMouseGesture.mouseDragStarted");
-    }
+  /*
+   * AbstractMouseGesture
+   */
 
-    @Override
-    protected void mouseDragged() {
-        System.out.println("DebugMouseGesture.mouseDragged");
-    }
+  @Override
+  protected void mousePressed() {
+    System.out.println("DebugMouseGesture.mousePressed");
+  }
 
-    @Override
-    protected void mouseDragEnded() {
-        System.out.println("DebugMouseGesture.mouseDragEnded");
-    }
+  @Override
+  protected void mouseDragStarted() {
+    System.out.println("DebugMouseGesture.mouseDragStarted");
+  }
 
-    @Override
-    protected void mouseReleased() {
-        System.out.println("DebugMouseGesture.mouseReleased");
-    }
+  @Override
+  protected void mouseDragged() {
+    System.out.println("DebugMouseGesture.mouseDragged");
+  }
 
-    @Override
-    protected void keyEvent(KeyEvent e) {
-        System.out.println("DebugMouseGesture.keyEvent");
-    }
+  @Override
+  protected void mouseDragEnded() {
+    System.out.println("DebugMouseGesture.mouseDragEnded");
+  }
 
-    @Override
-    protected void userDidCancel() {
-        System.out.println("DebugMouseGesture.keyEvent");
-    }
-    
-    
-    /*
-     * Object
-     */
-    
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + "[" + title + "]";
-    }
+  @Override
+  protected void mouseReleased() {
+    System.out.println("DebugMouseGesture.mouseReleased");
+  }
+
+  @Override
+  protected void keyEvent(KeyEvent e) {
+    System.out.println("DebugMouseGesture.keyEvent");
+  }
+
+  @Override
+  protected void userDidCancel() {
+    System.out.println("DebugMouseGesture.keyEvent");
+  }
+
+  /*
+   * Object
+   */
+
+  @Override
+  public String toString() {
+    return getClass().getSimpleName() + "[" + title + "]";
+  }
 }

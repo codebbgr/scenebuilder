@@ -45,99 +45,99 @@ import java.util.List;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 
-/**
- *
- */
+/** */
 public class InsertColumnConstraintsJob extends Job {
 
-    private static final ColumnConstraintsListPropertyMetadata columnContraintsMeta =
-            new ColumnConstraintsListPropertyMetadata(
-                new PropertyName("columnConstraints"), //NOI18N
-                true, /* readWrite */
-                Collections.emptyList(), /* defaultValue */
-                InspectorPath.UNUSED);
+  private static final ColumnConstraintsListPropertyMetadata columnContraintsMeta =
+      new ColumnConstraintsListPropertyMetadata(
+          new PropertyName("columnConstraints"), // NOI18N
+          true, /* readWrite */
+          Collections.emptyList(), /* defaultValue */
+          InspectorPath.UNUSED);
 
-    private final FXOMInstance gridPaneObject;
-    private final int columnIndex;
-    private final int insertCount;
+  private final FXOMInstance gridPaneObject;
+  private final int columnIndex;
+  private final int insertCount;
 
-    public InsertColumnConstraintsJob(FXOMObject gridPaneObject, 
-            int columnIndex, int insertCount, EditorController editorController) {
-        super(editorController);
-        
-        assert gridPaneObject instanceof FXOMInstance;
-        assert gridPaneObject.getSceneGraphObject() instanceof GridPane;
-        assert columnIndex >= 0;
-        assert columnIndex <= columnContraintsMeta.getValue((FXOMInstance)gridPaneObject).size();
-        assert insertCount >= 1;
-        
-        this.gridPaneObject = (FXOMInstance)gridPaneObject;
-        this.columnIndex = columnIndex;
-        this.insertCount = insertCount;
-    }
+  public InsertColumnConstraintsJob(
+      FXOMObject gridPaneObject,
+      int columnIndex,
+      int insertCount,
+      EditorController editorController) {
+    super(editorController);
 
-    /*
-     * Job
-     */
-    @Override
-    public boolean isExecutable() {
-        return true;
-    }
+    assert gridPaneObject instanceof FXOMInstance;
+    assert gridPaneObject.getSceneGraphObject() instanceof GridPane;
+    assert columnIndex >= 0;
+    assert columnIndex <= columnContraintsMeta.getValue((FXOMInstance) gridPaneObject).size();
+    assert insertCount >= 1;
 
-    @Override
-    public void execute() {
-        // Same as redo()
-        redo();
-    }
+    this.gridPaneObject = (FXOMInstance) gridPaneObject;
+    this.columnIndex = columnIndex;
+    this.insertCount = insertCount;
+  }
 
-    @Override
-    public void undo() {
-        final List<ColumnConstraints> constraintsList 
-                = new ArrayList<>(columnContraintsMeta.getValue(gridPaneObject));
-        assert columnIndex < constraintsList.size();
-        for (int i = 0; i < insertCount; i++) {
-            constraintsList.remove(columnIndex);
-        }
-        columnContraintsMeta.setValue(gridPaneObject, constraintsList);
-    }
+  /*
+   * Job
+   */
+  @Override
+  public boolean isExecutable() {
+    return true;
+  }
 
-    @Override
-    public void redo() {
-        final List<ColumnConstraints> constraintsList 
-                = new ArrayList<>(columnContraintsMeta.getValue(gridPaneObject));
-        final ColumnConstraints template;
-        if (columnIndex >= 1) {
-            template = constraintsList.get(columnIndex-1);
-        } else {
-            template = null;
-        }
-        for (int i = 0; i < insertCount; i++) {
-            constraintsList.add(columnIndex, makeColumnConstraints(template));
-        }
-        columnContraintsMeta.setValue(gridPaneObject, constraintsList);
-    }
+  @Override
+  public void execute() {
+    // Same as redo()
+    redo();
+  }
 
-    @Override
-    public String getDescription() {
-        return getClass().getSimpleName();
+  @Override
+  public void undo() {
+    final List<ColumnConstraints> constraintsList =
+        new ArrayList<>(columnContraintsMeta.getValue(gridPaneObject));
+    assert columnIndex < constraintsList.size();
+    for (int i = 0; i < insertCount; i++) {
+      constraintsList.remove(columnIndex);
     }
-    
-    
-    /*
-     * Private
-     */
-    
-    private ColumnConstraints makeColumnConstraints(ColumnConstraints template) {
-        final ColumnConstraints result = new ColumnConstraints();
-        if (columnIndex >= 1) {
-            result.setFillWidth(template.isFillWidth());
-            result.setHalignment(template.getHalignment());
-            result.setHgrow(template.getHgrow());
-            result.setMaxWidth(template.getMaxWidth());
-            result.setMinWidth(template.getMinWidth());
-            result.setPercentWidth(template.getPercentWidth());
-            result.setPrefWidth(template.getPrefWidth());
-        }
-        return result;
+    columnContraintsMeta.setValue(gridPaneObject, constraintsList);
+  }
+
+  @Override
+  public void redo() {
+    final List<ColumnConstraints> constraintsList =
+        new ArrayList<>(columnContraintsMeta.getValue(gridPaneObject));
+    final ColumnConstraints template;
+    if (columnIndex >= 1) {
+      template = constraintsList.get(columnIndex - 1);
+    } else {
+      template = null;
     }
+    for (int i = 0; i < insertCount; i++) {
+      constraintsList.add(columnIndex, makeColumnConstraints(template));
+    }
+    columnContraintsMeta.setValue(gridPaneObject, constraintsList);
+  }
+
+  @Override
+  public String getDescription() {
+    return getClass().getSimpleName();
+  }
+
+  /*
+   * Private
+   */
+
+  private ColumnConstraints makeColumnConstraints(ColumnConstraints template) {
+    final ColumnConstraints result = new ColumnConstraints();
+    if (columnIndex >= 1) {
+      result.setFillWidth(template.isFillWidth());
+      result.setHalignment(template.getHalignment());
+      result.setHgrow(template.getHgrow());
+      result.setMaxWidth(template.getMaxWidth());
+      result.setMinWidth(template.getMinWidth());
+      result.setPercentWidth(template.getPercentWidth());
+      result.setPrefWidth(template.getPrefWidth());
+    }
+    return result;
+  }
 }

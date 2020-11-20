@@ -34,94 +34,99 @@ package com.oracle.javafx.scenebuilder.kit.library.util;
 
 import com.oracle.javafx.scenebuilder.kit.editor.EditorPlatform;
 import com.oracle.javafx.scenebuilder.kit.library.BuiltinLibrary;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.nio.charset.Charset;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 
 abstract class ExplorerBase {
 
-    static Object instantiateWithFXMLLoader(Class<?> klass, ClassLoader classLoader) throws IOException {
-        Object result;
+  static Object instantiateWithFXMLLoader(Class<?> klass, ClassLoader classLoader)
+      throws IOException {
+    Object result;
 
-        final String fxmlText = BuiltinLibrary.makeFxmlText(klass);
-        final byte[] fxmlBytes = fxmlText.getBytes(Charset.forName("UTF-8")); //NOI18N
+    final String fxmlText = BuiltinLibrary.makeFxmlText(klass);
+    final byte[] fxmlBytes = fxmlText.getBytes(Charset.forName("UTF-8")); // NOI18N
 
-        final FXMLLoader fxmlLoader = new FXMLLoader();
-        try {
-            fxmlLoader.setClassLoader(classLoader);
-            result = fxmlLoader.load(new ByteArrayInputStream(fxmlBytes));
-        } catch(IOException x) {
-            throw x;
-        } catch(RuntimeException|Error x) {
-            throw new IOException(x);
-        }
-
-        return result;
+    final FXMLLoader fxmlLoader = new FXMLLoader();
+    try {
+      fxmlLoader.setClassLoader(classLoader);
+      result = fxmlLoader.load(new ByteArrayInputStream(fxmlBytes));
+    } catch (IOException x) {
+      throw x;
+    } catch (RuntimeException | Error x) {
+      throw new IOException(x);
     }
 
-    String makeClassName(String entryName, String separator) {
-        final String result;
+    return result;
+  }
 
-        if (! entryName.endsWith(".class")) { //NOI18N
-            result = null;
-        } else if (entryName.contains("$")) { //NOI18N
-            // We skip inner classes for now
-            result = null;
+  String makeClassName(String entryName, String separator) {
+    final String result;
+
+    if (!entryName.endsWith(".class")) { // NOI18N
+      result = null;
+    } else if (entryName.contains("$")) { // NOI18N
+      // We skip inner classes for now
+      result = null;
+    } else {
+      final int endIndex = entryName.length() - 6; // ".class" -> 6 //NOI18N
+      result = entryName.substring(0, endIndex).replace(separator, "."); // NOI18N
+    }
+
+    return result;
+  }
+
+  JarReportEntry exploreEntry(String entryName, ClassLoader classLoader, String className) {
+    JarReportEntry.Status status;
+    Throwable entryException;
+    Class<?> entryClass = null;
+
+    // Filtering out what starts with com.javafx. is bound to DTL-6378.
+    if (className == null
+        || className.startsWith("java.") // NOI18N
+        || className.startsWith("javax.")
+        || className.startsWith("javafx.") // NOI18N
+        || className.startsWith("com.oracle.javafx.scenebuilder.") // NOI18N
+        || className.startsWith("com.javafx.")
+        || className.startsWith("module-info")
+        || className.startsWith(EditorPlatform.GLUON_PACKAGE)) { // NOI18N
+      status = JarReportEntry.Status.IGNORED;
+      entryClass = null;
+      entryException = null;
+    } else {
+      try {
+        // Some reading explaining why using Class.forName is not appropriate:
+        // http://blog.osgi.org/2011/05/what-you-should-know-about-class.html
+        // http://blog.bjhargrave.com/2007/09/classforname-caches-defined-class-in.html
+        // http://stackoverflow.com/questions/8100376/class-forname-vs-classloader-loadclass-which-to-use-for-dynamic-loading
+        entryClass =
+            classLoader.loadClass(
+                className); // Note: static intializers of entryClass are not run, this doesn't seem
+                            // to be an issue
+
+        if (Modifier.isAbstract(entryClass.getModifiers())
+            || !Node.class.isAssignableFrom(entryClass)) {
+          status = JarReportEntry.Status.IGNORED;
+          entryClass = null;
+          entryException = null;
         } else {
-            final int endIndex = entryName.length()-6; // ".class" -> 6 //NOI18N
-            result = entryName.substring(0, endIndex).replace(separator, "."); //NOI18N
+          instantiateWithFXMLLoader(entryClass, classLoader);
+          status = JarReportEntry.Status.OK;
+          entryException = null;
         }
-
-        return result;
+      } catch (RuntimeException | IOException x) {
+        status = JarReportEntry.Status.CANNOT_INSTANTIATE;
+        entryException = x;
+      } catch (Error | ClassNotFoundException x) {
+        status = JarReportEntry.Status.CANNOT_LOAD;
+        entryClass = null;
+        entryException = x;
+      }
     }
 
-    JarReportEntry exploreEntry(String entryName, ClassLoader classLoader, String className) {
-        JarReportEntry.Status status;
-        Throwable entryException;
-        Class<?> entryClass = null;
-
-        // Filtering out what starts with com.javafx. is bound to DTL-6378.
-        if (className == null || className.startsWith("java.") //NOI18N
-                || className.startsWith("javax.") || className.startsWith("javafx.") //NOI18N
-                || className.startsWith("com.oracle.javafx.scenebuilder.") //NOI18N
-                || className.startsWith("com.javafx.")
-                || className.startsWith("module-info")
-                || className.startsWith(EditorPlatform.GLUON_PACKAGE)) { //NOI18N
-            status = JarReportEntry.Status.IGNORED;
-            entryClass = null;
-            entryException = null;
-        } else {
-            try {
-                // Some reading explaining why using Class.forName is not appropriate:
-                // http://blog.osgi.org/2011/05/what-you-should-know-about-class.html
-                // http://blog.bjhargrave.com/2007/09/classforname-caches-defined-class-in.html
-                // http://stackoverflow.com/questions/8100376/class-forname-vs-classloader-loadclass-which-to-use-for-dynamic-loading
-                entryClass = classLoader.loadClass(className); // Note: static intializers of entryClass are not run, this doesn't seem to be an issue
-
-                if (Modifier.isAbstract(entryClass.getModifiers())
-                        || !Node.class.isAssignableFrom(entryClass)) {
-                    status = JarReportEntry.Status.IGNORED;
-                    entryClass = null;
-                    entryException = null;
-                } else {
-                    instantiateWithFXMLLoader(entryClass, classLoader);
-                    status = JarReportEntry.Status.OK;
-                    entryException = null;
-                }
-            } catch (RuntimeException | IOException x) {
-                status = JarReportEntry.Status.CANNOT_INSTANTIATE;
-                entryException = x;
-            } catch (Error | ClassNotFoundException x) {
-                status = JarReportEntry.Status.CANNOT_LOAD;
-                entryClass = null;
-                entryException = x;
-            }
-        }
-
-        return new JarReportEntry(entryName, status, entryException, entryClass, className);
-    }
+    return new JarReportEntry(entryName, status, entryException, entryClass, className);
+  }
 }

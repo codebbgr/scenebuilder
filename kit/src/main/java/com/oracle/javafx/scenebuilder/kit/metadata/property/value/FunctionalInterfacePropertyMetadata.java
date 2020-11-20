@@ -37,37 +37,39 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 
 public class FunctionalInterfacePropertyMetadata extends TextEncodablePropertyMetadata<String> {
-    private FunctionalInterface functionalInterface;
+  private FunctionalInterface functionalInterface;
 
-    public enum FunctionalInterface {
-        FUNCTION
-    }
+  public enum FunctionalInterface {
+    FUNCTION
+  }
 
-    public FunctionalInterfacePropertyMetadata(PropertyName name, boolean readWrite,
-                                        String defaultValue, InspectorPath inspectorPath, FunctionalInterface functionalInterface) {
-        super(name, String.class, readWrite, defaultValue, inspectorPath);
-        this.functionalInterface = functionalInterface;
-    }
+  public FunctionalInterfacePropertyMetadata(
+      PropertyName name,
+      boolean readWrite,
+      String defaultValue,
+      InspectorPath inspectorPath,
+      FunctionalInterface functionalInterface) {
+    super(name, String.class, readWrite, defaultValue, inspectorPath);
+    this.functionalInterface = functionalInterface;
+  }
 
-    /*
-     * TextEncodablePropertyMetadata
-     */
+  /*
+   * TextEncodablePropertyMetadata
+   */
 
-    @Override
-    public String makeValueFromString(String string) {
-        return string;
-    }
+  @Override
+  public String makeValueFromString(String string) {
+    return string;
+  }
 
-    @Override
-    public String getValue(FXOMInstance fxomInstance) {
-        // We override just to add a sanity check
-        assert isReadWrite();
-        return super.getValue(fxomInstance);
-    }
+  @Override
+  public String getValue(FXOMInstance fxomInstance) {
+    // We override just to add a sanity check
+    assert isReadWrite();
+    return super.getValue(fxomInstance);
+  }
 
-    public FunctionalInterface getFunctionalInterface() {
-        return functionalInterface;
-    }
-
+  public FunctionalInterface getFunctionalInterface() {
+    return functionalInterface;
+  }
 }
-

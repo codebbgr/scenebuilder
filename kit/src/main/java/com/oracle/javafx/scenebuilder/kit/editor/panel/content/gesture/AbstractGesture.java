@@ -34,21 +34,18 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.content.ContentPanelController;
 import javafx.scene.input.InputEvent;
 
-/**
- *
- * 
- */
+/** */
 public abstract class AbstractGesture {
-    
-    protected final ContentPanelController contentPanelController;
-    
-    public AbstractGesture(ContentPanelController contentPanelController) {
-        this.contentPanelController = contentPanelController;
-    }
 
-    public abstract void start(InputEvent e, Observer observer);
-    
-    public static interface Observer {
-        public void gestureDidTerminate(AbstractGesture gesture);
-    }
+  protected final ContentPanelController contentPanelController;
+
+  public AbstractGesture(ContentPanelController contentPanelController) {
+    this.contentPanelController = contentPanelController;
+  }
+
+  public abstract void start(InputEvent e, Observer observer);
+
+  public static interface Observer {
+    public void gestureDidTerminate(AbstractGesture gesture);
+  }
 }

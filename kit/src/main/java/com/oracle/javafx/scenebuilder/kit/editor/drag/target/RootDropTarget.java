@@ -38,39 +38,39 @@ import com.oracle.javafx.scenebuilder.kit.editor.job.Job;
 import com.oracle.javafx.scenebuilder.kit.editor.job.SetDocumentRootJob;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 
-/**
- *
- */
+/** */
 public class RootDropTarget extends AbstractDropTarget {
 
-    /*
-     * AbstractDropTarget
-     */
-    
-    @Override
-    public FXOMObject getTargetObject() {
-        return null;
-    }
+  /*
+   * AbstractDropTarget
+   */
 
-    @Override
-    public boolean acceptDragSource(AbstractDragSource dragSource) {
-        assert dragSource != null;
-        return dragSource.getDraggedObjects().size() == 1;
-    }
+  @Override
+  public FXOMObject getTargetObject() {
+    return null;
+  }
 
-    @Override
-    public Job makeDropJob(AbstractDragSource dragSource, EditorController editorController) {
-        assert dragSource != null;
-        assert dragSource.getDraggedObjects().size() == 1;
-        
-        final FXOMObject newRoot = dragSource.getDraggedObjects().get(0);
-        return new SetDocumentRootJob(newRoot, true /* usePredefinedSize */, 
-                dragSource.makeDropJobDescription(), editorController);
-    }
-    
-    @Override
-    public boolean isSelectRequiredAfterDrop() {
-        return true;
-    }
-    
+  @Override
+  public boolean acceptDragSource(AbstractDragSource dragSource) {
+    assert dragSource != null;
+    return dragSource.getDraggedObjects().size() == 1;
+  }
+
+  @Override
+  public Job makeDropJob(AbstractDragSource dragSource, EditorController editorController) {
+    assert dragSource != null;
+    assert dragSource.getDraggedObjects().size() == 1;
+
+    final FXOMObject newRoot = dragSource.getDraggedObjects().get(0);
+    return new SetDocumentRootJob(
+        newRoot,
+        true /* usePredefinedSize */,
+        dragSource.makeDropJobDescription(),
+        editorController);
+  }
+
+  @Override
+  public boolean isSelectRequiredAfterDrop() {
+    return true;
+  }
 }

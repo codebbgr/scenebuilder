@@ -49,82 +49,81 @@ import javafx.scene.Node;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
-/**
- *
- */
+/** */
 public class TableColumnDriver extends AbstractDriver {
 
-    public TableColumnDriver(ContentPanelController contentPanelController) {
-        super(contentPanelController);
-    }
+  public TableColumnDriver(ContentPanelController contentPanelController) {
+    super(contentPanelController);
+  }
 
-    /*
-     * AbstractDriver
-     */
-    
-    @Override
-    public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof TableColumn;
-        assert fxomObject instanceof FXOMInstance;
-        return new TableColumnHandles(contentPanelController, (FXOMInstance)fxomObject);
-    }
-    
-    @Override
-    public AbstractPring<?> makePring(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof TableColumn;
-        assert fxomObject instanceof FXOMInstance;
-        return new TableColumnPring(contentPanelController, (FXOMInstance) fxomObject);
-    }
+  /*
+   * AbstractDriver
+   */
 
-    @Override
-    public AbstractTring<?> makeTring(AbstractDropTarget dropTarget) {
-        assert dropTarget != null;
-        assert dropTarget.getTargetObject() instanceof FXOMInstance;
-        assert dropTarget.getTargetObject().getSceneGraphObject() instanceof TableColumn;
-        
-        return new TableColumnTring(contentPanelController, (FXOMInstance) dropTarget.getTargetObject());
-    }
+  @Override
+  public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof TableColumn;
+    assert fxomObject instanceof FXOMInstance;
+    return new TableColumnHandles(contentPanelController, (FXOMInstance) fxomObject);
+  }
 
-    @Override
-    public AbstractResizer<?> makeResizer(FXOMObject fxomObject) {
-        return null;
-    }
+  @Override
+  public AbstractPring<?> makePring(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof TableColumn;
+    assert fxomObject instanceof FXOMInstance;
+    return new TableColumnPring(contentPanelController, (FXOMInstance) fxomObject);
+  }
 
-    @Override
-    public AbstractCurveEditor<?> makeCurveEditor(FXOMObject fxomObject) {
-        return null;
-    }
-    
-    @Override
-    public FXOMObject refinePick(Node hitNode, double sceneX, double sceneY, FXOMObject fxomObject) {
-        // TODO(elp) : implement TableColumnDriver.refinePick()
-        return fxomObject;
-    }
+  @Override
+  public AbstractTring<?> makeTring(AbstractDropTarget dropTarget) {
+    assert dropTarget != null;
+    assert dropTarget.getTargetObject() instanceof FXOMInstance;
+    assert dropTarget.getTargetObject().getSceneGraphObject() instanceof TableColumn;
 
-    @Override
-    public AbstractDropTarget makeDropTarget(FXOMObject fxomObject, double sceneX, double sceneY) {
-        // TODO(elp) : temporary implementation
-        assert fxomObject instanceof FXOMInstance;
-        return new ContainerZDropTarget((FXOMInstance)fxomObject, null);
-    }
+    return new TableColumnTring(
+        contentPanelController, (FXOMInstance) dropTarget.getTargetObject());
+  }
 
-    @Override
-    public Node getInlineEditorBounds(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof TableColumn;
-        final TableColumn<?,?> tc = (TableColumn<?,?>) fxomObject.getSceneGraphObject();
-        final TableViewDesignInfoX di = new TableViewDesignInfoX();
-        return di.getColumnNode(tc);
-    }
+  @Override
+  public AbstractResizer<?> makeResizer(FXOMObject fxomObject) {
+    return null;
+  }
 
-    @Override
-    public boolean intersectsBounds(FXOMObject fxomObject, Bounds bounds) {
-        assert fxomObject.getSceneGraphObject() instanceof TableColumn;
-        
-        final TableColumn<?,?> tc = (TableColumn<?,?>) fxomObject.getSceneGraphObject();
-        final TableView<?> tv = tc.getTableView();
-        final TableViewDesignInfoX di = new TableViewDesignInfoX();
-        final Bounds tcBounds = tv.localToScene(di.getColumnBounds(tc), true /* rootScene */);
-        
-        return tcBounds.intersects(bounds);
-    }
+  @Override
+  public AbstractCurveEditor<?> makeCurveEditor(FXOMObject fxomObject) {
+    return null;
+  }
+
+  @Override
+  public FXOMObject refinePick(Node hitNode, double sceneX, double sceneY, FXOMObject fxomObject) {
+    // TODO(elp) : implement TableColumnDriver.refinePick()
+    return fxomObject;
+  }
+
+  @Override
+  public AbstractDropTarget makeDropTarget(FXOMObject fxomObject, double sceneX, double sceneY) {
+    // TODO(elp) : temporary implementation
+    assert fxomObject instanceof FXOMInstance;
+    return new ContainerZDropTarget((FXOMInstance) fxomObject, null);
+  }
+
+  @Override
+  public Node getInlineEditorBounds(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof TableColumn;
+    final TableColumn<?, ?> tc = (TableColumn<?, ?>) fxomObject.getSceneGraphObject();
+    final TableViewDesignInfoX di = new TableViewDesignInfoX();
+    return di.getColumnNode(tc);
+  }
+
+  @Override
+  public boolean intersectsBounds(FXOMObject fxomObject, Bounds bounds) {
+    assert fxomObject.getSceneGraphObject() instanceof TableColumn;
+
+    final TableColumn<?, ?> tc = (TableColumn<?, ?>) fxomObject.getSceneGraphObject();
+    final TableView<?> tv = tc.getTableView();
+    final TableViewDesignInfoX di = new TableViewDesignInfoX();
+    final Bounds tcBounds = tv.localToScene(di.getColumnBounds(tc), true /* rootScene */);
+
+    return tcBounds.intersects(bounds);
+  }
 }

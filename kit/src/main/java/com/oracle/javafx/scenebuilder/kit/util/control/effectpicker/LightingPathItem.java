@@ -38,88 +38,88 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.effect.Effect;
 import javafx.scene.effect.Lighting;
 
-/**
- * Effect path item for the lighting effect.
- */
+/** Effect path item for the lighting effect. */
 public class LightingPathItem extends EffectPathItem {
 
-    private final RadioMenuItem bumpMenuItem = new RadioMenuItem("BumpInput"); //NOI18N
-    private final RadioMenuItem contentMenuItem = new RadioMenuItem("ContentInput"); //NOI18N
-    private final ToggleGroup inputToggleGroup = new ToggleGroup();
-    private EffectPathItem bumpInputPathItem;
-    private EffectPathItem contentInputPathItem;
+  private final RadioMenuItem bumpMenuItem = new RadioMenuItem("BumpInput"); // NOI18N
+  private final RadioMenuItem contentMenuItem = new RadioMenuItem("ContentInput"); // NOI18N
+  private final ToggleGroup inputToggleGroup = new ToggleGroup();
+  private EffectPathItem bumpInputPathItem;
+  private EffectPathItem contentInputPathItem;
 
-    public LightingPathItem(EffectPickerController epc, Effect effect, EffectPathItem hostPathItem) {
-        super(epc, effect, hostPathItem);
-        assert effect instanceof javafx.scene.effect.Lighting;
-        initialize();
+  public LightingPathItem(EffectPickerController epc, Effect effect, EffectPathItem hostPathItem) {
+    super(epc, effect, hostPathItem);
+    assert effect instanceof javafx.scene.effect.Lighting;
+    initialize();
+  }
+
+  @Override
+  EffectPathItem getSelectedInputPathItem() {
+    if (bumpMenuItem.isSelected()) {
+      return bumpInputPathItem;
+    } else {
+      assert contentMenuItem.isSelected() == true;
+      return contentInputPathItem;
     }
+  }
 
-    @Override
-    EffectPathItem getSelectedInputPathItem() {
-        if (bumpMenuItem.isSelected()) {
-            return bumpInputPathItem;
-        } else {
-            assert contentMenuItem.isSelected() == true;
-            return contentInputPathItem;
-        }
+  @Override
+  void setSelectedInputEffect(Effect input) {
+    if (bumpMenuItem.isSelected()) {
+      setBumpInput(input);
+    } else {
+      assert contentMenuItem.isSelected() == true;
+      setContentInput(input);
     }
+  }
 
-    @Override
-    void setSelectedInputEffect(Effect input) {
-        if (bumpMenuItem.isSelected()) {
-            setBumpInput(input);
-        } else {
-            assert contentMenuItem.isSelected() == true;
-            setContentInput(input);
-        }
-    }
+  void setBumpInputPathItem(EffectPathItem epi) {
+    bumpInputPathItem = epi;
+  }
 
-    void setBumpInputPathItem(EffectPathItem epi) {
-        bumpInputPathItem = epi;
-    }
+  void setContentInputPathItem(EffectPathItem epi) {
+    contentInputPathItem = epi;
+  }
 
-    void setContentInputPathItem(EffectPathItem epi) {
-        contentInputPathItem = epi;
-    }
+  Effect getBumpInput() {
+    return ((Lighting) effect).getBumpInput();
+  }
 
-    Effect getBumpInput() {
-        return ((Lighting) effect).getBumpInput();
-    }
+  void setBumpInput(Effect input) {
+    ((Lighting) effect).setBumpInput(input);
+  }
 
-    void setBumpInput(Effect input) {
-        ((Lighting) effect).setBumpInput(input);
-    }
+  Effect getContentInput() {
+    return ((Lighting) effect).getContentInput();
+  }
 
-    Effect getContentInput() {
-        return ((Lighting) effect).getContentInput();
-    }
+  void setContentInput(Effect input) {
+    ((Lighting) effect).setContentInput(input);
+  }
 
-    void setContentInput(Effect input) {
-        ((Lighting) effect).setContentInput(input);
-    }
-
-    private void initialize() {
-        // Add Select Input Menu
-        final Menu inputMenu = new Menu("Select Input"); //NOI18N
-        bumpMenuItem.setToggleGroup(inputToggleGroup);
-        bumpMenuItem.setOnAction(event -> {
-            toggle_button.setText(getSimpleName() + " (BumpInput)"); //NOI18N
-            effectPickerController.updateUI(LightingPathItem.this);
+  private void initialize() {
+    // Add Select Input Menu
+    final Menu inputMenu = new Menu("Select Input"); // NOI18N
+    bumpMenuItem.setToggleGroup(inputToggleGroup);
+    bumpMenuItem.setOnAction(
+        event -> {
+          toggle_button.setText(getSimpleName() + " (BumpInput)"); // NOI18N
+          effectPickerController.updateUI(LightingPathItem.this);
         });
-        contentMenuItem.setToggleGroup(inputToggleGroup);
-        contentMenuItem.setOnAction(event -> {
-            toggle_button.setText(getSimpleName() + " (ContentInput)"); //NOI18N
-            effectPickerController.updateUI(LightingPathItem.this);
+    contentMenuItem.setToggleGroup(inputToggleGroup);
+    contentMenuItem.setOnAction(
+        event -> {
+          toggle_button.setText(getSimpleName() + " (ContentInput)"); // NOI18N
+          effectPickerController.updateUI(LightingPathItem.this);
         });
 
-        inputMenu.getItems().addAll(bumpMenuItem, contentMenuItem);
-        menu_button.getItems().add(0, inputMenu);
-        menu_button.getItems().add(1, new SeparatorMenuItem());
+    inputMenu.getItems().addAll(bumpMenuItem, contentMenuItem);
+    menu_button.getItems().add(0, inputMenu);
+    menu_button.getItems().add(1, new SeparatorMenuItem());
 
-        // BumpInput selected at init time
-        toggle_button.setText(getSimpleName() + " (BumpInput)"); //NOI18N
-        bumpMenuItem.setSelected(true);
-        contentMenuItem.setSelected(false);
-    }
+    // BumpInput selected at init time
+    toggle_button.setText(getSimpleName() + " (BumpInput)"); // NOI18N
+    bumpMenuItem.setSelected(true);
+    contentMenuItem.setSelected(false);
+  }
 }

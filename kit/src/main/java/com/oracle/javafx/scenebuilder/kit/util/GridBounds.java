@@ -32,66 +32,64 @@
 
 package com.oracle.javafx.scenebuilder.kit.util;
 
-/**
- *
- */
+/** */
 public class GridBounds {
-    
-    private final int minColumnIndex;
-    private final int minRowIndex;
-    private final int columnSpan;
-    private final int rowSpan;
 
-    public GridBounds(int columnIndex, int rowIndex, int columnSpan, int rowSpan) {
-        assert (columnSpan >= 0);
-        assert (rowSpan >= 0);
-        this.minColumnIndex = columnIndex;
-        this.minRowIndex = rowIndex;
-        this.columnSpan = columnSpan;
-        this.rowSpan = rowSpan;
-    }
+  private final int minColumnIndex;
+  private final int minRowIndex;
+  private final int columnSpan;
+  private final int rowSpan;
 
-    public int getMinColumnIndex() {
-        return minColumnIndex;
-    }
+  public GridBounds(int columnIndex, int rowIndex, int columnSpan, int rowSpan) {
+    assert (columnSpan >= 0);
+    assert (rowSpan >= 0);
+    this.minColumnIndex = columnIndex;
+    this.minRowIndex = rowIndex;
+    this.columnSpan = columnSpan;
+    this.rowSpan = rowSpan;
+  }
 
-    public int getMinRowIndex() {
-        return minRowIndex;
-    }
+  public int getMinColumnIndex() {
+    return minColumnIndex;
+  }
 
-    public int getColumnSpan() {
-        return columnSpan;
-    }
+  public int getMinRowIndex() {
+    return minRowIndex;
+  }
 
-    public int getRowSpan() {
-        return rowSpan;
-    }
-    
-    public int getMaxColumnIndex() {
-        return minColumnIndex + columnSpan;
-    }
-    
-    public int getMaxRowIndex() {
-        return minRowIndex + rowSpan;
-    }
+  public int getColumnSpan() {
+    return columnSpan;
+  }
 
-    public boolean isEmpty() {
-        return (columnSpan == 0) || (rowSpan == 0);
-    }
-    
-    public GridBounds move(int columnDelta, int rowDelta) {
-        final int newColumnIndex = minColumnIndex + columnDelta;
-        final int newRowIndex = minRowIndex + rowDelta;
-        return new GridBounds(newColumnIndex, newRowIndex, columnSpan, rowSpan);
-    }
-    
-    public GridBounds union(GridBounds gridBounds) {
-        final int newMinColumnIndex = Math.min(minColumnIndex, gridBounds.minColumnIndex);
-        final int newMinRowIndex = Math.min(minRowIndex, gridBounds.minRowIndex);
-        final int newMaxColumnIndex = Math.max(getMaxColumnIndex(), gridBounds.getMaxColumnIndex());
-        final int newMaxRowIndex = Math.max(getMaxRowIndex(), gridBounds.getMaxRowIndex());
-        final int newColumnSpan = newMaxColumnIndex - newMinColumnIndex;
-        final int newRowSpan = newMaxRowIndex - newMinRowIndex;
-        return new GridBounds(newMinColumnIndex, newMinRowIndex, newColumnSpan, newRowSpan);
-    }
+  public int getRowSpan() {
+    return rowSpan;
+  }
+
+  public int getMaxColumnIndex() {
+    return minColumnIndex + columnSpan;
+  }
+
+  public int getMaxRowIndex() {
+    return minRowIndex + rowSpan;
+  }
+
+  public boolean isEmpty() {
+    return (columnSpan == 0) || (rowSpan == 0);
+  }
+
+  public GridBounds move(int columnDelta, int rowDelta) {
+    final int newColumnIndex = minColumnIndex + columnDelta;
+    final int newRowIndex = minRowIndex + rowDelta;
+    return new GridBounds(newColumnIndex, newRowIndex, columnSpan, rowSpan);
+  }
+
+  public GridBounds union(GridBounds gridBounds) {
+    final int newMinColumnIndex = Math.min(minColumnIndex, gridBounds.minColumnIndex);
+    final int newMinRowIndex = Math.min(minRowIndex, gridBounds.minRowIndex);
+    final int newMaxColumnIndex = Math.max(getMaxColumnIndex(), gridBounds.getMaxColumnIndex());
+    final int newMaxRowIndex = Math.max(getMaxRowIndex(), gridBounds.getMaxRowIndex());
+    final int newColumnSpan = newMaxColumnIndex - newMinColumnIndex;
+    final int newRowSpan = newMaxRowIndex - newMinRowIndex;
+    return new GridBounds(newMinColumnIndex, newMinRowIndex, newColumnSpan, newRowSpan);
+  }
 }

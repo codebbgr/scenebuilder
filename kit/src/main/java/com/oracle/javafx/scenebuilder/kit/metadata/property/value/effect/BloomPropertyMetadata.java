@@ -40,34 +40,39 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.effect.Bloom;
 
-/**
- *
- */
+/** */
 public class BloomPropertyMetadata extends ComplexPropertyMetadata<Bloom> {
-    
-    private final EffectPropertyMetadata inputMetadata
-            = new EffectPropertyMetadata(new PropertyName("input"), //NOI18N
-            true /* readWrite */, null, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata thresholdMetadata
-            = new DoublePropertyMetadata(new PropertyName("threshold"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.OPACITY, true /* readWrite */, 0.3, InspectorPath.UNUSED);
 
-    public BloomPropertyMetadata(PropertyName name, boolean readWrite, 
-            Bloom defaultValue, InspectorPath inspectorPath) {
-        super(name, Bloom.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final EffectPropertyMetadata inputMetadata =
+      new EffectPropertyMetadata(
+          new PropertyName("input"), // NOI18N
+          true /* readWrite */,
+          null,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata thresholdMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("threshold"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.OPACITY,
+          true /* readWrite */,
+          0.3,
+          InspectorPath.UNUSED);
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Bloom value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        inputMetadata.setValue(result, value.getInput());
-        thresholdMetadata.setValue(result, value.getThreshold());
-        
-        return result;
-    }
+  public BloomPropertyMetadata(
+      PropertyName name, boolean readWrite, Bloom defaultValue, InspectorPath inspectorPath) {
+    super(name, Bloom.class, readWrite, defaultValue, inspectorPath);
+  }
+
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Bloom value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    inputMetadata.setValue(result, value.getInput());
+    thresholdMetadata.setValue(result, value.getThreshold());
+
+    return result;
+  }
 }

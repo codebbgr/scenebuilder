@@ -33,24 +33,26 @@ package com.oracle.javafx.scenebuilder.kit.editor.job;
 
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 
-/**
- *
- */
+/** */
 public abstract class Job {
-    
-    private final EditorController editorController;
-    
-    public Job(EditorController editorController) {
-        this.editorController = editorController;
-    }
-    
-    public EditorController getEditorController() {
-        return editorController;
-    }
-    
-    public abstract boolean isExecutable();
-    public abstract void execute();
-    public abstract void undo();
-    public abstract void redo();
-    public abstract String getDescription();
+
+  private final EditorController editorController;
+
+  public Job(EditorController editorController) {
+    this.editorController = editorController;
+  }
+
+  public EditorController getEditorController() {
+    return editorController;
+  }
+
+  public abstract boolean isExecutable();
+
+  public abstract void execute();
+
+  public abstract void undo();
+
+  public abstract void redo();
+
+  public abstract String getDescription();
 }

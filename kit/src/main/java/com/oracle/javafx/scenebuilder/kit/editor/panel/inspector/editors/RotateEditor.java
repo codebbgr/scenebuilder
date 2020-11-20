@@ -34,9 +34,7 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors;
 
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
 import com.oracle.javafx.scenebuilder.kit.metadata.property.value.DoublePropertyMetadata;
-
 import java.util.Set;
-
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -48,145 +46,140 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
 
-/**
- * Editor for bounded double properties. (e.g. 0 &lt;= opacity &lt;= 1)
- *
- * 
- */
+/** Editor for bounded double properties. (e.g. 0 &lt;= opacity &lt;= 1) */
 public class RotateEditor extends PropertyEditor {
 
-    @FXML
-    private TextField rotateTf;
+  @FXML private TextField rotateTf;
 
-    @FXML
-    private Button rotatorDial;
+  @FXML private Button rotatorDial;
 
-    @FXML
-    private Button rotatorHandle;
+  @FXML private Button rotatorHandle;
 
-    private Parent root;
-    private int roundingFactor = 10; // 1 decimal
-    private boolean updateFromRotator = false;
+  private Parent root;
+  private int roundingFactor = 10; // 1 decimal
+  private boolean updateFromRotator = false;
 
-    public RotateEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super(propMeta, selectedClasses);
-        initialize();
-    }
-    
-    // Method to please FindBugs
-    private void initialize() {
-        root = EditorUtils.loadFxml("RotateEditor.fxml", this);
+  public RotateEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super(propMeta, selectedClasses);
+    initialize();
+  }
 
-        //
-        // Text field
-        //
-        EventHandler<ActionEvent> valueListener = event -> {
-            if (isHandlingError()) {
-                // Event received because of focus lost due to error dialog
-                return;
-            }
-            String valStr = rotateTf.getText();
-            double valDouble;
-            try {
-                valDouble = Double.parseDouble(valStr);
-            } catch (NumberFormatException e) {
-                handleInvalidValue(valStr);
-                return;
-            }
-            if (!((DoublePropertyMetadata) getPropertyMeta()).isValidValue(valDouble)) {
-                handleInvalidValue(valDouble);
-                return;
-            }
-            rotate(valDouble);
-            rotateTf.selectAll();
-            userUpdateValueProperty(valDouble);
+  // Method to please FindBugs
+  private void initialize() {
+    root = EditorUtils.loadFxml("RotateEditor.fxml", this);
 
-        };
-        setNumericEditorBehavior(this, rotateTf, valueListener, false);
-
-        // Select all text when this editor is selected
-        rotateTf.setOnMousePressed(event -> rotateTf.selectAll());
-        rotateTf.focusedProperty().addListener(((observable, oldValue, newValue) -> {
-            if (newValue) {
-                rotateTf.selectAll();
-            }
-        }));
-    }
-
-    @Override
-    public Node getValueEditor() {
-        return super.handleGenericModes(root);
-    }
-
-    @Override
-    public Object getValue() {
-        return EditorUtils.round(rotatorHandle.getRotate(), roundingFactor);
-    }
-
-    @Override
-    public void setValue(Object value) {
-        setValueGeneric(value);
-        if (isSetValueDone()) {
+    //
+    // Text field
+    //
+    EventHandler<ActionEvent> valueListener =
+        event -> {
+          if (isHandlingError()) {
+            // Event received because of focus lost due to error dialog
             return;
-        }
+          }
+          String valStr = rotateTf.getText();
+          double valDouble;
+          try {
+            valDouble = Double.parseDouble(valStr);
+          } catch (NumberFormatException e) {
+            handleInvalidValue(valStr);
+            return;
+          }
+          if (!((DoublePropertyMetadata) getPropertyMeta()).isValidValue(valDouble)) {
+            handleInvalidValue(valDouble);
+            return;
+          }
+          rotate(valDouble);
+          rotateTf.selectAll();
+          userUpdateValueProperty(valDouble);
+        };
+    setNumericEditorBehavior(this, rotateTf, valueListener, false);
 
-        assert (value instanceof Double);
-        rotate((Double) value);
+    // Select all text when this editor is selected
+    rotateTf.setOnMousePressed(event -> rotateTf.selectAll());
+    rotateTf
+        .focusedProperty()
+        .addListener(
+            ((observable, oldValue, newValue) -> {
+              if (newValue) {
+                rotateTf.selectAll();
+              }
+            }));
+  }
+
+  @Override
+  public Node getValueEditor() {
+    return super.handleGenericModes(root);
+  }
+
+  @Override
+  public Object getValue() {
+    return EditorUtils.round(rotatorHandle.getRotate(), roundingFactor);
+  }
+
+  @Override
+  public void setValue(Object value) {
+    setValueGeneric(value);
+    if (isSetValueDone()) {
+      return;
     }
 
-    @Override
-    public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super.reset(propMeta, selectedClasses);
-//        setValueGeneric(propMeta.getDefaultValueObject());
-    }
+    assert (value instanceof Double);
+    rotate((Double) value);
+  }
 
-    @Override
-    protected void valueIsIndeterminate() {
-        handleIndeterminate(rotateTf);
-    }
+  @Override
+  public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super.reset(propMeta, selectedClasses);
+    //        setValueGeneric(propMeta.getDefaultValueObject());
+  }
 
-    @FXML
-    void rotatorPressed(MouseEvent e) {
-        rotatorDragged(e);
-    }
+  @Override
+  protected void valueIsIndeterminate() {
+    handleIndeterminate(rotateTf);
+  }
 
-    @FXML
-    void rotatorReleased(MouseEvent e) {
-        userUpdateValueProperty(getValue());
-    }
+  @FXML
+  void rotatorPressed(MouseEvent e) {
+    rotatorDragged(e);
+  }
 
-    @FXML
-    public void rotatorDragged(MouseEvent e) {
-//        System.out.println("in RotateEditor.rotatorDragged");
-        updateFromRotator = true;
-        Parent p = rotatorDial.getParent();
-        Bounds b = rotatorDial.getLayoutBounds();
-        Double centerX = b.getMinX() + (b.getWidth() / 2);
-        Double centerY = b.getMinY() + (b.getHeight() / 2);
-        Point2D center = p.localToParent(centerX, centerY);
-        Point2D mouse = p.localToParent(e.getX(), e.getY());
-        Double deltaX = mouse.getX() - center.getX();
-        Double deltaY = mouse.getY() - center.getY();
-        Double radians = Math.atan2(deltaY, deltaX);
-        rotate(Math.toDegrees(radians));
-        userUpdateTransientValueProperty(getValue());
-        updateFromRotator = false;
-    }
+  @FXML
+  void rotatorReleased(MouseEvent e) {
+    userUpdateValueProperty(getValue());
+  }
 
-    private void rotate(Double degrees) {
-        rotatorHandle.setRotate(degrees);
-        if (updateFromRotator) {
-            // Round the value
-            rotateTf.setText(EditorUtils.valAsStr(getValue()));
-        } else {
-            // Do not round the value (more decimals may be required)
-            rotateTf.setText(EditorUtils.valAsStr(degrees));
-        }
-    }
+  @FXML
+  public void rotatorDragged(MouseEvent e) {
+    //        System.out.println("in RotateEditor.rotatorDragged");
+    updateFromRotator = true;
+    Parent p = rotatorDial.getParent();
+    Bounds b = rotatorDial.getLayoutBounds();
+    Double centerX = b.getMinX() + (b.getWidth() / 2);
+    Double centerY = b.getMinY() + (b.getHeight() / 2);
+    Point2D center = p.localToParent(centerX, centerY);
+    Point2D mouse = p.localToParent(e.getX(), e.getY());
+    Double deltaX = mouse.getX() - center.getX();
+    Double deltaY = mouse.getY() - center.getY();
+    Double radians = Math.atan2(deltaY, deltaX);
+    rotate(Math.toDegrees(radians));
+    userUpdateTransientValueProperty(getValue());
+    updateFromRotator = false;
+  }
 
-    @Override
-    public void requestFocus() {
-        EditorUtils.doNextFrame(() -> rotateTf.requestFocus());
+  private void rotate(Double degrees) {
+    rotatorHandle.setRotate(degrees);
+    if (updateFromRotator) {
+      // Round the value
+      rotateTf.setText(EditorUtils.valAsStr(getValue()));
+    } else {
+      // Do not round the value (more decimals may be required)
+      rotateTf.setText(EditorUtils.valAsStr(degrees));
     }
+  }
 
+  @Override
+  public void requestFocus() {
+    EditorUtils.doNextFrame(() -> rotateTf.requestFocus());
+  }
 }

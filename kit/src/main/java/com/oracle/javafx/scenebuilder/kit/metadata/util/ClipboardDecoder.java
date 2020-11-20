@@ -46,76 +46,72 @@ import java.util.List;
 import java.util.ResourceBundle;
 import javafx.scene.input.Clipboard;
 
-/**
- *
- */
+/** */
 public class ClipboardDecoder {
-    
-    final Clipboard clipboard;
 
-    public ClipboardDecoder(Clipboard clipboard) {
-        this.clipboard = clipboard;
+  final Clipboard clipboard;
+
+  public ClipboardDecoder(Clipboard clipboard) {
+    this.clipboard = clipboard;
+  }
+
+  public List<FXOMObject> decode(FXOMDocument targetDocument) {
+    assert targetDocument != null;
+
+    List<FXOMObject> result = null;
+
+    // SB_DATA_FORMAT
+    if (clipboard.hasContent(ClipboardEncoder.SB_DATA_FORMAT)) {
+      final Object content = clipboard.getContent(ClipboardEncoder.SB_DATA_FORMAT);
+      if (content instanceof FXOMArchive) {
+        final FXOMArchive archive = (FXOMArchive) content;
+        try {
+          result = archive.decode(targetDocument);
+        } catch (IOException x) {
+          result = null;
+        }
+      }
     }
-    
-    public List<FXOMObject> decode(FXOMDocument targetDocument) {
-        assert targetDocument != null;
-        
-        List<FXOMObject> result = null;
-        
-        // SB_DATA_FORMAT
-        if (clipboard.hasContent(ClipboardEncoder.SB_DATA_FORMAT)) {
-            final Object content = clipboard.getContent(ClipboardEncoder.SB_DATA_FORMAT);
-            if (content instanceof FXOMArchive) {
-                final FXOMArchive archive = (FXOMArchive) content;
-                try {
-                    result = archive.decode(targetDocument);
-                } catch(IOException x) {
-                    result = null;
-                }
-            }
+
+    // FXML_DATA_FORMAT
+    if ((result == null) && clipboard.hasContent(ClipboardEncoder.FXML_DATA_FORMAT)) {
+      final Object content = clipboard.getContent(ClipboardEncoder.FXML_DATA_FORMAT);
+      if (content instanceof String) {
+        final String fxmlText = (String) content;
+        try {
+          final URL location = targetDocument.getLocation();
+          final ClassLoader classLoader = targetDocument.getClassLoader();
+          final ResourceBundle resources = targetDocument.getResources();
+          final FXOMDocument transientDoc =
+              new FXOMDocument(fxmlText, location, classLoader, resources);
+          result = Arrays.asList(transientDoc.getFxomRoot());
+        } catch (IOException x) {
+          result = null;
         }
-        
-        // FXML_DATA_FORMAT
-        if ((result == null) 
-                && clipboard.hasContent(ClipboardEncoder.FXML_DATA_FORMAT)) {
-            final Object content = clipboard.getContent(ClipboardEncoder.FXML_DATA_FORMAT);
-            if (content instanceof String) {
-                final String fxmlText = (String) content;
-                try {
-                    final URL location = targetDocument.getLocation();
-                    final ClassLoader classLoader = targetDocument.getClassLoader();
-                    final ResourceBundle resources = targetDocument.getResources();
-                    final FXOMDocument transientDoc
-                            = new FXOMDocument(fxmlText, location, classLoader, resources);
-                    result = Arrays.asList(transientDoc.getFxomRoot());
-                } catch(IOException x) {
-                    result = null;
-                }
-            }
-        }
-        
-        // DataFormat.FILES
-        if ((result == null) && clipboard.hasFiles()) {
-            result = new ArrayList<>();
-            for (File file : clipboard.getFiles()) {
-                try {
-                    final FXOMObject newObject
-                            = FXOMNodes.newObject(targetDocument, file);
-                    // newObject is null when file is empty
-                    if (newObject != null) {
-                        result.add(newObject);
-                    }
-                } catch (IOException x) {
-                    // Then we silently ignore this file
-                }
-            }
-        }
-        
-        // If nothing is exploitable, we return a list.
-        if (result == null) {
-            result = Collections.emptyList();
-        }
-        
-        return result;
+      }
     }
+
+    // DataFormat.FILES
+    if ((result == null) && clipboard.hasFiles()) {
+      result = new ArrayList<>();
+      for (File file : clipboard.getFiles()) {
+        try {
+          final FXOMObject newObject = FXOMNodes.newObject(targetDocument, file);
+          // newObject is null when file is empty
+          if (newObject != null) {
+            result.add(newObject);
+          }
+        } catch (IOException x) {
+          // Then we silently ignore this file
+        }
+      }
+    }
+
+    // If nothing is exploitable, we return a list.
+    if (result == null) {
+      result = Collections.emptyList();
+    }
+
+    return result;
+  }
 }

@@ -36,18 +36,21 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import java.util.List;
 
-/**
- *
- */
+/** */
 public class TickMarkListPropertyMetadata extends ListValuePropertyMetadata<Object> {
 
-    private final static ObjectPropertyMetadata itemMetadata
-            = new ObjectPropertyMetadata(new PropertyName("unused"), //NOI18N
-                    true, null, InspectorPath.UNUSED);
+  private static final ObjectPropertyMetadata itemMetadata =
+      new ObjectPropertyMetadata(
+          new PropertyName("unused"), // NOI18N
+          true,
+          null,
+          InspectorPath.UNUSED);
 
-    public TickMarkListPropertyMetadata(PropertyName name, boolean readWrite, 
-            List<Object> defaultValue, InspectorPath inspectorPath) {
-        super(name, Object.class, itemMetadata, readWrite, defaultValue, inspectorPath);
-    }
-
+  public TickMarkListPropertyMetadata(
+      PropertyName name,
+      boolean readWrite,
+      List<Object> defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, Object.class, itemMetadata, readWrite, defaultValue, inspectorPath);
+  }
 }

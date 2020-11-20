@@ -39,69 +39,65 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
+/** */
 public class FXOMArchive implements Serializable {
-    
-    private static final long serialVersionUID = 7777;
 
-    private final List<Entry> entries = new ArrayList<>();
-    
-    public FXOMArchive(List<FXOMObject> fxomObjects) {
-        assert fxomObjects != null;
-        
-        for (FXOMObject o : fxomObjects) {
-            final URL location = o.getFxomDocument().getLocation();
-            final String fxmlText = FXOMNodes.newDocument(o).getFxmlText(false);
-            entries.add(new Entry(fxmlText, location));
-        }
-    }
-    
-    public List<Entry> getEntries() {
-        return entries;
-    }
-    
-    public List<FXOMObject> decode(FXOMDocument targetDocument)
-    throws IOException {
-        final List<FXOMObject> result = new ArrayList<>();
-        
-        assert targetDocument != null;
-        
-        for (Entry e : entries) {
-            final URL location = e.getLocation();
-            final String fxmlText = e.getFxmlText();
-            final FXOMDocument d = new FXOMDocument(fxmlText, location, 
-                    targetDocument.getClassLoader(), targetDocument.getResources());
-            final FXOMObject fxomRoot = d.getFxomRoot();
-            assert fxomRoot != null;
-            fxomRoot.moveToFxomDocument(targetDocument);
-            result.add(fxomRoot);
-        }
-        
-        return result;
-    }
-    
-    
-    public static class Entry implements Serializable {
-        
-        private static final long serialVersionUID = 8888;
-        
-        private final String fxmlText;
-        private final URL location;
-        
-        public Entry(String fxmlText, URL location) {
-            this.fxmlText = fxmlText;
-            this.location = location;
-        }
+  private static final long serialVersionUID = 7777;
 
-        public String getFxmlText() {
-            return fxmlText;
-        }
+  private final List<Entry> entries = new ArrayList<>();
 
-        public URL getLocation() {
-            return location;
-        }
-        
+  public FXOMArchive(List<FXOMObject> fxomObjects) {
+    assert fxomObjects != null;
+
+    for (FXOMObject o : fxomObjects) {
+      final URL location = o.getFxomDocument().getLocation();
+      final String fxmlText = FXOMNodes.newDocument(o).getFxmlText(false);
+      entries.add(new Entry(fxmlText, location));
     }
+  }
+
+  public List<Entry> getEntries() {
+    return entries;
+  }
+
+  public List<FXOMObject> decode(FXOMDocument targetDocument) throws IOException {
+    final List<FXOMObject> result = new ArrayList<>();
+
+    assert targetDocument != null;
+
+    for (Entry e : entries) {
+      final URL location = e.getLocation();
+      final String fxmlText = e.getFxmlText();
+      final FXOMDocument d =
+          new FXOMDocument(
+              fxmlText, location, targetDocument.getClassLoader(), targetDocument.getResources());
+      final FXOMObject fxomRoot = d.getFxomRoot();
+      assert fxomRoot != null;
+      fxomRoot.moveToFxomDocument(targetDocument);
+      result.add(fxomRoot);
+    }
+
+    return result;
+  }
+
+  public static class Entry implements Serializable {
+
+    private static final long serialVersionUID = 8888;
+
+    private final String fxmlText;
+    private final URL location;
+
+    public Entry(String fxmlText, URL location) {
+      this.fxmlText = fxmlText;
+      this.location = location;
+    }
+
+    public String getFxmlText() {
+      return fxmlText;
+    }
+
+    public URL getLocation() {
+      return location;
+    }
+  }
 }

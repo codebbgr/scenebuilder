@@ -35,8 +35,13 @@ import com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors.DoubleF
 import com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors.EditorUtils;
 import com.oracle.javafx.scenebuilder.kit.util.control.effectpicker.EffectPickerController;
 import com.oracle.javafx.scenebuilder.kit.util.control.effectpicker.Utils;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -45,122 +50,118 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.event.ActionEvent;
-
 public class DoubleTextFieldControl extends GridPane {
 
-    @FXML
-    private Label editor_label;
-    @FXML
-    private DoubleField editor_textfield;
+  @FXML private Label editor_label;
+  @FXML private DoubleField editor_textfield;
 
-    private double mini;
-    private double maxi;
-    private double incDecValue;
-    private final DoubleProperty value = new SimpleDoubleProperty();
-    private final EffectPickerController effectPickerController;
-    private final int roundingFactor = 100; // 2 decimals rounding
+  private double mini;
+  private double maxi;
+  private double incDecValue;
+  private final DoubleProperty value = new SimpleDoubleProperty();
+  private final EffectPickerController effectPickerController;
+  private final int roundingFactor = 100; // 2 decimals rounding
 
-    public DoubleTextFieldControl(
-            EffectPickerController effectPickerController,
-            String labelString,
-            double min,
-            double max,
-            double initVal,
-            double incDec) {
-        this.effectPickerController = effectPickerController;
-        initialize(labelString, min, max, initVal, incDec);
+  public DoubleTextFieldControl(
+      EffectPickerController effectPickerController,
+      String labelString,
+      double min,
+      double max,
+      double initVal,
+      double incDec) {
+    this.effectPickerController = effectPickerController;
+    initialize(labelString, min, max, initVal, incDec);
 
-        editor_textfield.focusedProperty().addListener((ChangeListener<Boolean>) (ov, oldValue, newValue) -> {
-            // Commit the value on focus lost
-            if (newValue == false) {
-                double inputValue = Double.parseDouble(editor_textfield.getText());
-                // First update the model
-                setValue(inputValue);
-                // Then notify the controller a change occured
-                effectPickerController.incrementRevision();
-            }
+    editor_textfield
+        .focusedProperty()
+        .addListener(
+            (ChangeListener<Boolean>)
+                (ov, oldValue, newValue) -> {
+                  // Commit the value on focus lost
+                  if (newValue == false) {
+                    double inputValue = Double.parseDouble(editor_textfield.getText());
+                    // First update the model
+                    setValue(inputValue);
+                    // Then notify the controller a change occured
+                    effectPickerController.incrementRevision();
+                  }
+                });
+    editor_textfield.setOnAction(
+        (ActionEvent event) -> {
+          event.consume();
         });
-        editor_textfield.setOnAction((ActionEvent event) -> {
-            event.consume();
-        });
+  }
+
+  public DoubleProperty valueProperty() {
+    return value;
+  }
+
+  public double getValue() {
+    return value.get();
+  }
+
+  @FXML
+  void textfieldTyped(KeyEvent e) {
+    if (e.getCode() == KeyCode.UP) {
+      // First update the model
+      incOrDecValue(incDecValue);
+      // Then notify the controller a change occured
+      effectPickerController.incrementRevision();
+    }
+    if (e.getCode() == KeyCode.DOWN) {
+      // First update the model
+      incOrDecValue(-incDecValue);
+      // Then notify the controller a change occured
+      effectPickerController.incrementRevision();
+    }
+    if (e.getCode() == KeyCode.ENTER) {
+      double inputValue = Double.parseDouble(editor_textfield.getText());
+      // First update the model
+      setValue(inputValue);
+      // Then notify the controller a change occured
+      effectPickerController.incrementRevision();
+      editor_textfield.selectAll();
+    }
+  }
+
+  private void incOrDecValue(double delta) {
+    setValue(getValue() + delta);
+    //        Platform.runLater(new Runnable() {
+    //            @Override
+    //            public void run() {
+    //                // position caret after new value for easy editing
+    //                editor_textfield.positionCaret(editor_textfield.getText().length());
+    //            }
+    //        });
+  }
+
+  private void setValue(double d) {
+    double val = Utils.clamp(mini, d, maxi);
+    double rounded = EditorUtils.round(val, roundingFactor);
+    value.set(rounded);
+    editor_textfield.setText(Double.toString(rounded));
+  }
+
+  private void initialize(
+      String labelString, double min, double max, double initVal, double incDec) {
+
+    final URL layoutURL =
+        DoubleTextFieldControl.class.getResource("NumFieldControl.fxml"); // NOI18N
+    try (InputStream is = layoutURL.openStream()) {
+      FXMLLoader loader = new FXMLLoader();
+      loader.setController(this);
+      loader.setRoot(this);
+      loader.setLocation(layoutURL);
+      Parent p = (Parent) loader.load(is);
+      assert p == this;
+    } catch (IOException x) {
+      throw new RuntimeException(x);
     }
 
-    public DoubleProperty valueProperty() {
-        return value;
-    }
-
-    public double getValue() {
-        return value.get();
-    }
-
-    @FXML
-    void textfieldTyped(KeyEvent e) {
-        if (e.getCode() == KeyCode.UP) {
-            // First update the model
-            incOrDecValue(incDecValue);
-            // Then notify the controller a change occured
-            effectPickerController.incrementRevision();
-        }
-        if (e.getCode() == KeyCode.DOWN) {
-            // First update the model
-            incOrDecValue(-incDecValue);
-            // Then notify the controller a change occured
-            effectPickerController.incrementRevision();
-        }
-        if (e.getCode() == KeyCode.ENTER) {
-            double inputValue = Double.parseDouble(editor_textfield.getText());
-            // First update the model
-            setValue(inputValue);
-            // Then notify the controller a change occured
-            effectPickerController.incrementRevision();
-            editor_textfield.selectAll();
-        }
-    }
-
-    private void incOrDecValue(double delta) {
-        setValue(getValue() + delta);
-//        Platform.runLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                // position caret after new value for easy editing
-//                editor_textfield.positionCaret(editor_textfield.getText().length());
-//            }
-//        });
-    }
-
-    private void setValue(double d) {
-        double val = Utils.clamp(mini, d, maxi);
-        double rounded = EditorUtils.round(val, roundingFactor);
-        value.set(rounded);
-        editor_textfield.setText(Double.toString(rounded));
-    }
-
-    private void initialize(String labelString,
-            double min, double max, double initVal, double incDec) {
-
-        final URL layoutURL = DoubleTextFieldControl.class.getResource("NumFieldControl.fxml"); //NOI18N
-        try (InputStream is = layoutURL.openStream()) {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setController(this);
-            loader.setRoot(this);
-            loader.setLocation(layoutURL);
-            Parent p = (Parent) loader.load(is);
-            assert p == this;
-        } catch (IOException x) {
-            throw new RuntimeException(x);
-        }
-
-        editor_label.setText(labelString);
-        incDecValue = incDec;
-        mini = min;
-        maxi = max;
-        setValue(initVal);
-    }
+    editor_label.setText(labelString);
+    incDecValue = incDec;
+    mini = min;
+    maxi = max;
+    setValue(initVal);
+  }
 }

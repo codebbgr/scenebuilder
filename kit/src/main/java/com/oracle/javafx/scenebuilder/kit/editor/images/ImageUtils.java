@@ -44,135 +44,135 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
-/**
- *
- */
+/** */
 public abstract class ImageUtils {
-    
-    static final String NODE_ICONS_DIR = "nodeicons"; //NOI18N
-    static final String UI_DIR = "ui"; //NOI18N
-    static final String MISSING_ICON = "MissingIcon.png"; //NOI18N
-    static final String CLOSED_HAND = "ClosedHand.png"; //NOI18N
-    static final String OPEN_HAND = "OpenHand.png"; //NOI18N
-    static final String WARNING_BADGE = "WarningBadge.png"; //NOI18N
-    static final String CSS_CURSOR = "css-cursor.png"; //NOI18N
-    static final String DELETE_ICON = "delete.png"; //NOI18N
-    static final String EDIT_ICON = "edit.png"; //NOI18N
-    private static Cursor closed_hand_cursor;
-    private static Cursor open_hand_cursor;
-    private static Image warning_badge_image;
-    private static Image delete_icon_image;
-    private static Image edit_icon_image;
-    private static ImageCursor css_cursor;
-    private static final WeakHashMap<String, Reference<Image>> imageCache = new WeakHashMap<>();
 
-    public static Image getImage(URL resource) {
-        // No resource found for the specified name
-        if (resource == null) {
-            resource = ImageUtils.class.getResource(NODE_ICONS_DIR + "/" + MISSING_ICON); //NOI18N
-        }
-        final String imageUrl = resource.toExternalForm();
-        final Reference<Image> ref = imageCache.get(imageUrl);
-        Image image = ref != null ? ref.get() : null;
-        if (image == null) {
-            image = new Image(imageUrl);
-            imageCache.put(imageUrl, new SoftReference<>(image));
-        }
-        return image;
-    }
+  static final String NODE_ICONS_DIR = "nodeicons"; // NOI18N
+  static final String UI_DIR = "ui"; // NOI18N
+  static final String MISSING_ICON = "MissingIcon.png"; // NOI18N
+  static final String CLOSED_HAND = "ClosedHand.png"; // NOI18N
+  static final String OPEN_HAND = "OpenHand.png"; // NOI18N
+  static final String WARNING_BADGE = "WarningBadge.png"; // NOI18N
+  static final String CSS_CURSOR = "css-cursor.png"; // NOI18N
+  static final String DELETE_ICON = "delete.png"; // NOI18N
+  static final String EDIT_ICON = "edit.png"; // NOI18N
+  private static Cursor closed_hand_cursor;
+  private static Cursor open_hand_cursor;
+  private static Image warning_badge_image;
+  private static Image delete_icon_image;
+  private static Image edit_icon_image;
+  private static ImageCursor css_cursor;
+  private static final WeakHashMap<String, Reference<Image>> imageCache = new WeakHashMap<>();
 
-    /**
-     * Returns the image corresponding to the specified name.
-     * The file MUST be located in the NODE_ICONS_DIR.
-     * @param name
-     * @return 
-     */
-    public static Image getNodeIcon(String name) {
-        final URL resource = getNodeIconURL(name);
-        return getImage(resource);
+  public static Image getImage(URL resource) {
+    // No resource found for the specified name
+    if (resource == null) {
+      resource = ImageUtils.class.getResource(NODE_ICONS_DIR + "/" + MISSING_ICON); // NOI18N
     }
+    final String imageUrl = resource.toExternalForm();
+    final Reference<Image> ref = imageCache.get(imageUrl);
+    Image image = ref != null ? ref.get() : null;
+    if (image == null) {
+      image = new Image(imageUrl);
+      imageCache.put(imageUrl, new SoftReference<>(image));
+    }
+    return image;
+  }
 
-    public static Image getImageFromNode(Node visualNode) {
-        visualNode.setOpacity(0.75);
-        final Group visualGroup = new Group();
-        visualGroup.getChildren().add(visualNode);
-        final Scene hiddenScene = new Scene(visualGroup);
-        Stage hiddenStage = new Stage();
-        hiddenStage.setScene(hiddenScene);
-        final Image contentImage = visualNode.snapshot(null, null);
-        // Detach the scene !
-        hiddenScene.setRoot(new Group());
-        hiddenStage.close();
-        return contentImage;
+  /**
+   * Returns the image corresponding to the specified name. The file MUST be located in the
+   * NODE_ICONS_DIR.
+   *
+   * @param name
+   * @return
+   */
+  public static Image getNodeIcon(String name) {
+    final URL resource = getNodeIconURL(name);
+    return getImage(resource);
+  }
+
+  public static Image getImageFromNode(Node visualNode) {
+    visualNode.setOpacity(0.75);
+    final Group visualGroup = new Group();
+    visualGroup.getChildren().add(visualNode);
+    final Scene hiddenScene = new Scene(visualGroup);
+    Stage hiddenStage = new Stage();
+    hiddenStage.setScene(hiddenScene);
+    final Image contentImage = visualNode.snapshot(null, null);
+    // Detach the scene !
+    hiddenScene.setRoot(new Group());
+    hiddenStage.close();
+    return contentImage;
+  }
+
+  public static synchronized Cursor getClosedHandCursor() {
+    if (closed_hand_cursor == null) {
+      final URL url = ImageUtils.class.getResource(UI_DIR + "/" + CLOSED_HAND); // NOI18N
+      // The image is of size 32 x 32 and we set hotspot on the middle.
+      closed_hand_cursor = new ImageCursor(new Image(url.toExternalForm()), 16, 10);
     }
-    
-    public static synchronized Cursor getClosedHandCursor() {
-        if (closed_hand_cursor == null) {
-            final URL url = ImageUtils.class.getResource(UI_DIR + "/" + CLOSED_HAND); //NOI18N
-            // The image is of size 32 x 32 and we set hotspot on the middle.
-            closed_hand_cursor = new ImageCursor(new Image(url.toExternalForm()), 16, 10);
-        }
-        return closed_hand_cursor;
+    return closed_hand_cursor;
+  }
+
+  public static synchronized Cursor getOpenHandCursor() {
+    if (open_hand_cursor == null) {
+      final URL url = ImageUtils.class.getResource(UI_DIR + "/" + OPEN_HAND); // NOI18N
+      // The image is of size 32 x 32 and we set hotspot on the middle.
+      open_hand_cursor = new ImageCursor(new Image(url.toExternalForm()), 16, 10);
     }
-    
-    public static synchronized Cursor getOpenHandCursor() {
-        if (open_hand_cursor == null) {
-            final URL url = ImageUtils.class.getResource(UI_DIR + "/" + OPEN_HAND); //NOI18N
-            // The image is of size 32 x 32 and we set hotspot on the middle.
-            open_hand_cursor = new ImageCursor(new Image(url.toExternalForm()), 16, 10);
-        }
-        return open_hand_cursor;
+    return open_hand_cursor;
+  }
+
+  public static synchronized Image getDeleteIconImage() {
+    if (delete_icon_image == null) {
+      final URL url = ImageUtils.class.getResource(UI_DIR + "/" + DELETE_ICON); // NOI18N
+      delete_icon_image = new Image(url.toExternalForm());
     }
-    
-    public static synchronized Image getDeleteIconImage() {
-        if (delete_icon_image == null) {
-            final URL url = ImageUtils.class.getResource(UI_DIR + "/" + DELETE_ICON); //NOI18N
-            delete_icon_image = new Image(url.toExternalForm());
-        }
-        return delete_icon_image;
+    return delete_icon_image;
+  }
+
+  public static synchronized Image getEditIconImage() {
+    if (edit_icon_image == null) {
+      final URL url = ImageUtils.class.getResource(UI_DIR + "/" + EDIT_ICON); // NOI18N
+      edit_icon_image = new Image(url.toExternalForm());
     }
-    
-    public static synchronized Image getEditIconImage() {
-        if (edit_icon_image == null) {
-            final URL url = ImageUtils.class.getResource(UI_DIR + "/" + EDIT_ICON); //NOI18N
-            edit_icon_image = new Image(url.toExternalForm());
-        }
-        return edit_icon_image;
+    return edit_icon_image;
+  }
+
+  public static synchronized Image getWarningBadgeImage() {
+    if (warning_badge_image == null) {
+      final URL url = ImageUtils.class.getResource(UI_DIR + "/" + WARNING_BADGE); // NOI18N
+      warning_badge_image = new Image(url.toExternalForm());
     }
-    
-    public static synchronized Image getWarningBadgeImage() {
-        if (warning_badge_image == null) {
-            final URL url = ImageUtils.class.getResource(UI_DIR + "/" + WARNING_BADGE); //NOI18N
-            warning_badge_image = new Image(url.toExternalForm());
-        }
-        return warning_badge_image;
+    return warning_badge_image;
+  }
+
+  public static synchronized Cursor getCSSCursor() {
+    if (css_cursor == null) {
+      final URL url = ImageUtils.class.getResource(UI_DIR + "/" + CSS_CURSOR); // NOI18N
+      css_cursor = new ImageCursor(new Image(url.toExternalForm()));
     }
-    
-    public static synchronized Cursor getCSSCursor() {
-        if (css_cursor == null) {
-            final URL url = ImageUtils.class.getResource(UI_DIR + "/" + CSS_CURSOR); //NOI18N
-            css_cursor = new ImageCursor(new Image(url.toExternalForm()));
-        }
-        return css_cursor;
-    }
-    
-    /**
-     * Returns the URL corresponding to the specified name.
-     * The file MUST be located in the NODE_ICONS_DIR.
-     * @param name
-     * @return
-     */
-    public static URL getNodeIconURL(String name) {
-        return ImageUtils.class.getResource(NODE_ICONS_DIR + "/" + name); //NOI18N
-    }
-    
-    /**
-     * Returns the URL corresponding to the specified name.
-     * The file MUST be located in the UI_DIR.
-     * @param name
-     * @return
-     */
-    public static URL getUIURL(String name) {
-        return ImageUtils.class.getResource(UI_DIR + "/" + name); //NOI18N
-    }
+    return css_cursor;
+  }
+
+  /**
+   * Returns the URL corresponding to the specified name. The file MUST be located in the
+   * NODE_ICONS_DIR.
+   *
+   * @param name
+   * @return
+   */
+  public static URL getNodeIconURL(String name) {
+    return ImageUtils.class.getResource(NODE_ICONS_DIR + "/" + name); // NOI18N
+  }
+
+  /**
+   * Returns the URL corresponding to the specified name. The file MUST be located in the UI_DIR.
+   *
+   * @param name
+   * @return
+   */
+  public static URL getUIURL(String name) {
+    return ImageUtils.class.getResource(UI_DIR + "/" + name); // NOI18N
+  }
 }

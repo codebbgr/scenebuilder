@@ -35,33 +35,29 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.library.manager;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-/**
- * List cell item in the JAR/FXML Library dialog.
- */
+/** List cell item in the JAR/FXML Library dialog. */
 public class LibraryDialogListItem implements DialogListItem {
 
-    private final LibraryDialogController libraryDialogController;
-    private final Path filePath;
+  private final LibraryDialogController libraryDialogController;
+  private final Path filePath;
 
-    public LibraryDialogListItem(LibraryDialogController libraryDialogController, Path filePath) {
-        this.libraryDialogController = libraryDialogController;
-        this.filePath = filePath;
-    }
+  public LibraryDialogListItem(LibraryDialogController libraryDialogController, Path filePath) {
+    this.libraryDialogController = libraryDialogController;
+    this.filePath = filePath;
+  }
 
-    @Override
-    public LibraryDialogController getLibraryDialogController() {
-        return libraryDialogController;
-    }
+  @Override
+  public LibraryDialogController getLibraryDialogController() {
+    return libraryDialogController;
+  }
 
-    public Path getFilePath() {
-        return filePath;
-    }
-    
-    @Override
-    public String toString() {
-        if (Files.isDirectory(filePath))
-            return filePath.toAbsolutePath().toString();
-        else
-            return filePath.getFileName().toString();
-    }
+  public Path getFilePath() {
+    return filePath;
+  }
+
+  @Override
+  public String toString() {
+    if (Files.isDirectory(filePath)) return filePath.toAbsolutePath().toString();
+    else return filePath.getFileName().toString();
+  }
 }

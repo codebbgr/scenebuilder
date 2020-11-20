@@ -37,65 +37,62 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 
-/**
- *
- */
+/** */
 class BeanPropertyIntrospector {
-    
-    private final Object object;
-    private final PropertyDescriptor[] propertyDescriptors;
-    
-    public BeanPropertyIntrospector(Object object) {
-        assert object != null;
-        this.object = object;
-        try {
-            final BeanInfo beanInfo = Introspector.getBeanInfo(object.getClass());
-            this.propertyDescriptors = beanInfo.getPropertyDescriptors();
-        } catch(IntrospectionException x) {
-            throw new RuntimeException(x);
-        }
+
+  private final Object object;
+  private final PropertyDescriptor[] propertyDescriptors;
+
+  public BeanPropertyIntrospector(Object object) {
+    assert object != null;
+    this.object = object;
+    try {
+      final BeanInfo beanInfo = Introspector.getBeanInfo(object.getClass());
+      this.propertyDescriptors = beanInfo.getPropertyDescriptors();
+    } catch (IntrospectionException x) {
+      throw new RuntimeException(x);
     }
-    
-    public Object getValue(String propertyName) {
-        final PropertyDescriptor d = findDescriptor(propertyName);
-        final Object result;
-        
-        if (d != null) {
-            try {
-                result = d.getReadMethod().invoke(object);
-            } catch(InvocationTargetException|IllegalAccessException x) {
-                throw new RuntimeException(x);
-            }
-        } else {
-            throw new RuntimeException(propertyName + " not found"); //NOI18N
-        }
-        
-        return result;
+  }
+
+  public Object getValue(String propertyName) {
+    final PropertyDescriptor d = findDescriptor(propertyName);
+    final Object result;
+
+    if (d != null) {
+      try {
+        result = d.getReadMethod().invoke(object);
+      } catch (InvocationTargetException | IllegalAccessException x) {
+        throw new RuntimeException(x);
+      }
+    } else {
+      throw new RuntimeException(propertyName + " not found"); // NOI18N
     }
-    
-    
-    public void setValue(String propertyName, Object value) {
-        final PropertyDescriptor d = findDescriptor(propertyName);
-        
-        if (d != null) {
-            try {
-                d.getWriteMethod().invoke(object, value);
-            } catch(InvocationTargetException|IllegalAccessException x) {
-                throw new RuntimeException(x);
-            }
-        } else {
-            throw new RuntimeException(propertyName + " not found"); //NOI18N
-        }
+
+    return result;
+  }
+
+  public void setValue(String propertyName, Object value) {
+    final PropertyDescriptor d = findDescriptor(propertyName);
+
+    if (d != null) {
+      try {
+        d.getWriteMethod().invoke(object, value);
+      } catch (InvocationTargetException | IllegalAccessException x) {
+        throw new RuntimeException(x);
+      }
+    } else {
+      throw new RuntimeException(propertyName + " not found"); // NOI18N
     }
-    
-    private PropertyDescriptor findDescriptor(String propertyName) {
-        assert propertyDescriptors != null;
-        int i = 0;
-        while ((i < propertyDescriptors.length) 
-                && ! propertyDescriptors[i].getName().equals(propertyName)){
-            i++;
-        }
-        
-        return (i < propertyDescriptors.length) ? propertyDescriptors[i] : null;
+  }
+
+  private PropertyDescriptor findDescriptor(String propertyName) {
+    assert propertyDescriptors != null;
+    int i = 0;
+    while ((i < propertyDescriptors.length)
+        && !propertyDescriptors[i].getName().equals(propertyName)) {
+      i++;
     }
+
+    return (i < propertyDescriptors.length) ? propertyDescriptors[i] : null;
+  }
 }

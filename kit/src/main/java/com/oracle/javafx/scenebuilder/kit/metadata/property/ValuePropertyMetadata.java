@@ -32,106 +32,99 @@
 package com.oracle.javafx.scenebuilder.kit.metadata.property;
 
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
-import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
+import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *
- * 
- */
+/** */
 public abstract class ValuePropertyMetadata extends PropertyMetadata {
-    
-    private final boolean readWrite;
-    private final InspectorPath inspectorPath;
-    
-    
-    private final Map<Class<?>, Object> defaultValueAlternatives = new HashMap<>();
 
-    public ValuePropertyMetadata(PropertyName name, boolean readWrite, InspectorPath inspectorPath) {
-        super(name);
-        this.readWrite = readWrite;
-        this.inspectorPath = inspectorPath;
+  private final boolean readWrite;
+  private final InspectorPath inspectorPath;
+
+  private final Map<Class<?>, Object> defaultValueAlternatives = new HashMap<>();
+
+  public ValuePropertyMetadata(PropertyName name, boolean readWrite, InspectorPath inspectorPath) {
+    super(name);
+    this.readWrite = readWrite;
+    this.inspectorPath = inspectorPath;
+  }
+
+  public boolean isReadWrite() {
+    return readWrite;
+  }
+
+  public InspectorPath getInspectorPath() {
+    return inspectorPath;
+  }
+
+  public abstract Class<?> getValueClass();
+
+  public abstract Object getDefaultValueObject();
+
+  public abstract Object getValueObject(FXOMInstance fxomInstance);
+
+  public abstract void setValueObject(FXOMInstance fxomInstance, Object valueObject);
+
+  public Map<Class<?>, Object> getDefaultValueAlternatives() {
+    return defaultValueAlternatives;
+  }
+
+  /**
+   * Returns true if getName().getResidenceClass() != null.
+   *
+   * @return true if getName().getResidenceClass() != null.
+   */
+  public boolean isStaticProperty() {
+    return getName().getResidenceClass() != null;
+  }
+
+  /**
+   * Sets the property value in the scene graph object. FXOM instance is unchanged. Value is lost at
+   * next scene graph reconstruction.
+   *
+   * @param fxomInstance an fxom instance (never null)
+   * @param value a value conform with the property typing
+   */
+  public void setValueInSceneGraphObject(FXOMInstance fxomInstance, Object value) {
+    assert fxomInstance != null;
+    assert fxomInstance.getSceneGraphObject() != null;
+    getName().setValue(fxomInstance.getSceneGraphObject(), value);
+  }
+
+  /**
+   * Gets the property value in the scene graph object. Result might be different from
+   * getValueObject(). For example, if Button.text contains a resource key 'button-key' and a
+   * resource bundle assign 'OK' to this key: - getValueObject() -> '%button-key' -
+   * getValueInSceneGraphObject() -> 'OK'
+   *
+   * @param fxomInstance an fxom instance (never null)
+   * @return value of this property in the scene graph object associated fxomInstance
+   */
+  public Object getValueInSceneGraphObject(FXOMInstance fxomInstance) {
+    assert fxomInstance != null;
+    return getName().getValue(fxomInstance.getSceneGraphObject());
+  }
+
+  /*
+   * Object
+   */
+
+  @Override
+  public int hashCode() { // To please FindBugs
+    return super.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) { // To please FindBugs
+    if (obj == null) {
+      return false;
+    }
+    if (PropertyMetadata.class != obj.getClass()) {
+      return false;
     }
 
-    public boolean isReadWrite() {
-        return readWrite;
-    }
-
-
-    public InspectorPath getInspectorPath() {
-        return inspectorPath;
-    }
-    
-    public abstract Class<?> getValueClass();
-    public abstract Object getDefaultValueObject();
-    public abstract Object getValueObject(FXOMInstance fxomInstance);
-    public abstract void setValueObject(FXOMInstance fxomInstance, Object valueObject);
-    
-    public Map<Class<?>, Object> getDefaultValueAlternatives() {
-        return defaultValueAlternatives;
-    }
-    
-    
-    /**
-     * Returns true if getName().getResidenceClass() != null.
-     * @return true if getName().getResidenceClass() != null.
-     */
-    public boolean isStaticProperty() {
-        return getName().getResidenceClass() != null;
-    }
-    
-    /**
-     * Sets the property value in the scene graph object.
-     * FXOM instance is unchanged. 
-     * Value is lost at next scene graph reconstruction.
-     * 
-     * @param fxomInstance an fxom instance (never null)
-     * @param value a value conform with the property typing
-     */
-    public void setValueInSceneGraphObject(FXOMInstance fxomInstance, Object value) {
-        assert fxomInstance != null;
-        assert fxomInstance.getSceneGraphObject() != null;
-        getName().setValue(fxomInstance.getSceneGraphObject(), value);
-    }
-    
-    /**
-     * Gets the property value in the scene graph object.
-     * Result might be different from getValueObject().
-     * For example, if Button.text contains a resource key 'button-key'
-     * and a resource bundle assign 'OK' to this key:
-     *    - getValueObject() -> '%button-key'
-     *    - getValueInSceneGraphObject() -> 'OK'
-     * 
-     * @param fxomInstance an fxom instance (never null)
-     * @return value of this property in the scene graph object associated
-     *         fxomInstance
-     */
-    public Object getValueInSceneGraphObject(FXOMInstance fxomInstance) {
-        assert fxomInstance != null;
-        return getName().getValue(fxomInstance.getSceneGraphObject());
-    }
-    
-    /*
-     * Object
-     */
-    
-    @Override
-    public int hashCode() {  // To please FindBugs
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {  // To please FindBugs
-        if (obj == null) {
-            return false;
-        }
-        if (PropertyMetadata.class != obj.getClass()) {
-            return false;
-        }
-        
-        return super.equals(obj);
-    }
-    
+    return super.equals(obj);
+  }
 }

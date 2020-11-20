@@ -42,82 +42,78 @@ import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.scene.shape.Circle;
 
-/**
- *
- * 
- */
+/** */
 public class CircleResizer extends AbstractResizer<Circle> {
 
-    private final double originalRadius;
-    private final PropertyName radiusName = new PropertyName("radius"); //NOI18N
-    private final List<PropertyName> propertyNames = new ArrayList<>();
-    
-    public CircleResizer(Circle sceneGraphObject) {
-        super(sceneGraphObject);
-        originalRadius = sceneGraphObject.getRadius();
-        propertyNames.add(radiusName);
+  private final double originalRadius;
+  private final PropertyName radiusName = new PropertyName("radius"); // NOI18N
+  private final List<PropertyName> propertyNames = new ArrayList<>();
+
+  public CircleResizer(Circle sceneGraphObject) {
+    super(sceneGraphObject);
+    originalRadius = sceneGraphObject.getRadius();
+    propertyNames.add(radiusName);
+  }
+
+  /*
+   * AbstractResizer
+   */
+
+  @Override
+  public final Bounds computeBounds(double width, double height) {
+    final double radius = Math.round(Math.min(width, height) / 2.0);
+    final double minX = sceneGraphObject.getCenterX() - radius;
+    final double minY = sceneGraphObject.getCenterY() - radius;
+    return new BoundingBox(minX, minY, 2 * radius, 2 * radius);
+  }
+
+  @Override
+  public Feature getFeature() {
+    return Feature.SCALING;
+  }
+
+  @Override
+  public void changeWidth(double width) {
+    sceneGraphObject.setRadius(Math.round(width / 2));
+  }
+
+  @Override
+  public void changeHeight(double height) {
+    sceneGraphObject.setRadius(Math.round(height / 2));
+  }
+
+  @Override
+  public void revertToOriginalSize() {
+    sceneGraphObject.setRadius(originalRadius);
+  }
+
+  @Override
+  public List<PropertyName> getPropertyNames() {
+    return propertyNames;
+  }
+
+  @Override
+  public Object getValue(PropertyName propertyName) {
+    assert propertyName != null;
+    assert propertyNames.contains(propertyName);
+
+    final Object result;
+    if (propertyName.equals(radiusName)) {
+      result = sceneGraphObject.getRadius();
+    } else {
+      // Emergency code
+      result = null;
     }
 
-    /*
-     * AbstractResizer
-     */
-    
-    @Override
-    public final Bounds computeBounds(double width, double height) {
-        final double radius = Math.round(Math.min(width, height) / 2.0);
-        final double minX = sceneGraphObject.getCenterX() - radius;
-        final double minY = sceneGraphObject.getCenterY() - radius;
-        return new BoundingBox(minX, minY, 2 * radius, 2 * radius);
-    }
- 
-    @Override
-    public Feature getFeature() {
-        return Feature.SCALING;
-    }
+    return result;
+  }
 
-    @Override
-    public void changeWidth(double width) {
-        sceneGraphObject.setRadius(Math.round(width / 2));
+  @Override
+  public Map<PropertyName, Object> getChangeMap() {
+    final Map<PropertyName, Object> result = new HashMap<>();
+    if (MathUtils.equals(sceneGraphObject.getRadius(), originalRadius) == false) {
+      result.put(radiusName, sceneGraphObject.getRadius());
     }
-
-    @Override
-    public void changeHeight(double height) {
-        sceneGraphObject.setRadius(Math.round(height / 2));
-    }
-
-    @Override
-    public void revertToOriginalSize() {
-        sceneGraphObject.setRadius(originalRadius);
-    }
-
-    @Override
-    public List<PropertyName> getPropertyNames() {
-        return propertyNames;
-    }
-
-    @Override
-    public Object getValue(PropertyName propertyName) {
-        assert propertyName != null;
-        assert propertyNames.contains(propertyName);
-        
-        final Object result;
-        if (propertyName.equals(radiusName)) {
-            result = sceneGraphObject.getRadius();
-        } else {
-            // Emergency code
-            result = null;
-        }
-        
-        return result;
-    }
-
-    @Override
-    public Map<PropertyName, Object> getChangeMap() {
-        final Map<PropertyName, Object> result = new HashMap<>();
-        if (MathUtils.equals(sceneGraphObject.getRadius(), originalRadius) == false) {
-            result.put(radiusName, sceneGraphObject.getRadius());
-        }
-        return result;
-    }
-
+    return result;
+  }
 }

@@ -36,38 +36,35 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.chart.PieChart;
 
-/**
- *
- */
+/** */
 class PieChartSampleData extends AbstractSampleData {
-    
-    private final List<PieChart.Data> samples = new ArrayList<>();
 
-    public PieChartSampleData() {
-        for (int i = 0; i < 20; i++) {
-            samples.add(new PieChart.Data(lorem(i), Math.random() * 100.0));
-        }
-    }
+  private final List<PieChart.Data> samples = new ArrayList<>();
 
-    /*
-     * AbstractSampleData
-     */
-    
-    @Override
-    public void applyTo(Object sceneGraphObject) {
-        assert sceneGraphObject instanceof PieChart;
-        
-        final PieChart pieChart = (PieChart) sceneGraphObject;
-        pieChart.getData().clear();
-        pieChart.getData().addAll(samples);
+  public PieChartSampleData() {
+    for (int i = 0; i < 20; i++) {
+      samples.add(new PieChart.Data(lorem(i), Math.random() * 100.0));
     }
-    
-    @Override
-    public void removeFrom(Object sceneGraphObject) {
-        assert sceneGraphObject instanceof PieChart;
-        
-        final PieChart pieChart = (PieChart) sceneGraphObject;
-        pieChart.getData().clear();
-    }
-    
+  }
+
+  /*
+   * AbstractSampleData
+   */
+
+  @Override
+  public void applyTo(Object sceneGraphObject) {
+    assert sceneGraphObject instanceof PieChart;
+
+    final PieChart pieChart = (PieChart) sceneGraphObject;
+    pieChart.getData().clear();
+    pieChart.getData().addAll(samples);
+  }
+
+  @Override
+  public void removeFrom(Object sceneGraphObject) {
+    assert sceneGraphObject instanceof PieChart;
+
+    final PieChart pieChart = (PieChart) sceneGraphObject;
+    pieChart.getData().clear();
+  }
 }

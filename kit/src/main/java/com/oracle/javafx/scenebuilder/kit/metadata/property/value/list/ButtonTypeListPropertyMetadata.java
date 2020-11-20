@@ -37,18 +37,21 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import java.util.List;
 import javafx.scene.control.ButtonType;
 
-/**
- *
- */
+/** */
 public class ButtonTypeListPropertyMetadata extends ListValuePropertyMetadata<ButtonType> {
 
-    private final static ButtonTypePropertyMetadata itemMetadata
-            = new ButtonTypePropertyMetadata(new PropertyName("unused"), //NOI18N
-                    true, ButtonType.CLOSE, InspectorPath.UNUSED);
+  private static final ButtonTypePropertyMetadata itemMetadata =
+      new ButtonTypePropertyMetadata(
+          new PropertyName("unused"), // NOI18N
+          true,
+          ButtonType.CLOSE,
+          InspectorPath.UNUSED);
 
-    public ButtonTypeListPropertyMetadata(PropertyName name, boolean readWrite, 
-            List<ButtonType> defaultValue, InspectorPath inspectorPath) {
-        super(name, ButtonType.class, itemMetadata, readWrite, defaultValue, inspectorPath);
-    }
-
+  public ButtonTypeListPropertyMetadata(
+      PropertyName name,
+      boolean readWrite,
+      List<ButtonType> defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, ButtonType.class, itemMetadata, readWrite, defaultValue, inspectorPath);
+  }
 }

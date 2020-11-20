@@ -34,13 +34,11 @@ package com.oracle.javafx.scenebuilder.kit.editor.job.wrap;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import javafx.scene.layout.TilePane;
 
-/**
- * Job used to wrap selection in a TilePane.
- */
+/** Job used to wrap selection in a TilePane. */
 public class WrapInTilePaneJob extends AbstractWrapInSubComponentJob {
 
-    public WrapInTilePaneJob(EditorController editorController) {
-        super(editorController);
-        newContainerClass = TilePane.class;
-    }
+  public WrapInTilePaneJob(EditorController editorController) {
+    super(editorController);
+    newContainerClass = TilePane.class;
+  }
 }

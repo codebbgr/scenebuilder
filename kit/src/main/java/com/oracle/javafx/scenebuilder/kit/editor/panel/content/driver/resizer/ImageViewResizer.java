@@ -31,117 +31,111 @@
  */
 package com.oracle.javafx.scenebuilder.kit.editor.panel.content.driver.resizer;
 
+import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
+import com.oracle.javafx.scenebuilder.kit.util.MathUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.scene.image.ImageView;
 
-import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
-import com.oracle.javafx.scenebuilder.kit.util.MathUtils;
-
-/**
- *
- * 
- */
+/** */
 public class ImageViewResizer extends AbstractResizer<ImageView> {
 
-    private final double originalFitWidth;
-    private final double originalFitHeight;
-    private final PropertyName fitWidthName = new PropertyName("fitWidth"); //NOI18N
-    private final PropertyName fitHeightName = new PropertyName("fitHeight"); //NOI18N
-    private final List<PropertyName> propertyNames = new ArrayList<>();
-    
-    public ImageViewResizer(ImageView sceneGraphObject) {
-        super(sceneGraphObject);
-        originalFitWidth   = sceneGraphObject.getFitWidth();
-        originalFitHeight  = sceneGraphObject.getFitHeight();
-        propertyNames.add(fitWidthName);
-        propertyNames.add(fitHeightName);
-//        assert BoundsUtils.equals(sceneGraphObject.getLayoutBounds(), 
-//                computeBounds(originalFitWidth, originalFitHeight));
+  private final double originalFitWidth;
+  private final double originalFitHeight;
+  private final PropertyName fitWidthName = new PropertyName("fitWidth"); // NOI18N
+  private final PropertyName fitHeightName = new PropertyName("fitHeight"); // NOI18N
+  private final List<PropertyName> propertyNames = new ArrayList<>();
+
+  public ImageViewResizer(ImageView sceneGraphObject) {
+    super(sceneGraphObject);
+    originalFitWidth = sceneGraphObject.getFitWidth();
+    originalFitHeight = sceneGraphObject.getFitHeight();
+    propertyNames.add(fitWidthName);
+    propertyNames.add(fitHeightName);
+    //        assert BoundsUtils.equals(sceneGraphObject.getLayoutBounds(),
+    //                computeBounds(originalFitWidth, originalFitHeight));
+  }
+
+  /*
+   * AbstractResizer
+   */
+
+  @Override
+  public final Bounds computeBounds(double width, double height) {
+    final double minX = sceneGraphObject.getX();
+    final double minY = sceneGraphObject.getY();
+    final double actualWidth;
+    if (width > 0) {
+      actualWidth = width;
+    } else {
+      actualWidth = 1.0;
+    }
+    final double actualHeight;
+    if (height > 0) {
+      actualHeight = height;
+    } else {
+      actualHeight = 1.0;
+    }
+    return new BoundingBox(minX, minY, Math.round(actualWidth), Math.round(actualHeight));
+  }
+
+  @Override
+  public Feature getFeature() {
+    return Feature.FREE;
+  }
+
+  @Override
+  public void changeWidth(double width) {
+    sceneGraphObject.setFitWidth(Math.round(width));
+  }
+
+  @Override
+  public void changeHeight(double height) {
+    sceneGraphObject.setFitHeight(Math.round(height));
+  }
+
+  @Override
+  public void revertToOriginalSize() {
+    sceneGraphObject.setFitWidth(originalFitWidth);
+    sceneGraphObject.setFitHeight(originalFitHeight);
+  }
+
+  @Override
+  public List<PropertyName> getPropertyNames() {
+    return propertyNames;
+  }
+
+  @Override
+  public Object getValue(PropertyName propertyName) {
+    assert propertyName != null;
+    assert propertyNames.contains(propertyName);
+
+    final Object result;
+    if (propertyName.equals(fitWidthName)) {
+      result = sceneGraphObject.getFitWidth();
+    } else if (propertyName.equals(fitHeightName)) {
+      result = sceneGraphObject.getFitHeight();
+    } else {
+      // Emergency code
+      result = null;
     }
 
-    /*
-     * AbstractResizer
-     */
-    
-    @Override
-    public final Bounds computeBounds(double width, double height) {
-        final double minX = sceneGraphObject.getX();
-        final double minY = sceneGraphObject.getY();
-        final double actualWidth;
-        if (width > 0) {
-            actualWidth = width;
-        } else {
-            actualWidth = 1.0;
-        }
-        final double actualHeight;
-        if (height > 0) {
-            actualHeight = height;
-        } else {
-            actualHeight = 1.0;
-        }
-        return new BoundingBox(minX, minY, Math.round(actualWidth), Math.round(actualHeight));
-    }
+    return result;
+  }
 
-    
-    @Override
-    public Feature getFeature() {
-        return Feature.FREE;
+  @Override
+  public Map<PropertyName, Object> getChangeMap() {
+    final Map<PropertyName, Object> result = new HashMap<>();
+    if (MathUtils.equals(sceneGraphObject.getFitWidth(), originalFitWidth) == false) {
+      result.put(fitWidthName, sceneGraphObject.getFitWidth());
     }
-
-    @Override
-    public void changeWidth(double width) {
-        sceneGraphObject.setFitWidth(Math.round(width));
+    if (MathUtils.equals(sceneGraphObject.getFitHeight(), originalFitHeight) == false) {
+      result.put(fitHeightName, sceneGraphObject.getFitHeight());
     }
-
-    @Override
-    public void changeHeight(double height) {
-        sceneGraphObject.setFitHeight(Math.round(height));
-    }
-
-    @Override
-    public void revertToOriginalSize() {
-        sceneGraphObject.setFitWidth(originalFitWidth);
-        sceneGraphObject.setFitHeight(originalFitHeight);
-    }
-
-    @Override
-    public List<PropertyName> getPropertyNames() {
-        return propertyNames;
-    }
-
-    @Override
-    public Object getValue(PropertyName propertyName) {
-        assert propertyName != null;
-        assert propertyNames.contains(propertyName);
-        
-        final Object result;
-        if (propertyName.equals(fitWidthName)) {
-            result = sceneGraphObject.getFitWidth();
-        } else if (propertyName.equals(fitHeightName)) {
-            result = sceneGraphObject.getFitHeight();
-        } else {
-            // Emergency code
-            result = null;
-        }
-        
-        return result;
-    }
-
-    @Override
-    public Map<PropertyName, Object> getChangeMap() {
-        final Map<PropertyName, Object> result = new HashMap<>();
-        if (MathUtils.equals(sceneGraphObject.getFitWidth(), originalFitWidth) == false) {
-            result.put(fitWidthName, sceneGraphObject.getFitWidth());
-        }
-        if (MathUtils.equals(sceneGraphObject.getFitHeight(), originalFitHeight) == false) {
-            result.put(fitHeightName, sceneGraphObject.getFitHeight());
-        }
-        return result;
-    }
+    return result;
+  }
 }

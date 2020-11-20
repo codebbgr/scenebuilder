@@ -41,20 +41,18 @@ import java.util.List;
 import javafx.geometry.Orientation;
 import javafx.scene.layout.VBox;
 
-/**
- * Job used to wrap selection in an VBox.
- */
+/** Job used to wrap selection in an VBox. */
 public class WrapInVBoxJob extends AbstractWrapInSubComponentJob {
 
-    public WrapInVBoxJob(EditorController editorController) {
-        super(editorController);
-        newContainerClass = VBox.class;
-    }
+  public WrapInVBoxJob(EditorController editorController) {
+    super(editorController);
+    newContainerClass = VBox.class;
+  }
 
-    @Override
-    protected Collection<FXOMObject> sortChildren(List<FXOMObject> children) {
-        final List<FXOMObject> sorted = new ArrayList<>(children);
-        Collections.sort(sorted, UnidimensionalComparator.of(Orientation.VERTICAL));
-        return sorted;
-    }
+  @Override
+  protected Collection<FXOMObject> sortChildren(List<FXOMObject> children) {
+    final List<FXOMObject> sorted = new ArrayList<>(children);
+    Collections.sort(sorted, UnidimensionalComparator.of(Orientation.VERTICAL));
+    return sorted;
+  }
 }

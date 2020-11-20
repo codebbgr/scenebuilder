@@ -44,158 +44,153 @@ import java.util.Collections;
 import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 
-/**
- *
- */
+/** */
 public class GridPaneHandles extends AbstractNodeHandles<GridPane> {
-    
-    private final GridPaneMosaic mosaic 
-            = new GridPaneMosaic("handles", //NOI18N
-                    true /* shouldShowTray */,
-                    true /* shouldCreateSensors */ );
-    
-    public GridPaneHandles(ContentPanelController contentPanelController,
-            FXOMInstance fxomInstance) {
-        super(contentPanelController, fxomInstance, GridPane.class);
-        
-        getRootNode().getChildren().add(0, mosaic.getTopGroup()); // Below handles
+
+  private final GridPaneMosaic mosaic =
+      new GridPaneMosaic(
+          "handles", // NOI18N
+          true /* shouldShowTray */,
+          true /* shouldCreateSensors */);
+
+  public GridPaneHandles(ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
+    super(contentPanelController, fxomInstance, GridPane.class);
+
+    getRootNode().getChildren().add(0, mosaic.getTopGroup()); // Below handles
+  }
+
+  public void updateColumnRowSelection(GridSelectionGroup gsg) {
+
+    if (gsg == null) {
+      mosaic.setSelectedColumnIndexes(Collections.emptySet());
+      mosaic.setSelectedRowIndexes(Collections.emptySet());
+    } else {
+      switch (gsg.getType()) {
+        case COLUMN:
+          mosaic.setSelectedColumnIndexes(gsg.getIndexes());
+          mosaic.setSelectedRowIndexes(Collections.emptySet());
+          break;
+        case ROW:
+          mosaic.setSelectedColumnIndexes(Collections.emptySet());
+          mosaic.setSelectedRowIndexes(gsg.getIndexes());
+          break;
+        default:
+          assert false;
+          break;
+      }
     }
-    
-    public void updateColumnRowSelection(GridSelectionGroup gsg) {
-        
-        if (gsg == null) {
-            mosaic.setSelectedColumnIndexes(Collections.emptySet());
-            mosaic.setSelectedRowIndexes(Collections.emptySet());
-        } else {
-            switch(gsg.getType()) {
-                case COLUMN:
-                    mosaic.setSelectedColumnIndexes(gsg.getIndexes());
-                    mosaic.setSelectedRowIndexes(Collections.emptySet());
-                    break;
-                case ROW:
-                    mosaic.setSelectedColumnIndexes(Collections.emptySet());
-                    mosaic.setSelectedRowIndexes(gsg.getIndexes());
-                    break;
-                default:
-                    assert false;
-                    break;
-            }
-        }
-    }
-    
-    
-    /*
-     * AbstractNodeHandles
-     */
-    @Override
-    public void layoutDecoration() {
-        super.layoutDecoration();
-                
-        if (mosaic.getGridPane() != getSceneGraphObject()) {
-            mosaic.setGridPane(getSceneGraphObject());
-        } else {
-            mosaic.update();
-        }
-        
-        // Mosaic update may have created new trays and new sensors. 
-        // Attach this handles to them.
-        for (Node node : this.mosaic.getNorthTrayNodes()) {
-            attachHandles(node);
-        }
-        for (Node node : this.mosaic.getSouthTrayNodes()) {
-            attachHandles(node);
-        }
-        for (Node node : this.mosaic.getEastTrayNodes()) {
-            attachHandles(node);
-        }
-        for (Node node : this.mosaic.getWestTrayNodes()) {
-            attachHandles(node);
-        }
-        for (Node node : this.mosaic.getHgapSensorNodes()) {
-            attachHandles(node);
-        }
-        for (Node node : this.mosaic.getVgapSensorNodes()) {
-            attachHandles(node);
-        }
-        
-        // Update mosaic transform
-        mosaic.getTopGroup().getTransforms().clear();
-        mosaic.getTopGroup().getTransforms().add(getSceneGraphObjectToDecorationTransform());
+  }
+
+  /*
+   * AbstractNodeHandles
+   */
+  @Override
+  public void layoutDecoration() {
+    super.layoutDecoration();
+
+    if (mosaic.getGridPane() != getSceneGraphObject()) {
+      mosaic.setGridPane(getSceneGraphObject());
+    } else {
+      mosaic.update();
     }
 
-    @Override
-    public AbstractGesture findGesture(Node node) {
-        AbstractGesture result = findGestureInTrays(node);
-        if (result == null) {
-            result = findGestureInSensors(node);
-        }
-        
-        return result;
+    // Mosaic update may have created new trays and new sensors.
+    // Attach this handles to them.
+    for (Node node : this.mosaic.getNorthTrayNodes()) {
+      attachHandles(node);
     }
-    
-    
-    private AbstractGesture findGestureInTrays(Node node) {
-        final GridSelectionGroup.Type feature;
-        
-        int trayIndex = mosaic.getNorthTrayNodes().indexOf(node);
+    for (Node node : this.mosaic.getSouthTrayNodes()) {
+      attachHandles(node);
+    }
+    for (Node node : this.mosaic.getEastTrayNodes()) {
+      attachHandles(node);
+    }
+    for (Node node : this.mosaic.getWestTrayNodes()) {
+      attachHandles(node);
+    }
+    for (Node node : this.mosaic.getHgapSensorNodes()) {
+      attachHandles(node);
+    }
+    for (Node node : this.mosaic.getVgapSensorNodes()) {
+      attachHandles(node);
+    }
+
+    // Update mosaic transform
+    mosaic.getTopGroup().getTransforms().clear();
+    mosaic.getTopGroup().getTransforms().add(getSceneGraphObjectToDecorationTransform());
+  }
+
+  @Override
+  public AbstractGesture findGesture(Node node) {
+    AbstractGesture result = findGestureInTrays(node);
+    if (result == null) {
+      result = findGestureInSensors(node);
+    }
+
+    return result;
+  }
+
+  private AbstractGesture findGestureInTrays(Node node) {
+    final GridSelectionGroup.Type feature;
+
+    int trayIndex = mosaic.getNorthTrayNodes().indexOf(node);
+    if (trayIndex != -1) {
+      feature = GridSelectionGroup.Type.COLUMN;
+    } else {
+      trayIndex = mosaic.getSouthTrayNodes().indexOf(node);
+      if (trayIndex != -1) {
+        feature = GridSelectionGroup.Type.COLUMN;
+      } else {
+        trayIndex = mosaic.getWestTrayNodes().indexOf(node);
         if (trayIndex != -1) {
-            feature = GridSelectionGroup.Type.COLUMN;
+          feature = GridSelectionGroup.Type.ROW;
         } else {
-            trayIndex = mosaic.getSouthTrayNodes().indexOf(node);
-            if (trayIndex != -1) {
-                feature = GridSelectionGroup.Type.COLUMN;
-            } else {
-                trayIndex = mosaic.getWestTrayNodes().indexOf(node);
-                if (trayIndex != -1) {
-                    feature = GridSelectionGroup.Type.ROW;
-                } else {
-                    trayIndex = mosaic.getEastTrayNodes().indexOf(node);
-                    feature = GridSelectionGroup.Type.ROW;
-                }
-            }
+          trayIndex = mosaic.getEastTrayNodes().indexOf(node);
+          feature = GridSelectionGroup.Type.ROW;
         }
-        
-        final AbstractGesture result;
-        if (trayIndex == -1) {
-            result = super.findGesture(node);
-        } else {
-            result = new SelectAndMoveInGridGesture(getContentPanelController(),
-                    getFxomInstance(), feature, trayIndex);
-        }
-        
-        return result;
-    }
-    
-    
-    private AbstractGesture findGestureInSensors(Node node) {
-        final AbstractGesture result;
-        
-        int sensorIndex = mosaic.getHgapSensorNodes().indexOf(node);
-        if (sensorIndex != -1) {
-            result = new ResizeColumnGesture(this, sensorIndex);
-        } else {
-            sensorIndex = mosaic.getVgapSensorNodes().indexOf(node);
-            if (sensorIndex != -1) {
-                result = new ResizeRowGesture(this, sensorIndex);
-            } else {
-                result = super.findGesture(node);
-            }
-        }
-        
-        return result;
+      }
     }
 
-    
-    /*
-     * Private
-     */
-    
-    /* 
-     * Wrapper to avoid the 'leaking this in constructor' warning emitted by NB.
-     */
-    private void attachHandles(Node node) {
-        if (AbstractHandles.lookupHandles(node) == null) {
-            attachHandles(node, this);
-        }
+    final AbstractGesture result;
+    if (trayIndex == -1) {
+      result = super.findGesture(node);
+    } else {
+      result =
+          new SelectAndMoveInGridGesture(
+              getContentPanelController(), getFxomInstance(), feature, trayIndex);
     }
+
+    return result;
+  }
+
+  private AbstractGesture findGestureInSensors(Node node) {
+    final AbstractGesture result;
+
+    int sensorIndex = mosaic.getHgapSensorNodes().indexOf(node);
+    if (sensorIndex != -1) {
+      result = new ResizeColumnGesture(this, sensorIndex);
+    } else {
+      sensorIndex = mosaic.getVgapSensorNodes().indexOf(node);
+      if (sensorIndex != -1) {
+        result = new ResizeRowGesture(this, sensorIndex);
+      } else {
+        result = super.findGesture(node);
+      }
+    }
+
+    return result;
+  }
+
+  /*
+   * Private
+   */
+
+  /*
+   * Wrapper to avoid the 'leaking this in constructor' warning emitted by NB.
+   */
+  private void attachHandles(Node node) {
+    if (AbstractHandles.lookupHandles(node) == null) {
+      attachHandles(node, this);
+    }
+  }
 }

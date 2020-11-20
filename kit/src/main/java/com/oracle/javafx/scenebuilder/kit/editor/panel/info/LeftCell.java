@@ -37,35 +37,29 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
 
-/**
- *
- */
+/** */
 class LeftCell extends TableCell<IndexEntry, String> {
-    
-    
+
+  /*
+   * TableCell
+   */
+
+  @Override
+  protected void updateItem(String leftValue, boolean empty) {
+    super.updateItem(leftValue, empty);
+    setText(empty ? "" : leftValue); // NOI18N
+  }
+
+  public static class Factory
+      implements Callback<TableColumn<IndexEntry, String>, TableCell<IndexEntry, String>> {
+
     /*
-     * TableCell
+     * Callback<TableView<IndexEntry, String>, TableCell<IndexEntry, String>>
      */
 
     @Override
-    protected void updateItem(String leftValue, boolean empty) {
-        super.updateItem(leftValue, empty);
-        setText(empty ? "" : leftValue); //NOI18N
+    public TableCell<IndexEntry, String> call(TableColumn<IndexEntry, String> tc) {
+      return new LeftCell();
     }
-    
-    
-    
-    
-    public static class Factory 
-    implements Callback<TableColumn<IndexEntry, String>, TableCell<IndexEntry, String>> {
-
-        /*
-         * Callback<TableView<IndexEntry, String>, TableCell<IndexEntry, String>>
-         */
-
-        @Override
-        public TableCell<IndexEntry, String> call(TableColumn<IndexEntry, String> tc) {
-            return new LeftCell();
-        }
-    }
+  }
 }

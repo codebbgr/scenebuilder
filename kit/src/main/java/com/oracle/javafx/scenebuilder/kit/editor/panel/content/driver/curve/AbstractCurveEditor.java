@@ -36,34 +36,41 @@ import com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.mouse.Edi
 import com.oracle.javafx.scenebuilder.kit.editor.panel.content.guides.EditCurveGuideController;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import java.util.EnumMap;
-import javafx.scene.Node;
-
 import java.util.List;
 import java.util.Map;
+import javafx.scene.Node;
 
 public abstract class AbstractCurveEditor<T extends Node> {
 
-    protected final T sceneGraphObject;
+  protected final T sceneGraphObject;
 
-    public AbstractCurveEditor(T sceneGraphObject) {
-        assert sceneGraphObject != null;
-        this.sceneGraphObject = sceneGraphObject;
-    }
+  public AbstractCurveEditor(T sceneGraphObject) {
+    assert sceneGraphObject != null;
+    this.sceneGraphObject = sceneGraphObject;
+  }
 
-    public T getSceneGraphObject() {
-        return sceneGraphObject;
-    }
-    
-    public abstract EditCurveGuideController createController(EnumMap<EditCurveGesture.Tunable, Integer> tunableMap);
-    
-    public abstract void moveTunable(EnumMap<EditCurveGesture.Tunable, Integer> tunableMap, double newX, double newY);
-    public abstract void revertToOriginalState();
+  public T getSceneGraphObject() {
+    return sceneGraphObject;
+  }
 
-    public abstract List<PropertyName> getPropertyNames();
-    public abstract Object getValue(PropertyName propertyName);
-    public abstract Map<PropertyName, Object> getChangeMap();
-    
-    public abstract List<Double> getPoints();
-    public abstract void addPoint(EnumMap<EditCurveGesture.Tunable, Integer> tunableMap, double newX, double newY);
-    public abstract void removePoint(EnumMap<EditCurveGesture.Tunable, Integer> tunableMap);
+  public abstract EditCurveGuideController createController(
+      EnumMap<EditCurveGesture.Tunable, Integer> tunableMap);
+
+  public abstract void moveTunable(
+      EnumMap<EditCurveGesture.Tunable, Integer> tunableMap, double newX, double newY);
+
+  public abstract void revertToOriginalState();
+
+  public abstract List<PropertyName> getPropertyNames();
+
+  public abstract Object getValue(PropertyName propertyName);
+
+  public abstract Map<PropertyName, Object> getChangeMap();
+
+  public abstract List<Double> getPoints();
+
+  public abstract void addPoint(
+      EnumMap<EditCurveGesture.Tunable, Integer> tunableMap, double newX, double newY);
+
+  public abstract void removePoint(EnumMap<EditCurveGesture.Tunable, Integer> tunableMap);
 }

@@ -42,52 +42,45 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/**
- * Main class used for the wrap jobs using the new container SUB COMPONENT
- * property.
- */
+/** Main class used for the wrap jobs using the new container SUB COMPONENT property. */
 public abstract class AbstractWrapInSubComponentJob extends AbstractWrapInJob {
 
-    public AbstractWrapInSubComponentJob(EditorController editorController) {
-        super(editorController);
-    }
+  public AbstractWrapInSubComponentJob(EditorController editorController) {
+    super(editorController);
+  }
 
-    @Override
-    protected List<Job> wrapChildrenJobs(final List<FXOMObject> children) {
+  @Override
+  protected List<Job> wrapChildrenJobs(final List<FXOMObject> children) {
 
-        final List<Job> jobs = new ArrayList<>();
+    final List<Job> jobs = new ArrayList<>();
 
-        final DesignHierarchyMask newContainerMask
-                = new DesignHierarchyMask(newContainer);
-        assert newContainerMask.isAcceptingSubComponent();
+    final DesignHierarchyMask newContainerMask = new DesignHierarchyMask(newContainer);
+    assert newContainerMask.isAcceptingSubComponent();
 
-        // Retrieve the new container property name to be used
-        final PropertyName newContainerPropertyName
-                = newContainerMask.getSubComponentPropertyName();
-        // Create the new container property
-        final FXOMPropertyC newContainerProperty = new FXOMPropertyC(
-                newContainer.getFxomDocument(), newContainerPropertyName);
+    // Retrieve the new container property name to be used
+    final PropertyName newContainerPropertyName = newContainerMask.getSubComponentPropertyName();
+    // Create the new container property
+    final FXOMPropertyC newContainerProperty =
+        new FXOMPropertyC(newContainer.getFxomDocument(), newContainerPropertyName);
 
-        // Update children before adding them to the new container
-        jobs.addAll(modifyChildrenJobs(children));
+    // Update children before adding them to the new container
+    jobs.addAll(modifyChildrenJobs(children));
 
-        // Sort the children before adding them to their new container
-        final Collection<FXOMObject> sorted = sortChildren(children);
-        // Add the children to the new container
-        jobs.addAll(addChildrenJobs(newContainerProperty, sorted));
+    // Sort the children before adding them to their new container
+    final Collection<FXOMObject> sorted = sortChildren(children);
+    // Add the children to the new container
+    jobs.addAll(addChildrenJobs(newContainerProperty, sorted));
 
-        // Add the new container property to the new container instance
-        assert newContainerProperty.getParentInstance() == null;
-        final Job addPropertyJob = new AddPropertyJob(
-                newContainerProperty,
-                newContainer,
-                -1, getEditorController());
-        jobs.add(addPropertyJob);
+    // Add the new container property to the new container instance
+    assert newContainerProperty.getParentInstance() == null;
+    final Job addPropertyJob =
+        new AddPropertyJob(newContainerProperty, newContainer, -1, getEditorController());
+    jobs.add(addPropertyJob);
 
-        return jobs;
-    }
+    return jobs;
+  }
 
-    protected Collection<FXOMObject> sortChildren(List<FXOMObject> children) {
-        return children;
-    }
+  protected Collection<FXOMObject> sortChildren(List<FXOMObject> children) {
+    return children;
+  }
 }

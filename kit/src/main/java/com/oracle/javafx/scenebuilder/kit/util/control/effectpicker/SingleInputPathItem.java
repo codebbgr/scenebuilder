@@ -46,99 +46,98 @@ import javafx.scene.effect.Reflection;
 import javafx.scene.effect.SepiaTone;
 import javafx.scene.effect.Shadow;
 
-/**
- * Effect path item for effects defining single input.
- */
+/** Effect path item for effects defining single input. */
 public class SingleInputPathItem extends EffectPathItem {
 
-    private EffectPathItem inputPathItem;
+  private EffectPathItem inputPathItem;
 
-    public SingleInputPathItem(EffectPickerController epc, Effect effect, EffectPathItem hostPathItem) {
-        super(epc, effect, hostPathItem);
-        assert effect instanceof Bloom
-                || effect instanceof BoxBlur
-                || effect instanceof ColorAdjust
-                || effect instanceof DisplacementMap
-                || effect instanceof DropShadow
-                || effect instanceof GaussianBlur
-                || effect instanceof Glow
-                || effect instanceof InnerShadow
-                || effect instanceof MotionBlur
-                || effect instanceof PerspectiveTransform
-                || effect instanceof Reflection
-                || effect instanceof SepiaTone
-                || effect instanceof Shadow;
-    }
+  public SingleInputPathItem(
+      EffectPickerController epc, Effect effect, EffectPathItem hostPathItem) {
+    super(epc, effect, hostPathItem);
+    assert effect instanceof Bloom
+        || effect instanceof BoxBlur
+        || effect instanceof ColorAdjust
+        || effect instanceof DisplacementMap
+        || effect instanceof DropShadow
+        || effect instanceof GaussianBlur
+        || effect instanceof Glow
+        || effect instanceof InnerShadow
+        || effect instanceof MotionBlur
+        || effect instanceof PerspectiveTransform
+        || effect instanceof Reflection
+        || effect instanceof SepiaTone
+        || effect instanceof Shadow;
+  }
 
-    @Override
-    EffectPathItem getSelectedInputPathItem() {
-        return inputPathItem;
-    }
+  @Override
+  EffectPathItem getSelectedInputPathItem() {
+    return inputPathItem;
+  }
 
-    void setInputPathItem(EffectPathItem epi) {
-        inputPathItem = epi;
-    }
+  void setInputPathItem(EffectPathItem epi) {
+    inputPathItem = epi;
+  }
 
-    @Override
-    void setSelectedInputEffect(Effect input) {
-        if (effect instanceof Bloom) {
-            ((Bloom) effect).setInput(input);
-        } else if (effect instanceof BoxBlur) {
-            ((BoxBlur) effect).setInput(input);
-        } else if (effect instanceof ColorAdjust) {
-            ((ColorAdjust) effect).setInput(input);
-        } else if (effect instanceof DisplacementMap) {
-            ((DisplacementMap) effect).setInput(input);
-        } else if (effect instanceof DropShadow) {
-            ((DropShadow) effect).setInput(input);
-        } else if (effect instanceof GaussianBlur) {
-            ((GaussianBlur) effect).setInput(input);
-        } else if (effect instanceof Glow) {
-            ((Glow) effect).setInput(input);
-        } else if (effect instanceof InnerShadow) {
-            ((InnerShadow) effect).setInput(input);
-        } else if (effect instanceof MotionBlur) {
-            ((MotionBlur) effect).setInput(input);
-        } else if (effect instanceof PerspectiveTransform) {
-            ((PerspectiveTransform) effect).setInput(input);
-        } else if (effect instanceof Reflection) {
-            ((Reflection) effect).setInput(input);
-        } else if (effect instanceof SepiaTone) {
-            ((SepiaTone) effect).setInput(input);
-        } else {
-            assert effect instanceof Shadow;
-            ((Shadow) effect).setInput(input);
-        }
+  @Override
+  void setSelectedInputEffect(Effect input) {
+    if (effect instanceof Bloom) {
+      ((Bloom) effect).setInput(input);
+    } else if (effect instanceof BoxBlur) {
+      ((BoxBlur) effect).setInput(input);
+    } else if (effect instanceof ColorAdjust) {
+      ((ColorAdjust) effect).setInput(input);
+    } else if (effect instanceof DisplacementMap) {
+      ((DisplacementMap) effect).setInput(input);
+    } else if (effect instanceof DropShadow) {
+      ((DropShadow) effect).setInput(input);
+    } else if (effect instanceof GaussianBlur) {
+      ((GaussianBlur) effect).setInput(input);
+    } else if (effect instanceof Glow) {
+      ((Glow) effect).setInput(input);
+    } else if (effect instanceof InnerShadow) {
+      ((InnerShadow) effect).setInput(input);
+    } else if (effect instanceof MotionBlur) {
+      ((MotionBlur) effect).setInput(input);
+    } else if (effect instanceof PerspectiveTransform) {
+      ((PerspectiveTransform) effect).setInput(input);
+    } else if (effect instanceof Reflection) {
+      ((Reflection) effect).setInput(input);
+    } else if (effect instanceof SepiaTone) {
+      ((SepiaTone) effect).setInput(input);
+    } else {
+      assert effect instanceof Shadow;
+      ((Shadow) effect).setInput(input);
     }
+  }
 
-    Effect getInput() {
-        if (effect instanceof Bloom) {
-            return ((Bloom) effect).getInput();
-        } else if (effect instanceof BoxBlur) {
-            return ((BoxBlur) effect).getInput();
-        } else if (effect instanceof ColorAdjust) {
-            return ((ColorAdjust) effect).getInput();
-        } else if (effect instanceof DisplacementMap) {
-            return ((DisplacementMap) effect).getInput();
-        } else if (effect instanceof DropShadow) {
-            return ((DropShadow) effect).getInput();
-        } else if (effect instanceof GaussianBlur) {
-            return ((GaussianBlur) effect).getInput();
-        } else if (effect instanceof Glow) {
-            return ((Glow) effect).getInput();
-        } else if (effect instanceof InnerShadow) {
-            return ((InnerShadow) effect).getInput();
-        } else if (effect instanceof MotionBlur) {
-            return ((MotionBlur) effect).getInput();
-        } else if (effect instanceof PerspectiveTransform) {
-            return ((PerspectiveTransform) effect).getInput();
-        } else if (effect instanceof Reflection) {
-            return ((Reflection) effect).getInput();
-        } else if (effect instanceof SepiaTone) {
-            return ((SepiaTone) effect).getInput();
-        } else {
-            assert effect instanceof Shadow;
-            return ((Shadow) effect).getInput();
-        }
+  Effect getInput() {
+    if (effect instanceof Bloom) {
+      return ((Bloom) effect).getInput();
+    } else if (effect instanceof BoxBlur) {
+      return ((BoxBlur) effect).getInput();
+    } else if (effect instanceof ColorAdjust) {
+      return ((ColorAdjust) effect).getInput();
+    } else if (effect instanceof DisplacementMap) {
+      return ((DisplacementMap) effect).getInput();
+    } else if (effect instanceof DropShadow) {
+      return ((DropShadow) effect).getInput();
+    } else if (effect instanceof GaussianBlur) {
+      return ((GaussianBlur) effect).getInput();
+    } else if (effect instanceof Glow) {
+      return ((Glow) effect).getInput();
+    } else if (effect instanceof InnerShadow) {
+      return ((InnerShadow) effect).getInput();
+    } else if (effect instanceof MotionBlur) {
+      return ((MotionBlur) effect).getInput();
+    } else if (effect instanceof PerspectiveTransform) {
+      return ((PerspectiveTransform) effect).getInput();
+    } else if (effect instanceof Reflection) {
+      return ((Reflection) effect).getInput();
+    } else if (effect instanceof SepiaTone) {
+      return ((SepiaTone) effect).getInput();
+    } else {
+      assert effect instanceof Shadow;
+      return ((Shadow) effect).getInput();
     }
+  }
 }

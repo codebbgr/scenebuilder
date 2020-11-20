@@ -36,40 +36,37 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.control.ListView;
 
-/**
- *
- */
+/** */
 class ListViewSampleData extends AbstractSampleData {
-    
-    private final List<String> samples = new ArrayList<>();
 
-    public ListViewSampleData() {
-        for (int i = 0; i < 20; i++) {
-            samples.add(lorem(i));
-        }
-    }
+  private final List<String> samples = new ArrayList<>();
 
-    /*
-     * AbstractSampleData
-     */
-    
-    @Override
-    public void applyTo(Object sceneGraphObject) {
-        assert sceneGraphObject != null;
-        
-        @SuppressWarnings("unchecked")        
-        final ListView<String> listView = (ListView<String>) sceneGraphObject;
-        listView.getItems().clear();
-        listView.getItems().addAll(samples);
+  public ListViewSampleData() {
+    for (int i = 0; i < 20; i++) {
+      samples.add(lorem(i));
     }
-    
-    @Override
-    public void removeFrom(Object sceneGraphObject) {
-        assert sceneGraphObject != null;
-        
-        @SuppressWarnings("unchecked")        
-        final ListView<String> listView = (ListView<String>) sceneGraphObject;
-        listView.getItems().clear();
-    }
-    
+  }
+
+  /*
+   * AbstractSampleData
+   */
+
+  @Override
+  public void applyTo(Object sceneGraphObject) {
+    assert sceneGraphObject != null;
+
+    @SuppressWarnings("unchecked")
+    final ListView<String> listView = (ListView<String>) sceneGraphObject;
+    listView.getItems().clear();
+    listView.getItems().addAll(samples);
+  }
+
+  @Override
+  public void removeFrom(Object sceneGraphObject) {
+    assert sceneGraphObject != null;
+
+    @SuppressWarnings("unchecked")
+    final ListView<String> listView = (ListView<String>) sceneGraphObject;
+    listView.getItems().clear();
+  }
 }

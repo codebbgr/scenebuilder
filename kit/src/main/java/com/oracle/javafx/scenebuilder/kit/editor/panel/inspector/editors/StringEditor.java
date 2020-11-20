@@ -33,88 +33,86 @@
 package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors;
 
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
-
 import java.util.Set;
-
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputControl;
 
-/**
- * Simple String editor (no I18N or multi-lines support).
- *
- *
- */
+/** Simple String editor (no I18N or multi-lines support). */
 public class StringEditor extends PropertyEditor {
 
-    private TextInputControl textField = new TextField();
-    private EventHandler<ActionEvent> valueListener;
+  private TextInputControl textField = new TextField();
+  private EventHandler<ActionEvent> valueListener;
 
-    public StringEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super(propMeta, selectedClasses);
-        initialize();
-    }
+  public StringEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super(propMeta, selectedClasses);
+    initialize();
+  }
 
-    private void initialize() {
-        valueListener = event -> {
-            userUpdateValueProperty(getValue());
-            textField.selectAll();
+  private void initialize() {
+    valueListener =
+        event -> {
+          userUpdateValueProperty(getValue());
+          textField.selectAll();
         };
-        setTextEditorBehavior(this, textField, valueListener);
-        
-        // Double line editor by default
-        setLayoutFormat(LayoutFormat.DOUBLE_LINE);
+    setTextEditorBehavior(this, textField, valueListener);
 
-        // Select all text when this editor is selected
-        textField.setOnMousePressed(event -> textField.selectAll());
-        textField.focusedProperty().addListener(((observable, oldValue, newValue) -> {
-            if (newValue) {
+    // Double line editor by default
+    setLayoutFormat(LayoutFormat.DOUBLE_LINE);
+
+    // Select all text when this editor is selected
+    textField.setOnMousePressed(event -> textField.selectAll());
+    textField
+        .focusedProperty()
+        .addListener(
+            ((observable, oldValue, newValue) -> {
+              if (newValue) {
                 textField.selectAll();
-            }
-        }));
-    }
-    
-    @Override
-    public Object getValue() {
-        return EditorUtils.getPlainString(textField.getText());
+              }
+            }));
+  }
+
+  @Override
+  public Object getValue() {
+    return EditorUtils.getPlainString(textField.getText());
+  }
+
+  @Override
+  public void setValue(Object value) {
+    setValueGeneric(value);
+    if (isSetValueDone()) {
+      return;
     }
 
-    @Override
-    public void setValue(Object value) {
-        setValueGeneric(value);
-        if (isSetValueDone()) {
-            return;
-        }
-
-        if (value == null) {
-            textField.setText(null);
-            return;
-        }
-        assert value instanceof String;
-        String val = (String) value;
-        textField.setText(val);
+    if (value == null) {
+      textField.setText(null);
+      return;
     }
+    assert value instanceof String;
+    String val = (String) value;
+    textField.setText(val);
+  }
 
-    @Override
-    public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super.reset(propMeta, selectedClasses);
-        setLayoutFormat(PropertyEditor.LayoutFormat.DOUBLE_LINE);
-    }
+  @Override
+  public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super.reset(propMeta, selectedClasses);
+    setLayoutFormat(PropertyEditor.LayoutFormat.DOUBLE_LINE);
+  }
 
-    @Override
-    public Node getValueEditor() {
-        return super.handleGenericModes(textField);
-    }
+  @Override
+  public Node getValueEditor() {
+    return super.handleGenericModes(textField);
+  }
 
-    @Override
-    protected void valueIsIndeterminate() {
-        handleIndeterminate(textField);
-    }
+  @Override
+  protected void valueIsIndeterminate() {
+    handleIndeterminate(textField);
+  }
 
-    @Override
-    public void requestFocus() {
-        EditorUtils.doNextFrame(() -> textField.requestFocus());
-    }
+  @Override
+  public void requestFocus() {
+    EditorUtils.doNextFrame(() -> textField.requestFocus());
+  }
 }

@@ -37,18 +37,22 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import java.util.List;
 
-/**
- *
- */
+/** */
 public class DoubleListPropertyMetadata extends ListValuePropertyMetadata<Double> {
 
-    private final static DoublePropertyMetadata itemMetadata
-            = new DoublePropertyMetadata(new PropertyName("unused"), //NOI18N
-                    DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
+  private static final DoublePropertyMetadata itemMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("unused"), // NOI18N
+          DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
 
-    public DoubleListPropertyMetadata(PropertyName name, boolean readWrite, 
-            List<Double> defaultValue, InspectorPath inspectorPath) {
-        super(name, Double.class, itemMetadata, readWrite, defaultValue, inspectorPath);
-    }
-
+  public DoubleListPropertyMetadata(
+      PropertyName name,
+      boolean readWrite,
+      List<Double> defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, Double.class, itemMetadata, readWrite, defaultValue, inspectorPath);
+  }
 }

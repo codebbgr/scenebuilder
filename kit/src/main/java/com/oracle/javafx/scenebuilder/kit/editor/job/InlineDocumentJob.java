@@ -37,54 +37,50 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * This Job updates the FXOM document at execution time. The selection is not
- * updated.
+ * This Job updates the FXOM document at execution time. The selection is not updated.
  *
- * The sub jobs are created and executed just after.
+ * <p>The sub jobs are created and executed just after.
  */
 public abstract class InlineDocumentJob extends CompositeJob {
 
-    private List<Job> subJobs;
+  private List<Job> subJobs;
 
-    public InlineDocumentJob(EditorController editorController) {
-        super(editorController);
+  public InlineDocumentJob(EditorController editorController) {
+    super(editorController);
+  }
+
+  @Override
+  public final List<Job> getSubJobs() {
+    return subJobs;
+  }
+
+  @Override
+  public void execute() {
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    fxomDocument.beginUpdate();
+    subJobs = Collections.unmodifiableList(makeAndExecuteSubJobs());
+    fxomDocument.endUpdate();
+  }
+
+  @Override
+  public void undo() {
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    fxomDocument.beginUpdate();
+    for (int i = getSubJobs().size() - 1; i >= 0; i--) {
+      getSubJobs().get(i).undo();
     }
+    fxomDocument.endUpdate();
+  }
 
-    @Override
-    public final List<Job> getSubJobs() {
-        return subJobs;
+  @Override
+  public void redo() {
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    fxomDocument.beginUpdate();
+    for (Job subJob : getSubJobs()) {
+      subJob.redo();
     }
+    fxomDocument.endUpdate();
+  }
 
-    @Override
-    public void execute() {
-        final FXOMDocument fxomDocument
-                = getEditorController().getFxomDocument();
-        fxomDocument.beginUpdate();
-        subJobs = Collections.unmodifiableList(makeAndExecuteSubJobs());
-        fxomDocument.endUpdate();
-    }
-
-    @Override
-    public void undo() {
-        final FXOMDocument fxomDocument
-                = getEditorController().getFxomDocument();
-        fxomDocument.beginUpdate();
-        for (int i = getSubJobs().size() - 1; i >= 0; i--) {
-            getSubJobs().get(i).undo();
-        }
-        fxomDocument.endUpdate();
-    }
-
-    @Override
-    public void redo() {
-        final FXOMDocument fxomDocument
-                = getEditorController().getFxomDocument();
-        fxomDocument.beginUpdate();
-        for (Job subJob : getSubJobs()) {
-            subJob.redo();
-        }
-        fxomDocument.endUpdate();
-    }
-
-    protected abstract List<Job> makeAndExecuteSubJobs();
+  protected abstract List<Job> makeAndExecuteSubJobs();
 }

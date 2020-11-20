@@ -37,19 +37,16 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.paint.Material;
 
-/**
- *
- */
+/** */
 public class MaterialPropertyMetadata extends ComplexPropertyMetadata<Material> {
 
-    public MaterialPropertyMetadata(PropertyName name, boolean readWrite, 
-            Material defaultValue, InspectorPath inspectorPath) {
-        super(name, Material.class, readWrite, defaultValue, inspectorPath);
-    }
+  public MaterialPropertyMetadata(
+      PropertyName name, boolean readWrite, Material defaultValue, InspectorPath inspectorPath) {
+    super(name, Material.class, readWrite, defaultValue, inspectorPath);
+  }
 
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Material value, FXOMDocument fxomDocument) {
-        throw new UnsupportedOperationException("Not supported yet."); //NOI18N
-    }
-    
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Material value, FXOMDocument fxomDocument) {
+    throw new UnsupportedOperationException("Not supported yet."); // NOI18N
+  }
 }

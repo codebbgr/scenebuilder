@@ -37,54 +37,50 @@ import javafx.scene.control.TreeView;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 
-/**
- *
- */
+/** */
 class TreeViewSampleData extends AbstractSampleData {
-    
-    private final TreeItem<String> sampleRoot;
 
-    public TreeViewSampleData() {
-        int i = 0;
-        sampleRoot = new TreeItem<>(lorem(i++));
-        sampleRoot.setExpanded(true);
-        for (int j = 0; j<10; j++) {
-            final Rectangle r = new Rectangle(10, 10);
-            r.setFill(color(i));
-            TreeItem<String> child = new TreeItem<>(lorem(i++));
-            child.setExpanded(true);
-            child.setGraphic(r);
-            for (int k=0; k<3; k++) {
-                final TreeItem<String> child2 = new TreeItem<>(lorem(i++));
-                child2.setExpanded(true);
-                final Circle c = new Circle(5);
-                c.setFill(color(i));
-                child2.setGraphic(c);
-                child.getChildren().add(child2);
-            }
-            sampleRoot.getChildren().add(child);
-        }
-    }
+  private final TreeItem<String> sampleRoot;
 
-    /*
-     * AbstractSampleData
-     */
-    
-    
-    @Override
-    public void applyTo(Object sceneGraphObject) {
-        assert sceneGraphObject instanceof TreeView;
-        @SuppressWarnings("unchecked")        
-        final TreeView<String> treeView = (TreeView<String>) sceneGraphObject;
-        treeView.setRoot(sampleRoot);
+  public TreeViewSampleData() {
+    int i = 0;
+    sampleRoot = new TreeItem<>(lorem(i++));
+    sampleRoot.setExpanded(true);
+    for (int j = 0; j < 10; j++) {
+      final Rectangle r = new Rectangle(10, 10);
+      r.setFill(color(i));
+      TreeItem<String> child = new TreeItem<>(lorem(i++));
+      child.setExpanded(true);
+      child.setGraphic(r);
+      for (int k = 0; k < 3; k++) {
+        final TreeItem<String> child2 = new TreeItem<>(lorem(i++));
+        child2.setExpanded(true);
+        final Circle c = new Circle(5);
+        c.setFill(color(i));
+        child2.setGraphic(c);
+        child.getChildren().add(child2);
+      }
+      sampleRoot.getChildren().add(child);
     }
+  }
 
-    @Override
-    public void removeFrom(Object sceneGraphObject) {
-        assert sceneGraphObject instanceof TreeView;
-        @SuppressWarnings("unchecked")        
-        final TreeView<String> treeView = (TreeView<String>) sceneGraphObject;
-        treeView.setRoot(null);
-    }
-    
+  /*
+   * AbstractSampleData
+   */
+
+  @Override
+  public void applyTo(Object sceneGraphObject) {
+    assert sceneGraphObject instanceof TreeView;
+    @SuppressWarnings("unchecked")
+    final TreeView<String> treeView = (TreeView<String>) sceneGraphObject;
+    treeView.setRoot(sampleRoot);
+  }
+
+  @Override
+  public void removeFrom(Object sceneGraphObject) {
+    assert sceneGraphObject instanceof TreeView;
+    @SuppressWarnings("unchecked")
+    final TreeView<String> treeView = (TreeView<String>) sceneGraphObject;
+    treeView.setRoot(null);
+  }
 }

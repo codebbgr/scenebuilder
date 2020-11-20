@@ -33,11 +33,11 @@
 package com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.mouse;
 
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
-import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.editor.job.atomic.ModifyObjectJob;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.content.driver.gridpane.GridPaneHandles;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.content.driver.resizer.GridPaneRowResizer;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
+import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
 import com.oracle.javafx.scenebuilder.kit.metadata.property.value.list.RowConstraintsListPropertyMetadata;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
@@ -53,158 +53,152 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 
-/**
- *
- */
+/** */
 public class ResizeRowGesture extends AbstractMouseGesture {
 
-    private static final PropertyName rowConstraintsName
-            = new PropertyName("rowConstraints"); //NOI18N
-    private static final ValuePropertyMetadata rowConstraintsMeta 
-            = new RowConstraintsListPropertyMetadata(
-                rowConstraintsName,
-                true, /* readWrite */
-                Collections.emptyList(), /* defaultValue */
-                InspectorPath.UNUSED);
-    
-    private final GridPaneHandles gridPaneHandles;
-    private final FXOMInstance fxomInstance;
-    private final int rowIndex;
-    private final GridPane gridPane;
-    private GridPaneRowResizer resizer;
+  private static final PropertyName rowConstraintsName =
+      new PropertyName("rowConstraints"); // NOI18N
+  private static final ValuePropertyMetadata rowConstraintsMeta =
+      new RowConstraintsListPropertyMetadata(
+          rowConstraintsName,
+          true, /* readWrite */
+          Collections.emptyList(), /* defaultValue */
+          InspectorPath.UNUSED);
 
+  private final GridPaneHandles gridPaneHandles;
+  private final FXOMInstance fxomInstance;
+  private final int rowIndex;
+  private final GridPane gridPane;
+  private GridPaneRowResizer resizer;
 
-    public ResizeRowGesture(GridPaneHandles gridPaneHandles, int rowIndex) {
-        super(gridPaneHandles.getContentPanelController());
-        
-        assert rowIndex >= 0;
-        
-        this.gridPaneHandles = gridPaneHandles;
-        this.fxomInstance = gridPaneHandles.getFxomInstance(); // Shortcut
-        this.gridPane = (GridPane) fxomInstance.getSceneGraphObject(); // Shortcut
-        this.rowIndex = rowIndex;
-        
-        assert this.rowIndex < Deprecation.getGridPaneRowCount(this.gridPane);
-    }
+  public ResizeRowGesture(GridPaneHandles gridPaneHandles, int rowIndex) {
+    super(gridPaneHandles.getContentPanelController());
+
+    assert rowIndex >= 0;
+
+    this.gridPaneHandles = gridPaneHandles;
+    this.fxomInstance = gridPaneHandles.getFxomInstance(); // Shortcut
+    this.gridPane = (GridPane) fxomInstance.getSceneGraphObject(); // Shortcut
+    this.rowIndex = rowIndex;
+
+    assert this.rowIndex < Deprecation.getGridPaneRowCount(this.gridPane);
+  }
+
+  /*
+   * AbstractMouseGesture
+   */
+
+  @Override
+  protected void mousePressed() {
+    // Everthing is done in mouseDragStarted
+  }
+
+  @Override
+  protected void mouseDragStarted() {
+    assert resizer == null;
+
+    resizer = new GridPaneRowResizer(gridPane, rowIndex);
+
+    // Now same as mouseDragged
+    mouseDragged();
+  }
+
+  @Override
+  protected void mouseDragged() {
+    assert resizer != null;
+
+    final double startSceneX = getMousePressedEvent().getSceneX();
+    final double startSceneY = getMousePressedEvent().getSceneY();
+    final double currentSceneX = getLastMouseEvent().getSceneX();
+    final double currentSceneY = getLastMouseEvent().getSceneY();
+    final Point2D start = gridPane.sceneToLocal(startSceneX, startSceneY, true /* rootScene */);
+    final Point2D current =
+        gridPane.sceneToLocal(currentSceneX, currentSceneY, true /* rootScene */);
+    final double dy = current.getY() - start.getY();
+
+    resizer.updateHeight(dy);
+    gridPane.layout();
+    gridPaneHandles.layoutDecoration();
+  }
+
+  @Override
+  protected void mouseDragEnded() {
+    assert resizer != null;
 
     /*
-     * AbstractMouseGesture
+     * Three steps
+     *
+     * 1) Collects the modified row constraints list
+     * 2) Reverts to initial sizing
+     *    => this step is equivalent to userDidCancel()
+     * 3) Push a BatchModifyObjectJob to officially resize the rows
      */
-    
-    @Override
-    protected void mousePressed() {
-        // Everthing is done in mouseDragStarted
+
+    // Step #1
+    final List<RowConstraints> newConstraints = cloneRowConstraintsList(gridPane);
+
+    // Step #2
+    userDidCancel();
+
+    // Step #3
+    final Map<ValuePropertyMetadata, Object> metaValueMap = new HashMap<>();
+    metaValueMap.put(rowConstraintsMeta, newConstraints);
+
+    final EditorController editorController = contentPanelController.getEditorController();
+    final ModifyObjectJob j =
+        new ModifyObjectJob(
+            fxomInstance,
+            rowConstraintsMeta,
+            newConstraints,
+            editorController,
+            I18N.getString("label.action.edit.resize.row"));
+    editorController.getJobManager().push(j);
+
+    gridPaneHandles.layoutDecoration();
+    resizer = null; // For sake of symetry...
+  }
+
+  @Override
+  protected void mouseReleased() {
+    // Everything is done in mouseDragEnded
+  }
+
+  @Override
+  protected void keyEvent(KeyEvent e) {
+    // Nothing special here
+  }
+
+  @Override
+  protected void userDidCancel() {
+    resizer.revertToOriginalSize();
+    gridPane.layout();
+  }
+
+  /*
+   * Private
+   */
+
+  private List<RowConstraints> cloneRowConstraintsList(GridPane gridPane) {
+    final List<RowConstraints> result = new ArrayList<>();
+
+    for (RowConstraints rc : gridPane.getRowConstraints()) {
+      result.add(cloneRowConstraints(rc));
     }
 
-    @Override
-    protected void mouseDragStarted() {
-        assert resizer == null;
-        
-        resizer = new GridPaneRowResizer(gridPane, rowIndex);
-        
-        // Now same as mouseDragged
-        mouseDragged();
-    }
+    return result;
+  }
 
-    @Override
-    protected void mouseDragged() {
-        assert resizer != null;
-        
-        final double startSceneX = getMousePressedEvent().getSceneX();
-        final double startSceneY = getMousePressedEvent().getSceneY();
-        final double currentSceneX = getLastMouseEvent().getSceneX();
-        final double currentSceneY = getLastMouseEvent().getSceneY();
-        final Point2D start = gridPane.sceneToLocal(startSceneX, startSceneY, true /* rootScene */);
-        final Point2D current = gridPane.sceneToLocal(currentSceneX, currentSceneY, true /* rootScene */);
-        final double dy = current.getY() - start.getY();
-        
-        resizer.updateHeight(dy);
-        gridPane.layout();
-        gridPaneHandles.layoutDecoration();
-    }
+  private RowConstraints cloneRowConstraints(RowConstraints cc) {
+    final RowConstraints result = new RowConstraints();
 
-    @Override
-    protected void mouseDragEnded() {
-        assert resizer != null;
-        
-        /*
-         * Three steps
-         * 
-         * 1) Collects the modified row constraints list
-         * 2) Reverts to initial sizing
-         *    => this step is equivalent to userDidCancel()
-         * 3) Push a BatchModifyObjectJob to officially resize the rows
-         */
-        
-        // Step #1
-        final List<RowConstraints> newConstraints 
-                = cloneRowConstraintsList(gridPane);
+    result.setFillHeight(cc.isFillHeight());
+    result.setValignment(cc.getValignment());
+    result.setVgrow(cc.getVgrow());
+    result.setMaxHeight(cc.getMaxHeight());
+    result.setMinHeight(cc.getMinHeight());
+    result.setPercentHeight(cc.getPercentHeight());
+    result.setPrefHeight(cc.getPrefHeight());
 
-        // Step #2
-        userDidCancel();
-        
-        // Step #3
-        final Map<ValuePropertyMetadata, Object> metaValueMap = new HashMap<>();
-        metaValueMap.put(rowConstraintsMeta, newConstraints);
-        
-        final EditorController editorController 
-                = contentPanelController.getEditorController();
-        final ModifyObjectJob j = new ModifyObjectJob(
-                fxomInstance,
-                rowConstraintsMeta,
-                newConstraints,
-                editorController,
-                I18N.getString("label.action.edit.resize.row"));
-        editorController.getJobManager().push(j);
-        
-        gridPaneHandles.layoutDecoration();
-        resizer = null; // For sake of symetry...
-    }
-
-    @Override
-    protected void mouseReleased() {
-        // Everything is done in mouseDragEnded
-    }
-
-    @Override
-    protected void keyEvent(KeyEvent e) {
-        // Nothing special here
-    }
-
-    @Override
-    protected void userDidCancel() {
-        resizer.revertToOriginalSize();
-        gridPane.layout();
-    }
-    
-    
-    
-    /*
-     * Private
-     */
-    
-    private List<RowConstraints> cloneRowConstraintsList(GridPane gridPane) {
-        final List<RowConstraints> result = new ArrayList<>();
-        
-        for (RowConstraints rc : gridPane.getRowConstraints()) {
-            result.add(cloneRowConstraints(rc));
-        }
-        
-        return result;
-    }
-    
-    
-    private RowConstraints cloneRowConstraints(RowConstraints cc) {
-        final RowConstraints result = new RowConstraints();
-        
-        result.setFillHeight(cc.isFillHeight());
-        result.setValignment(cc.getValignment());
-        result.setVgrow(cc.getVgrow());
-        result.setMaxHeight(cc.getMaxHeight());
-        result.setMinHeight(cc.getMinHeight());
-        result.setPercentHeight(cc.getPercentHeight());
-        result.setPrefHeight(cc.getPrefHeight());
-        
-        return result;
-    }
+    return result;
+  }
 }

@@ -39,76 +39,76 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMPropertyC;
 import javafx.stage.Stage;
 
-/**
- *
- */
+/** */
 public class AddPropertyValueJob extends Job {
 
-    private final FXOMObject value;
-    private final FXOMPropertyC targetProperty;
-    private final int targetIndex;
-    
-    public AddPropertyValueJob(FXOMObject value, FXOMPropertyC targetProperty, 
-            int targetIndex, EditorController editorController) {
-        super(editorController);
-        
-        assert value != null;
-        assert targetProperty != null;
-        assert targetIndex >= -1;
-        
-        this.value = value;
-        this.targetProperty = targetProperty;
-        this.targetIndex = targetIndex;
-    }
+  private final FXOMObject value;
+  private final FXOMPropertyC targetProperty;
+  private final int targetIndex;
 
-    /*
-     * AddPropertyValueJob
-     */
-    
-    @Override
-    public boolean isExecutable() {
-        return (value.getParentProperty() == null)
-                && (value.getParentCollection() == null);
-    }
+  public AddPropertyValueJob(
+      FXOMObject value,
+      FXOMPropertyC targetProperty,
+      int targetIndex,
+      EditorController editorController) {
+    super(editorController);
 
-    @Override
-    public void execute() {
-        assert targetIndex <= targetProperty.getValues().size();
-        redo();
-    }
+    assert value != null;
+    assert targetProperty != null;
+    assert targetIndex >= -1;
 
-    @Override
-    public void undo() {
-        assert value.getParentProperty() == targetProperty;
-        assert value.getParentCollection() == null;
-        
-        getEditorController().getFxomDocument().beginUpdate();
-        value.removeFromParentProperty();
-        getEditorController().getFxomDocument().endUpdate();
-        
-        assert value.getParentProperty() == null;
-        assert value.getParentCollection() == null;
-    }
+    this.value = value;
+    this.targetProperty = targetProperty;
+    this.targetIndex = targetIndex;
+  }
 
-    @Override
-    public void redo() {
-        assert value.getParentProperty() == null;
-        assert value.getParentCollection() == null;
-        
-        getEditorController().getFxomDocument().beginUpdate();
-        value.addToParentProperty(targetIndex, targetProperty);
-        getEditorController().getFxomDocument().endUpdate();
+  /*
+   * AddPropertyValueJob
+   */
 
-        WarnThemeAlert.showAlertIfRequired(getEditorController(), value, (Stage)getEditorController().getOwnerWindow());
+  @Override
+  public boolean isExecutable() {
+    return (value.getParentProperty() == null) && (value.getParentCollection() == null);
+  }
 
-        assert value.getParentProperty() == targetProperty;
-        assert value.getParentCollection() == null;
-    }
+  @Override
+  public void execute() {
+    assert targetIndex <= targetProperty.getValues().size();
+    redo();
+  }
 
-    @Override
-    public String getDescription() {
-        // Should normally not reach the user
-        return getClass().getSimpleName();
-    }
-    
+  @Override
+  public void undo() {
+    assert value.getParentProperty() == targetProperty;
+    assert value.getParentCollection() == null;
+
+    getEditorController().getFxomDocument().beginUpdate();
+    value.removeFromParentProperty();
+    getEditorController().getFxomDocument().endUpdate();
+
+    assert value.getParentProperty() == null;
+    assert value.getParentCollection() == null;
+  }
+
+  @Override
+  public void redo() {
+    assert value.getParentProperty() == null;
+    assert value.getParentCollection() == null;
+
+    getEditorController().getFxomDocument().beginUpdate();
+    value.addToParentProperty(targetIndex, targetProperty);
+    getEditorController().getFxomDocument().endUpdate();
+
+    WarnThemeAlert.showAlertIfRequired(
+        getEditorController(), value, (Stage) getEditorController().getOwnerWindow());
+
+    assert value.getParentProperty() == targetProperty;
+    assert value.getParentCollection() == null;
+  }
+
+  @Override
+  public String getDescription() {
+    // Should normally not reach the user
+    return getClass().getSimpleName();
+  }
 }

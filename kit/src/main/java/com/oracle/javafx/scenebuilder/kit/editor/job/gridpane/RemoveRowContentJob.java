@@ -41,52 +41,46 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.DesignHierarchyMask;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Job invoked when removing row content.
- */
+/** Job invoked when removing row content. */
 public class RemoveRowContentJob extends BatchDocumentJob {
 
-    private final FXOMObject targetGridPane;
-    private final List<Integer> targetIndexes;
+  private final FXOMObject targetGridPane;
+  private final List<Integer> targetIndexes;
 
-    public RemoveRowContentJob(
-            final EditorController editorController,
-            final FXOMObject targetGridPane,
-            final List<Integer> targetIndexes) {
-        super(editorController);
+  public RemoveRowContentJob(
+      final EditorController editorController,
+      final FXOMObject targetGridPane,
+      final List<Integer> targetIndexes) {
+    super(editorController);
 
-        assert targetGridPane != null;
-        assert targetIndexes != null;
-        this.targetGridPane = targetGridPane;
-        this.targetIndexes = targetIndexes;
+    assert targetGridPane != null;
+    assert targetIndexes != null;
+    this.targetGridPane = targetGridPane;
+    this.targetIndexes = targetIndexes;
+  }
+
+  @Override
+  protected List<Job> makeSubJobs() {
+
+    final List<Job> result = new ArrayList<>();
+
+    assert targetGridPane instanceof FXOMInstance;
+    assert targetIndexes.isEmpty() == false;
+    final DesignHierarchyMask targetGridPaneMask = new DesignHierarchyMask(targetGridPane);
+
+    for (int targetIndex : targetIndexes) {
+      final List<FXOMObject> children = targetGridPaneMask.getRowContentAtIndex(targetIndex);
+      for (FXOMObject child : children) {
+        final Job removeChildJob = new DeleteObjectJob(child, getEditorController());
+        result.add(removeChildJob);
+      }
     }
 
-    @Override
-    protected List<Job> makeSubJobs() {
+    return result;
+  }
 
-        final List<Job> result = new ArrayList<>();
-
-        assert targetGridPane instanceof FXOMInstance;
-        assert targetIndexes.isEmpty() == false;
-        final DesignHierarchyMask targetGridPaneMask
-                = new DesignHierarchyMask(targetGridPane);
-
-        for (int targetIndex : targetIndexes) {
-            final List<FXOMObject> children
-                    = targetGridPaneMask.getRowContentAtIndex(targetIndex);
-            for (FXOMObject child : children) {
-                final Job removeChildJob = new DeleteObjectJob(
-                        child,
-                        getEditorController());
-                result.add(removeChildJob);
-            }
-        }
-
-        return result;
-    }
-
-    @Override
-    protected String makeDescription() {
-        return "Remove Row Content"; //NOI18N
-    }
+  @Override
+  protected String makeDescription() {
+    return "Remove Row Content"; // NOI18N
+  }
 }

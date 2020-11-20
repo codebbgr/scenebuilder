@@ -33,101 +33,96 @@ package com.oracle.javafx.scenebuilder.kit.fxom.glue;
 
 import java.util.Objects;
 
-/**
- *
- * 
- */
+/** */
 class QualifiedName implements Comparable<QualifiedName> {
-    
-    private final String qualifier;
-    private final String name;
 
-    public QualifiedName(String qualifier, String name) {
-        assert name != null;
-        this.qualifier = qualifier;
-        this.name = name;
+  private final String qualifier;
+  private final String name;
+
+  public QualifiedName(String qualifier, String name) {
+    assert name != null;
+    this.qualifier = qualifier;
+    this.name = name;
+  }
+
+  public QualifiedName(String qualifiedName) {
+    final int dotIndex = qualifiedName.indexOf('.');
+    if (dotIndex == -1) {
+      this.qualifier = null;
+      this.name = qualifiedName;
+    } else {
+      this.qualifier = qualifiedName.substring(0, dotIndex);
+      this.name = qualifiedName.substring(dotIndex + 1);
     }
-    
-    public QualifiedName(String qualifiedName) {
-        final int dotIndex = qualifiedName.indexOf('.');
-        if (dotIndex == -1) {
-            this.qualifier = null;
-            this.name = qualifiedName;
-        } else {
-            this.qualifier = qualifiedName.substring(0, dotIndex);
-            this.name = qualifiedName.substring(dotIndex+1);
-        }
+  }
+
+  public String getQualifier() {
+    return qualifier;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  /*
+   * Object
+   */
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 71 * hash + Objects.hashCode(this.qualifier);
+    hash = 71 * hash + Objects.hashCode(this.name);
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final QualifiedName other = (QualifiedName) obj;
+    if (!Objects.equals(this.qualifier, other.qualifier)) {
+      return false;
+    }
+    if (!Objects.equals(this.name, other.name)) {
+      return false;
+    }
+    return true;
+  }
+
+  /*
+   * Comparable
+   */
+
+  @Override
+  public int compareTo(QualifiedName o) {
+    int result;
+
+    if (this == o) {
+      result = 0;
+    } else if (o == null) {
+      result = -1;
+    } else {
+      if ((this.qualifier == null) && (o.qualifier == null)) {
+        result = 0;
+      } else if (this.qualifier == null) {
+        result = -1;
+      } else if (o.qualifier == null) {
+        result = +1;
+      } else {
+        result = this.qualifier.compareTo(o.qualifier);
+      }
+      if (result == 0) {
+        assert this.name != null;
+        assert o.name != null;
+        result = this.name.compareTo(o.name);
+      }
     }
 
-    public String getQualifier() {
-        return qualifier;
-    }
-
-    public String getName() {
-        return name;
-    }
-    
-    /*
-     * Object
-     */
-    
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 71 * hash + Objects.hashCode(this.qualifier);
-        hash = 71 * hash + Objects.hashCode(this.name);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final QualifiedName other = (QualifiedName) obj;
-        if (!Objects.equals(this.qualifier, other.qualifier)) {
-            return false;
-        }
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        return true;
-    }
-
-    /*
-     * Comparable
-     */
-    
-    @Override
-    public int compareTo(QualifiedName o) {
-        int result;
-        
-        if (this == o) {
-            result = 0;
-        } else if (o == null) {
-            result = -1;
-        } else {
-            if ((this.qualifier == null) && (o.qualifier == null)) {
-                result = 0;
-            } else if (this.qualifier == null) {
-                result = -1;
-            } else if (o.qualifier == null) {
-                result = +1;
-            } else {
-                result = this.qualifier.compareTo(o.qualifier);
-            }
-            if (result == 0) {
-                assert this.name != null;
-                assert o.name != null;
-                result = this.name.compareTo(o.name);
-            }
-        }
-        
-        return result;
-    }
-    
-    
+    return result;
+  }
 }

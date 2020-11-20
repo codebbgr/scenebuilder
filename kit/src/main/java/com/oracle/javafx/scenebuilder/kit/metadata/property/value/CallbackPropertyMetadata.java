@@ -42,139 +42,133 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import java.util.Objects;
 import javafx.util.Callback;
 
-/**
- *
- */
-
+/** */
 public abstract class CallbackPropertyMetadata extends ValuePropertyMetadata {
 
-    private final Object defaultValue;
+  private final Object defaultValue;
 
-    public CallbackPropertyMetadata(PropertyName name, boolean readWrite, Object defaultValue, InspectorPath inspectorPath) {
-        super(name, readWrite, inspectorPath);
-        this.defaultValue = defaultValue;
-    }
+  public CallbackPropertyMetadata(
+      PropertyName name, boolean readWrite, Object defaultValue, InspectorPath inspectorPath) {
+    super(name, readWrite, inspectorPath);
+    this.defaultValue = defaultValue;
+  }
 
-    public Object getDefaultValue() {
-        return defaultValue;
-    }
-    
-    public Object getValue(FXOMInstance fxomInstance) {
-        final Object result;
-        
-        if (isReadWrite()) {
-            final FXOMProperty fxomProperty = fxomInstance.getProperties().get(getName());
-            if (fxomProperty instanceof FXOMPropertyC) {
-                
-                final FXOMPropertyC fxomPropertyC = (FXOMPropertyC) fxomProperty;
-                assert fxomPropertyC.getValues().size() == 1;
+  public Object getDefaultValue() {
+    return defaultValue;
+  }
 
-                final FXOMObject valueFxomObject = fxomPropertyC.getValues().get(0);
-                final Object sceneGraphObject = valueFxomObject.getSceneGraphObject();
+  public Object getValue(FXOMInstance fxomInstance) {
+    final Object result;
 
-                result = castValue(sceneGraphObject);
-            } else {
-                assert fxomProperty == null;
-                
-                // propertyName is not specified in the fxom instance.
-                // We return the default value specified in the metadata of the
-                // property
-                result = defaultValue;
-            }
-        } else {
-            result = castValue(getName().getValue(fxomInstance.getSceneGraphObject()));
-        }
-        
-        return result;
-    }
+    if (isReadWrite()) {
+      final FXOMProperty fxomProperty = fxomInstance.getProperties().get(getName());
+      if (fxomProperty instanceof FXOMPropertyC) {
 
-    public void setValue(FXOMInstance fxomInstance, Object value) {
-        assert isReadWrite();
-        
-        final FXOMProperty fxomProperty = fxomInstance.getProperties().get(getName());
-
-        if (Objects.equals(value, getDefaultValueObject())) {
-            // We must remove the fxom property if any
-            if (fxomProperty != null) {
-                fxomProperty.removeFromParentInstance();
-            }
-        } else {
-            if (fxomProperty == null) {
-                // propertyName is not specified in the fxom instance.
-                // We insert a new fxom property
-                final FXOMProperty newProperty
-                        = makeFxomPropertyFromValue(fxomInstance, value);
-                newProperty.addToParentInstance(-1, fxomInstance);
-            } else {
-                updateFxomPropertyWithValue(fxomProperty, value);
-            }
-        }
-    }
-    
-    
-    protected abstract void updateFxomInstanceWithValue(FXOMInstance valueInstance, Object value);
-    protected abstract Class<?> getFxConstantClass();
-    protected abstract Object castValue(Object value);
-    
-    
-    
-    
-    /*
-     * ValuePropertyMetadata
-     */
-    
-    @Override
-    public Class<?> getValueClass() {
-        return Callback.class;
-    }
-
-    @Override
-    public Object getDefaultValueObject() {
-        return defaultValue;
-    }
-
-    @Override
-    public Object getValueObject(FXOMInstance fxomInstance) {
-        return getValue(fxomInstance);
-    }
-
-    @Override
-    public void setValueObject(FXOMInstance fxomInstance, Object valueObject) {
-        setValue(fxomInstance, castValue(valueObject));
-    }
-    
-    
-    /*
-     * Private
-     */
-    
-    protected FXOMProperty makeFxomPropertyFromValue(FXOMInstance fxomInstance, Object value) {
-        assert fxomInstance != null;
-        assert value != null;
-        
-        final FXOMDocument fxomDocument = fxomInstance.getFxomDocument();
-        final FXOMInstance valueInstance = new FXOMInstance(fxomDocument, getFxConstantClass());
-        updateFxomInstanceWithValue(valueInstance, value);
-        return new FXOMPropertyC(fxomDocument, getName(), valueInstance);
-    }
-
-    protected void updateFxomPropertyWithValue(FXOMProperty fxomProperty, Object value) {
-        assert value != null;
-        assert fxomProperty instanceof FXOMPropertyC; // Because Callback are expressed using fx:constant
-        
         final FXOMPropertyC fxomPropertyC = (FXOMPropertyC) fxomProperty;
         assert fxomPropertyC.getValues().size() == 1;
-        
-        FXOMObject valueObject = fxomPropertyC.getValues().get(0);
-        if (valueObject instanceof FXOMInstance) {
-            updateFxomInstanceWithValue((FXOMInstance) valueObject, value);
-        } else {
-            final FXOMDocument fxomDocument = fxomProperty.getFxomDocument();
-            final FXOMInstance valueInstance = new FXOMInstance(fxomDocument, getFxConstantClass());
-            updateFxomInstanceWithValue(valueInstance, value);
-            valueInstance.addToParentProperty(0, fxomPropertyC);
-            valueObject.removeFromParentProperty();
-        }
+
+        final FXOMObject valueFxomObject = fxomPropertyC.getValues().get(0);
+        final Object sceneGraphObject = valueFxomObject.getSceneGraphObject();
+
+        result = castValue(sceneGraphObject);
+      } else {
+        assert fxomProperty == null;
+
+        // propertyName is not specified in the fxom instance.
+        // We return the default value specified in the metadata of the
+        // property
+        result = defaultValue;
+      }
+    } else {
+      result = castValue(getName().getValue(fxomInstance.getSceneGraphObject()));
     }
 
+    return result;
+  }
+
+  public void setValue(FXOMInstance fxomInstance, Object value) {
+    assert isReadWrite();
+
+    final FXOMProperty fxomProperty = fxomInstance.getProperties().get(getName());
+
+    if (Objects.equals(value, getDefaultValueObject())) {
+      // We must remove the fxom property if any
+      if (fxomProperty != null) {
+        fxomProperty.removeFromParentInstance();
+      }
+    } else {
+      if (fxomProperty == null) {
+        // propertyName is not specified in the fxom instance.
+        // We insert a new fxom property
+        final FXOMProperty newProperty = makeFxomPropertyFromValue(fxomInstance, value);
+        newProperty.addToParentInstance(-1, fxomInstance);
+      } else {
+        updateFxomPropertyWithValue(fxomProperty, value);
+      }
+    }
+  }
+
+  protected abstract void updateFxomInstanceWithValue(FXOMInstance valueInstance, Object value);
+
+  protected abstract Class<?> getFxConstantClass();
+
+  protected abstract Object castValue(Object value);
+
+  /*
+   * ValuePropertyMetadata
+   */
+
+  @Override
+  public Class<?> getValueClass() {
+    return Callback.class;
+  }
+
+  @Override
+  public Object getDefaultValueObject() {
+    return defaultValue;
+  }
+
+  @Override
+  public Object getValueObject(FXOMInstance fxomInstance) {
+    return getValue(fxomInstance);
+  }
+
+  @Override
+  public void setValueObject(FXOMInstance fxomInstance, Object valueObject) {
+    setValue(fxomInstance, castValue(valueObject));
+  }
+
+  /*
+   * Private
+   */
+
+  protected FXOMProperty makeFxomPropertyFromValue(FXOMInstance fxomInstance, Object value) {
+    assert fxomInstance != null;
+    assert value != null;
+
+    final FXOMDocument fxomDocument = fxomInstance.getFxomDocument();
+    final FXOMInstance valueInstance = new FXOMInstance(fxomDocument, getFxConstantClass());
+    updateFxomInstanceWithValue(valueInstance, value);
+    return new FXOMPropertyC(fxomDocument, getName(), valueInstance);
+  }
+
+  protected void updateFxomPropertyWithValue(FXOMProperty fxomProperty, Object value) {
+    assert value != null;
+    assert fxomProperty
+        instanceof FXOMPropertyC; // Because Callback are expressed using fx:constant
+
+    final FXOMPropertyC fxomPropertyC = (FXOMPropertyC) fxomProperty;
+    assert fxomPropertyC.getValues().size() == 1;
+
+    FXOMObject valueObject = fxomPropertyC.getValues().get(0);
+    if (valueObject instanceof FXOMInstance) {
+      updateFxomInstanceWithValue((FXOMInstance) valueObject, value);
+    } else {
+      final FXOMDocument fxomDocument = fxomProperty.getFxomDocument();
+      final FXOMInstance valueInstance = new FXOMInstance(fxomDocument, getFxConstantClass());
+      updateFxomInstanceWithValue(valueInstance, value);
+      valueInstance.addToParentProperty(0, fxomPropertyC);
+      valueObject.removeFromParentProperty();
+    }
+  }
 }

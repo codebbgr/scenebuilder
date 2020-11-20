@@ -43,65 +43,65 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.layout.BorderPane;
 
-/**
- *
- */
+/** */
 public class BorderPaneDriver extends AbstractNodeDriver {
 
-    public BorderPaneDriver(ContentPanelController contentPanelController) {
-        super(contentPanelController);
+  public BorderPaneDriver(ContentPanelController contentPanelController) {
+    super(contentPanelController);
+  }
+
+  /*
+   * AbstractDriver
+   */
+
+  @Override
+  public AbstractDropTarget makeDropTarget(FXOMObject fxomObject, double sceneX, double sceneY) {
+    assert fxomObject.getSceneGraphObject() instanceof BorderPane;
+    assert fxomObject instanceof FXOMInstance;
+
+    final FXOMInstance fxomInstance = (FXOMInstance) fxomObject;
+    final BorderPane borderPane = (BorderPane) fxomInstance.getSceneGraphObject();
+    final Point2D hitPoint = borderPane.sceneToLocal(sceneX, sceneY, true /* rootScene */);
+    final double hitX = hitPoint.getX();
+    final double hitY = hitPoint.getY();
+
+    final Bounds layoutBounds = borderPane.getLayoutBounds();
+    final Bounds centerBounds = BorderPaneTring.computeCenterBounds(borderPane);
+    final Bounds topBounds =
+        BorderPaneTring.computeAreaBounds(layoutBounds, centerBounds, Accessory.TOP);
+    final Bounds bottomBounds =
+        BorderPaneTring.computeAreaBounds(layoutBounds, centerBounds, Accessory.BOTTOM);
+    final Bounds leftBounds =
+        BorderPaneTring.computeAreaBounds(layoutBounds, centerBounds, Accessory.LEFT);
+    final Bounds rightBounds =
+        BorderPaneTring.computeAreaBounds(layoutBounds, centerBounds, Accessory.RIGHT);
+
+    final Accessory targetAccessory;
+    if (centerBounds.contains(hitX, hitY)) {
+      targetAccessory = Accessory.CENTER;
+    } else if (topBounds.contains(hitX, hitY)) {
+      targetAccessory = Accessory.TOP;
+    } else if (bottomBounds.contains(hitX, hitY)) {
+      targetAccessory = Accessory.BOTTOM;
+    } else if (leftBounds.contains(hitX, hitY)) {
+      targetAccessory = Accessory.LEFT;
+    } else if (rightBounds.contains(hitX, hitY)) {
+      targetAccessory = Accessory.RIGHT;
+    } else {
+      targetAccessory = Accessory.CENTER;
     }
 
-    /*
-     * AbstractDriver
-     */
-     
-    @Override
-    public AbstractDropTarget makeDropTarget(FXOMObject fxomObject, double sceneX, double sceneY) {
-        assert fxomObject.getSceneGraphObject() instanceof BorderPane;
-        assert fxomObject instanceof FXOMInstance;
-        
-        final FXOMInstance fxomInstance = (FXOMInstance) fxomObject;
-        final BorderPane borderPane = (BorderPane) fxomInstance.getSceneGraphObject();
-        final Point2D hitPoint = borderPane.sceneToLocal(sceneX, sceneY, true /* rootScene */);
-        final double hitX = hitPoint.getX();
-        final double hitY = hitPoint.getY();
-        
-        final Bounds layoutBounds = borderPane.getLayoutBounds();
-        final Bounds centerBounds = BorderPaneTring.computeCenterBounds(borderPane);
-        final Bounds topBounds = BorderPaneTring.computeAreaBounds(layoutBounds, centerBounds, Accessory.TOP);
-        final Bounds bottomBounds = BorderPaneTring.computeAreaBounds(layoutBounds, centerBounds, Accessory.BOTTOM);
-        final Bounds leftBounds = BorderPaneTring.computeAreaBounds(layoutBounds, centerBounds, Accessory.LEFT);
-        final Bounds rightBounds = BorderPaneTring.computeAreaBounds(layoutBounds, centerBounds, Accessory.RIGHT);
-        
-        final Accessory targetAccessory;
-        if (centerBounds.contains(hitX, hitY)) {
-            targetAccessory = Accessory.CENTER;
-        } else if (topBounds.contains(hitX, hitY)) {
-            targetAccessory = Accessory.TOP;
-        } else if (bottomBounds.contains(hitX, hitY)) {
-            targetAccessory = Accessory.BOTTOM;
-        } else if (leftBounds.contains(hitX, hitY)) {
-            targetAccessory = Accessory.LEFT;
-        } else if (rightBounds.contains(hitX, hitY)) {
-            targetAccessory = Accessory.RIGHT;
-        } else {
-            targetAccessory = Accessory.CENTER;
-        }
-        
-        return new AccessoryDropTarget(fxomInstance, targetAccessory);
-    }
-    
-    
-    @Override
-    public AbstractTring<?> makeTring(AbstractDropTarget dropTarget) {
-        assert dropTarget instanceof AccessoryDropTarget;
-        
-        final AccessoryDropTarget accessoryDropTarget 
-                = (AccessoryDropTarget) dropTarget;
-        return new BorderPaneTring(contentPanelController, 
-                (FXOMInstance) dropTarget.getTargetObject(),
-                accessoryDropTarget.getAccessory());
-    }
-    
+    return new AccessoryDropTarget(fxomInstance, targetAccessory);
+  }
+
+  @Override
+  public AbstractTring<?> makeTring(AbstractDropTarget dropTarget) {
+    assert dropTarget instanceof AccessoryDropTarget;
+
+    final AccessoryDropTarget accessoryDropTarget = (AccessoryDropTarget) dropTarget;
+    return new BorderPaneTring(
+        contentPanelController,
+        (FXOMInstance) dropTarget.getTargetObject(),
+        accessoryDropTarget.getAccessory());
+  }
 }

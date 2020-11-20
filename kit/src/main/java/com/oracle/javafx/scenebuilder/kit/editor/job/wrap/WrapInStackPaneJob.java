@@ -34,13 +34,11 @@ package com.oracle.javafx.scenebuilder.kit.editor.job.wrap;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import javafx.scene.layout.StackPane;
 
-/**
- * Job used to wrap selection in a StackPane.
- */
+/** Job used to wrap selection in a StackPane. */
 public class WrapInStackPaneJob extends AbstractWrapInSubComponentJob {
 
-    public WrapInStackPaneJob(EditorController editorController) {
-        super(editorController);
-        newContainerClass = StackPane.class;
-    }
+  public WrapInStackPaneJob(EditorController editorController) {
+    super(editorController);
+    newContainerClass = StackPane.class;
+  }
 }

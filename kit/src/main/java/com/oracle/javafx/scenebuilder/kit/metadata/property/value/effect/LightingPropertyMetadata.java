@@ -41,60 +41,79 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.effect.Lighting;
 
-/**
- *
- */
+/** */
 public class LightingPropertyMetadata extends ComplexPropertyMetadata<Lighting> {
-    
-    private static final Lighting LIGHTING_DEFAULT = new Lighting();
-    
-    private final EffectPropertyMetadata bumpInputMetadata
-            = new EffectPropertyMetadata(new PropertyName("bumpInput"), //NOI18N
-            true /* readWrite */, LIGHTING_DEFAULT.getBumpInput(), InspectorPath.UNUSED);
-    private final EffectPropertyMetadata contentInputMetadata
-            = new EffectPropertyMetadata(new PropertyName("contentInput"), //NOI18N
-            true /* readWrite */, LIGHTING_DEFAULT.getContentInput(), InspectorPath.UNUSED);
-    private final DoublePropertyMetadata diffuseConstantMetadata
-            = new DoublePropertyMetadata(new PropertyName("diffuseConstant"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, 
-            LIGHTING_DEFAULT.getDiffuseConstant(), InspectorPath.UNUSED);
-    private final LightPropertyMetadata lightMetadata
-            = new LightPropertyMetadata(new PropertyName("light"), //NOI18N
-            true /* readWrite */, LIGHTING_DEFAULT.getLight(), InspectorPath.UNUSED);
-    private final DoublePropertyMetadata specularConstantMetadata
-            = new DoublePropertyMetadata(new PropertyName("specularConstant"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, 
-            LIGHTING_DEFAULT.getSpecularConstant(), InspectorPath.UNUSED);
-    private final DoublePropertyMetadata specularExponentMetadata
-            = new DoublePropertyMetadata(new PropertyName("specularExponent"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, 
-            LIGHTING_DEFAULT.getSpecularExponent(), InspectorPath.UNUSED);
-    private final DoublePropertyMetadata surfaceScaleMetadata
-            = new DoublePropertyMetadata(new PropertyName("surfaceScale"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, 
-            LIGHTING_DEFAULT.getSurfaceScale(), InspectorPath.UNUSED);
 
-    public LightingPropertyMetadata(PropertyName name, boolean readWrite, 
-            Lighting defaultValue, InspectorPath inspectorPath) {
-        super(name, Lighting.class, readWrite, defaultValue, inspectorPath);
-    }
+  private static final Lighting LIGHTING_DEFAULT = new Lighting();
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Lighting value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        bumpInputMetadata.setValue(result, value.getBumpInput());
-        contentInputMetadata.setValue(result, value.getContentInput());
-        diffuseConstantMetadata.setValue(result, value.getDiffuseConstant());
-        lightMetadata.setValue(result, value.getLight());
-        specularConstantMetadata.setValue(result, value.getSpecularConstant());
-        specularExponentMetadata.setValue(result, value.getSpecularExponent());
-        surfaceScaleMetadata.setValue(result, value.getSurfaceScale());
+  private final EffectPropertyMetadata bumpInputMetadata =
+      new EffectPropertyMetadata(
+          new PropertyName("bumpInput"), // NOI18N
+          true /* readWrite */,
+          LIGHTING_DEFAULT.getBumpInput(),
+          InspectorPath.UNUSED);
+  private final EffectPropertyMetadata contentInputMetadata =
+      new EffectPropertyMetadata(
+          new PropertyName("contentInput"), // NOI18N
+          true /* readWrite */,
+          LIGHTING_DEFAULT.getContentInput(),
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata diffuseConstantMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("diffuseConstant"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          LIGHTING_DEFAULT.getDiffuseConstant(),
+          InspectorPath.UNUSED);
+  private final LightPropertyMetadata lightMetadata =
+      new LightPropertyMetadata(
+          new PropertyName("light"), // NOI18N
+          true /* readWrite */,
+          LIGHTING_DEFAULT.getLight(),
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata specularConstantMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("specularConstant"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          LIGHTING_DEFAULT.getSpecularConstant(),
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata specularExponentMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("specularExponent"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          LIGHTING_DEFAULT.getSpecularExponent(),
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata surfaceScaleMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("surfaceScale"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          LIGHTING_DEFAULT.getSurfaceScale(),
+          InspectorPath.UNUSED);
 
-        return result;
-    }
+  public LightingPropertyMetadata(
+      PropertyName name, boolean readWrite, Lighting defaultValue, InspectorPath inspectorPath) {
+    super(name, Lighting.class, readWrite, defaultValue, inspectorPath);
+  }
+
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Lighting value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    bumpInputMetadata.setValue(result, value.getBumpInput());
+    contentInputMetadata.setValue(result, value.getContentInput());
+    diffuseConstantMetadata.setValue(result, value.getDiffuseConstant());
+    lightMetadata.setValue(result, value.getLight());
+    specularConstantMetadata.setValue(result, value.getSpecularConstant());
+    specularExponentMetadata.setValue(result, value.getSpecularExponent());
+    surfaceScaleMetadata.setValue(result, value.getSurfaceScale());
+
+    return result;
+  }
 }

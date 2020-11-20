@@ -39,98 +39,96 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 
-/**
- *
- * @treatAsPrivate
- */
+/** @treatAsPrivate */
 public class CssValuePresenterFactory {
 
-    public abstract class CssValuePresenter<T> {
+  public abstract class CssValuePresenter<T> {
 
-        private final T value;
-        private Node node;
-        protected CssValuePresenter(T value) {
-            this.value = value;
-        }
+    private final T value;
+    private Node node;
 
-        public T getValue() {
-            return value;
-        }
-
-        public Node getCustomPresenter() {
-            if (node == null) {
-                node = doGetPresenter();
-            }
-            return node;
-        }
-        
-        public Label getTextPresenter() {
-            return new Label(CssValueConverter.toCssString(value));
-        }
-
-        protected abstract Node doGetPresenter();
-    }
-    
-    private static final CssValuePresenterFactory singleton = new CssValuePresenterFactory();
-
-    protected CssValuePresenterFactory() {
+    protected CssValuePresenter(T value) {
+      this.value = value;
     }
 
-    public static CssValuePresenterFactory getInstance() {
-        return singleton;
+    public T getValue() {
+      return value;
     }
 
-    public <T> CssValuePresenter<T> newValuePresenter(T value) {
-        final CssValuePresenter<?> ret;
-        if(Paint.class.isAssignableFrom(value.getClass())){
-            ret = new PaintValuePresenter((Paint)value);
-        } else {
-            if(value instanceof Image){
-                ret = new ImageValuePresenter((Image) value);
-            } else {
-                ret = new DefaultValuePresenter(value);
-            }
-        }
-        @SuppressWarnings("unchecked")
-        final CssValuePresenter<T> castedRet = (CssValuePresenter<T>)ret;
-        return castedRet;
+    public Node getCustomPresenter() {
+      if (node == null) {
+        node = doGetPresenter();
+      }
+      return node;
     }
-    
-    private class PaintValuePresenter extends CssValuePresenter<Paint> {
-        private PaintValuePresenter(Paint p){
-            super(p);
-        }
-        
-        @Override
-        protected Node doGetPresenter() {
-            Rectangle rect = new Rectangle(10, 10);
-            rect.setStroke(Color.BLACK);
-            rect.setFill(getValue());
-            return rect;
-        }
+
+    public Label getTextPresenter() {
+      return new Label(CssValueConverter.toCssString(value));
     }
-    
-    private class ImageValuePresenter extends CssValuePresenter<Image> {
-        private ImageValuePresenter(Image img){
-            super(img);
-        }
-        
-        @Override
-        protected Node doGetPresenter() {
-            ImageView imgView = new ImageView((getValue()));
-            imgView.setFitWidth(15);
-            imgView.setPreserveRatio(true);
-            return imgView;
-        }
+
+    protected abstract Node doGetPresenter();
+  }
+
+  private static final CssValuePresenterFactory singleton = new CssValuePresenterFactory();
+
+  protected CssValuePresenterFactory() {}
+
+  public static CssValuePresenterFactory getInstance() {
+    return singleton;
+  }
+
+  public <T> CssValuePresenter<T> newValuePresenter(T value) {
+    final CssValuePresenter<?> ret;
+    if (Paint.class.isAssignableFrom(value.getClass())) {
+      ret = new PaintValuePresenter((Paint) value);
+    } else {
+      if (value instanceof Image) {
+        ret = new ImageValuePresenter((Image) value);
+      } else {
+        ret = new DefaultValuePresenter(value);
+      }
     }
-    
-    private class DefaultValuePresenter extends CssValuePresenter<Object> {
-        private DefaultValuePresenter(Object val){
-            super(val);
-        }
-        @Override
-        protected Node doGetPresenter() {
-            return null;
-        }
+    @SuppressWarnings("unchecked")
+    final CssValuePresenter<T> castedRet = (CssValuePresenter<T>) ret;
+    return castedRet;
+  }
+
+  private class PaintValuePresenter extends CssValuePresenter<Paint> {
+    private PaintValuePresenter(Paint p) {
+      super(p);
     }
+
+    @Override
+    protected Node doGetPresenter() {
+      Rectangle rect = new Rectangle(10, 10);
+      rect.setStroke(Color.BLACK);
+      rect.setFill(getValue());
+      return rect;
+    }
+  }
+
+  private class ImageValuePresenter extends CssValuePresenter<Image> {
+    private ImageValuePresenter(Image img) {
+      super(img);
+    }
+
+    @Override
+    protected Node doGetPresenter() {
+      ImageView imgView = new ImageView((getValue()));
+      imgView.setFitWidth(15);
+      imgView.setPreserveRatio(true);
+      return imgView;
+    }
+  }
+
+  private class DefaultValuePresenter extends CssValuePresenter<Object> {
+    private DefaultValuePresenter(Object val) {
+      super(val);
+    }
+
+    @Override
+    protected Node doGetPresenter() {
+      return null;
+    }
+  }
 }

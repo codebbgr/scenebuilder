@@ -42,42 +42,54 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.effect.Blend;
 import javafx.scene.effect.BlendMode;
 
-/**
- *
- */
+/** */
 public class BlendPropertyMetadata extends ComplexPropertyMetadata<Blend> {
-    
-    private final EffectPropertyMetadata bottomInputMetadata
-            = new EffectPropertyMetadata(new PropertyName("bottomInput"), //NOI18N
-            true /* readWrite */, null, InspectorPath.UNUSED);
-    private final EffectPropertyMetadata topInputMetadata
-            = new EffectPropertyMetadata(new PropertyName("topInput"), //NOI18N
-            true /* readWrite */, null, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata opacityMetadata
-            = new DoublePropertyMetadata(new PropertyName("opacity"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.OPACITY, true /* readWrite */, 1.0, InspectorPath.UNUSED);
-    private final EnumerationPropertyMetadata modeMetadata
-            = new EnumerationPropertyMetadata(new PropertyName("mode"), //NOI18N
-            BlendMode.class, true, BlendMode.SRC_OVER, InspectorPath.UNUSED);
 
-    public BlendPropertyMetadata(PropertyName name, boolean readWrite, 
-            Blend defaultValue, InspectorPath inspectorPath) {
-        super(name, Blend.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final EffectPropertyMetadata bottomInputMetadata =
+      new EffectPropertyMetadata(
+          new PropertyName("bottomInput"), // NOI18N
+          true /* readWrite */,
+          null,
+          InspectorPath.UNUSED);
+  private final EffectPropertyMetadata topInputMetadata =
+      new EffectPropertyMetadata(
+          new PropertyName("topInput"), // NOI18N
+          true /* readWrite */,
+          null,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata opacityMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("opacity"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.OPACITY,
+          true /* readWrite */,
+          1.0,
+          InspectorPath.UNUSED);
+  private final EnumerationPropertyMetadata modeMetadata =
+      new EnumerationPropertyMetadata(
+          new PropertyName("mode"), // NOI18N
+          BlendMode.class,
+          true,
+          BlendMode.SRC_OVER,
+          InspectorPath.UNUSED);
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Blend value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        bottomInputMetadata.setValue(result, value.getBottomInput());
-        topInputMetadata.setValue(result, value.getTopInput());
-        opacityMetadata.setValue(result, value.getOpacity());
-        modeMetadata.setValue(result, value.getMode().toString());
-        
-        return result;
-    }
+  public BlendPropertyMetadata(
+      PropertyName name, boolean readWrite, Blend defaultValue, InspectorPath inspectorPath) {
+    super(name, Blend.class, readWrite, defaultValue, inspectorPath);
+  }
+
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Blend value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    bottomInputMetadata.setValue(result, value.getBottomInput());
+    topInputMetadata.setValue(result, value.getTopInput());
+    opacityMetadata.setValue(result, value.getOpacity());
+    modeMetadata.setValue(result, value.getMode().toString());
+
+    return result;
+  }
 }

@@ -42,74 +42,71 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- *
- */
+/** */
 public class FitToParentSelectionJob extends BatchDocumentJob {
 
-    public FitToParentSelectionJob(EditorController editorController) {
-        super(editorController);
-    }
+  public FitToParentSelectionJob(EditorController editorController) {
+    super(editorController);
+  }
 
-    @Override
-    protected List<Job> makeSubJobs() {
+  @Override
+  protected List<Job> makeSubJobs() {
 
-        final List<Job> result = new ArrayList<>();
+    final List<Job> result = new ArrayList<>();
 
-        final Set<FXOMInstance> candidates = new HashSet<>();
-        final Selection selection = getEditorController().getSelection();
-        if (selection.getGroup() instanceof ObjectSelectionGroup) {
-            final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
-            for (FXOMObject fxomObject : osg.getItems()) {
-                if (fxomObject instanceof FXOMInstance) {
-                    candidates.add((FXOMInstance) fxomObject);
-                }
-            }
-        } else if (selection.getGroup() instanceof GridSelectionGroup) {
-            // GridPane rows / columns are selected : FitToParentSelectionJob is meaningless
-            // Just do nothing
-        } else {
-            assert selection.getGroup() == null :
-                    "Add implementation for " + selection.getGroup();
+    final Set<FXOMInstance> candidates = new HashSet<>();
+    final Selection selection = getEditorController().getSelection();
+    if (selection.getGroup() instanceof ObjectSelectionGroup) {
+      final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
+      for (FXOMObject fxomObject : osg.getItems()) {
+        if (fxomObject instanceof FXOMInstance) {
+          candidates.add((FXOMInstance) fxomObject);
         }
-
-        for (FXOMInstance candidate : candidates) {
-            final FitToParentObjectJob subJob
-                    = new FitToParentObjectJob(candidate, getEditorController());
-            if (subJob.isExecutable()) {
-                result.add(subJob);
-            } else {
-                // Should we do best effort here ?
-                // Do not clear subJobs list but keep only executable ones
-                result.clear(); // -> isExecutable() will return false
-                break;
-            }
-        }
-        return result;
+      }
+    } else if (selection.getGroup() instanceof GridSelectionGroup) {
+      // GridPane rows / columns are selected : FitToParentSelectionJob is meaningless
+      // Just do nothing
+    } else {
+      assert selection.getGroup() == null : "Add implementation for " + selection.getGroup();
     }
 
-    @Override
-    protected String makeDescription() {
-        final String result;
-        switch (getSubJobs().size()) {
-            case 0:
-                result = "Unexecutable Fit To Parent"; // NO18N
-                break;
-            case 1:
-                result = getSubJobs().get(0).getDescription();
-                break;
-            default:
-                result = makeMultipleSelectionDescription();
-                break;
-        }
-        return result;
+    for (FXOMInstance candidate : candidates) {
+      final FitToParentObjectJob subJob =
+          new FitToParentObjectJob(candidate, getEditorController());
+      if (subJob.isExecutable()) {
+        result.add(subJob);
+      } else {
+        // Should we do best effort here ?
+        // Do not clear subJobs list but keep only executable ones
+        result.clear(); // -> isExecutable() will return false
+        break;
+      }
     }
+    return result;
+  }
 
-    private String makeMultipleSelectionDescription() {
-        final StringBuilder result = new StringBuilder();
-        result.append("Fit To Parent ");
-        result.append(getSubJobs().size());
-        result.append(" Objects");
-        return result.toString();
+  @Override
+  protected String makeDescription() {
+    final String result;
+    switch (getSubJobs().size()) {
+      case 0:
+        result = "Unexecutable Fit To Parent"; // NO18N
+        break;
+      case 1:
+        result = getSubJobs().get(0).getDescription();
+        break;
+      default:
+        result = makeMultipleSelectionDescription();
+        break;
     }
+    return result;
+  }
+
+  private String makeMultipleSelectionDescription() {
+    final StringBuilder result = new StringBuilder();
+    result.append("Fit To Parent ");
+    result.append(getSubJobs().size());
+    result.append(" Objects");
+    return result.toString();
+  }
 }

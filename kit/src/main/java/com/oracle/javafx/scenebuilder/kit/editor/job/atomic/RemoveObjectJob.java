@@ -32,60 +32,56 @@
 
 package com.oracle.javafx.scenebuilder.kit.editor.job.atomic;
 
-import com.oracle.javafx.scenebuilder.kit.editor.job.atomic.RemoveCollectionItemJob;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import com.oracle.javafx.scenebuilder.kit.editor.job.Job;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 
-/**
- *
- */
+/** */
 public class RemoveObjectJob extends Job {
-    
-    private final Job subJob;
-    
-    public RemoveObjectJob(FXOMObject targetObject, EditorController editorController) {
-        super(editorController);
-        
-        assert targetObject != null;
-        assert (targetObject.getParentProperty() != null) || (targetObject.getParentCollection() != null);
-        
-        if (targetObject.getParentProperty() != null) {
-            subJob = new RemovePropertyValueJob(targetObject, editorController);
-        } else {
-            assert targetObject.getParentCollection() != null;
-            subJob = new RemoveCollectionItemJob(targetObject, editorController);
-        }
-    }
-    
-    
-    /*
-     * Job
-     */
 
-    @Override
-    public boolean isExecutable() {
-        return subJob.isExecutable();
-    }
+  private final Job subJob;
 
-    @Override
-    public void execute() {
-        subJob.execute();
-    }
+  public RemoveObjectJob(FXOMObject targetObject, EditorController editorController) {
+    super(editorController);
 
-    @Override
-    public void undo() {
-        subJob.undo();
-    }
+    assert targetObject != null;
+    assert (targetObject.getParentProperty() != null)
+        || (targetObject.getParentCollection() != null);
 
-    @Override
-    public void redo() {
-        subJob.redo();
+    if (targetObject.getParentProperty() != null) {
+      subJob = new RemovePropertyValueJob(targetObject, editorController);
+    } else {
+      assert targetObject.getParentCollection() != null;
+      subJob = new RemoveCollectionItemJob(targetObject, editorController);
     }
+  }
 
-    @Override
-    public String getDescription() {
-        return getClass().getSimpleName(); // Should not reach end user
-    }
-    
+  /*
+   * Job
+   */
+
+  @Override
+  public boolean isExecutable() {
+    return subJob.isExecutable();
+  }
+
+  @Override
+  public void execute() {
+    subJob.execute();
+  }
+
+  @Override
+  public void undo() {
+    subJob.undo();
+  }
+
+  @Override
+  public void redo() {
+    subJob.redo();
+  }
+
+  @Override
+  public String getDescription() {
+    return getClass().getSimpleName(); // Should not reach end user
+  }
 }

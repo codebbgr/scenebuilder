@@ -39,35 +39,39 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.paint.Stop;
 
-/**
- *
- */
+/** */
 public class StopPropertyMetadata extends ComplexPropertyMetadata<Stop> {
-    
-    private final DoublePropertyMetadata offsetMetadata
-            = new DoublePropertyMetadata(new PropertyName("offset"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final ColorPropertyMetadata colorMetadata
-            = new ColorPropertyMetadata(new PropertyName("color"), //NOI18N
-            true, null, InspectorPath.UNUSED);
-    
-    public StopPropertyMetadata(PropertyName name, boolean readWrite, 
-            Stop defaultValue, InspectorPath inspectorPath) {
-        super(name, Stop.class, readWrite, defaultValue, inspectorPath);
-    }
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Stop value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, getValueClass());
-        
-        offsetMetadata.setValue(result, value.getOffset());
-        colorMetadata.setValue(result, value.getColor());
+  private final DoublePropertyMetadata offsetMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("offset"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final ColorPropertyMetadata colorMetadata =
+      new ColorPropertyMetadata(
+          new PropertyName("color"), // NOI18N
+          true,
+          null,
+          InspectorPath.UNUSED);
 
-        return result;
-    }
-    
+  public StopPropertyMetadata(
+      PropertyName name, boolean readWrite, Stop defaultValue, InspectorPath inspectorPath) {
+    super(name, Stop.class, readWrite, defaultValue, inspectorPath);
+  }
+
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Stop value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, getValueClass());
+
+    offsetMetadata.setValue(result, value.getOffset());
+    colorMetadata.setValue(result, value.getColor());
+
+    return result;
+  }
 }

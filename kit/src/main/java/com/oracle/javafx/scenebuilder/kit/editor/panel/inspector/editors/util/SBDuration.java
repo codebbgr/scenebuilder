@@ -37,69 +37,68 @@ import javafx.util.Duration;
 
 public class SBDuration extends Duration {
 
-    /**
-     * Creates a new SBDuration with potentially fractional millisecond resolution.
-     *
-     * @param millis The number of milliseconds
-     */
-    public SBDuration(@NamedArg("millis") double millis) {
-        super(millis);
+  /**
+   * Creates a new SBDuration with potentially fractional millisecond resolution.
+   *
+   * @param millis The number of milliseconds
+   */
+  public SBDuration(@NamedArg("millis") double millis) {
+    super(millis);
+  }
+
+  /**
+   * Creates a new SBDuration instance from a Duration object.
+   *
+   * @param duration
+   */
+  public SBDuration(Duration duration) {
+    super(duration.toMillis());
+  }
+
+  @Override
+  public String toString() {
+    return isIndefinite() ? "INDEFINITE" : (isUnknown() ? "UNKNOWN" : this.toMillis() + "ms");
+  }
+
+  /**
+   * Factory method that returns a Duration instance for a specified amount of time. The syntax is
+   * "[number][ms|s|m|h]".
+   *
+   * @param time A non-null string properly formatted. Leading or trailing spaces will not parse
+   *     correctly. Throws a NullPointerException if time is null.
+   * @return a Duration which is represented by the <code>time</code>
+   */
+  public static SBDuration valueOf(String time) {
+    int index = -1;
+    for (int i = 0; i < time.length(); i++) {
+      char c = time.charAt(i);
+      if (!Character.isDigit(c) && c != '.' && c != '-' && c != 'E') {
+        index = i;
+        break;
+      }
     }
 
-    /**
-     * Creates a new SBDuration instance from a Duration object.
-     * @param duration
-     */
-    public SBDuration(Duration duration){
-        super(duration.toMillis());
+    String suffix;
+    double value;
+    if (index == -1) {
+      value = Double.parseDouble(time);
+      // Never found the suffix!
+      suffix = "ms";
+    } else {
+      value = Double.parseDouble(time.substring(0, index));
+      suffix = time.substring(index);
     }
-
-    @Override
-    public String toString() {
-        return isIndefinite() ? "INDEFINITE" : (isUnknown() ? "UNKNOWN" : this.toMillis() + "ms");
+    if ("ms".equals(suffix)) {
+      return new SBDuration(millis(value));
+    } else if ("s".equals(suffix)) {
+      return new SBDuration(seconds(value));
+    } else if ("m".equals(suffix)) {
+      return new SBDuration(minutes(value));
+    } else if ("h".equals(suffix)) {
+      return new SBDuration(hours(value));
+    } else {
+      // Malformed suffix
+      throw new IllegalArgumentException("The time parameter must have a suffix of [ms|s|m|h]");
     }
-
-    /**
-     * Factory method that returns a Duration instance for a specified
-     * amount of time. The syntax is "[number][ms|s|m|h]".
-     *
-     * @param time A non-null string properly formatted. Leading or trailing
-     * spaces will not parse correctly. Throws a NullPointerException if
-     * time is null.
-     * @return a Duration which is represented by the <code>time</code>
-     */
-    public static SBDuration valueOf(String time) {
-        int index = -1;
-        for (int i=0; i<time.length(); i++) {
-            char c = time.charAt(i);
-            if (!Character.isDigit(c) && c != '.' && c != '-' && c!='E') {
-                index = i;
-                break;
-            }
-        }
-
-        String suffix;
-        double value;
-        if (index == -1) {
-            value = Double.parseDouble(time);
-            // Never found the suffix!
-            suffix = "ms";
-        } else {
-            value = Double.parseDouble(time.substring(0, index));
-            suffix = time.substring(index);
-        }
-        if ("ms".equals(suffix)) {
-            return new SBDuration(millis(value));
-        } else if ("s".equals(suffix)) {
-            return new SBDuration(seconds(value));
-        } else if ("m".equals(suffix)) {
-            return new SBDuration(minutes(value));
-        } else if ("h".equals(suffix)) {
-            return new SBDuration(hours(value));
-        } else {
-            // Malformed suffix
-            throw new IllegalArgumentException("The time parameter must have a suffix of [ms|s|m|h]");
-        }
-
-    }
+  }
 }

@@ -43,87 +43,84 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- *
- */
+/** */
 public class UseComputedSizesSelectionJob extends BatchDocumentJob {
 
-    public UseComputedSizesSelectionJob(EditorController editorController) {
-        super(editorController);
-    }
+  public UseComputedSizesSelectionJob(EditorController editorController) {
+    super(editorController);
+  }
 
-    @Override
-    protected List<Job> makeSubJobs() {
+  @Override
+  protected List<Job> makeSubJobs() {
 
-        final List<Job> result = new ArrayList<>();
+    final List<Job> result = new ArrayList<>();
 
-        final Set<FXOMInstance> candidates = new HashSet<>();
-        final Selection selection = getEditorController().getSelection();
-        if (selection.getGroup() instanceof ObjectSelectionGroup) {
-            final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
-            for (FXOMObject fxomObject : osg.getItems()) {
-                if (fxomObject instanceof FXOMInstance) {
-                    candidates.add((FXOMInstance) fxomObject);
-                }
-            }
-        } else if (selection.getGroup() instanceof GridSelectionGroup) {
-            final GridSelectionGroup gsg = (GridSelectionGroup) selection.getGroup();
-            final FXOMObject gridPane = gsg.getParentObject();
-            final DesignHierarchyMask mask = new DesignHierarchyMask(gridPane);
-            for (int index : gsg.getIndexes()) {
-                final FXOMObject constraints;
-                switch (gsg.getType()) {
-                    case COLUMN:
-                        constraints = mask.getColumnConstraintsAtIndex(index);
-                        break;
-                    case ROW:
-                        constraints = mask.getRowConstraintsAtIndex(index);
-                        break;
-                    default:
-                        assert false;
-                        return result;
-                }
-                assert constraints instanceof FXOMInstance;
-                candidates.add((FXOMInstance) constraints);
-            }
-        } else {
-            assert selection.getGroup() == null :
-                    "Add implementation for " + selection.getGroup();
+    final Set<FXOMInstance> candidates = new HashSet<>();
+    final Selection selection = getEditorController().getSelection();
+    if (selection.getGroup() instanceof ObjectSelectionGroup) {
+      final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
+      for (FXOMObject fxomObject : osg.getItems()) {
+        if (fxomObject instanceof FXOMInstance) {
+          candidates.add((FXOMInstance) fxomObject);
         }
-
-        for (FXOMInstance candidate : candidates) {
-            final UseComputedSizesObjectJob subJob
-                    = new UseComputedSizesObjectJob(candidate, getEditorController());
-            if (subJob.isExecutable()) {
-                result.add(subJob);
-            }
+      }
+    } else if (selection.getGroup() instanceof GridSelectionGroup) {
+      final GridSelectionGroup gsg = (GridSelectionGroup) selection.getGroup();
+      final FXOMObject gridPane = gsg.getParentObject();
+      final DesignHierarchyMask mask = new DesignHierarchyMask(gridPane);
+      for (int index : gsg.getIndexes()) {
+        final FXOMObject constraints;
+        switch (gsg.getType()) {
+          case COLUMN:
+            constraints = mask.getColumnConstraintsAtIndex(index);
+            break;
+          case ROW:
+            constraints = mask.getRowConstraintsAtIndex(index);
+            break;
+          default:
+            assert false;
+            return result;
         }
-
-        return result;
+        assert constraints instanceof FXOMInstance;
+        candidates.add((FXOMInstance) constraints);
+      }
+    } else {
+      assert selection.getGroup() == null : "Add implementation for " + selection.getGroup();
     }
 
-    @Override
-    protected String makeDescription() {
-        final String result;
-        switch (getSubJobs().size()) {
-            case 0:
-                result = "Unexecutable Use Computed Sizes"; // NO18N
-                break;
-            case 1:
-                result = getSubJobs().get(0).getDescription();
-                break;
-            default:
-                result = makeMultipleSelectionDescription();
-                break;
-        }
-        return result;
+    for (FXOMInstance candidate : candidates) {
+      final UseComputedSizesObjectJob subJob =
+          new UseComputedSizesObjectJob(candidate, getEditorController());
+      if (subJob.isExecutable()) {
+        result.add(subJob);
+      }
     }
 
-    private String makeMultipleSelectionDescription() {
-        final StringBuilder result = new StringBuilder();
-        result.append("Use Computed Sizes on ");
-        result.append(getSubJobs().size());
-        result.append(" Objects");
-        return result.toString();
+    return result;
+  }
+
+  @Override
+  protected String makeDescription() {
+    final String result;
+    switch (getSubJobs().size()) {
+      case 0:
+        result = "Unexecutable Use Computed Sizes"; // NO18N
+        break;
+      case 1:
+        result = getSubJobs().get(0).getDescription();
+        break;
+      default:
+        result = makeMultipleSelectionDescription();
+        break;
     }
+    return result;
+  }
+
+  private String makeMultipleSelectionDescription() {
+    final StringBuilder result = new StringBuilder();
+    result.append("Use Computed Sizes on ");
+    result.append(getSubJobs().size());
+    result.append(" Objects");
+    return result.toString();
+  }
 }

@@ -37,60 +37,57 @@ import com.oracle.javafx.scenebuilder.kit.editor.job.Job;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.AbstractSelectionGroup;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.Selection;
 
-/**
- *
- */
+/** */
 public class BackupSelectionJob extends Job {
 
-    private final AbstractSelectionGroup oldSelectionGroup;
+  private final AbstractSelectionGroup oldSelectionGroup;
 
-    public BackupSelectionJob(EditorController editorController) {
-        super(editorController);
-        
-        // Saves the current selection
-        final Selection selection = getEditorController().getSelection();
-        try {
-            if (selection.getGroup() == null) {
-                this.oldSelectionGroup = null;
-            } else {
-                this.oldSelectionGroup = selection.getGroup().clone();
-            }
-        } catch(CloneNotSupportedException x) {
-            throw new RuntimeException("Bug", x); //NOI18N
-        }
+  public BackupSelectionJob(EditorController editorController) {
+    super(editorController);
+
+    // Saves the current selection
+    final Selection selection = getEditorController().getSelection();
+    try {
+      if (selection.getGroup() == null) {
+        this.oldSelectionGroup = null;
+      } else {
+        this.oldSelectionGroup = selection.getGroup().clone();
+      }
+    } catch (CloneNotSupportedException x) {
+      throw new RuntimeException("Bug", x); // NOI18N
     }
+  }
 
-    /*
-     * Job
-     */
+  /*
+   * Job
+   */
 
-    @Override
-    public boolean isExecutable() {
-        return true;
-    }
+  @Override
+  public boolean isExecutable() {
+    return true;
+  }
 
-    @Override
-    public void execute() {
-        // Now same as redo()
-        redo();
-    }
+  @Override
+  public void execute() {
+    // Now same as redo()
+    redo();
+  }
 
-    @Override
-    public void undo() {
-        final Selection selection = getEditorController().getSelection();
-        selection.select(oldSelectionGroup);
-        assert selection.isValid(getEditorController().getFxomDocument());
-    }
+  @Override
+  public void undo() {
+    final Selection selection = getEditorController().getSelection();
+    selection.select(oldSelectionGroup);
+    assert selection.isValid(getEditorController().getFxomDocument());
+  }
 
-    @Override
-    public void redo() {
-        // Nothing to do :)
-    }
+  @Override
+  public void redo() {
+    // Nothing to do :)
+  }
 
-    @Override
-    public String getDescription() {
-        // Not expected to reach the user
-        return getClass().getSimpleName();
-    }
-    
+  @Override
+  public String getDescription() {
+    // Not expected to reach the user
+    return getClass().getSimpleName();
+  }
 }

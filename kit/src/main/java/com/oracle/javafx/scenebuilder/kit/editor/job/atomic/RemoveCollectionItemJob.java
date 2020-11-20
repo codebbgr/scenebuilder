@@ -36,74 +36,70 @@ import com.oracle.javafx.scenebuilder.kit.editor.job.Job;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMCollection;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 
-/**
- *
- */
+/** */
 public class RemoveCollectionItemJob extends Job {
 
-    private final FXOMObject targetValue;
-    
-    private FXOMCollection parentCollection;
-    private int indexInParentCollection;
+  private final FXOMObject targetValue;
 
-    public RemoveCollectionItemJob(FXOMObject value, EditorController editorController) {
-        super(editorController);
-        this.targetValue = value;
-    }
-    
-    
-    /*
-     * Job
-     */
-    
-    @Override
-    public boolean isExecutable() {
-        return targetValue.getParentCollection() != null;
-    }
+  private FXOMCollection parentCollection;
+  private int indexInParentCollection;
 
-    @Override
-    public void execute() {
-        assert parentCollection == null;
-        assert isExecutable();
-        
-        parentCollection = targetValue.getParentCollection();
-        indexInParentCollection = targetValue.getIndexInParentCollection();
-        
-        // Now same as redo()
-        redo();
-    }
+  public RemoveCollectionItemJob(FXOMObject value, EditorController editorController) {
+    super(editorController);
+    this.targetValue = value;
+  }
 
-    @Override
-    public void undo() {
-        assert targetValue.getParentCollection() == null;
-        
-        getEditorController().getFxomDocument().beginUpdate();
-        targetValue.addToParentCollection(indexInParentCollection, parentCollection);
-        getEditorController().getFxomDocument().endUpdate();
+  /*
+   * Job
+   */
 
-        assert targetValue.getParentCollection() == parentCollection;
-        assert targetValue.getIndexInParentCollection() == indexInParentCollection;
-    }
+  @Override
+  public boolean isExecutable() {
+    return targetValue.getParentCollection() != null;
+  }
 
-    @Override
-    public void redo() {
-        assert targetValue.getParentCollection() == parentCollection;
-        assert targetValue.getIndexInParentCollection() == indexInParentCollection;
-        
-        getEditorController().getFxomDocument().beginUpdate();
-        targetValue.removeFromParentCollection();
-        getEditorController().getFxomDocument().endUpdate();
+  @Override
+  public void execute() {
+    assert parentCollection == null;
+    assert isExecutable();
 
-        assert targetValue.getParentCollection() == null;
-    }
+    parentCollection = targetValue.getParentCollection();
+    indexInParentCollection = targetValue.getIndexInParentCollection();
 
-    @Override
-    public String getDescription() {
-        // Should normally not reach the user
-        return getClass().getSimpleName() 
-                + "[" //NOI18N
-                + targetValue.getGlueElement().getTagName()
-                + "]"; //NOI18N
-    }
-    
+    // Now same as redo()
+    redo();
+  }
+
+  @Override
+  public void undo() {
+    assert targetValue.getParentCollection() == null;
+
+    getEditorController().getFxomDocument().beginUpdate();
+    targetValue.addToParentCollection(indexInParentCollection, parentCollection);
+    getEditorController().getFxomDocument().endUpdate();
+
+    assert targetValue.getParentCollection() == parentCollection;
+    assert targetValue.getIndexInParentCollection() == indexInParentCollection;
+  }
+
+  @Override
+  public void redo() {
+    assert targetValue.getParentCollection() == parentCollection;
+    assert targetValue.getIndexInParentCollection() == indexInParentCollection;
+
+    getEditorController().getFxomDocument().beginUpdate();
+    targetValue.removeFromParentCollection();
+    getEditorController().getFxomDocument().endUpdate();
+
+    assert targetValue.getParentCollection() == null;
+  }
+
+  @Override
+  public String getDescription() {
+    // Should normally not reach the user
+    return getClass().getSimpleName()
+        + "[" // NOI18N
+        + targetValue.getGlueElement().getTagName()
+        + "]"; // NOI18N
+  }
 }

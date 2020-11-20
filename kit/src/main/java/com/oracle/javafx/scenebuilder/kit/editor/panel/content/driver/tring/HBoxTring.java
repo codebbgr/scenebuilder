@@ -40,69 +40,65 @@ import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import javafx.scene.shape.Line;
 
-/**
- *
- * 
- */
+/** */
 public class HBoxTring extends AbstractNodeTring<HBox> {
-        
-    private final int targetIndex;
-    private final Line crackLine = new Line();
 
-    public HBoxTring(ContentPanelController contentPanelController, 
-            FXOMInstance fxomInstance, int targetIndex) {
-        super(contentPanelController, fxomInstance, HBox.class);
-        assert targetIndex >= -1;
-        this.targetIndex = targetIndex;
-        
-        crackLine.getStyleClass().add(TARGET_CRACK_CLASS);
-        crackLine.setMouseTransparent(true);
-        getRootNode().getChildren().add(0, crackLine);
+  private final int targetIndex;
+  private final Line crackLine = new Line();
+
+  public HBoxTring(
+      ContentPanelController contentPanelController, FXOMInstance fxomInstance, int targetIndex) {
+    super(contentPanelController, fxomInstance, HBox.class);
+    assert targetIndex >= -1;
+    this.targetIndex = targetIndex;
+
+    crackLine.getStyleClass().add(TARGET_CRACK_CLASS);
+    crackLine.setMouseTransparent(true);
+    getRootNode().getChildren().add(0, crackLine);
+  }
+
+  /*
+   * AbstractGenericTring
+   */
+
+  @Override
+  protected void layoutDecoration() {
+
+    super.layoutDecoration();
+
+    final HBox hbox = getSceneGraphObject();
+    final int childCount = hbox.getChildren().size();
+
+    if (childCount == 0) {
+      // No crack line
+      crackLine.setVisible(false);
+
+    } else {
+      // Computes the crack x
+
+      final double crackX;
+      final List<Node> children = hbox.getChildren();
+      if (targetIndex == -1) {
+        final Node child = children.get(childCount - 1);
+        final Bounds cb = child.localToParent(child.getLayoutBounds());
+        crackX = cb.getMaxX();
+      } else {
+        final Node child = children.get(targetIndex);
+        final Bounds cb = child.localToParent(child.getLayoutBounds());
+        crackX = cb.getMinX();
+      }
+
+      // Updates the crack line
+      final boolean snapToPixel = true;
+      final Bounds b = getSceneGraphObject().getLayoutBounds();
+      final Point2D p0 = sceneGraphObjectToDecoration(crackX, b.getMinY(), snapToPixel);
+      final Point2D p1 = sceneGraphObjectToDecoration(crackX, b.getMaxY(), snapToPixel);
+
+      crackLine.setVisible(true);
+      crackLine.setStartX(p0.getX());
+      crackLine.setStartY(p0.getY());
+      crackLine.setEndX(p1.getX());
+      crackLine.setEndY(p1.getY());
     }
-
-    
-    /*
-     * AbstractGenericTring
-     */
-        
-    @Override
-    protected void layoutDecoration() {
-        
-        super.layoutDecoration();
-        
-        final HBox hbox = getSceneGraphObject();
-        final int childCount = hbox.getChildren().size();
-        
-        if (childCount == 0) {
-            // No crack line
-            crackLine.setVisible(false);
-            
-        } else {
-            // Computes the crack x
-            
-            final double crackX;
-            final List<Node> children = hbox.getChildren();
-            if (targetIndex == -1) {
-                final Node child = children.get(childCount-1);
-                final Bounds cb = child.localToParent(child.getLayoutBounds());
-                crackX = cb.getMaxX();
-            } else {
-                final Node child = children.get(targetIndex);
-                final Bounds cb = child.localToParent(child.getLayoutBounds());
-                crackX = cb.getMinX();
-            }
-
-            // Updates the crack line
-            final boolean snapToPixel = true;
-            final Bounds b = getSceneGraphObject().getLayoutBounds();
-            final Point2D p0 = sceneGraphObjectToDecoration(crackX, b.getMinY(), snapToPixel);
-            final Point2D p1 = sceneGraphObjectToDecoration(crackX, b.getMaxY(), snapToPixel);
-
-            crackLine.setVisible(true);
-            crackLine.setStartX(p0.getX());
-            crackLine.setStartY(p0.getY());
-            crackLine.setEndX(p1.getX());
-            crackLine.setEndY(p1.getY());
-        }
-    }
+  }
 }

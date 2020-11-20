@@ -45,50 +45,50 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Delete job for GridSelectionGroup.
- * This job manages either RemoveRow or RemoveColumn jobs depending on the selection.
+ * Delete job for GridSelectionGroup. This job manages either RemoveRow or RemoveColumn jobs
+ * depending on the selection.
  */
 public class DeleteGridSelectionJob extends BatchSelectionJob {
 
-    private FXOMObject targetGridPane;
+  private FXOMObject targetGridPane;
 
-    public DeleteGridSelectionJob(EditorController editorController) {
-        super(editorController);
+  public DeleteGridSelectionJob(EditorController editorController) {
+    super(editorController);
+  }
+
+  @Override
+  protected List<Job> makeSubJobs() {
+
+    final List<Job> result = new ArrayList<>();
+    final Selection selection = getEditorController().getSelection();
+    assert selection.getGroup() instanceof GridSelectionGroup;
+
+    final GridSelectionGroup gsg = (GridSelectionGroup) selection.getGroup();
+    targetGridPane = gsg.getAncestor();
+    switch (gsg.getType()) {
+      case COLUMN:
+        result.add(new DeleteColumnJob(getEditorController()));
+        break;
+      case ROW:
+        result.add(new DeleteRowJob(getEditorController()));
+        break;
+      default:
+        assert false;
+        break;
     }
+    return result;
+  }
 
-    @Override
-    protected List<Job> makeSubJobs() {
+  @Override
+  protected String makeDescription() {
+    return getSubJobs().get(0).getDescription();
+  }
 
-        final List<Job> result = new ArrayList<>();
-        final Selection selection = getEditorController().getSelection();
-        assert selection.getGroup() instanceof GridSelectionGroup;
-
-        final GridSelectionGroup gsg = (GridSelectionGroup) selection.getGroup();
-        targetGridPane = gsg.getAncestor();
-        switch (gsg.getType()) {
-            case COLUMN:
-                result.add(new DeleteColumnJob(getEditorController()));
-                break;
-            case ROW:
-                result.add(new DeleteRowJob(getEditorController()));
-                break;
-            default:
-                assert false;
-                break;
-        }
-        return result;
-    }
-
-    @Override
-    protected String makeDescription() {
-        return getSubJobs().get(0).getDescription();
-    }
-
-    @Override
-    protected AbstractSelectionGroup getNewSelectionGroup() {
-        // Selection goes to the GridPane
-        final Set<FXOMObject> newObjects = new HashSet<>();
-        newObjects.add(targetGridPane);
-        return new ObjectSelectionGroup(newObjects, targetGridPane, null);
-    }
+  @Override
+  protected AbstractSelectionGroup getNewSelectionGroup() {
+    // Selection goes to the GridPane
+    final Set<FXOMObject> newObjects = new HashSet<>();
+    newObjects.add(targetGridPane);
+    return new ObjectSelectionGroup(newObjects, targetGridPane, null);
+  }
 }

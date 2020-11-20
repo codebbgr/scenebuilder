@@ -38,28 +38,29 @@ import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 
-/**
- *
- * 
- */
+/** */
 public abstract class AbstractRelocater<T extends Parent> {
-    
-    protected final Node sceneGraphObject;
-    protected final Class<T> parentClass;
 
-    public AbstractRelocater(Node sceneGraphObject, Class<T> parentClass) {
-        assert sceneGraphObject != null;
-        assert sceneGraphObject.getParent() != null;
-        assert sceneGraphObject.getParent().getClass() == parentClass;
-        this.sceneGraphObject = sceneGraphObject;
-        this.parentClass = parentClass;
-    }
-    
-    public abstract void moveToLayoutX(double newLayoutX, Bounds newLayoutBounds);
-    public abstract void moveToLayoutY(double newLayoutY, Bounds newLayoutBounds);
-    public abstract void revertToOriginalLocation();
+  protected final Node sceneGraphObject;
+  protected final Class<T> parentClass;
 
-    public abstract List<PropertyName> getPropertyNames();
-    public abstract Object getValue(PropertyName propertyName);
-    public abstract Map<PropertyName, Object> getChangeMap();
+  public AbstractRelocater(Node sceneGraphObject, Class<T> parentClass) {
+    assert sceneGraphObject != null;
+    assert sceneGraphObject.getParent() != null;
+    assert sceneGraphObject.getParent().getClass() == parentClass;
+    this.sceneGraphObject = sceneGraphObject;
+    this.parentClass = parentClass;
+  }
+
+  public abstract void moveToLayoutX(double newLayoutX, Bounds newLayoutBounds);
+
+  public abstract void moveToLayoutY(double newLayoutY, Bounds newLayoutBounds);
+
+  public abstract void revertToOriginalLocation();
+
+  public abstract List<PropertyName> getPropertyNames();
+
+  public abstract Object getValue(PropertyName propertyName);
+
+  public abstract Map<PropertyName, Object> getChangeMap();
 }

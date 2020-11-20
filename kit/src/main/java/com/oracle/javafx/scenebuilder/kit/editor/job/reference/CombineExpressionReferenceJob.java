@@ -45,59 +45,53 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PrefixedValue;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- *
- */
+/** */
 public class CombineExpressionReferenceJob extends InlineDocumentJob {
-    
-    private final FXOMPropertyT reference;
 
-    public CombineExpressionReferenceJob(
-            FXOMPropertyT reference, 
-            EditorController editorController) {
-        super(editorController);
-        
-        assert reference != null;
-        assert reference.getFxomDocument() == editorController.getFxomDocument();
-        
-        this.reference = reference;
-    }
-    
-    /*
-     * InlineDocumentJob
-     */
-    @Override
-    protected List<Job> makeAndExecuteSubJobs() {
-        final List<Job> result = new LinkedList<>();
-        
-        // 1) Locate the referee
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        final String fxId = FXOMNodes.extractReferenceSource(reference);
-        final FXOMObject referee = fxomDocument.searchWithFxId(fxId);
-        
-        // 2) Remove the referee
-        final Job removeJob = new RemoveObjectJob(referee, getEditorController());
-        removeJob.execute();
-        result.add(removeJob);
-        
-        // 3) Replace ther reference by the referee
-        final Job replaceJob = new ReplacePropertyValueJobT(reference, referee, getEditorController());
-        replaceJob.execute();
-        result.add(replaceJob);
-                
-        return result;
-    }
+  private final FXOMPropertyT reference;
 
-    @Override
-    protected String makeDescription() {
-        return getClass().getSimpleName(); // Not expected to reach the user
-    }
+  public CombineExpressionReferenceJob(FXOMPropertyT reference, EditorController editorController) {
+    super(editorController);
 
-    @Override
-    public boolean isExecutable() {
-        final PrefixedValue pv = new PrefixedValue(reference.getValue());
-        return pv.isExpression();
-    }
-    
-    
+    assert reference != null;
+    assert reference.getFxomDocument() == editorController.getFxomDocument();
+
+    this.reference = reference;
+  }
+
+  /*
+   * InlineDocumentJob
+   */
+  @Override
+  protected List<Job> makeAndExecuteSubJobs() {
+    final List<Job> result = new LinkedList<>();
+
+    // 1) Locate the referee
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    final String fxId = FXOMNodes.extractReferenceSource(reference);
+    final FXOMObject referee = fxomDocument.searchWithFxId(fxId);
+
+    // 2) Remove the referee
+    final Job removeJob = new RemoveObjectJob(referee, getEditorController());
+    removeJob.execute();
+    result.add(removeJob);
+
+    // 3) Replace ther reference by the referee
+    final Job replaceJob = new ReplacePropertyValueJobT(reference, referee, getEditorController());
+    replaceJob.execute();
+    result.add(replaceJob);
+
+    return result;
+  }
+
+  @Override
+  protected String makeDescription() {
+    return getClass().getSimpleName(); // Not expected to reach the user
+  }
+
+  @Override
+  public boolean isExecutable() {
+    final PrefixedValue pv = new PrefixedValue(reference.getValue());
+    return pv.isExpression();
+  }
 }

@@ -42,98 +42,96 @@ import java.util.List;
 import javafx.scene.Scene;
 import javafx.scene.chart.Axis;
 
-/**
- *
- */
+/** */
 public class DeleteObjectJob extends InlineDocumentJob {
 
-    private final FXOMObject targetFxomObject;
+  private final FXOMObject targetFxomObject;
 
-    public DeleteObjectJob(FXOMObject fxomObject, EditorController editorController) {
-        super(editorController);
+  public DeleteObjectJob(FXOMObject fxomObject, EditorController editorController) {
+    super(editorController);
 
-        assert fxomObject != null;
+    assert fxomObject != null;
 
-        this.targetFxomObject = fxomObject;
+    this.targetFxomObject = fxomObject;
+  }
+
+  @Override
+  public boolean isExecutable() {
+    final boolean result;
+
+    if (targetFxomObject == targetFxomObject.getFxomDocument().getFxomRoot()) {
+      // targetFxomObject is the root
+      result = true;
+    } else if (targetFxomObject.getSceneGraphObject() instanceof Axis) {
+      // Axis cannot be deleted from their parent Chart
+      result = false;
+    } else if (targetFxomObject.getParentObject() != null
+        && targetFxomObject.getParentObject().getSceneGraphObject() instanceof Scene) {
+      // Scene root cannot be deleted
+      result = false;
+    } else {
+      result = (targetFxomObject.getParentProperty() != null);
     }
 
-    @Override
-    public boolean isExecutable() {
-        final boolean result;
+    return result;
+  }
 
-        if (targetFxomObject == targetFxomObject.getFxomDocument().getFxomRoot()) {
-            // targetFxomObject is the root
-            result = true;
-        } else if (targetFxomObject.getSceneGraphObject() instanceof Axis) {
-            // Axis cannot be deleted from their parent Chart
-            result = false;
-        } else if (targetFxomObject.getParentObject() != null &&
-                targetFxomObject.getParentObject().getSceneGraphObject() instanceof Scene) {
-            // Scene root cannot be deleted
-            result = false;
-        } else {
-            result = (targetFxomObject.getParentProperty() != null);
-        }
+  @Override
+  protected List<Job> makeAndExecuteSubJobs() {
 
-        return result;
+    final List<Job> result = new ArrayList<>();
+    if ((targetFxomObject.getParentProperty() == null)
+        && (targetFxomObject.getParentCollection() == null)) {
+      /*
+       * targetFxomObject is the root object
+       * => we reset the root object to null
+       */
+      final Job setRootJob = new SetDocumentRootJob(null, getEditorController());
+      setRootJob.execute();
+      result.add(setRootJob);
+
+    } else {
+
+      /*
+       * targetFxomObject is not the root object
+       * => we delegate to ObjectDeleter
+       * => this class will take care of references
+       */
+
+      final ObjectDeleter deleter = new ObjectDeleter(getEditorController());
+      deleter.delete(targetFxomObject);
+      result.addAll(deleter.getExecutedJobs());
     }
 
-    @Override
-    protected List<Job> makeAndExecuteSubJobs() {
+    return result;
+  }
 
-        final List<Job> result = new ArrayList<>();
-        if ((targetFxomObject.getParentProperty() == null) &&
-            (targetFxomObject.getParentCollection() == null)) {
-            /*
-             * targetFxomObject is the root object
-             * => we reset the root object to null
-             */
-            final Job setRootJob = new SetDocumentRootJob(null, getEditorController());
-            setRootJob.execute();
-            result.add(setRootJob);
+  @Override
+  protected String makeDescription() {
+    final StringBuilder sb = new StringBuilder();
 
-        } else {
-            
-            /*
-             * targetFxomObject is not the root object
-             * => we delegate to ObjectDeleter
-             * => this class will take care of references
-             */
-            
-            final ObjectDeleter deleter = new ObjectDeleter(getEditorController());
-            deleter.delete(targetFxomObject);
-            result.addAll(deleter.getExecutedJobs());
-        }
-        
-        return result;
+    sb.append("Delete ");
+
+    if (targetFxomObject instanceof FXOMInstance) {
+      final Object sceneGraphObject = targetFxomObject.getSceneGraphObject();
+      if (sceneGraphObject != null) {
+        sb.append(sceneGraphObject.getClass().getSimpleName());
+      } else {
+        sb.append("Unresolved Object");
+      }
+    } else if (targetFxomObject instanceof FXOMCollection) {
+      sb.append("Collection");
+    } else if (targetFxomObject instanceof FXOMIntrinsic) {
+      sb.append(targetFxomObject.getGlueElement().getTagName());
+    } else {
+      assert false;
+      sb.append(targetFxomObject.getClass().getSimpleName());
     }
 
-    @Override
-    protected String makeDescription() {
-        final StringBuilder sb = new StringBuilder();
+    return sb.toString();
+  }
 
-        sb.append("Delete ");
-
-        if (targetFxomObject instanceof FXOMInstance) {
-            final Object sceneGraphObject = targetFxomObject.getSceneGraphObject();
-            if (sceneGraphObject != null) {
-                sb.append(sceneGraphObject.getClass().getSimpleName());
-            } else {
-                sb.append("Unresolved Object");
-            }
-        } else if (targetFxomObject instanceof FXOMCollection) {
-            sb.append("Collection");
-        } else if (targetFxomObject instanceof FXOMIntrinsic) {
-            sb.append(targetFxomObject.getGlueElement().getTagName());
-        } else {
-            assert false;
-            sb.append(targetFxomObject.getClass().getSimpleName());
-        }
-
-        return sb.toString();
-    }
-    
-    FXOMObject getTargetFxomObject() {
-        return targetFxomObject;
-    }
+  FXOMObject getTargetFxomObject() {
+    return targetFxomObject;
+  }
 }

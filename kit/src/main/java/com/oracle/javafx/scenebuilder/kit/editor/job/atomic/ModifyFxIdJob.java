@@ -32,74 +32,71 @@
 package com.oracle.javafx.scenebuilder.kit.editor.job.atomic;
 
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
-import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.editor.job.Job;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
+import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.util.JavaLanguage;
 import java.util.Objects;
 
-/**
- * Job used to modify an fx:id.
- *
- */
+/** Job used to modify an fx:id. */
 public class ModifyFxIdJob extends Job {
 
-    private final FXOMObject fxomObject;
-    private final String newValue;
-    private final String oldValue;
+  private final FXOMObject fxomObject;
+  private final String newValue;
+  private final String oldValue;
 
-    public ModifyFxIdJob(FXOMObject fxomObject, String newValue, EditorController editorController) {
-        super(editorController);
+  public ModifyFxIdJob(FXOMObject fxomObject, String newValue, EditorController editorController) {
+    super(editorController);
 
-        assert fxomObject != null;
-        assert fxomObject.getSceneGraphObject() != null;
+    assert fxomObject != null;
+    assert fxomObject.getSceneGraphObject() != null;
 
-        this.fxomObject = fxomObject;
-        this.newValue = newValue;
-        this.oldValue = fxomObject.getFxId();
+    this.fxomObject = fxomObject;
+    this.newValue = newValue;
+    this.oldValue = fxomObject.getFxId();
+  }
+
+  /*
+   * Job
+   */
+  @Override
+  public boolean isExecutable() {
+    return Objects.equals(oldValue, newValue) == false
+        && ((newValue == null) || JavaLanguage.isIdentifier(newValue));
+  }
+
+  @Override
+  public void execute() {
+    redo();
+  }
+
+  @Override
+  public void undo() {
+    getEditorController().getFxomDocument().beginUpdate();
+    this.fxomObject.setFxId(oldValue);
+    getEditorController().getFxomDocument().endUpdate();
+    assert Objects.equals(fxomObject.getFxId(), oldValue);
+  }
+
+  @Override
+  public void redo() {
+    getEditorController().getFxomDocument().beginUpdate();
+    this.fxomObject.setFxId(newValue);
+    getEditorController().getFxomDocument().endUpdate();
+    assert Objects.equals(fxomObject.getFxId(), newValue);
+  }
+
+  @Override
+  public String getDescription() {
+    final String result;
+
+    if (newValue == null) {
+      assert oldValue != null;
+      result = I18N.getString("job.remove.fxid", oldValue);
+    } else {
+      result = I18N.getString("job.set.fxid", newValue);
     }
 
-    /*
-     * Job
-     */
-    @Override
-    public boolean isExecutable() {
-        return Objects.equals(oldValue, newValue) == false
-                && ((newValue == null) || JavaLanguage.isIdentifier(newValue));
-    }
-
-    @Override
-    public void execute() {
-        redo();
-    }
-
-    @Override
-    public void undo() {
-        getEditorController().getFxomDocument().beginUpdate();
-        this.fxomObject.setFxId(oldValue);
-        getEditorController().getFxomDocument().endUpdate();
-        assert Objects.equals(fxomObject.getFxId(), oldValue);
-    }
-
-    @Override
-    public void redo() {
-        getEditorController().getFxomDocument().beginUpdate();
-        this.fxomObject.setFxId(newValue);
-        getEditorController().getFxomDocument().endUpdate();
-        assert Objects.equals(fxomObject.getFxId(), newValue);
-    }
-
-    @Override
-    public String getDescription() {
-        final String result;
-        
-        if (newValue == null) {
-            assert oldValue != null;
-            result = I18N.getString("job.remove.fxid", oldValue);
-        } else {
-            result = I18N.getString("job.set.fxid", newValue);
-        }
-        
-        return result;
-    }
+    return result;
+  }
 }

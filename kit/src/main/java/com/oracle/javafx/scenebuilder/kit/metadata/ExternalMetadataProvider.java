@@ -31,16 +31,15 @@
  */
 package com.oracle.javafx.scenebuilder.kit.metadata;
 
-
 import com.oracle.javafx.scenebuilder.kit.metadata.klass.ComponentClassMetadata;
-
 import java.util.List;
 
 public interface ExternalMetadataProvider {
 
-    /**
-     * list of items added to the metadata
-     * @return a List of classes
-     */
-    List<ComponentClassMetadata> getItems();
+  /**
+   * list of items added to the metadata
+   *
+   * @return a List of classes
+   */
+  List<ComponentClassMetadata> getItems();
 }

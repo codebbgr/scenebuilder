@@ -34,13 +34,11 @@ package com.oracle.javafx.scenebuilder.kit.editor.job.wrap;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import javafx.scene.control.ScrollPane;
 
-/**
- * Job used to wrap selection in a ScrollPane.
- */
+/** Job used to wrap selection in a ScrollPane. */
 public class WrapInScrollPaneJob extends AbstractWrapInContentJob {
 
-    public WrapInScrollPaneJob(EditorController editorController) {
-        super(editorController);
-        newContainerClass = ScrollPane.class;
-    }
+  public WrapInScrollPaneJob(EditorController editorController) {
+    super(editorController);
+    newContainerClass = ScrollPane.class;
+  }
 }

@@ -34,50 +34,47 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.content.driver.handles;
 
 import com.oracle.javafx.scenebuilder.kit.editor.panel.content.ContentPanelController;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
-
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
 
-/**
- *
- * 
- */
+/** */
 public abstract class AbstractCurveHandles<T extends Node> extends AbstractHandles<T> {
 
-    public AbstractCurveHandles(ContentPanelController contentPanelController,
-            FXOMObject fxomObject, Class<T> sceneGraphClass) {
-        super(contentPanelController, fxomObject, sceneGraphClass);
-    }
+  public AbstractCurveHandles(
+      ContentPanelController contentPanelController,
+      FXOMObject fxomObject,
+      Class<T> sceneGraphClass) {
+    super(contentPanelController, fxomObject, sceneGraphClass);
+  }
 
-    protected final ChangeListener<Number> coordinateListener
-        = (ov, v1, v2) -> layoutDecoration();
-    
-    protected final ListChangeListener<Number> pointsListener = 
-            (ListChangeListener.Change<? extends Number> c) -> layoutDecoration();
-    
-    /*
-     * AbstractHandles
-     */
-    
-    @Override
-    public Bounds getSceneGraphObjectBounds() {
-        return getSceneGraphObject().getLayoutBounds();
-    }
+  protected final ChangeListener<Number> coordinateListener = (ov, v1, v2) -> layoutDecoration();
 
-    @Override
-    public Node getSceneGraphObjectProxy() {
-        return getSceneGraphObject();
-    }
+  protected final ListChangeListener<Number> pointsListener =
+      (ListChangeListener.Change<? extends Number> c) -> layoutDecoration();
 
-    @Override
-    protected void startListeningToSceneGraphObject() {
-        startListeningToLocalToSceneTransform(getSceneGraphObject());
-    }
+  /*
+   * AbstractHandles
+   */
 
-    @Override
-    protected void stopListeningToSceneGraphObject() {
-        stopListeningToLocalToSceneTransform(getSceneGraphObject());
-    }
+  @Override
+  public Bounds getSceneGraphObjectBounds() {
+    return getSceneGraphObject().getLayoutBounds();
+  }
+
+  @Override
+  public Node getSceneGraphObjectProxy() {
+    return getSceneGraphObject();
+  }
+
+  @Override
+  protected void startListeningToSceneGraphObject() {
+    startListeningToLocalToSceneTransform(getSceneGraphObject());
+  }
+
+  @Override
+  protected void stopListeningToSceneGraphObject() {
+    stopListeningToLocalToSceneTransform(getSceneGraphObject());
+  }
 }

@@ -31,20 +31,16 @@
  */
 package com.oracle.javafx.scenebuilder.kit.fxom.glue;
 
-/**
- *
- * 
- */
+/** */
 public class GlueAuxiliary extends GlueNode {
-    
-    private final GlueDocument document;
 
-    public GlueAuxiliary(GlueDocument document) {
-        this.document = document;
-    }
+  private final GlueDocument document;
 
-    public GlueDocument getDocument() {
-        return document;
-    }
-    
+  public GlueAuxiliary(GlueDocument document) {
+    this.document = document;
+  }
+
+  public GlueDocument getDocument() {
+    return document;
+  }
 }

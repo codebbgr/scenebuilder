@@ -43,207 +43,202 @@ import java.util.Objects;
 import java.util.Set;
 import javafx.scene.Node;
 
-/**
- *
- * 
- */
+/** */
 public class ObjectSelectionGroup extends AbstractSelectionGroup {
-    
-    private final Set<FXOMObject> items = new HashSet<>();
-    private final FXOMObject hitItem;
-    private final Object hitSceneGraphObject;
-    private final Node hitNode;
-    
-    ObjectSelectionGroup(FXOMObject fxomObject, Node hitNode) {
-        assert fxomObject != null;
-        this.items.add(fxomObject);
-        this.hitItem = fxomObject;
-        this.hitSceneGraphObject = fxomObject.getSceneGraphObject();
-        this.hitNode = hitNode;
-    }
-    
-    public ObjectSelectionGroup(Collection<FXOMObject> fxomObjects, FXOMObject hitItem, Node hitNode) {
-        assert fxomObjects != null;
-        assert hitItem != null;
-        assert fxomObjects.contains(hitItem);
-        this.items.addAll(fxomObjects);
-        this.hitItem = hitItem;
-        this.hitSceneGraphObject = this.hitItem.getSceneGraphObject();
-        this.hitNode = hitNode;
-    }
-    
-    public Set<FXOMObject> getItems() {
-        return Collections.unmodifiableSet(items);
+
+  private final Set<FXOMObject> items = new HashSet<>();
+  private final FXOMObject hitItem;
+  private final Object hitSceneGraphObject;
+  private final Node hitNode;
+
+  ObjectSelectionGroup(FXOMObject fxomObject, Node hitNode) {
+    assert fxomObject != null;
+    this.items.add(fxomObject);
+    this.hitItem = fxomObject;
+    this.hitSceneGraphObject = fxomObject.getSceneGraphObject();
+    this.hitNode = hitNode;
+  }
+
+  public ObjectSelectionGroup(
+      Collection<FXOMObject> fxomObjects, FXOMObject hitItem, Node hitNode) {
+    assert fxomObjects != null;
+    assert hitItem != null;
+    assert fxomObjects.contains(hitItem);
+    this.items.addAll(fxomObjects);
+    this.hitItem = hitItem;
+    this.hitSceneGraphObject = this.hitItem.getSceneGraphObject();
+    this.hitNode = hitNode;
+  }
+
+  public Set<FXOMObject> getItems() {
+    return Collections.unmodifiableSet(items);
+  }
+
+  public FXOMObject getHitItem() {
+    return hitItem;
+  }
+
+  public Node getHitNode() {
+    return hitNode;
+  }
+
+  public boolean isExpired() {
+    return hitItem.getSceneGraphObject() != hitSceneGraphObject;
+  }
+
+  public Node getCheckedHitNode() {
+    final Node result;
+
+    if ((hitNode == null) || isExpired()) {
+      result = getFallbackHitNode();
+    } else {
+      result = hitNode;
     }
 
-    public FXOMObject getHitItem() {
-        return hitItem;
+    return result;
+  }
+
+  public Node getFallbackHitNode() {
+    final Node result;
+
+    if (hitItem.isNode()) {
+      result = (Node) hitItem.getSceneGraphObject();
+    } else {
+      final FXOMObject closestNodeObject = hitItem.getClosestNode();
+      if (closestNodeObject != null) {
+        result = (Node) closestNodeObject.getSceneGraphObject();
+      } else {
+        result = null;
+      }
     }
 
-    public Node getHitNode() {
-        return hitNode;
+    return result;
+  }
+
+  public Set<FXOMObject> getFlattenItems() {
+    return FXOMNodes.flatten(items);
+  }
+
+  public List<FXOMObject> getSortedItems() {
+    return FXOMNodes.sort(items);
+  }
+
+  public boolean hasSingleParent() {
+    final boolean result;
+
+    if (items.size() == 1) {
+      result = true;
+    } else {
+      final Set<FXOMObject> parents = new HashSet<>();
+      for (FXOMObject i : items) {
+        parents.add(i.getParentObject());
+      }
+      result = parents.size() == 1;
     }
-    
-    public boolean isExpired() {
-        return hitItem.getSceneGraphObject() != hitSceneGraphObject;
-    }
-    
-    public Node getCheckedHitNode() {
-        final Node result;
-        
-        if ((hitNode == null) || isExpired()) {
-            result = getFallbackHitNode();
-        } else {
-            result = hitNode;
-        }
-        
-        return result;
-    }
-    
-    public Node getFallbackHitNode() {
-        final Node result;
-        
-        if (hitItem.isNode()) {
-            result = (Node) hitItem.getSceneGraphObject();
-        } else {
-            final FXOMObject closestNodeObject = hitItem.getClosestNode();
-            if (closestNodeObject != null) {
-                result = (Node) closestNodeObject.getSceneGraphObject();
+
+    return result;
+  }
+
+  /*
+   * AbstractSelectionGroup
+   */
+
+  @Override
+  public FXOMObject getAncestor() {
+    final FXOMObject result;
+
+    assert items.isEmpty() == false;
+
+    switch (items.size()) {
+      case 0:
+        result = null;
+        break;
+
+      case 1:
+        result = items.iterator().next().getParentObject();
+        break;
+
+      default:
+        DesignHierarchyPath commonPath = null;
+        for (FXOMObject i : items) {
+          final FXOMObject parent = i.getParentObject();
+          if (parent != null) {
+            final DesignHierarchyPath dph = new DesignHierarchyPath(parent);
+            if (commonPath == null) {
+              commonPath = dph;
             } else {
-                result = null;
+              commonPath = commonPath.getCommonPathWith(dph);
             }
+          }
         }
-        
-        return result;
-    }
-    
-    public Set<FXOMObject> getFlattenItems() {
-        return FXOMNodes.flatten(items);
-    }
-    
-    public List<FXOMObject> getSortedItems() {
-        return FXOMNodes.sort(items);
-    }
-    
-    public boolean hasSingleParent() {
-        final boolean result;
-        
-        if (items.size() == 1) {
-            result = true;
-        } else {
-            final Set<FXOMObject> parents = new HashSet<>();
-            for (FXOMObject i : items) {
-                parents.add(i.getParentObject());
-            }
-            result = parents.size() == 1;
-        }
-        
-        return result;
-    }
-    
-    /*
-     * AbstractSelectionGroup
-     */
-    
-    @Override
-    public FXOMObject getAncestor() {
-        final FXOMObject result;
-        
-        assert items.isEmpty() == false;
-        
-        switch(items.size()) {
-
-            case 0:
-                result = null;
-                break;
-
-            case 1:
-                result = items.iterator().next().getParentObject();
-                break;
-
-            default:
-                DesignHierarchyPath commonPath = null;
-                for (FXOMObject i : items) {
-                    final FXOMObject parent = i.getParentObject();
-                    if (parent != null) {
-                        final DesignHierarchyPath dph = new DesignHierarchyPath(parent);
-                        if (commonPath == null) {
-                            commonPath = dph;
-                        } else {
-                            commonPath = commonPath.getCommonPathWith(dph);
-                        }
-                    }
-                }
-                assert commonPath != null; // Else it would mean root is selected twice
-                result = commonPath.getLeaf();
-                break;
-        }
-        
-        return result;
+        assert commonPath != null; // Else it would mean root is selected twice
+        result = commonPath.getLeaf();
+        break;
     }
 
-    @Override
-    public boolean isValid(FXOMDocument fxomDocument) {
-        assert fxomDocument != null;
-        
-        boolean result;
-        final FXOMObject fxomRoot = fxomDocument.getFxomRoot();
-        if (fxomRoot == null) {
-            result = false;
-        } else {
-            result = true;
-            for (FXOMObject i : items) {
-                final boolean ok = (i == fxomRoot) || i.isDescendantOf(fxomRoot);
-                if (ok == false) {
-                    result = false;
-                    break;
-                }
-            }
+    return result;
+  }
+
+  @Override
+  public boolean isValid(FXOMDocument fxomDocument) {
+    assert fxomDocument != null;
+
+    boolean result;
+    final FXOMObject fxomRoot = fxomDocument.getFxomRoot();
+    if (fxomRoot == null) {
+      result = false;
+    } else {
+      result = true;
+      for (FXOMObject i : items) {
+        final boolean ok = (i == fxomRoot) || i.isDescendantOf(fxomRoot);
+        if (ok == false) {
+          result = false;
+          break;
         }
-        
-        return result;
-    }
-    
-    
-    /*
-     * Cloneable
-     */
-    @Override
-    public ObjectSelectionGroup clone() throws CloneNotSupportedException {
-        return (ObjectSelectionGroup)super.clone();
+      }
     }
 
-    
-    /*
-     * Object
-     */
-    @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 41 * hash + Objects.hashCode(this.items);
-        hash = 41 * hash + Objects.hashCode(this.hitItem);
-        hash = 41 * hash + Objects.hashCode(this.hitNode);
-        return hash;
-    }
+    return result;
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final ObjectSelectionGroup other = (ObjectSelectionGroup) obj;
-        if (!Objects.equals(this.items, other.items)) {
-            return false;
-        }
-        if (!Objects.equals(this.hitItem, other.hitItem)) {
-            return false;
-        }
-        if (this.hitNode != other.hitNode) {
-            return false;
-        }
-        return true;
+  /*
+   * Cloneable
+   */
+  @Override
+  public ObjectSelectionGroup clone() throws CloneNotSupportedException {
+    return (ObjectSelectionGroup) super.clone();
+  }
+
+  /*
+   * Object
+   */
+  @Override
+  public int hashCode() {
+    int hash = 3;
+    hash = 41 * hash + Objects.hashCode(this.items);
+    hash = 41 * hash + Objects.hashCode(this.hitItem);
+    hash = 41 * hash + Objects.hashCode(this.hitNode);
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
     }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final ObjectSelectionGroup other = (ObjectSelectionGroup) obj;
+    if (!Objects.equals(this.items, other.items)) {
+      return false;
+    }
+    if (!Objects.equals(this.hitItem, other.hitItem)) {
+      return false;
+    }
+    if (this.hitNode != other.hitNode) {
+      return false;
+    }
+    return true;
+  }
 }

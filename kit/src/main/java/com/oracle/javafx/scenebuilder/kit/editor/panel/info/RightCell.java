@@ -38,46 +38,40 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
 
-/**
- *
- */
+/** */
 class RightCell extends TableCell<IndexEntry, FXOMObject> {
-    
-    
+
+  /*
+   * TableCell
+   */
+
+  @Override
+  protected void updateItem(FXOMObject rightValue, boolean empty) {
+    super.updateItem(rightValue, empty);
+
+    final String text;
+    if (empty) {
+      text = ""; // NOI18N
+    } else {
+      if (rightValue == null) {
+        text = "null"; // NOI18N
+      } else {
+        text = rightValue.getGlueElement().getTagName();
+      }
+    }
+    setText(text);
+  }
+
+  public static class Factory
+      implements Callback<TableColumn<IndexEntry, FXOMObject>, TableCell<IndexEntry, FXOMObject>> {
+
     /*
-     * TableCell
+     * Callback<TableView<IndexEntry>, TableCell<IndexEntry, FXOMObject>>
      */
 
     @Override
-    protected void updateItem(FXOMObject rightValue, boolean empty) {
-        super.updateItem(rightValue, empty);
-        
-        final String text;
-        if (empty) {
-            text = ""; //NOI18N
-        } else {
-            if (rightValue == null) {
-                text = "null"; //NOI18N
-            } else {
-                text = rightValue.getGlueElement().getTagName();
-            }
-        }
-        setText(text);
+    public TableCell<IndexEntry, FXOMObject> call(TableColumn<IndexEntry, FXOMObject> tc) {
+      return new RightCell();
     }
-    
-    
-    
-    
-    public static class Factory 
-    implements Callback<TableColumn<IndexEntry, FXOMObject>, TableCell<IndexEntry, FXOMObject>> {
-
-        /*
-         * Callback<TableView<IndexEntry>, TableCell<IndexEntry, FXOMObject>>
-         */
-
-        @Override
-        public TableCell<IndexEntry, FXOMObject> call(TableColumn<IndexEntry, FXOMObject> tc) {
-            return new RightCell();
-        }
-    }
+  }
 }

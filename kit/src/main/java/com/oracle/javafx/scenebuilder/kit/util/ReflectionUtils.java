@@ -38,34 +38,36 @@ import java.util.Map;
 import javafx.fxml.FXMLLoader;
 
 /**
- * A temporary class created to reflectively call private and protected methods
- * from classes in JDK 9 unless we come up with a permanent solution.
+ * A temporary class created to reflectively call private and protected methods from classes in JDK
+ * 9 unless we come up with a permanent solution.
  */
 public class ReflectionUtils {
 
-    private static final Map<String, Method> methodMap = new HashMap<>();
+  private static final Map<String, Method> methodMap = new HashMap<>();
 
-    private ReflectionUtils() {}
+  private ReflectionUtils() {}
 
-    public static void setStaticLoad(FXMLLoader loader, boolean staticLoad) {
-        Class<?> clazz = loader.getClass();
-        Method setStaticLoadMethod = methodMap.computeIfAbsent(clazz.getName(), s -> {
-            try {
+  public static void setStaticLoad(FXMLLoader loader, boolean staticLoad) {
+    Class<?> clazz = loader.getClass();
+    Method setStaticLoadMethod =
+        methodMap.computeIfAbsent(
+            clazz.getName(),
+            s -> {
+              try {
                 Method method = clazz.getDeclaredMethod("setStaticLoad", boolean.class);
                 method.setAccessible(true);
                 return method;
-            } catch (NoSuchMethodException e) {
+              } catch (NoSuchMethodException e) {
                 e.printStackTrace();
-            }
-            return null;
-        });
-        if (setStaticLoadMethod != null) {
-            try {
-                setStaticLoadMethod.invoke(loader, staticLoad);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
-            }
-        }
+              }
+              return null;
+            });
+    if (setStaticLoadMethod != null) {
+      try {
+        setStaticLoadMethod.invoke(loader, staticLoad);
+      } catch (IllegalAccessException | InvocationTargetException e) {
+        e.printStackTrace();
+      }
     }
-
+  }
 }

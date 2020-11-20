@@ -38,143 +38,141 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- *
- */
+/** */
 public class BatchJob extends Job {
 
-    private final List<Job> subJobs = new ArrayList<>();
-    private final boolean shouldRefreshSceneGraph;
-    private final boolean shouldUpdateSelection;
-    private final String description;
+  private final List<Job> subJobs = new ArrayList<>();
+  private final boolean shouldRefreshSceneGraph;
+  private final boolean shouldUpdateSelection;
+  private final String description;
 
-    public BatchJob(EditorController editorController, 
-            boolean shouldRefreshSceneGraph, 
-            boolean shouldUpdateSelection,
-            String description) {
-        super(editorController);
-        this.description = description;
-        this.shouldRefreshSceneGraph = shouldRefreshSceneGraph;
-        this.shouldUpdateSelection = shouldUpdateSelection;
-    }
-    
-    public BatchJob(EditorController editorController, 
-            boolean shouldRefreshSceneGraph, String description) {
-        super(editorController);
-        this.description = description;
-        this.shouldRefreshSceneGraph = shouldRefreshSceneGraph;
-        this.shouldUpdateSelection = true;
-    }
-    
-     public BatchJob(EditorController editorController, String description) {
-         super(editorController);
-         this.description = description;
-         this.shouldRefreshSceneGraph = true;
-         this.shouldUpdateSelection = true;
-    }
-    
-   public BatchJob(EditorController editorController) {
-        super(editorController);
-        this.description = getClass().getSimpleName();
-        this.shouldRefreshSceneGraph = true;
-        this.shouldUpdateSelection = true;
-    }
-    
-    public void addSubJob(Job subJob) {
-        assert subJob != null;
-        this.subJobs.add(subJob);
-    }
+  public BatchJob(
+      EditorController editorController,
+      boolean shouldRefreshSceneGraph,
+      boolean shouldUpdateSelection,
+      String description) {
+    super(editorController);
+    this.description = description;
+    this.shouldRefreshSceneGraph = shouldRefreshSceneGraph;
+    this.shouldUpdateSelection = shouldUpdateSelection;
+  }
 
-    public void addSubJobs(List<Job> subJobs) {
-        assert subJobs != null;
-        this.subJobs.addAll(subJobs);
-    }
+  public BatchJob(
+      EditorController editorController, boolean shouldRefreshSceneGraph, String description) {
+    super(editorController);
+    this.description = description;
+    this.shouldRefreshSceneGraph = shouldRefreshSceneGraph;
+    this.shouldUpdateSelection = true;
+  }
 
-    public void prependSubJob(Job subJob) {
-        assert subJob != null;
-        this.subJobs.add(0, subJob);
-    }
+  public BatchJob(EditorController editorController, String description) {
+    super(editorController);
+    this.description = description;
+    this.shouldRefreshSceneGraph = true;
+    this.shouldUpdateSelection = true;
+  }
 
-    public List<Job> getSubJobs() {
-        return Collections.unmodifiableList(subJobs);
-    }
-    
-    /*
-     * Job
-     */
-    
-    @Override
-    public boolean isExecutable() {
-        return subJobs.isEmpty() == false;
-    }
+  public BatchJob(EditorController editorController) {
+    super(editorController);
+    this.description = getClass().getSimpleName();
+    this.shouldRefreshSceneGraph = true;
+    this.shouldUpdateSelection = true;
+  }
 
-    @Override
-    public void execute() {
-        final Selection selection = getEditorController().getSelection();
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        if (shouldUpdateSelection) {
-            selection.beginUpdate();
-        }
-        if (shouldRefreshSceneGraph) {
-            fxomDocument.beginUpdate();
-        }
-        for (Job subJob : subJobs) {
-            subJob.execute();
-        }
-        if (shouldRefreshSceneGraph) {
-            fxomDocument.endUpdate();
-        }
-        if (shouldUpdateSelection) {
-            selection.endUpdate();
-        }
-    }
+  public void addSubJob(Job subJob) {
+    assert subJob != null;
+    this.subJobs.add(subJob);
+  }
 
-    @Override
-    public void undo() {
-        final Selection selection = getEditorController().getSelection();
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        if (shouldUpdateSelection) {
-            selection.beginUpdate();
-        }
-        if (shouldRefreshSceneGraph) {
-            fxomDocument.beginUpdate();
-        }
-        for (int i = subJobs.size()-1; i >= 0; i--) {
-            subJobs.get(i).undo();
-        }
-        if (shouldRefreshSceneGraph) {
-            fxomDocument.endUpdate();
-        }
-        if (shouldUpdateSelection) {
-            selection.endUpdate();
-        }
-    }
+  public void addSubJobs(List<Job> subJobs) {
+    assert subJobs != null;
+    this.subJobs.addAll(subJobs);
+  }
 
-    @Override
-    public void redo() {
-        final Selection selection = getEditorController().getSelection();
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        
-        if (shouldUpdateSelection) {
-            selection.beginUpdate();
-        }
-        if (shouldRefreshSceneGraph) {
-            fxomDocument.beginUpdate();
-        }
-        for (Job subJob : subJobs) {
-            subJob.redo();
-        }
-        if (shouldRefreshSceneGraph) {
-            fxomDocument.endUpdate();
-        }
-        if (shouldUpdateSelection) {
-            selection.endUpdate();
-        }
-    }
+  public void prependSubJob(Job subJob) {
+    assert subJob != null;
+    this.subJobs.add(0, subJob);
+  }
 
-    @Override
-    public String getDescription() {
-        return description;
+  public List<Job> getSubJobs() {
+    return Collections.unmodifiableList(subJobs);
+  }
+
+  /*
+   * Job
+   */
+
+  @Override
+  public boolean isExecutable() {
+    return subJobs.isEmpty() == false;
+  }
+
+  @Override
+  public void execute() {
+    final Selection selection = getEditorController().getSelection();
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    if (shouldUpdateSelection) {
+      selection.beginUpdate();
     }
-    
+    if (shouldRefreshSceneGraph) {
+      fxomDocument.beginUpdate();
+    }
+    for (Job subJob : subJobs) {
+      subJob.execute();
+    }
+    if (shouldRefreshSceneGraph) {
+      fxomDocument.endUpdate();
+    }
+    if (shouldUpdateSelection) {
+      selection.endUpdate();
+    }
+  }
+
+  @Override
+  public void undo() {
+    final Selection selection = getEditorController().getSelection();
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    if (shouldUpdateSelection) {
+      selection.beginUpdate();
+    }
+    if (shouldRefreshSceneGraph) {
+      fxomDocument.beginUpdate();
+    }
+    for (int i = subJobs.size() - 1; i >= 0; i--) {
+      subJobs.get(i).undo();
+    }
+    if (shouldRefreshSceneGraph) {
+      fxomDocument.endUpdate();
+    }
+    if (shouldUpdateSelection) {
+      selection.endUpdate();
+    }
+  }
+
+  @Override
+  public void redo() {
+    final Selection selection = getEditorController().getSelection();
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+
+    if (shouldUpdateSelection) {
+      selection.beginUpdate();
+    }
+    if (shouldRefreshSceneGraph) {
+      fxomDocument.beginUpdate();
+    }
+    for (Job subJob : subJobs) {
+      subJob.redo();
+    }
+    if (shouldRefreshSceneGraph) {
+      fxomDocument.endUpdate();
+    }
+    if (shouldUpdateSelection) {
+      selection.endUpdate();
+    }
+  }
+
+  @Override
+  public String getDescription() {
+    return description;
+  }
 }

@@ -37,41 +37,40 @@ import javafx.scene.shape.Line;
 
 public class DistanceUtils {
 
-    /**
-     * Calculates distance from point to line
-     * 
-     * @param point target point
-     * @param line target line
-     * @return distance
-     */
-    public static double getDistFromPointToLine(Point2D point, Line line) {
-        double x = point.getX();
-        double y = point.getY();
-        
-        double x0 = line.getStartX();
-        double y0 = line.getStartY();
-        double x1 = line.getEndX();
-        double y1 = line.getEndY();
-        
-        double dot0 = dot(x - x0, y - y0, x1 - x0, y1 - y0);
-        if (dot0 < 0) {
-            return dist(x, y, x0, y0);
-        }
-        
-        double dot1 = dot(x - x1, y - y1, x0 - x1, y0 - y1);
-        if (dot1 < 0) {
-            return dist(x, y, x1, y1);
-        }
-        
-        return Math.abs((y0 - y1) * x + (x1 - x0) * y + (x0 * y1 - x1 * y0)) / dist(x0, y0, x1, y1);
+  /**
+   * Calculates distance from point to line
+   *
+   * @param point target point
+   * @param line target line
+   * @return distance
+   */
+  public static double getDistFromPointToLine(Point2D point, Line line) {
+    double x = point.getX();
+    double y = point.getY();
+
+    double x0 = line.getStartX();
+    double y0 = line.getStartY();
+    double x1 = line.getEndX();
+    double y1 = line.getEndY();
+
+    double dot0 = dot(x - x0, y - y0, x1 - x0, y1 - y0);
+    if (dot0 < 0) {
+      return dist(x, y, x0, y0);
     }
-    
-    private static double dot(double x1, double y1, double x2, double y2) {
-        return x1 * x2 + y1 * y2;
+
+    double dot1 = dot(x - x1, y - y1, x0 - x1, y0 - y1);
+    if (dot1 < 0) {
+      return dist(x, y, x1, y1);
     }
-    
-    private static double dist(double x1, double y1, double x2, double y2) {
-        return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-    }
-    
+
+    return Math.abs((y0 - y1) * x + (x1 - x0) * y + (x0 * y1 - x1 * y0)) / dist(x0, y0, x1, y1);
+  }
+
+  private static double dot(double x1, double y1, double x2, double y2) {
+    return x1 * x2 + y1 * y2;
+  }
+
+  private static double dist(double x1, double y1, double x2, double y2) {
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+  }
 }

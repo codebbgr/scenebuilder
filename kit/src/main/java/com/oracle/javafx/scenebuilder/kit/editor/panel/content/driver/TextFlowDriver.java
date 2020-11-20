@@ -41,57 +41,53 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.DesignHierarchyMask;
 import javafx.scene.text.TextFlow;
 
-/**
- *
- */
+/** */
 public class TextFlowDriver extends AbstractNodeDriver {
 
-    public TextFlowDriver(ContentPanelController contentPanelController) {
-        super(contentPanelController);
+  public TextFlowDriver(ContentPanelController contentPanelController) {
+    super(contentPanelController);
+  }
+
+  /*
+   * AbstractDriver
+   */
+  @Override
+  public AbstractDropTarget makeDropTarget(FXOMObject fxomObject, double sceneX, double sceneY) {
+
+    assert fxomObject instanceof FXOMInstance;
+    assert fxomObject.getSceneGraphObject() instanceof TextFlow;
+
+    final int targetIndex = GenericParentTring.lookupCrackIndex(fxomObject, sceneX, sceneY);
+
+    final FXOMObject beforeChild;
+    if (targetIndex == -1) {
+      beforeChild = null;
+    } else {
+      final DesignHierarchyMask m = new DesignHierarchyMask(fxomObject);
+      if (targetIndex < m.getSubComponentCount()) {
+        beforeChild = m.getSubComponentAtIndex(targetIndex);
+      } else {
+        beforeChild = null;
+      }
     }
 
-    /*
-     * AbstractDriver
-     */
-    @Override
-    public AbstractDropTarget makeDropTarget(FXOMObject fxomObject, double sceneX, double sceneY) {
-        
-        assert fxomObject instanceof FXOMInstance;
-        assert fxomObject.getSceneGraphObject() instanceof TextFlow;
-        
-        final int targetIndex = GenericParentTring.lookupCrackIndex(fxomObject, sceneX, sceneY);
-        
-        final FXOMObject beforeChild;
-        if (targetIndex == -1) {
-            beforeChild = null;
-        } else {
-            final DesignHierarchyMask m = new DesignHierarchyMask(fxomObject);
-            if (targetIndex < m.getSubComponentCount()) {
-                beforeChild = m.getSubComponentAtIndex(targetIndex);
-            } else {
-                beforeChild = null;
-            }
-        }
-        
-        return new ContainerZDropTarget((FXOMInstance)fxomObject, beforeChild);
+    return new ContainerZDropTarget((FXOMInstance) fxomObject, beforeChild);
+  }
+
+  @Override
+  public AbstractTring<?> makeTring(AbstractDropTarget dropTarget) {
+    assert dropTarget instanceof ContainerZDropTarget;
+    assert dropTarget.getTargetObject() instanceof FXOMInstance;
+    assert dropTarget.getTargetObject().getSceneGraphObject() instanceof TextFlow;
+
+    final ContainerZDropTarget zDropTarget = (ContainerZDropTarget) dropTarget;
+    final int targetIndex;
+    if (zDropTarget.getBeforeChild() == null) {
+      targetIndex = -1;
+    } else {
+      targetIndex = zDropTarget.getBeforeChild().getIndexInParentProperty();
     }
-    
-    
-    @Override
-    public AbstractTring<?> makeTring(AbstractDropTarget dropTarget) {
-        assert dropTarget instanceof ContainerZDropTarget; 
-        assert dropTarget.getTargetObject() instanceof FXOMInstance;
-        assert dropTarget.getTargetObject().getSceneGraphObject() instanceof TextFlow;
-        
-        final ContainerZDropTarget zDropTarget = (ContainerZDropTarget) dropTarget;
-        final int targetIndex;
-        if (zDropTarget.getBeforeChild() == null) {
-            targetIndex = -1;
-        } else {
-            targetIndex = zDropTarget.getBeforeChild().getIndexInParentProperty();
-        }
-        return new GenericParentTring(contentPanelController, 
-                (FXOMInstance) dropTarget.getTargetObject(),
-                targetIndex);
-    }
+    return new GenericParentTring(
+        contentPanelController, (FXOMInstance) dropTarget.getTargetObject(), targetIndex);
+  }
 }

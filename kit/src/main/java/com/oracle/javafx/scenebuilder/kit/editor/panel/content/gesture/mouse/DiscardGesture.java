@@ -34,45 +34,35 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.mouse;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.content.ContentPanelController;
 import javafx.scene.input.KeyEvent;
 
-/**
- *
- * 
- */
+/** */
 public class DiscardGesture extends AbstractMouseGesture {
 
-    public DiscardGesture(ContentPanelController contentPanelController) {
-        super(contentPanelController);
-    }
+  public DiscardGesture(ContentPanelController contentPanelController) {
+    super(contentPanelController);
+  }
 
-    /*
-     * AbstractMouseGesture
-     */
-    
-    @Override
-    protected void mousePressed() {
-    }
+  /*
+   * AbstractMouseGesture
+   */
 
-    @Override
-    protected void mouseDragStarted() {
-    }
+  @Override
+  protected void mousePressed() {}
 
-    @Override
-    protected void mouseDragged() {
-    }
+  @Override
+  protected void mouseDragStarted() {}
 
-    @Override
-    protected void mouseDragEnded() {
-    }
+  @Override
+  protected void mouseDragged() {}
 
-    @Override
-    protected void mouseReleased() {
-    }
+  @Override
+  protected void mouseDragEnded() {}
 
-    @Override
-    protected void keyEvent(KeyEvent e) {
-    }
+  @Override
+  protected void mouseReleased() {}
 
-    @Override
-    protected void userDidCancel() {
-    }
+  @Override
+  protected void keyEvent(KeyEvent e) {}
+
+  @Override
+  protected void userDidCancel() {}
 }

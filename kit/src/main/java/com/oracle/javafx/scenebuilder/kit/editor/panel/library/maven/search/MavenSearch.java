@@ -32,6 +32,10 @@
 package com.oracle.javafx.scenebuilder.kit.editor.panel.library.maven.search;
 
 import com.oracle.javafx.scenebuilder.kit.editor.panel.library.maven.preset.MavenPresets;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -39,10 +43,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import jakarta.json.Json;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonObject;
-import jakarta.json.JsonReader;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -51,46 +51,46 @@ import org.eclipse.aether.artifact.DefaultArtifact;
 
 public class MavenSearch implements Search {
 
-    // maven
-    private static final String URL_PREFIX = "http://search.maven.org/solrsearch/select?q=";
-    private static final String URL_SUFFIX = "&rows=200&wt=json";
-    
-    private static final String URL_PREFIX_FULLCLASS = "http://search.maven.org/solrsearch/select?q=fc:%22";
-    private static final String URL_SUFFIX_FULLCLASS = "%22&rows=200&wt=json";
-    
-    private final HttpClient client;
-            
-    public MavenSearch() {
-        client = HttpClients.createDefault();
-    }
-    
-    @Override
-    public List<DefaultArtifact> getCoordinates(String query) {
-        
-        final Map<String, String> map = new HashMap<>();
-        map.put("Repository", MavenPresets.MAVEN);
-    
-        try {
-            HttpGet request = new HttpGet(URL_PREFIX + query + URL_SUFFIX);
-            HttpResponse response = client.execute(request);
-            try (JsonReader rdr = Json.createReader(response.getEntity().getContent())) {
-                JsonObject obj = rdr.readObject();
-                if (obj != null && !obj.isEmpty() && obj.containsKey("response")) {
-                    JsonObject jsonResponse = obj.getJsonObject("response");
-                    if (jsonResponse != null && !jsonResponse.isEmpty() && jsonResponse.containsKey("docs")) {
-                        JsonArray docResults = jsonResponse.getJsonArray("docs");
-                        return docResults.getValuesAs(JsonObject.class)
-                                .stream()
-                                .map(doc -> doc.getString("id", "") + ":" + MIN_VERSION)
-                                .distinct()
-                                .map(gav -> new DefaultArtifact(gav, map))
-                                .collect(Collectors.toList());
-                    }
-                }
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(MavenSearch.class.getName()).log(Level.SEVERE, null, ex);
+  // maven
+  private static final String URL_PREFIX = "http://search.maven.org/solrsearch/select?q=";
+  private static final String URL_SUFFIX = "&rows=200&wt=json";
+
+  private static final String URL_PREFIX_FULLCLASS =
+      "http://search.maven.org/solrsearch/select?q=fc:%22";
+  private static final String URL_SUFFIX_FULLCLASS = "%22&rows=200&wt=json";
+
+  private final HttpClient client;
+
+  public MavenSearch() {
+    client = HttpClients.createDefault();
+  }
+
+  @Override
+  public List<DefaultArtifact> getCoordinates(String query) {
+
+    final Map<String, String> map = new HashMap<>();
+    map.put("Repository", MavenPresets.MAVEN);
+
+    try {
+      HttpGet request = new HttpGet(URL_PREFIX + query + URL_SUFFIX);
+      HttpResponse response = client.execute(request);
+      try (JsonReader rdr = Json.createReader(response.getEntity().getContent())) {
+        JsonObject obj = rdr.readObject();
+        if (obj != null && !obj.isEmpty() && obj.containsKey("response")) {
+          JsonObject jsonResponse = obj.getJsonObject("response");
+          if (jsonResponse != null && !jsonResponse.isEmpty() && jsonResponse.containsKey("docs")) {
+            JsonArray docResults = jsonResponse.getJsonArray("docs");
+            return docResults.getValuesAs(JsonObject.class).stream()
+                .map(doc -> doc.getString("id", "") + ":" + MIN_VERSION)
+                .distinct()
+                .map(gav -> new DefaultArtifact(gav, map))
+                .collect(Collectors.toList());
+          }
         }
-        return null;
+      }
+    } catch (IOException ex) {
+      Logger.getLogger(MavenSearch.class.getName()).log(Level.SEVERE, null, ex);
     }
+    return null;
+  }
 }

@@ -33,7 +33,7 @@
 package com.oracle.javafx.scenebuilder.kit.template;
 
 public enum Type {
-    DESKTOP,
-    TABLET,
-    PHONE
+  DESKTOP,
+  TABLET,
+  PHONE
 }

@@ -39,70 +39,65 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMPropertyC;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMPropertyT;
 
-/**
- *
- */
+/** */
 public class ReplacePropertyValueJobT extends Job {
-    
-    private final FXOMPropertyT hostProperty;
-    private final FXOMObject newValue;
-    
-    private FXOMInstance hostInstance;
-    private FXOMPropertyC newProperty;
 
-    public ReplacePropertyValueJobT(FXOMPropertyT hostProperty, FXOMObject newValue, EditorController editorController) {
-        super(editorController);
-        
-        assert hostProperty != null;
-        assert newValue != null;
-        
-        this.hostProperty = hostProperty;
-        this.newValue = newValue;
-    }
+  private final FXOMPropertyT hostProperty;
+  private final FXOMObject newValue;
 
-    
-    /*
-     * Job
-     */
-    @Override
-    public boolean isExecutable() {
-        return (hostProperty.getParentInstance() != null);
-    }
+  private FXOMInstance hostInstance;
+  private FXOMPropertyC newProperty;
 
-    @Override
-    public void execute() {
-        hostInstance = hostProperty.getParentInstance();
-        newProperty = new FXOMPropertyC(hostProperty.getFxomDocument(), hostProperty.getName());
-        
-        // Now same as redo()
-        redo();
-    }
+  public ReplacePropertyValueJobT(
+      FXOMPropertyT hostProperty, FXOMObject newValue, EditorController editorController) {
+    super(editorController);
 
-    @Override
-    public void undo() {
-        assert hostProperty.getParentInstance() == null;
-        assert newProperty.getParentInstance() == hostInstance;
-        
-        newProperty.removeFromParentInstance();
-        newValue.removeFromParentProperty();
-        hostProperty.addToParentInstance(-1, hostInstance);
-    }
+    assert hostProperty != null;
+    assert newValue != null;
 
-    @Override
-    public void redo() {
-        assert hostProperty.getParentInstance() == hostInstance;
-        assert newProperty.getParentInstance() == null;
-        
-        hostProperty.removeFromParentInstance();
-        newValue.addToParentProperty(-1, newProperty);
-        newProperty.addToParentInstance(-1, hostInstance);
-    }
+    this.hostProperty = hostProperty;
+    this.newValue = newValue;
+  }
 
-    @Override
-    public String getDescription() {
-        return getClass().getSimpleName();
-    }
-    
-    
-    
+  /*
+   * Job
+   */
+  @Override
+  public boolean isExecutable() {
+    return (hostProperty.getParentInstance() != null);
+  }
+
+  @Override
+  public void execute() {
+    hostInstance = hostProperty.getParentInstance();
+    newProperty = new FXOMPropertyC(hostProperty.getFxomDocument(), hostProperty.getName());
+
+    // Now same as redo()
+    redo();
+  }
+
+  @Override
+  public void undo() {
+    assert hostProperty.getParentInstance() == null;
+    assert newProperty.getParentInstance() == hostInstance;
+
+    newProperty.removeFromParentInstance();
+    newValue.removeFromParentProperty();
+    hostProperty.addToParentInstance(-1, hostInstance);
+  }
+
+  @Override
+  public void redo() {
+    assert hostProperty.getParentInstance() == hostInstance;
+    assert newProperty.getParentInstance() == null;
+
+    hostProperty.removeFromParentInstance();
+    newValue.addToParentProperty(-1, newProperty);
+    newProperty.addToParentInstance(-1, hostInstance);
+  }
+
+  @Override
+  public String getDescription() {
+    return getClass().getSimpleName();
+  }
 }

@@ -43,86 +43,81 @@ import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
-/**
- *
- */
+/** */
 public class VBoxDriver extends AbstractNodeDriver {
 
-    public VBoxDriver(ContentPanelController contentPanelController) {
-        super(contentPanelController);
+  public VBoxDriver(ContentPanelController contentPanelController) {
+    super(contentPanelController);
+  }
+
+  /*
+   * AbstractDriver
+   */
+  @Override
+  public AbstractDropTarget makeDropTarget(FXOMObject fxomObject, double sceneX, double sceneY) {
+
+    assert fxomObject instanceof FXOMInstance;
+    assert fxomObject.getSceneGraphObject() instanceof VBox;
+
+    final VBox hbox = (VBox) fxomObject.getSceneGraphObject();
+    assert hbox.getScene() != null;
+
+    final double localY = hbox.sceneToLocal(sceneX, sceneY, true /* rootScene */).getY();
+    final int childCount = hbox.getChildrenUnmodifiable().size();
+
+    final int targetIndex;
+    if (childCount == 0) {
+      // No children : we append
+      targetIndex = -1;
+
+    } else {
+      assert childCount >= 1;
+
+      int childIndex = 0;
+      double midY;
+      do {
+        Node child = hbox.getChildrenUnmodifiable().get(childIndex++);
+        Bounds childBounds = child.getBoundsInParent();
+        midY = (childBounds.getMinY() + childBounds.getMaxY()) / 2.0;
+      } while ((localY > midY) && (childIndex < childCount));
+
+      if (localY <= midY) {
+        assert childIndex - 1 < childCount;
+        targetIndex = childIndex - 1;
+      } else {
+        targetIndex = -1;
+      }
     }
 
-    /*
-     * AbstractDriver
-     */
-    @Override
-    public AbstractDropTarget makeDropTarget(FXOMObject fxomObject, double sceneX, double sceneY) {
-        
-        assert fxomObject instanceof FXOMInstance;
-        assert fxomObject.getSceneGraphObject() instanceof VBox;
-        
-        final VBox hbox = (VBox) fxomObject.getSceneGraphObject();
-        assert hbox.getScene() != null;
-        
-        final double localY = hbox.sceneToLocal(sceneX, sceneY, true /* rootScene */).getY();
-        final int childCount = hbox.getChildrenUnmodifiable().size();
-        
-        final int targetIndex;
-        if (childCount == 0) {
-            // No children : we append
-            targetIndex = -1;
-            
-        } else {
-            assert childCount >= 1;
-            
-            int childIndex = 0;
-            double midY;
-            do {
-                Node child = hbox.getChildrenUnmodifiable().get(childIndex++);
-                Bounds childBounds = child.getBoundsInParent();
-                midY = (childBounds.getMinY() + childBounds.getMaxY()) / 2.0;
-            } while ((localY > midY) && (childIndex < childCount));
-            
-            if (localY <= midY) {
-                assert childIndex-1 < childCount;
-                targetIndex = childIndex-1;
-            } else {
-                targetIndex = -1;
-            }
-        }
-        
-        final FXOMObject beforeChild;
-        if (targetIndex == -1) {
-            beforeChild = null;
-        } else {
-            final DesignHierarchyMask m = new DesignHierarchyMask(fxomObject);
-            if (targetIndex < m.getSubComponentCount()) {
-                beforeChild = m.getSubComponentAtIndex(targetIndex);
-            } else {
-                beforeChild = null;
-            }
-        }
-        
-        return new ContainerZDropTarget((FXOMInstance)fxomObject, beforeChild);
-    }
-    
-    
-    @Override
-    public AbstractTring<?> makeTring(AbstractDropTarget dropTarget) {
-        assert dropTarget instanceof ContainerZDropTarget; 
-        assert dropTarget.getTargetObject() instanceof FXOMInstance;
-        assert dropTarget.getTargetObject().getSceneGraphObject() instanceof VBox;
-        
-        final ContainerZDropTarget zDropTarget = (ContainerZDropTarget) dropTarget;
-        final int targetIndex;
-        if (zDropTarget.getBeforeChild() == null) {
-            targetIndex = -1;
-        } else {
-            targetIndex = zDropTarget.getBeforeChild().getIndexInParentProperty();
-        }
-        return new VBoxTring(contentPanelController, 
-                (FXOMInstance) dropTarget.getTargetObject(),
-                targetIndex);
+    final FXOMObject beforeChild;
+    if (targetIndex == -1) {
+      beforeChild = null;
+    } else {
+      final DesignHierarchyMask m = new DesignHierarchyMask(fxomObject);
+      if (targetIndex < m.getSubComponentCount()) {
+        beforeChild = m.getSubComponentAtIndex(targetIndex);
+      } else {
+        beforeChild = null;
+      }
     }
 
+    return new ContainerZDropTarget((FXOMInstance) fxomObject, beforeChild);
+  }
+
+  @Override
+  public AbstractTring<?> makeTring(AbstractDropTarget dropTarget) {
+    assert dropTarget instanceof ContainerZDropTarget;
+    assert dropTarget.getTargetObject() instanceof FXOMInstance;
+    assert dropTarget.getTargetObject().getSceneGraphObject() instanceof VBox;
+
+    final ContainerZDropTarget zDropTarget = (ContainerZDropTarget) dropTarget;
+    final int targetIndex;
+    if (zDropTarget.getBeforeChild() == null) {
+      targetIndex = -1;
+    } else {
+      targetIndex = zDropTarget.getBeforeChild().getIndexInParentProperty();
+    }
+    return new VBoxTring(
+        contentPanelController, (FXOMInstance) dropTarget.getTargetObject(), targetIndex);
+  }
 }

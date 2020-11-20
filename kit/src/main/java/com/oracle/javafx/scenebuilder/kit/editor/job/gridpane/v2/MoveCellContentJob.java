@@ -42,88 +42,87 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 
-/**
- *
- */
+/** */
 public class MoveCellContentJob extends Job {
-    
-    private static final IntegerPropertyMetadata columnIndexMeta =
-            new IntegerPropertyMetadata(
-                new PropertyName("columnIndex", GridPane.class), //NOI18N
-                true, /* readWrite */
-                0, /* defaultValue */
-                InspectorPath.UNUSED);
-    private static final IntegerPropertyMetadata rowIndexMeta =
-            new IntegerPropertyMetadata(
-                new PropertyName("rowIndex", GridPane.class), //NOI18N
-                true, /* readWrite */
-                0, /* defaultValue */
-                InspectorPath.UNUSED);
-    
-    private final FXOMInstance fxomObject;
-    private final int columnIndexDelta;
-    private final int rowIndexDelta;
-    private int oldColumnIndex = -1;
-    private int oldRowIndex = -1;
 
-    public MoveCellContentJob(FXOMInstance fxomObject, 
-            int columnIndexDelta, int rowIndexDelta, 
-            EditorController editorController) {
-        super(editorController);
-        assert fxomObject != null;
-        assert fxomObject.getSceneGraphObject() instanceof Node;
-        
-        this.fxomObject = fxomObject;
-        this.columnIndexDelta = columnIndexDelta;
-        this.rowIndexDelta = rowIndexDelta;
-    }
+  private static final IntegerPropertyMetadata columnIndexMeta =
+      new IntegerPropertyMetadata(
+          new PropertyName("columnIndex", GridPane.class), // NOI18N
+          true, /* readWrite */
+          0, /* defaultValue */
+          InspectorPath.UNUSED);
+  private static final IntegerPropertyMetadata rowIndexMeta =
+      new IntegerPropertyMetadata(
+          new PropertyName("rowIndex", GridPane.class), // NOI18N
+          true, /* readWrite */
+          0, /* defaultValue */
+          InspectorPath.UNUSED);
 
-    /*
-     * Job
-     */
-    
-    @Override
-    public boolean isExecutable() {
-        return true;
-    }
+  private final FXOMInstance fxomObject;
+  private final int columnIndexDelta;
+  private final int rowIndexDelta;
+  private int oldColumnIndex = -1;
+  private int oldRowIndex = -1;
 
-    @Override
-    public void execute() {
-        oldColumnIndex = columnIndexMeta.getValue(fxomObject);
-        oldRowIndex = rowIndexMeta.getValue(fxomObject);
-        
-        assert oldColumnIndex + columnIndexDelta >= 0;
-        assert oldRowIndex + rowIndexDelta >= 0;
-        
-        // Now same as redo()
-        redo();
-    }
+  public MoveCellContentJob(
+      FXOMInstance fxomObject,
+      int columnIndexDelta,
+      int rowIndexDelta,
+      EditorController editorController) {
+    super(editorController);
+    assert fxomObject != null;
+    assert fxomObject.getSceneGraphObject() instanceof Node;
 
-    @Override
-    public void undo() {
-        assert isExecutable();
+    this.fxomObject = fxomObject;
+    this.columnIndexDelta = columnIndexDelta;
+    this.rowIndexDelta = rowIndexDelta;
+  }
 
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        fxomDocument.beginUpdate();
-        columnIndexMeta.setValue(fxomObject, oldColumnIndex);
-        rowIndexMeta.setValue(fxomObject, oldRowIndex);
-        fxomDocument.endUpdate();
-    }
+  /*
+   * Job
+   */
 
-    @Override
-    public void redo() {
-        assert isExecutable();
+  @Override
+  public boolean isExecutable() {
+    return true;
+  }
 
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        fxomDocument.beginUpdate();
-        columnIndexMeta.setValue(fxomObject, oldColumnIndex + columnIndexDelta);
-        rowIndexMeta.setValue(fxomObject, oldRowIndex + rowIndexDelta);
-        fxomDocument.endUpdate();
-    }
+  @Override
+  public void execute() {
+    oldColumnIndex = columnIndexMeta.getValue(fxomObject);
+    oldRowIndex = rowIndexMeta.getValue(fxomObject);
 
-    @Override
-    public String getDescription() {
-        return getClass().getSimpleName();
-    }
-    
+    assert oldColumnIndex + columnIndexDelta >= 0;
+    assert oldRowIndex + rowIndexDelta >= 0;
+
+    // Now same as redo()
+    redo();
+  }
+
+  @Override
+  public void undo() {
+    assert isExecutable();
+
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    fxomDocument.beginUpdate();
+    columnIndexMeta.setValue(fxomObject, oldColumnIndex);
+    rowIndexMeta.setValue(fxomObject, oldRowIndex);
+    fxomDocument.endUpdate();
+  }
+
+  @Override
+  public void redo() {
+    assert isExecutable();
+
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    fxomDocument.beginUpdate();
+    columnIndexMeta.setValue(fxomObject, oldColumnIndex + columnIndexDelta);
+    rowIndexMeta.setValue(fxomObject, oldRowIndex + rowIndexDelta);
+    fxomDocument.endUpdate();
+  }
+
+  @Override
+  public String getDescription() {
+    return getClass().getSimpleName();
+  }
 }

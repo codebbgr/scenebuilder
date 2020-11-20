@@ -74,143 +74,140 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.scene.web.WebView;
 
-/**
- *
- */
+/** */
 public abstract class AbstractNodeDriver extends AbstractDriver {
 
-    public AbstractNodeDriver(ContentPanelController contentPanelController) {
-        super(contentPanelController);
-    }
+  public AbstractNodeDriver(ContentPanelController contentPanelController) {
+    super(contentPanelController);
+  }
+
+  /*
+   * AbstractDriver
+   */
+
+  @Override
+  public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof Node;
+    assert fxomObject instanceof FXOMInstance;
+    return new NodeHandles(contentPanelController, (FXOMInstance) fxomObject);
+  }
+
+  @Override
+  public AbstractPring<?> makePring(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof Node;
+    assert fxomObject instanceof FXOMInstance;
+    return new NodePring(contentPanelController, (FXOMInstance) fxomObject);
+  }
+
+  @Override
+  public AbstractTring<?> makeTring(AbstractDropTarget dropTarget) {
+    assert dropTarget != null;
+    assert dropTarget.getTargetObject() instanceof FXOMInstance;
+    assert dropTarget.getTargetObject().getSceneGraphObject() instanceof Node;
+    return new NodeTring(contentPanelController, (FXOMInstance) dropTarget.getTargetObject());
+  }
+
+  @Override
+  public AbstractResizer<?> makeResizer(FXOMObject fxomObject) {
+    final AbstractResizer<?> result;
 
     /*
-     * AbstractDriver
+     * To avoid creating one driver for each resizer,
+     * we make the dispatch here:
      */
-    
-    @Override
-    public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof Node;
-        assert fxomObject instanceof FXOMInstance;
-        return new NodeHandles(contentPanelController, (FXOMInstance)fxomObject);
-    }
-    
-    @Override
-    public AbstractPring<?> makePring(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof Node;
-        assert fxomObject instanceof FXOMInstance;
-        return new NodePring(contentPanelController, (FXOMInstance)fxomObject);
+
+    final Object sceneGraphObject = fxomObject.getSceneGraphObject();
+    if (sceneGraphObject instanceof ImageView) {
+      result = new ImageViewResizer((ImageView) sceneGraphObject);
+    } else if (sceneGraphObject instanceof Region) {
+      result = new RegionResizer((Region) sceneGraphObject);
+    } else if (sceneGraphObject instanceof WebView) {
+      result = new WebViewResizer((WebView) sceneGraphObject);
+    } else if (sceneGraphObject instanceof Canvas) {
+      result = new CanvasResizer((Canvas) sceneGraphObject);
+    } else if (sceneGraphObject instanceof Arc) {
+      result = new ArcResizer((Arc) sceneGraphObject);
+    } else if (sceneGraphObject instanceof Circle) {
+      result = new CircleResizer((Circle) sceneGraphObject);
+    } else if (sceneGraphObject instanceof Ellipse) {
+      result = new EllipseResizer((Ellipse) sceneGraphObject);
+    } else if (sceneGraphObject instanceof Rectangle) {
+      result = new RectangleResizer((Rectangle) sceneGraphObject);
+    } else if (sceneGraphObject instanceof Text) {
+      result = new TextResizer((Text) sceneGraphObject);
+    } else if (sceneGraphObject instanceof SubScene) {
+      result = new SubSceneResizer((SubScene) sceneGraphObject);
+    } else {
+      result = null;
     }
 
-    @Override
-    public AbstractTring<?> makeTring(AbstractDropTarget dropTarget) {
-        assert dropTarget != null;
-        assert dropTarget.getTargetObject() instanceof FXOMInstance;
-        assert dropTarget.getTargetObject().getSceneGraphObject() instanceof Node;
-        return new NodeTring(contentPanelController, (FXOMInstance) dropTarget.getTargetObject());
+    return result;
+  }
+
+  @Override
+  public AbstractCurveEditor<?> makeCurveEditor(FXOMObject fxomObject) {
+    return null;
+  }
+
+  @Override
+  public FXOMObject refinePick(Node hitNode, double sceneX, double sceneY, FXOMObject fxomObject) {
+    return fxomObject;
+  }
+
+  @Override
+  public AbstractDropTarget makeDropTarget(FXOMObject fxomObject, double sceneX, double sceneY) {
+    assert fxomObject instanceof FXOMInstance;
+    assert fxomObject.getSceneGraphObject()
+        != null; // Because mouse cannot be above a unresolved component
+
+    final AbstractDropTarget result;
+
+    final FXOMInstance fxomInstance = (FXOMInstance) fxomObject;
+    final DesignHierarchyMask mask = new DesignHierarchyMask(fxomObject);
+    if (mask.isFreeChildPositioning()) {
+      result = new ContainerXYDropTarget(fxomInstance, sceneX, sceneY);
+    } else {
+      if (mask.isAcceptingAccessory(DesignHierarchyMask.Accessory.CONTENT)) {
+        result = new AccessoryDropTarget(fxomInstance, DesignHierarchyMask.Accessory.CONTENT);
+      } else {
+        result = new ContainerZDropTarget(fxomInstance, null);
+      }
     }
 
-    @Override
-    public AbstractResizer<?> makeResizer(FXOMObject fxomObject) {
-        final AbstractResizer<?> result;
-        
-        /*
-         * To avoid creating one driver for each resizer, 
-         * we make the dispatch here:
-         */
-        
-        final Object sceneGraphObject = fxomObject.getSceneGraphObject();
-        if (sceneGraphObject instanceof ImageView) {
-            result = new ImageViewResizer((ImageView) sceneGraphObject);
-        } else if (sceneGraphObject instanceof Region) {
-            result = new RegionResizer((Region) sceneGraphObject);
-        } else if (sceneGraphObject instanceof WebView) {
-            result = new WebViewResizer((WebView) sceneGraphObject);
-        } else if (sceneGraphObject instanceof Canvas) {
-            result = new CanvasResizer((Canvas) sceneGraphObject);
-        } else if (sceneGraphObject instanceof Arc) {
-            result = new ArcResizer((Arc) sceneGraphObject);
-        } else if (sceneGraphObject instanceof Circle) {
-            result = new CircleResizer((Circle) sceneGraphObject);
-        } else if (sceneGraphObject instanceof Ellipse) {
-            result = new EllipseResizer((Ellipse) sceneGraphObject);
-        } else if (sceneGraphObject instanceof Rectangle) {
-            result = new RectangleResizer((Rectangle) sceneGraphObject);
-        } else if (sceneGraphObject instanceof Text) {
-            result = new TextResizer((Text) sceneGraphObject);
-        } else if (sceneGraphObject instanceof SubScene) {
-            result = new SubSceneResizer((SubScene) sceneGraphObject);
-        } else {
-            result = null;
-        }
-        
-        return result;
-    }
-    
-    @Override
-    public AbstractCurveEditor<?> makeCurveEditor(FXOMObject fxomObject) {
-        return null;
-    }
-    
-    @Override
-    public FXOMObject refinePick(Node hitNode, double sceneX, double sceneY, FXOMObject fxomObject) {
-        return fxomObject;
+    return result;
+  }
+
+  @Override
+  public Node getInlineEditorBounds(FXOMObject fxomObject) {
+    final Node result;
+
+    final Object sceneGraphObject = fxomObject.getSceneGraphObject();
+    if (sceneGraphObject instanceof ComboBox) {
+      result = (ComboBox<?>) sceneGraphObject;
+    } else if (sceneGraphObject instanceof Labeled) {
+      result = (Labeled) sceneGraphObject;
+    } else if (sceneGraphObject instanceof Text) {
+      result = (Text) sceneGraphObject;
+    } else if (sceneGraphObject instanceof TextInputControl) {
+      result = (TextInputControl) sceneGraphObject;
+    } else if (sceneGraphObject instanceof TitledPane) {
+      result = (TitledPane) sceneGraphObject;
+    } else {
+      result = null;
     }
 
-    @Override
-    public AbstractDropTarget makeDropTarget(FXOMObject fxomObject, double sceneX, double sceneY) {
-        assert fxomObject instanceof FXOMInstance;
-        assert fxomObject.getSceneGraphObject() != null; // Because mouse cannot be above a unresolved component
-        
-        final AbstractDropTarget result;
-        
-        final FXOMInstance fxomInstance = (FXOMInstance) fxomObject;
-        final DesignHierarchyMask mask = new DesignHierarchyMask(fxomObject);
-        if (mask.isFreeChildPositioning()) {
-            result = new ContainerXYDropTarget(fxomInstance, sceneX, sceneY);
-        } else {
-            if (mask.isAcceptingAccessory(DesignHierarchyMask.Accessory.CONTENT)) {
-                result = new AccessoryDropTarget(fxomInstance, DesignHierarchyMask.Accessory.CONTENT);
-            } else {
-                result = new ContainerZDropTarget(fxomInstance, null);
-            }
-        }
-        
-        return result;
-    }
+    return result;
+  }
 
-    @Override
-    public Node getInlineEditorBounds(FXOMObject fxomObject) {
-        final Node result;
-        
-        final Object sceneGraphObject = fxomObject.getSceneGraphObject();
-        if (sceneGraphObject instanceof ComboBox) {
-            result = (ComboBox<?>) sceneGraphObject;
-        } else if (sceneGraphObject instanceof Labeled) {
-            result = (Labeled) sceneGraphObject;
-        } else if (sceneGraphObject instanceof Text) {
-            result = (Text) sceneGraphObject;
-        } else if (sceneGraphObject instanceof TextInputControl) {
-            result = (TextInputControl) sceneGraphObject;
-        } else if (sceneGraphObject instanceof TitledPane) {
-            result = (TitledPane) sceneGraphObject;
-        } else {
-            result = null;
-        }
-        
-        return result;
-    }
+  @Override
+  public boolean intersectsBounds(FXOMObject fxomObject, Bounds bounds) {
+    assert fxomObject.getSceneGraphObject() instanceof Node;
 
-    @Override
-    public boolean intersectsBounds(FXOMObject fxomObject, Bounds bounds) {
-        assert fxomObject.getSceneGraphObject() instanceof Node;
-        
-        // Note: bounds are in root scene coordinates
-        final Node sceneGraphNode 
-                = (Node) fxomObject.getSceneGraphObject();
-        final Bounds sceneGraphNodeBounds 
-                = sceneGraphNode.localToScene(sceneGraphNode.getLayoutBounds(), true /* rootScene */);
+    // Note: bounds are in root scene coordinates
+    final Node sceneGraphNode = (Node) fxomObject.getSceneGraphObject();
+    final Bounds sceneGraphNodeBounds =
+        sceneGraphNode.localToScene(sceneGraphNode.getLayoutBounds(), true /* rootScene */);
 
-        return sceneGraphNodeBounds.intersects(bounds);
-    }
-    
+    return sceneGraphNodeBounds.intersects(bounds);
+  }
 }

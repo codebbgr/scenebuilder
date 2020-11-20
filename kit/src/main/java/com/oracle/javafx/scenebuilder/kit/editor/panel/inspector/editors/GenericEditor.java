@@ -33,81 +33,78 @@
 package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors;
 
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
-
 import java.util.Set;
-
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.TextField;
 
-/**
- * Simple editor used when the property type is not (yet) supported.
- *
- *
- */
+/** Simple editor used when the property type is not (yet) supported. */
 public class GenericEditor extends PropertyEditor {
 
-    private TextField textField;
+  private TextField textField;
 
-    public GenericEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super(propMeta, selectedClasses);
-        initialize();
-    }
-    
-    private void initialize() {
-        textField = new TextField();
-        EventHandler<ActionEvent> onActionListener = event -> userUpdateValueProperty(getValue());
-        setTextEditorBehavior(this, textField, onActionListener);
-        setDisable(true);
+  public GenericEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super(propMeta, selectedClasses);
+    initialize();
+  }
 
-        // Select all text when this editor is selected
-        textField.setOnMousePressed(event -> textField.selectAll());
-        textField.focusedProperty().addListener(((observable, oldValue, newValue) -> {
-            if (newValue) {
+  private void initialize() {
+    textField = new TextField();
+    EventHandler<ActionEvent> onActionListener = event -> userUpdateValueProperty(getValue());
+    setTextEditorBehavior(this, textField, onActionListener);
+    setDisable(true);
+
+    // Select all text when this editor is selected
+    textField.setOnMousePressed(event -> textField.selectAll());
+    textField
+        .focusedProperty()
+        .addListener(
+            ((observable, oldValue, newValue) -> {
+              if (newValue) {
                 textField.selectAll();
-            }
-        }));
+              }
+            }));
+  }
+
+  @Override
+  public Node getValueEditor() {
+    return super.handleGenericModes(textField);
+  }
+
+  @Override
+  public Object getValue() {
+    return textField.getText();
+  }
+
+  @Override
+  public void setValue(Object value) {
+    setValueGeneric(value);
+    if (isSetValueDone()) {
+      return;
     }
 
-    @Override
-    public Node getValueEditor() {
-        return super.handleGenericModes(textField);
+    if (value == null) {
+      textField.setText(null);
+    } else {
+      textField.setText("" + value); // NOI18N
     }
+  }
 
-    @Override
-    public Object getValue() {
-        return textField.getText();
-    }
+  @Override
+  public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super.reset(propMeta, selectedClasses);
+    textField.setPromptText(null);
+    setDisable(true);
+  }
 
-    @Override
-    public void setValue(Object value) {
-        setValueGeneric(value);
-        if (isSetValueDone()) {
-            return;
-        }
+  @Override
+  protected void valueIsIndeterminate() {
+    handleIndeterminate(textField);
+  }
 
-        if (value == null) {
-            textField.setText(null);
-        } else {
-            textField.setText("" + value); //NOI18N
-        }
-    }
-
-    @Override
-    public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super.reset(propMeta, selectedClasses);
-        textField.setPromptText(null);
-        setDisable(true);
-    }
-
-    @Override
-    protected void valueIsIndeterminate() {
-        handleIndeterminate(textField);
-    }
-
-    @Override
-    public void requestFocus() {
-        EditorUtils.doNextFrame(() -> textField.requestFocus());
-    }
+  @Override
+  public void requestFocus() {
+    EditorUtils.doNextFrame(() -> textField.requestFocus());
+  }
 }

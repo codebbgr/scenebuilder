@@ -47,105 +47,102 @@ import java.util.List;
 
 /**
  * Job invoked when re-indexing rows content.
- * 
- * IMPORTANT:
- * This job cannot extends BatchDocumentJob because its sub jobs list cannot be initialized lazily.
+ *
+ * <p>IMPORTANT: This job cannot extends BatchDocumentJob because its sub jobs list cannot be
+ * initialized lazily.
  */
 public class ReIndexRowContentJob extends Job {
 
-    private BatchJob subJob;
-    private final int offset;
-    private final FXOMObject targetGridPane;
-    private final List<Integer> targetIndexes;
+  private BatchJob subJob;
+  private final int offset;
+  private final FXOMObject targetGridPane;
+  private final List<Integer> targetIndexes;
 
-    public ReIndexRowContentJob(
-            final EditorController editorController,
-            final int offset,
-            final FXOMObject targetGridPane,
-            final List<Integer> targetIndexes) {
-        super(editorController);
-        this.offset = offset;
-        this.targetGridPane = targetGridPane;
-        this.targetIndexes = targetIndexes;
-        buildSubJobs();
+  public ReIndexRowContentJob(
+      final EditorController editorController,
+      final int offset,
+      final FXOMObject targetGridPane,
+      final List<Integer> targetIndexes) {
+    super(editorController);
+    this.offset = offset;
+    this.targetGridPane = targetGridPane;
+    this.targetIndexes = targetIndexes;
+    buildSubJobs();
+  }
+
+  public ReIndexRowContentJob(
+      final EditorController editorController,
+      final int offset,
+      final FXOMObject targetGridPane,
+      final int targetIndex) {
+    super(editorController);
+    this.offset = offset;
+    this.targetGridPane = targetGridPane;
+    this.targetIndexes = new ArrayList<>();
+    this.targetIndexes.add(targetIndex);
+    buildSubJobs();
+  }
+
+  @Override
+  public boolean isExecutable() {
+    // When the rows are empty, there is no content to move and the
+    // sub job list may be empty.
+    // => we do not invoke subJob.isExecutable() here.
+    return subJob != null;
+  }
+
+  @Override
+  public void execute() {
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    assert isExecutable();
+    fxomDocument.beginUpdate();
+    subJob.execute();
+    fxomDocument.endUpdate();
+  }
+
+  @Override
+  public void undo() {
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    fxomDocument.beginUpdate();
+    subJob.undo();
+    fxomDocument.endUpdate();
+  }
+
+  @Override
+  public void redo() {
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    fxomDocument.beginUpdate();
+    subJob.redo();
+    fxomDocument.endUpdate();
+  }
+
+  @Override
+  public String getDescription() {
+    return "ReIndex Row Content"; // NOI18N
+  }
+
+  private void buildSubJobs() {
+
+    // Create sub job
+    subJob = new BatchJob(getEditorController(), true /* shouldRefreshSceneGraph */, null);
+
+    assert targetIndexes.isEmpty() == false;
+    final DesignHierarchyMask targetGridPaneMask = new DesignHierarchyMask(targetGridPane);
+    final PropertyName propertyName =
+        new PropertyName("rowIndex", javafx.scene.layout.GridPane.class); // NOI18N
+
+    for (int targetIndex : targetIndexes) {
+      final List<FXOMObject> children = targetGridPaneMask.getRowContentAtIndex(targetIndex);
+      for (FXOMObject child : children) {
+        assert child instanceof FXOMInstance;
+        final FXOMInstance childInstance = (FXOMInstance) child;
+        final ValuePropertyMetadata vpm =
+            Metadata.getMetadata().queryValueProperty(childInstance, propertyName);
+        int newIndexValue = targetIndex + offset;
+        final Job modifyJob =
+            new ModifyObjectJob(childInstance, vpm, newIndexValue, getEditorController());
+        subJob.addSubJob(modifyJob);
+      }
     }
-
-    public ReIndexRowContentJob(
-            final EditorController editorController,
-            final int offset,
-            final FXOMObject targetGridPane,
-            final int targetIndex) {
-        super(editorController);
-        this.offset = offset;
-        this.targetGridPane = targetGridPane;
-        this.targetIndexes = new ArrayList<>();
-        this.targetIndexes.add(targetIndex);
-        buildSubJobs();
-    }
-
-    @Override
-    public boolean isExecutable() {
-        // When the rows are empty, there is no content to move and the 
-        // sub job list may be empty. 
-        // => we do not invoke subJob.isExecutable() here. 
-        return subJob != null;
-    }
-
-    @Override
-    public void execute() {
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        assert isExecutable();
-        fxomDocument.beginUpdate();
-        subJob.execute();
-        fxomDocument.endUpdate();
-    }
-
-    @Override
-    public void undo() {
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        fxomDocument.beginUpdate();
-        subJob.undo();
-        fxomDocument.endUpdate();
-    }
-
-    @Override
-    public void redo() {
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        fxomDocument.beginUpdate();
-        subJob.redo();
-        fxomDocument.endUpdate();
-    }
-
-    @Override
-    public String getDescription() {
-        return "ReIndex Row Content"; //NOI18N
-    }
-
-    private void buildSubJobs() {
-
-        // Create sub job
-        subJob = new BatchJob(getEditorController(),
-                true /* shouldRefreshSceneGraph */, null);
-
-        assert targetIndexes.isEmpty() == false;
-        final DesignHierarchyMask targetGridPaneMask
-                = new DesignHierarchyMask(targetGridPane);
-        final PropertyName propertyName = new PropertyName(
-                "rowIndex", javafx.scene.layout.GridPane.class); //NOI18N
-
-        for (int targetIndex : targetIndexes) {
-            final List<FXOMObject> children
-                    = targetGridPaneMask.getRowContentAtIndex(targetIndex);
-            for (FXOMObject child : children) {
-                assert child instanceof FXOMInstance;
-                final FXOMInstance childInstance = (FXOMInstance) child;
-                final ValuePropertyMetadata vpm = Metadata.getMetadata().
-                        queryValueProperty(childInstance, propertyName);
-                int newIndexValue = targetIndex + offset;
-                final Job modifyJob = new ModifyObjectJob(
-                        childInstance, vpm, newIndexValue, getEditorController());
-                subJob.addSubJob(modifyJob);
-            }
-        }
-    }
+  }
 }

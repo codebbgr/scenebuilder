@@ -34,13 +34,11 @@ package com.oracle.javafx.scenebuilder.kit.editor.job.wrap;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import javafx.scene.text.TextFlow;
 
-/**
- * Job used to wrap selection in a TextFlow.
- */
+/** Job used to wrap selection in a TextFlow. */
 public class WrapInTextFlowJob extends AbstractWrapInSubComponentJob {
 
-    public WrapInTextFlowJob(EditorController editorController) {
-        super(editorController);
-        newContainerClass = TextFlow.class;
-    }
+  public WrapInTextFlowJob(EditorController editorController) {
+    super(editorController);
+    newContainerClass = TextFlow.class;
+  }
 }

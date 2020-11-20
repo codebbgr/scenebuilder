@@ -35,11 +35,9 @@ import com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors.DoubleF
 import com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors.EditorUtils;
 import com.oracle.javafx.scenebuilder.kit.util.control.effectpicker.EffectPickerController;
 import com.oracle.javafx.scenebuilder.kit.util.control.effectpicker.Utils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
@@ -47,8 +45,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.Slider;
 import javafx.scene.control.Label;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -56,134 +54,144 @@ import javafx.scene.layout.GridPane;
 
 public class SliderControl extends GridPane {
 
-    @FXML
-    private Slider editor_slider;
-    @FXML
-    private Label editor_label;
-    @FXML
-    private DoubleField editor_textfield;
+  @FXML private Slider editor_slider;
+  @FXML private Label editor_label;
+  @FXML private DoubleField editor_textfield;
 
-    private boolean intMode;
-    private double incDecValue;
-    private final DoubleProperty value = new SimpleDoubleProperty();
-    private final EffectPickerController effectPickerController;
-    private final int roundingFactor = 100; // 2 decimals rounding
+  private boolean intMode;
+  private double incDecValue;
+  private final DoubleProperty value = new SimpleDoubleProperty();
+  private final EffectPickerController effectPickerController;
+  private final int roundingFactor = 100; // 2 decimals rounding
 
-    public SliderControl(
-            EffectPickerController effectPickerController,
-            String labelString,
-            double min,
-            double max,
-            double initVal,
-            double incDec,
-            boolean integerMode) {
-        this.effectPickerController = effectPickerController;
-        initialize(labelString, min, max, initVal, incDec, integerMode);
+  public SliderControl(
+      EffectPickerController effectPickerController,
+      String labelString,
+      double min,
+      double max,
+      double initVal,
+      double incDec,
+      boolean integerMode) {
+    this.effectPickerController = effectPickerController;
+    initialize(labelString, min, max, initVal, incDec, integerMode);
+  }
+
+  public DoubleProperty valueProperty() {
+    return value;
+  }
+
+  public double getValue() {
+    return value.get();
+  }
+
+  public Slider getSlider() {
+    return editor_slider;
+  }
+
+  public TextField getTextField() {
+    return editor_textfield;
+  }
+
+  @FXML
+  void textfieldTyped(KeyEvent e) {
+    if (e.getCode() == KeyCode.UP) {
+      incOrDecValue(incDecValue);
+    } else if (e.getCode() == KeyCode.DOWN) {
+      incOrDecValue(-incDecValue);
+    } else if (e.getCode() == KeyCode.ENTER) {
+      double inputValue = Double.parseDouble(editor_textfield.getText());
+      setValue(inputValue);
+      editor_slider.setValue(getValue());
+      editor_textfield.selectAll();
+    }
+  }
+
+  private void incOrDecValue(double delta) {
+    setValue(getValue() + delta);
+    //        Platform.runLater(new Runnable() {
+    //            @Override
+    //            public void run() {
+    //                // position caret after new value for easy editing
+    //                editor_textfield.positionCaret(editor_textfield.getText().length());
+    //            }
+    //        });
+  }
+
+  private void setValue(Number n) {
+    if (intMode) {
+      long rounded = Math.round(n.doubleValue());
+      value.set(rounded);
+      editor_textfield.setText(Long.toString(rounded));
+    } else {
+      double val = Utils.clamp(editor_slider.getMin(), n.doubleValue(), editor_slider.getMax());
+      double rounded = EditorUtils.round(val, roundingFactor);
+      value.set(rounded);
+      editor_textfield.setText(Double.toString(rounded));
+    }
+    editor_slider.setValue(value.get());
+  }
+
+  private void initialize(
+      String labelString,
+      double min,
+      double max,
+      double initVal,
+      double incDec,
+      boolean integerMode) {
+
+    final URL layoutURL = SliderControl.class.getResource("SliderControl.fxml"); // NOI18N
+    try (InputStream is = layoutURL.openStream()) {
+      FXMLLoader loader = new FXMLLoader();
+      loader.setController(this);
+      loader.setRoot(this);
+      loader.setLocation(layoutURL);
+      Parent p = (Parent) loader.load(is);
+      assert p == this;
+    } catch (IOException x) {
+      throw new RuntimeException(x);
     }
 
-    public DoubleProperty valueProperty() {
-        return value;
-    }
+    editor_label.setText(labelString);
+    incDecValue = incDec;
+    intMode = integerMode;
+    editor_slider.setMin(min);
+    editor_slider.setMax(max);
+    editor_slider.setValue(initVal);
+    setValue(initVal);
+    editor_slider
+        .valueProperty()
+        .addListener(
+            (ChangeListener<Number>)
+                (ov, oldVal, newVal) -> {
+                  // First update the model
+                  setValue(newVal);
+                  // Then notify the controller a change occured
+                  effectPickerController.incrementRevision();
+                });
+    editor_slider
+        .pressedProperty()
+        .addListener(
+            (ChangeListener<Boolean>)
+                (ov, oldValue, newValue) -> effectPickerController.setLiveUpdate(newValue));
 
-    public double getValue() {
-        return value.get();
-    }
+    editor_textfield
+        .focusedProperty()
+        .addListener(
+            (ChangeListener<Boolean>)
+                (ov, oldValue, newValue) -> {
+                  // Commit the value on focus lost
+                  if (newValue == false) {
+                    double inputValue = Double.parseDouble(editor_textfield.getText());
+                    // First update the model
+                    setValue(inputValue);
+                    // Then notify the controller a change occured
+                    effectPickerController.incrementRevision();
+                  }
+                });
 
-    public Slider getSlider() {
-        return editor_slider;
-    }
-
-    public TextField getTextField() {
-        return editor_textfield;
-    }
-
-    @FXML
-    void textfieldTyped(KeyEvent e) {
-        if (e.getCode() == KeyCode.UP) {
-            incOrDecValue(incDecValue);
-        } else if (e.getCode() == KeyCode.DOWN) {
-            incOrDecValue(-incDecValue);
-        } else if (e.getCode() == KeyCode.ENTER) {
-            double inputValue = Double.parseDouble(editor_textfield.getText());
-            setValue(inputValue);
-            editor_slider.setValue(getValue());
-            editor_textfield.selectAll();
-        }
-    }
-
-    private void incOrDecValue(double delta) {
-        setValue(getValue() + delta);
-//        Platform.runLater(new Runnable() {
-//            @Override
-//            public void run() {
-//                // position caret after new value for easy editing
-//                editor_textfield.positionCaret(editor_textfield.getText().length());
-//            }
-//        });
-    }
-
-    private void setValue(Number n) {
-        if (intMode) {
-            long rounded = Math.round(n.doubleValue());
-            value.set(rounded);
-            editor_textfield.setText(Long.toString(rounded));
-        } else {
-            double val = Utils.clamp(editor_slider.getMin(), n.doubleValue(), editor_slider.getMax());
-            double rounded = EditorUtils.round(val, roundingFactor);
-            value.set(rounded);
-            editor_textfield.setText(Double.toString(rounded));
-        }
-        editor_slider.setValue(value.get());
-    }
-
-    private void initialize(
-            String labelString,
-            double min,
-            double max,
-            double initVal,
-            double incDec,
-            boolean integerMode) {
-
-        final URL layoutURL = SliderControl.class.getResource("SliderControl.fxml"); //NOI18N
-        try (InputStream is = layoutURL.openStream()) {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setController(this);
-            loader.setRoot(this);
-            loader.setLocation(layoutURL);
-            Parent p = (Parent) loader.load(is);
-            assert p == this;
-        } catch (IOException x) {
-            throw new RuntimeException(x);
-        }
-
-        editor_label.setText(labelString);
-        incDecValue = incDec;
-        intMode = integerMode;
-        editor_slider.setMin(min);
-        editor_slider.setMax(max);
-        editor_slider.setValue(initVal);
-        setValue(initVal);
-        editor_slider.valueProperty().addListener((ChangeListener<Number>) (ov, oldVal, newVal) -> {
-            // First update the model
-            setValue(newVal);
-            // Then notify the controller a change occured
-            effectPickerController.incrementRevision();
+    editor_textfield.setOnAction(
+        (ActionEvent e) -> {
+          e.consume();
         });
-        editor_slider.pressedProperty().addListener((ChangeListener<Boolean>) (ov, oldValue, newValue) -> effectPickerController.setLiveUpdate(newValue));
-
-        editor_textfield.focusedProperty().addListener((ChangeListener<Boolean>) (ov, oldValue, newValue) -> {
-            // Commit the value on focus lost
-            if (newValue == false) {
-                double inputValue = Double.parseDouble(editor_textfield.getText());
-                // First update the model
-                setValue(inputValue);
-                // Then notify the controller a change occured
-                effectPickerController.incrementRevision();
-            }
-        });
-        
-        editor_textfield.setOnAction((ActionEvent e) -> {
-            e.consume();
-        });
-    }
+  }
 }

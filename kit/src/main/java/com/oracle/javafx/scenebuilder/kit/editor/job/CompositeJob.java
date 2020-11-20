@@ -34,26 +34,25 @@ package com.oracle.javafx.scenebuilder.kit.editor.job;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import java.util.List;
 
-/**
- * This Job handles a list of sub jobs and a description.
- */
+/** This Job handles a list of sub jobs and a description. */
 public abstract class CompositeJob extends Job {
 
-    private String description;
+  private String description;
 
-    public CompositeJob(EditorController editorController) {
-        super(editorController);
+  public CompositeJob(EditorController editorController) {
+    super(editorController);
+  }
+
+  @Override
+  public final String getDescription() {
+    if (description == null) {
+      description = makeDescription();
+      assert description != null;
     }
+    return description;
+  }
 
-    @Override
-    public final String getDescription() {
-        if (description == null) {
-            description = makeDescription();
-            assert description != null;
-        }
-        return description;
-    }
+  public abstract List<Job> getSubJobs();
 
-    public abstract List<Job> getSubJobs();
-    protected abstract String makeDescription();
+  protected abstract String makeDescription();
 }

@@ -38,45 +38,44 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.control.TreeTableView;
 import javafx.util.Callback;
 
-/**
- *
- */
+/** */
 public class TreeTableViewResizePolicyPropertyMetadata extends CallbackPropertyMetadata {
-    
-    public TreeTableViewResizePolicyPropertyMetadata(PropertyName name, boolean readWrite, Object defaultValue, InspectorPath inspectorPath) {
-        super(name, readWrite, defaultValue, inspectorPath);
-        assert (defaultValue == TreeTableView.CONSTRAINED_RESIZE_POLICY)
-                || (defaultValue == TreeTableView.UNCONSTRAINED_RESIZE_POLICY);
+
+  public TreeTableViewResizePolicyPropertyMetadata(
+      PropertyName name, boolean readWrite, Object defaultValue, InspectorPath inspectorPath) {
+    super(name, readWrite, defaultValue, inspectorPath);
+    assert (defaultValue == TreeTableView.CONSTRAINED_RESIZE_POLICY)
+        || (defaultValue == TreeTableView.UNCONSTRAINED_RESIZE_POLICY);
+  }
+
+  /*
+   * CallbackPropertyMetadata
+   */
+  @Override
+  protected Object castValue(Object value) {
+    assert value instanceof Callback<?, ?> : "value=" + value;
+    return value;
+  }
+
+  @Override
+  protected Class<?> getFxConstantClass() {
+    return TreeTableView.class;
+  }
+
+  @Override
+  protected void updateFxomInstanceWithValue(FXOMInstance valueInstance, Object value) {
+    final String fxConstant;
+
+    if (value == TreeTableView.CONSTRAINED_RESIZE_POLICY) {
+      fxConstant = "CONSTRAINED_RESIZE_POLICY"; // NOI18N
+    } else if (value == TreeTableView.UNCONSTRAINED_RESIZE_POLICY) {
+      fxConstant = "UNCONSTRAINED_RESIZE_POLICY"; // NOI18N
+    } else {
+      // Emergency code
+      assert false;
+      fxConstant = "CONSTRAINED_RESIZE_POLICY"; // NOI18N
     }
 
-    /*
-     * CallbackPropertyMetadata
-     */
-    @Override
-    protected Object castValue(Object value) {
-        assert value instanceof Callback<?,?> : "value=" + value;
-        return value;
-    }
-
-    @Override
-    protected Class<?> getFxConstantClass() {
-        return TreeTableView.class;
-    }
-    
-    @Override
-    protected void updateFxomInstanceWithValue(FXOMInstance valueInstance, Object value) {
-        final String fxConstant;
-        
-        if (value == TreeTableView.CONSTRAINED_RESIZE_POLICY) {
-            fxConstant = "CONSTRAINED_RESIZE_POLICY"; //NOI18N
-        } else if (value == TreeTableView.UNCONSTRAINED_RESIZE_POLICY) {
-            fxConstant = "UNCONSTRAINED_RESIZE_POLICY"; //NOI18N
-        } else {
-            // Emergency code
-            assert false;
-            fxConstant = "CONSTRAINED_RESIZE_POLICY"; //NOI18N
-        }
-        
-        valueInstance.setFxConstant(fxConstant);
-    }
+    valueInstance.setFxConstant(fxConstant);
+  }
 }

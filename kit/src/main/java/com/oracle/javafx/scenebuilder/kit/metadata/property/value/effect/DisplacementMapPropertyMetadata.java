@@ -41,56 +41,82 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.effect.DisplacementMap;
 
-/**
- *
- */
+/** */
 public class DisplacementMapPropertyMetadata extends ComplexPropertyMetadata<DisplacementMap> {
-    
-    private final DisplacementMap DEFAULT = new DisplacementMap();
-    
-    private final EffectPropertyMetadata inputMetadata
-            = new EffectPropertyMetadata(new PropertyName("input"), //NOI18N
-            true /* readWrite */, null, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata offsetXMetadata
-            = new DoublePropertyMetadata(new PropertyName("offsetX"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, DEFAULT.getOffsetX(), InspectorPath.UNUSED);
-    private final DoublePropertyMetadata offsetYMetadata
-            = new DoublePropertyMetadata(new PropertyName("offsetY"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, DEFAULT.getOffsetY(), InspectorPath.UNUSED);
-    private final DoublePropertyMetadata scaleXMetadata
-            = new DoublePropertyMetadata(new PropertyName("scaleX"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, DEFAULT.getScaleX(), InspectorPath.UNUSED);
-    private final DoublePropertyMetadata scaleYMetadata
-            = new DoublePropertyMetadata(new PropertyName("scaleY"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, DEFAULT.getScaleY(), InspectorPath.UNUSED);
-    private final BooleanPropertyMetadata wrapMetadata
-            = new BooleanPropertyMetadata(new PropertyName("wrap"), //NOI18N
-            true /* readWrite */, DEFAULT.isWrap(), InspectorPath.UNUSED);
-    private final FloatMapPropertyMetadata mapDataMetadata
-            = new FloatMapPropertyMetadata(new PropertyName("mapData"), //NOI18N
-            true /* readWrite */, DEFAULT.getMapData(), InspectorPath.UNUSED);
 
-    public DisplacementMapPropertyMetadata(PropertyName name, boolean readWrite, 
-            DisplacementMap defaultValue, InspectorPath inspectorPath) {
-        super(name, DisplacementMap.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final DisplacementMap DEFAULT = new DisplacementMap();
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(DisplacementMap value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        inputMetadata.setValue(result, value.getInput());
-        offsetXMetadata.setValue(result, value.getOffsetX());
-        offsetYMetadata.setValue(result, value.getOffsetY());
-        scaleXMetadata.setValue(result, value.getScaleX());
-        scaleYMetadata.setValue(result, value.getScaleY());
-        wrapMetadata.setValue(result, value.isWrap());
-        mapDataMetadata.setValue(result, value.getMapData());
+  private final EffectPropertyMetadata inputMetadata =
+      new EffectPropertyMetadata(
+          new PropertyName("input"), // NOI18N
+          true /* readWrite */,
+          null,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata offsetXMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("offsetX"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          DEFAULT.getOffsetX(),
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata offsetYMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("offsetY"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          DEFAULT.getOffsetY(),
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata scaleXMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("scaleX"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          DEFAULT.getScaleX(),
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata scaleYMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("scaleY"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          DEFAULT.getScaleY(),
+          InspectorPath.UNUSED);
+  private final BooleanPropertyMetadata wrapMetadata =
+      new BooleanPropertyMetadata(
+          new PropertyName("wrap"), // NOI18N
+          true /* readWrite */,
+          DEFAULT.isWrap(),
+          InspectorPath.UNUSED);
+  private final FloatMapPropertyMetadata mapDataMetadata =
+      new FloatMapPropertyMetadata(
+          new PropertyName("mapData"), // NOI18N
+          true /* readWrite */,
+          DEFAULT.getMapData(),
+          InspectorPath.UNUSED);
 
-        return result;
-    }
+  public DisplacementMapPropertyMetadata(
+      PropertyName name,
+      boolean readWrite,
+      DisplacementMap defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, DisplacementMap.class, readWrite, defaultValue, inspectorPath);
+  }
+
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(DisplacementMap value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    inputMetadata.setValue(result, value.getInput());
+    offsetXMetadata.setValue(result, value.getOffsetX());
+    offsetYMetadata.setValue(result, value.getOffsetY());
+    scaleXMetadata.setValue(result, value.getScaleX());
+    scaleYMetadata.setValue(result, value.getScaleY());
+    wrapMetadata.setValue(result, value.isWrap());
+    mapDataMetadata.setValue(result, value.getMapData());
+
+    return result;
+  }
 }

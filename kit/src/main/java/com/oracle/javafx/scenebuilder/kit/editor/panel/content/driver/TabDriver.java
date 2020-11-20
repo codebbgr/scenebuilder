@@ -50,88 +50,84 @@ import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 
-/**
- *
- */
+/** */
 public class TabDriver extends AbstractDriver {
 
-    public TabDriver(ContentPanelController contentPanelController) {
-        super(contentPanelController);
+  public TabDriver(ContentPanelController contentPanelController) {
+    super(contentPanelController);
+  }
+
+  /*
+   * AbstractDriver
+   */
+
+  @Override
+  public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof Tab;
+    assert fxomObject instanceof FXOMInstance;
+    return new TabHandles(contentPanelController, (FXOMInstance) fxomObject);
+  }
+
+  @Override
+  public AbstractTring<?> makeTring(AbstractDropTarget dropTarget) {
+    assert dropTarget != null;
+    assert dropTarget.getTargetObject() instanceof FXOMInstance;
+    assert dropTarget.getTargetObject().getSceneGraphObject() instanceof Tab;
+    return new TabTring(contentPanelController, (FXOMInstance) dropTarget.getTargetObject());
+  }
+
+  @Override
+  public AbstractPring<?> makePring(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof Tab;
+    assert fxomObject instanceof FXOMInstance;
+    return new TabPring(contentPanelController, (FXOMInstance) fxomObject);
+  }
+
+  @Override
+  public AbstractResizer<?> makeResizer(FXOMObject fxomObject) {
+    // Resize gesture does not apply to Tab objects
+    return null;
+  }
+
+  @Override
+  public AbstractCurveEditor<?> makeCurveEditor(FXOMObject fxomObject) {
+    return null;
+  }
+
+  @Override
+  public FXOMObject refinePick(Node hitNode, double sceneX, double sceneY, FXOMObject fxomObject) {
+    return fxomObject;
+  }
+
+  @Override
+  public AbstractDropTarget makeDropTarget(FXOMObject fxomObject, double sceneX, double sceneY) {
+    assert fxomObject instanceof FXOMInstance;
+    return new AccessoryDropTarget((FXOMInstance) fxomObject, Accessory.CONTENT);
+  }
+
+  @Override
+  public Node getInlineEditorBounds(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof Tab;
+    final Tab tab = (Tab) fxomObject.getSceneGraphObject();
+    final TabPaneDesignInfoX di = new TabPaneDesignInfoX();
+    return di.getTabNode(tab.getTabPane(), tab);
+  }
+
+  @Override
+  public boolean intersectsBounds(FXOMObject fxomObject, Bounds bounds) {
+    assert fxomObject.getSceneGraphObject() instanceof Tab;
+
+    final Tab tab = (Tab) fxomObject.getSceneGraphObject();
+    final boolean result;
+    if (tab.isSelected()) {
+      final TabPane tabPane = tab.getTabPane();
+      final Bounds sceneGraphNodeBounds =
+          tabPane.localToScene(tabPane.getLayoutBounds(), true /* rootScene */);
+      result = sceneGraphNodeBounds.intersects(bounds);
+    } else {
+      result = false;
     }
 
-    /*
-     * AbstractDriver
-     */
-    
-    @Override
-    public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof Tab;
-        assert fxomObject instanceof FXOMInstance;
-        return new TabHandles(contentPanelController, (FXOMInstance) fxomObject);
-    }
-    
-    @Override
-    public AbstractTring<?> makeTring(AbstractDropTarget dropTarget) {
-        assert dropTarget != null;
-        assert dropTarget.getTargetObject() instanceof FXOMInstance;
-        assert dropTarget.getTargetObject().getSceneGraphObject() instanceof Tab;
-        return new TabTring(contentPanelController, (FXOMInstance) dropTarget.getTargetObject());
-    }
-
-    @Override
-    public AbstractPring<?> makePring(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof Tab;
-        assert fxomObject instanceof FXOMInstance;
-        return new TabPring(contentPanelController, (FXOMInstance) fxomObject);
-    }
-    
-    @Override
-    public AbstractResizer<?> makeResizer(FXOMObject fxomObject) {
-        // Resize gesture does not apply to Tab objects
-        return null;
-    }
-
-    @Override
-    public AbstractCurveEditor<?> makeCurveEditor(FXOMObject fxomObject) {
-        return null;
-    }
-    
-    @Override
-    public FXOMObject refinePick(Node hitNode, double sceneX, double sceneY, FXOMObject fxomObject) {
-        return fxomObject;
-    }
-
-    @Override
-    public AbstractDropTarget makeDropTarget(FXOMObject fxomObject, double sceneX, double sceneY) {
-        assert fxomObject instanceof FXOMInstance;
-        return new AccessoryDropTarget((FXOMInstance) fxomObject, Accessory.CONTENT);
-    }
-
-    @Override
-    public Node getInlineEditorBounds(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof Tab;
-        final Tab tab = (Tab) fxomObject.getSceneGraphObject();
-        final TabPaneDesignInfoX di = new TabPaneDesignInfoX();
-        return di.getTabNode(tab.getTabPane(), tab);
-    }
-
-    @Override
-    public boolean intersectsBounds(FXOMObject fxomObject, Bounds bounds) {
-        assert fxomObject.getSceneGraphObject() instanceof Tab;
-        
-        final Tab tab = (Tab) fxomObject.getSceneGraphObject();
-        final boolean result;
-        if (tab.isSelected()) {
-            final TabPane tabPane
-                    = tab.getTabPane();
-            final Bounds sceneGraphNodeBounds 
-                    = tabPane.localToScene(tabPane.getLayoutBounds(), true /* rootScene */);
-            result = sceneGraphNodeBounds.intersects(bounds);
-        } else {
-            result = false;
-        }
-        
-        return result;
-    }
-    
+    return result;
+  }
 }

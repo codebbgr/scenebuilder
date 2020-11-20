@@ -41,74 +41,68 @@ import javafx.scene.Node;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 
-/**
- *
- * 
- */
+/** */
 public class TreeTableColumnPring extends AbstractGenericPring<Object> {
 
-    private final TreeTableViewDesignInfoX tableViewDesignInfo
-            = new TreeTableViewDesignInfoX();
-    
-    public TreeTableColumnPring(ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
-        super(contentPanelController, fxomInstance, Object.class);
-        assert fxomInstance.getSceneGraphObject() instanceof TreeTableColumn;
-    }
-    
-    public FXOMInstance getFxomInstance() {
-        return (FXOMInstance) getFxomObject();
+  private final TreeTableViewDesignInfoX tableViewDesignInfo = new TreeTableViewDesignInfoX();
+
+  public TreeTableColumnPring(
+      ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
+    super(contentPanelController, fxomInstance, Object.class);
+    assert fxomInstance.getSceneGraphObject() instanceof TreeTableColumn;
+  }
+
+  public FXOMInstance getFxomInstance() {
+    return (FXOMInstance) getFxomObject();
+  }
+
+  /*
+   * AbstractGenericPring
+   */
+
+  @Override
+  public Bounds getSceneGraphObjectBounds() {
+    return tableViewDesignInfo.getColumnBounds(getTreeTableColumn());
+  }
+
+  @Override
+  public Node getSceneGraphObjectProxy() {
+    return getTreeTableColumn().getTreeTableView();
+  }
+
+  @Override
+  protected void startListeningToSceneGraphObject() {
+    final TreeTableView<?> ttv = getTreeTableColumn().getTreeTableView();
+    startListeningToLayoutBounds(ttv);
+    startListeningToLocalToSceneTransform(ttv);
+  }
+
+  @Override
+  protected void stopListeningToSceneGraphObject() {
+    final TreeTableView<?> ttv = getTreeTableColumn().getTreeTableView();
+    stopListeningToLayoutBounds(ttv);
+    stopListeningToLocalToSceneTransform(ttv);
+  }
+
+  @Override
+  public AbstractGesture findGesture(Node node) {
+    final AbstractGesture result;
+
+    if (node == ringPath) {
+      result = new SelectWithPringGesture(getContentPanelController(), getFxomInstance());
+    } else {
+      result = null;
     }
 
-    
-    /*
-     * AbstractGenericPring
-     */
-    
-    @Override
-    public Bounds getSceneGraphObjectBounds() {
-        return tableViewDesignInfo.getColumnBounds(getTreeTableColumn());
-    }
+    return result;
+  }
 
-    @Override
-    public Node getSceneGraphObjectProxy() {
-        return getTreeTableColumn().getTreeTableView();
-    }
+  /*
+   * Private
+   */
 
-    @Override
-    protected void startListeningToSceneGraphObject() {
-        final TreeTableView<?> ttv = getTreeTableColumn().getTreeTableView();
-        startListeningToLayoutBounds(ttv);
-        startListeningToLocalToSceneTransform(ttv);
-    }
-
-    @Override
-    protected void stopListeningToSceneGraphObject() {
-        final TreeTableView<?> ttv = getTreeTableColumn().getTreeTableView();
-        stopListeningToLayoutBounds(ttv);
-        stopListeningToLocalToSceneTransform(ttv);
-    }
-
-    @Override
-    public AbstractGesture findGesture(Node node) {
-        final AbstractGesture result;
-        
-        if (node == ringPath) {
-            result = new SelectWithPringGesture(getContentPanelController(), 
-                    getFxomInstance());
-        } else {
-            result = null;
-        }
-        
-        return result;
-    }
-
-
-    /*
-     * Private
-     */
-    
-    private TreeTableColumn<?,?> getTreeTableColumn() {
-        assert getSceneGraphObject() instanceof TreeTableColumn;
-        return (TreeTableColumn<?,?>) getSceneGraphObject();
-    }
+  private TreeTableColumn<?, ?> getTreeTableColumn() {
+    assert getSceneGraphObject() instanceof TreeTableColumn;
+    return (TreeTableColumn<?, ?>) getSceneGraphObject();
+  }
 }

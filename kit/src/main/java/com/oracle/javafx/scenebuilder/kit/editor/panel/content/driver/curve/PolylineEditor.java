@@ -35,8 +35,6 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.content.driver.curve;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.mouse.EditCurveGesture.Tunable;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.content.guides.EditCurveGuideController;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
-import javafx.scene.shape.Polyline;
-
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -44,92 +42,92 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 import javafx.collections.ObservableList;
+import javafx.scene.shape.Polyline;
 
 public class PolylineEditor extends AbstractCurveEditor<Polyline> {
 
-    private final List<Double> originalPoints;
-    
-    private final List<PropertyName> propertyNames = new ArrayList<>();
+  private final List<Double> originalPoints;
 
-    private int vertexIndex = -1;
-    
-    public PolylineEditor(Polyline sceneGraphObject) {
-        super(sceneGraphObject);
+  private final List<PropertyName> propertyNames = new ArrayList<>();
 
-        originalPoints = new ArrayList<>(sceneGraphObject.getPoints());
-    }
-    
-    @Override
-    public EditCurveGuideController createController(EnumMap<Tunable, Integer> tunableMap) {
-        final EditCurveGuideController result = new EditCurveGuideController();
-        vertexIndex = -1;
-        if (tunableMap.containsKey(Tunable.VERTEX)) {
-            vertexIndex = tunableMap.get(Tunable.VERTEX);
-        }
-        final ObservableList<Double> points = sceneGraphObject.getPoints();
-        IntStream.range(0, points.size() / 2)
-                .filter(i -> i != vertexIndex)
-                .mapToObj(i -> points.subList(i * 2, 2 * (i + 1)))
-                .map(list -> sceneGraphObject.localToScene(list.get(0), list.get(1), true))
-                .forEach(result::addCurvePoint);
-        return result;
-    }
-    
-    @Override
-    public void moveTunable(EnumMap<Tunable, Integer> tunableMap, double newX, double newY) {
-        Integer index = tunableMap.get(Tunable.VERTEX);
-        if (index != null && index > -1 && index < sceneGraphObject.getPoints().size() / 2) {
-            sceneGraphObject.getPoints().set(2 * index, newX);
-            sceneGraphObject.getPoints().set(2 * index + 1, newY);
-        }
-    }
+  private int vertexIndex = -1;
 
-    @Override
-    public void revertToOriginalState() {
-        sceneGraphObject.getPoints().setAll(originalPoints);
-    }
+  public PolylineEditor(Polyline sceneGraphObject) {
+    super(sceneGraphObject);
 
-    @Override
-    public List<PropertyName> getPropertyNames() {
-        return propertyNames;
-    }
+    originalPoints = new ArrayList<>(sceneGraphObject.getPoints());
+  }
 
-    @Override
-    public Object getValue(PropertyName propertyName) {
-        assert propertyName != null;
-        assert propertyNames.contains(propertyName);
-        return null;
+  @Override
+  public EditCurveGuideController createController(EnumMap<Tunable, Integer> tunableMap) {
+    final EditCurveGuideController result = new EditCurveGuideController();
+    vertexIndex = -1;
+    if (tunableMap.containsKey(Tunable.VERTEX)) {
+      vertexIndex = tunableMap.get(Tunable.VERTEX);
     }
+    final ObservableList<Double> points = sceneGraphObject.getPoints();
+    IntStream.range(0, points.size() / 2)
+        .filter(i -> i != vertexIndex)
+        .mapToObj(i -> points.subList(i * 2, 2 * (i + 1)))
+        .map(list -> sceneGraphObject.localToScene(list.get(0), list.get(1), true))
+        .forEach(result::addCurvePoint);
+    return result;
+  }
 
-    @Override
-    public Map<PropertyName, Object> getChangeMap() {
-        return new HashMap<>();
+  @Override
+  public void moveTunable(EnumMap<Tunable, Integer> tunableMap, double newX, double newY) {
+    Integer index = tunableMap.get(Tunable.VERTEX);
+    if (index != null && index > -1 && index < sceneGraphObject.getPoints().size() / 2) {
+      sceneGraphObject.getPoints().set(2 * index, newX);
+      sceneGraphObject.getPoints().set(2 * index + 1, newY);
     }
-    
-    @Override
-    public List<Double> getPoints() {
-        return sceneGraphObject.getPoints();
-    }
+  }
 
-    @Override
-    public void addPoint(EnumMap<Tunable, Integer> tunableMap, double newX, double newY) {
-        Integer index = tunableMap.get(Tunable.SIDE);
-        if (index != null) {
-            index += 1;
-            if (index > -1 && index < sceneGraphObject.getPoints().size() / 2) {
-                sceneGraphObject.getPoints().add(2 * index, newY);
-                sceneGraphObject.getPoints().add(2 * index, newX);
-            }
-        }
-    }
+  @Override
+  public void revertToOriginalState() {
+    sceneGraphObject.getPoints().setAll(originalPoints);
+  }
 
-    @Override
-    public void removePoint(EnumMap<Tunable, Integer> tunableMap) {
-        Integer index = tunableMap.get(Tunable.VERTEX);
-        if (index != null && index > -1 && index < sceneGraphObject.getPoints().size() / 2) {
-            sceneGraphObject.getPoints().remove(2 * index + 1);
-            sceneGraphObject.getPoints().remove(2 * index);
-        }
-    }
+  @Override
+  public List<PropertyName> getPropertyNames() {
+    return propertyNames;
+  }
 
+  @Override
+  public Object getValue(PropertyName propertyName) {
+    assert propertyName != null;
+    assert propertyNames.contains(propertyName);
+    return null;
+  }
+
+  @Override
+  public Map<PropertyName, Object> getChangeMap() {
+    return new HashMap<>();
+  }
+
+  @Override
+  public List<Double> getPoints() {
+    return sceneGraphObject.getPoints();
+  }
+
+  @Override
+  public void addPoint(EnumMap<Tunable, Integer> tunableMap, double newX, double newY) {
+    Integer index = tunableMap.get(Tunable.SIDE);
+    if (index != null) {
+      index += 1;
+      if (index > -1 && index < sceneGraphObject.getPoints().size() / 2) {
+        sceneGraphObject.getPoints().add(2 * index, newY);
+        sceneGraphObject.getPoints().add(2 * index, newX);
+      }
+    }
+  }
+
+  @Override
+  public void removePoint(EnumMap<Tunable, Integer> tunableMap) {
+    Integer index = tunableMap.get(Tunable.VERTEX);
+    if (index != null && index > -1 && index < sceneGraphObject.getPoints().size() / 2) {
+      sceneGraphObject.getPoints().remove(2 * index + 1);
+      sceneGraphObject.getPoints().remove(2 * index);
+    }
+  }
 }

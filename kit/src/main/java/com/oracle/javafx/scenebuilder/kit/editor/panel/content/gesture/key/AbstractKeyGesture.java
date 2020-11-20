@@ -34,108 +34,103 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.key;
 
 import com.oracle.javafx.scenebuilder.kit.editor.panel.content.ContentPanelController;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.AbstractGesture;
-
 import javafx.scene.Node;
 import javafx.scene.input.InputEvent;
 import javafx.scene.input.KeyEvent;
 
-/**
- *
- */
+/** */
 public abstract class AbstractKeyGesture extends AbstractGesture {
 
-    private KeyEvent firstKeyPressedEvent;
-    private KeyEvent lastKeyEvent;
-    private Observer observer;
-    
-    
-    public AbstractKeyGesture(ContentPanelController contentPanelController) {
-        super(contentPanelController);
-    }
+  private KeyEvent firstKeyPressedEvent;
+  private KeyEvent lastKeyEvent;
+  private Observer observer;
 
-    
-    /*
-     * For subclasses
-     */
-    
-    protected abstract void keyPressed();
-    protected abstract void keyReleased();
-    
-    protected KeyEvent getFirstKeyPressedEvent() {
-        return firstKeyPressedEvent;
-    }
-    
-    protected KeyEvent getLastKeyEvent() {
-        return lastKeyEvent;
-    }
-    
-    /*
-     * AbstractGesture
-     */
-    
-    @Override
-    public void start(InputEvent e, Observer observer) {
-        assert e != null;
-        assert e instanceof KeyEvent;
-        assert e.getEventType() == KeyEvent.KEY_PRESSED;
-        assert observer != null;
-        
-        final Node glassLayer = contentPanelController.getGlassLayer();
-        assert glassLayer.getOnKeyPressed() == null;
-        assert glassLayer.getOnKeyReleased() == null;
-        
-        glassLayer.setOnKeyPressed(e1 -> {
-            if (e1.getCode() == firstKeyPressedEvent.getCode()) {
-                lastKeyEvent = e1;
-                try {
-                    keyPressed();
-                } finally {
-                    e1.consume();
-                }
+  public AbstractKeyGesture(ContentPanelController contentPanelController) {
+    super(contentPanelController);
+  }
+
+  /*
+   * For subclasses
+   */
+
+  protected abstract void keyPressed();
+
+  protected abstract void keyReleased();
+
+  protected KeyEvent getFirstKeyPressedEvent() {
+    return firstKeyPressedEvent;
+  }
+
+  protected KeyEvent getLastKeyEvent() {
+    return lastKeyEvent;
+  }
+
+  /*
+   * AbstractGesture
+   */
+
+  @Override
+  public void start(InputEvent e, Observer observer) {
+    assert e != null;
+    assert e instanceof KeyEvent;
+    assert e.getEventType() == KeyEvent.KEY_PRESSED;
+    assert observer != null;
+
+    final Node glassLayer = contentPanelController.getGlassLayer();
+    assert glassLayer.getOnKeyPressed() == null;
+    assert glassLayer.getOnKeyReleased() == null;
+
+    glassLayer.setOnKeyPressed(
+        e1 -> {
+          if (e1.getCode() == firstKeyPressedEvent.getCode()) {
+            lastKeyEvent = e1;
+            try {
+              keyPressed();
+            } finally {
+              e1.consume();
             }
+          }
         });
-        glassLayer.setOnKeyReleased(e1 -> {
-            if (e1.getCode() == firstKeyPressedEvent.getCode()) {
-                lastKeyEvent = e1;
-                try {
-                    keyReleased();
-                } finally {
-                    performTermination();
-                    e1.consume();
-                }
+    glassLayer.setOnKeyReleased(
+        e1 -> {
+          if (e1.getCode() == firstKeyPressedEvent.getCode()) {
+            lastKeyEvent = e1;
+            try {
+              keyReleased();
+            } finally {
+              performTermination();
+              e1.consume();
             }
+          }
         });
-        
-        
-        this.firstKeyPressedEvent = (KeyEvent)e;
-        this.lastKeyEvent = this.firstKeyPressedEvent;
-        this.observer = observer;
-        
-        try {
-            keyPressed();
-        } catch(RuntimeException x) {
-            performTermination();
-            throw x;
-        }
+
+    this.firstKeyPressedEvent = (KeyEvent) e;
+    this.lastKeyEvent = this.firstKeyPressedEvent;
+    this.observer = observer;
+
+    try {
+      keyPressed();
+    } catch (RuntimeException x) {
+      performTermination();
+      throw x;
     }
-    
-    
-    /*
-     * Private
-     */
-    
-    private void performTermination() {
-        final Node glassLayer = contentPanelController.getGlassLayer();
-        glassLayer.setOnKeyPressed(null);
-        glassLayer.setOnKeyReleased(null);
-        
-        try {
-            observer.gestureDidTerminate(this);
-        } finally {
-            observer = null;
-            firstKeyPressedEvent = null;
-            lastKeyEvent = null;
-        }
+  }
+
+  /*
+   * Private
+   */
+
+  private void performTermination() {
+    final Node glassLayer = contentPanelController.getGlassLayer();
+    glassLayer.setOnKeyPressed(null);
+    glassLayer.setOnKeyReleased(null);
+
+    try {
+      observer.gestureDidTerminate(this);
+    } finally {
+      observer = null;
+      firstKeyPressedEvent = null;
+      lastKeyEvent = null;
     }
-    
+  }
 }

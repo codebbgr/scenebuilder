@@ -35,98 +35,137 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- *
- */
+/** */
 public class JavaLanguage {
-    
-    /**
-     * Returns true if value is a valid identifier (as specified 
-     * in Java Language Specification, section 3.8).
-     * 
-     * @param value string to test (can be null or empty)
-     * @return true if value is a valid java identifier.
-     */
-    public static boolean isIdentifier(String value) {
-        /*
-         * See Java JavaLanguage Specification, section 3.8: Identifiers
-         * https://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.8
-         */
-        return isIdentifierChars(value)
-                && ! isKeyword(value)
-                && ! isBooleanLiteral(value)
-                && ! isNullLiteral(value);
-    }
-    
-    
-    /**
-     * Returns true if value is a valid class name (fully qualified or not).
-     * 
-     * @param value string to test (can be null or empty)
-     * @return  true if value is a valid class name
-     */
-    public static boolean isClassName(String value) {
-        boolean result;
-        
-        if (value == null) {
-            result = false;
-        } else {
-            result = true;
-            for (String item : value.split("\\.")) { //NOI18N
-                if (isIdentifier(item) == false) {
-                    result = false;
-                    break;
-                }
-            }
-        }
-        
-        return result;
-    }
-    
+
+  /**
+   * Returns true if value is a valid identifier (as specified in Java Language Specification,
+   * section 3.8).
+   *
+   * @param value string to test (can be null or empty)
+   * @return true if value is a valid java identifier.
+   */
+  public static boolean isIdentifier(String value) {
     /*
-     * Private
+     * See Java JavaLanguage Specification, section 3.8: Identifiers
+     * https://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.8
      */
-    
-    private static boolean isIdentifierChars(String value) {
-        if (value == null || value.isEmpty()
-                || !Character.isJavaIdentifierStart(value.codePointAt(0))) {
-            return false;
+    return isIdentifierChars(value)
+        && !isKeyword(value)
+        && !isBooleanLiteral(value)
+        && !isNullLiteral(value);
+  }
+
+  /**
+   * Returns true if value is a valid class name (fully qualified or not).
+   *
+   * @param value string to test (can be null or empty)
+   * @return true if value is a valid class name
+   */
+  public static boolean isClassName(String value) {
+    boolean result;
+
+    if (value == null) {
+      result = false;
+    } else {
+      result = true;
+      for (String item : value.split("\\.")) { // NOI18N
+        if (isIdentifier(item) == false) {
+          result = false;
+          break;
         }
-        for (int i = 0; i < value.length();) {
-            int codePoint = value.codePointAt(i);
-            if (!Character.isJavaIdentifierPart(codePoint)) {
-                return false;
-            }
-            i += Character.charCount(codePoint);
-        }
-        return true;
+      }
     }
-    
-    private static Set<String> keywords;
-    private static synchronized boolean isKeyword(String value) {
-        if (keywords == null) {
-            keywords = new HashSet<>();
-            Collections.addAll(
-                    keywords,
-                    "abstract", "continue", "for", "new", "switch", //NOI18N
-                    "assert", "default", "if", "package", "synchronized", //NOI18N
-                    "boolean", "do", "goto", "private", "this", //NOI18N
-                    "break", "double", "implements", "protected", "throw", //NOI18N
-                    "byte", "else", "import", "public", "throws", //NOI18N
-                    "case", "enum", "instanceof", "return", "transient", //NOI18N
-                    "catch", "extends", "int", "short", "try", //NOI18N
-                    "char", "final", "interface", "static", "void", //NOI18N
-                    "class", "finally", "long", "strictfp", "volatile",  //NOI18N
-                    "const", "float", "native", "super", "while"); //NOI18N
-        }
-        return keywords.contains(value);
+
+    return result;
+  }
+
+  /*
+   * Private
+   */
+
+  private static boolean isIdentifierChars(String value) {
+    if (value == null
+        || value.isEmpty()
+        || !Character.isJavaIdentifierStart(value.codePointAt(0))) {
+      return false;
     }
-    
-    private static boolean isBooleanLiteral(String value) {
-        return value.equals("true") || value.equals("false"); //NOI18N
+    for (int i = 0; i < value.length(); ) {
+      int codePoint = value.codePointAt(i);
+      if (!Character.isJavaIdentifierPart(codePoint)) {
+        return false;
+      }
+      i += Character.charCount(codePoint);
     }
-    
-    private static boolean isNullLiteral(String value) {
-        return value.equals("null"); //NOI18N
+    return true;
+  }
+
+  private static Set<String> keywords;
+
+  private static synchronized boolean isKeyword(String value) {
+    if (keywords == null) {
+      keywords = new HashSet<>();
+      Collections.addAll(
+          keywords,
+          "abstract",
+          "continue",
+          "for",
+          "new",
+          "switch", // NOI18N
+          "assert",
+          "default",
+          "if",
+          "package",
+          "synchronized", // NOI18N
+          "boolean",
+          "do",
+          "goto",
+          "private",
+          "this", // NOI18N
+          "break",
+          "double",
+          "implements",
+          "protected",
+          "throw", // NOI18N
+          "byte",
+          "else",
+          "import",
+          "public",
+          "throws", // NOI18N
+          "case",
+          "enum",
+          "instanceof",
+          "return",
+          "transient", // NOI18N
+          "catch",
+          "extends",
+          "int",
+          "short",
+          "try", // NOI18N
+          "char",
+          "final",
+          "interface",
+          "static",
+          "void", // NOI18N
+          "class",
+          "finally",
+          "long",
+          "strictfp",
+          "volatile", // NOI18N
+          "const",
+          "float",
+          "native",
+          "super",
+          "while"); // NOI18N
     }
+    return keywords.contains(value);
+  }
+
+  private static boolean isBooleanLiteral(String value) {
+    return value.equals("true") || value.equals("false"); // NOI18N
+  }
+
+  private static boolean isNullLiteral(String value) {
+    return value.equals("null"); // NOI18N
+  }
 }

@@ -46,151 +46,143 @@ import java.util.List;
 import javafx.scene.control.SplitPane;
 import javafx.scene.input.KeyEvent;
 
-/**
- *
- * 
- */
+/** */
 public class AdjustDividerGesture extends AbstractMouseGesture {
 
-    private final FXOMInstance splitPaneInstance;
-    private final int dividerIndex;
-    private final SplitPaneDesignInfoX di = new SplitPaneDesignInfoX();
-    private double[] originalDividerPositions;
-    
-    private static final PropertyName dividerPositionsName 
-            = new PropertyName("dividerPositions"); //NOI18N
+  private final FXOMInstance splitPaneInstance;
+  private final int dividerIndex;
+  private final SplitPaneDesignInfoX di = new SplitPaneDesignInfoX();
+  private double[] originalDividerPositions;
 
-    public AdjustDividerGesture(ContentPanelController contentPanelController,
-            FXOMInstance splitPaneInstance, int dividerIndex) {
-        super(contentPanelController);
-        
-        assert splitPaneInstance.getSceneGraphObject() instanceof SplitPane;
-        this.splitPaneInstance = splitPaneInstance;
-        this.dividerIndex = dividerIndex;
-    }
+  private static final PropertyName dividerPositionsName =
+      new PropertyName("dividerPositions"); // NOI18N
 
+  public AdjustDividerGesture(
+      ContentPanelController contentPanelController,
+      FXOMInstance splitPaneInstance,
+      int dividerIndex) {
+    super(contentPanelController);
+
+    assert splitPaneInstance.getSceneGraphObject() instanceof SplitPane;
+    this.splitPaneInstance = splitPaneInstance;
+    this.dividerIndex = dividerIndex;
+  }
+
+  /*
+   * AbstractMouseGesture
+   */
+
+  @Override
+  protected void mousePressed() {
+    // Everthing is done in mouseDragStarted
+  }
+
+  @Override
+  protected void mouseDragStarted() {
+    originalDividerPositions = getSplitPane().getDividerPositions();
+    setupAndOpenHudWindow();
+    contentPanelController.getHandleLayer().setVisible(false);
+    // Now same as mouseDragged
+    mouseDragged();
+  }
+
+  @Override
+  protected void mouseDragged() {
+    final SplitPane splitPane = (SplitPane) splitPaneInstance.getSceneGraphObject();
+    final double sceneX = getLastMouseEvent().getSceneX();
+    final double sceneY = getLastMouseEvent().getSceneY();
+    final double[] newDividerPositions =
+        di.simulateDividerMove(splitPane, dividerIndex, sceneX, sceneY);
+    splitPane.setDividerPositions(newDividerPositions);
+    splitPane.layout();
+    updateHudWindow();
+    contentPanelController.getHudWindowController().updatePopupLocation();
+  }
+
+  @Override
+  protected void mouseDragEnded() {
     /*
-     * AbstractMouseGesture
+     * Three steps
+     *
+     * 1) Copy the updated divider positions
+     * 2) Reverts to initial divider positions
+     *    => this step is equivalent to userDidCancel()
+     * 3) Push a BatchModifyObjectJob to officially update dividers
      */
-    
-    @Override
-    protected void mousePressed() {
-        // Everthing is done in mouseDragStarted
+
+    // Step #1
+    final List<Double> newDividerPositions = new ArrayList<>();
+    for (double p : getSplitPane().getDividerPositions()) {
+      newDividerPositions.add(Double.valueOf(p));
     }
 
-    @Override
-    protected void mouseDragStarted() {
-        originalDividerPositions = getSplitPane().getDividerPositions();
-        setupAndOpenHudWindow();
-        contentPanelController.getHandleLayer().setVisible(false);
-        // Now same as mouseDragged
-        mouseDragged();
-    }
+    // Step #2
+    userDidCancel();
 
-    @Override
-    protected void mouseDragged() {
-        final SplitPane splitPane = (SplitPane)splitPaneInstance.getSceneGraphObject();
-        final double sceneX = getLastMouseEvent().getSceneX();
-        final double sceneY = getLastMouseEvent().getSceneY();
-        final double[] newDividerPositions 
-                = di.simulateDividerMove(splitPane, dividerIndex, sceneX, sceneY);
-        splitPane.setDividerPositions(newDividerPositions);
-        splitPane.layout();
-        updateHudWindow();
-        contentPanelController.getHudWindowController().updatePopupLocation();
-    }
+    // Step #3
+    final Metadata metadata = Metadata.getMetadata();
+    final EditorController editorController = contentPanelController.getEditorController();
+    final ValuePropertyMetadata dividerPositionsMeta =
+        metadata.queryValueProperty(splitPaneInstance, dividerPositionsName);
+    final ModifyObjectJob j =
+        new ModifyObjectJob(
+            splitPaneInstance, dividerPositionsMeta, newDividerPositions, editorController);
+    if (j.isExecutable()) {
+      editorController.getJobManager().push(j);
+    } // else divider has been release to its original position
+  }
 
-    @Override
-    protected void mouseDragEnded() {
-        /*
-         * Three steps
-         * 
-         * 1) Copy the updated divider positions
-         * 2) Reverts to initial divider positions
-         *    => this step is equivalent to userDidCancel()
-         * 3) Push a BatchModifyObjectJob to officially update dividers
-         */
-        
-        // Step #1
-        final List<Double> newDividerPositions = new ArrayList<>();
-        for (double p : getSplitPane().getDividerPositions()) {
-            newDividerPositions.add(Double.valueOf(p));
-        }
-        
-        // Step #2
-        userDidCancel();
-        
-        // Step #3
-        final Metadata metadata = Metadata.getMetadata();
-        final EditorController editorController 
-                = contentPanelController.getEditorController();
-        final ValuePropertyMetadata dividerPositionsMeta 
-                = metadata.queryValueProperty(splitPaneInstance, dividerPositionsName);
-        final ModifyObjectJob j = new ModifyObjectJob(
-                splitPaneInstance, 
-                dividerPositionsMeta,
-                newDividerPositions,
-                editorController);
-        if (j.isExecutable()) {
-            editorController.getJobManager().push(j);
-        } // else divider has been release to its original position
-    }
+  @Override
+  protected void mouseReleased() {
+    // Everything is done in mouseDragEnded
+  }
 
-    @Override
-    protected void mouseReleased() {
-        // Everything is done in mouseDragEnded
-    }
+  @Override
+  protected void keyEvent(KeyEvent e) {}
 
-    @Override
-    protected void keyEvent(KeyEvent e) {
-    }
+  @Override
+  protected void userDidCancel() {
+    getSplitPane().setDividerPositions(originalDividerPositions);
+    contentPanelController.getHudWindowController().closeWindow();
+    contentPanelController.getHandleLayer().setVisible(true);
+    getSplitPane().layout();
+  }
 
-    @Override
-    protected void userDidCancel() {
-        getSplitPane().setDividerPositions(originalDividerPositions);
-        contentPanelController.getHudWindowController().closeWindow();
-        contentPanelController.getHandleLayer().setVisible(true);
-        getSplitPane().layout();
+  /*
+   * Private
+   */
+
+  private SplitPane getSplitPane() {
+    assert splitPaneInstance.getSceneGraphObject() instanceof SplitPane;
+    return (SplitPane) splitPaneInstance.getSceneGraphObject();
+  }
+
+  private void setupAndOpenHudWindow() {
+    final HudWindowController hudWindowController = contentPanelController.getHudWindowController();
+
+    hudWindowController.setRowCount(1);
+    hudWindowController.setNameAtRowIndex("dividerPosition", 0); // NOI18N
+    updateHudWindow();
+
+    final CardinalPoint cp;
+    switch (getSplitPane().getOrientation()) {
+      default:
+      case HORIZONTAL:
+        cp = CardinalPoint.S;
+        break;
+      case VERTICAL:
+        cp = CardinalPoint.E;
+        break;
     }
-    
-    
-    /*
-     * Private
-     */
-    
-    private SplitPane getSplitPane() {
-        assert splitPaneInstance.getSceneGraphObject() instanceof SplitPane;
-        return (SplitPane) splitPaneInstance.getSceneGraphObject();
-    }
-    
-    private void setupAndOpenHudWindow() {
-        final HudWindowController hudWindowController
-                = contentPanelController.getHudWindowController();
-        
-        hudWindowController.setRowCount(1);
-        hudWindowController.setNameAtRowIndex("dividerPosition", 0); //NOI18N
-        updateHudWindow();
-        
-        final CardinalPoint cp;
-        switch(getSplitPane().getOrientation()) {
-            default:
-            case HORIZONTAL:
-                cp = CardinalPoint.S;
-                break;
-            case VERTICAL:
-                cp = CardinalPoint.E;
-                break;
-        }
-        hudWindowController.setRelativePosition(cp);
-        hudWindowController.openWindow(getSplitPane());
-    }
-    
-    private void updateHudWindow() {
-        final HudWindowController hudWindowController
-                = contentPanelController.getHudWindowController();
-        
-        double dividerPosition = getSplitPane().getDividerPositions()[dividerIndex];
-        String str = String.format("%.2f %%", dividerPosition * 100); //NOI18N
-        hudWindowController.setValueAtRowIndex(str, 0);
-    }
+    hudWindowController.setRelativePosition(cp);
+    hudWindowController.openWindow(getSplitPane());
+  }
+
+  private void updateHudWindow() {
+    final HudWindowController hudWindowController = contentPanelController.getHudWindowController();
+
+    double dividerPosition = getSplitPane().getDividerPositions()[dividerIndex];
+    String str = String.format("%.2f %%", dividerPosition * 100); // NOI18N
+    hudWindowController.setValueAtRowIndex(str, 0);
+  }
 }

@@ -34,54 +34,48 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors;
 
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
 import com.oracle.javafx.scenebuilder.kit.metadata.property.value.TableViewResizePolicyPropertyMetadata;
-
 import java.util.Set;
-
 import javafx.scene.control.TableView;
 import javafx.scene.control.TreeTableView;
 
-/**
- * Editor for TableView columnResizePolicy property.
- */
+/** Editor for TableView columnResizePolicy property. */
 public class ColumnResizePolicyEditor extends EnumEditor {
 
-    boolean isTableView;
+  boolean isTableView;
 
-    public ColumnResizePolicyEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super(propMeta, selectedClasses);
-        isTableView = propMeta instanceof TableViewResizePolicyPropertyMetadata;
+  public ColumnResizePolicyEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super(propMeta, selectedClasses);
+    isTableView = propMeta instanceof TableViewResizePolicyPropertyMetadata;
+  }
+
+  @Override
+  public Object getValue() {
+    String policy = getComboBox().getSelectionModel().getSelectedItem();
+    if (isTableView) {
+      if (policy.equals(TableView.UNCONSTRAINED_RESIZE_POLICY.toString())) {
+        return TableView.UNCONSTRAINED_RESIZE_POLICY;
+      } else {
+        return TableView.CONSTRAINED_RESIZE_POLICY;
+      }
+    } else {
+      if (policy.equals(TreeTableView.UNCONSTRAINED_RESIZE_POLICY.toString())) {
+        return TreeTableView.UNCONSTRAINED_RESIZE_POLICY;
+      } else {
+        return TreeTableView.CONSTRAINED_RESIZE_POLICY;
+      }
     }
+  }
 
-    @Override
-    public Object getValue() {
-        String policy = getComboBox().getSelectionModel().getSelectedItem();
-        if (isTableView) {
-            if (policy.equals(TableView.UNCONSTRAINED_RESIZE_POLICY.toString())) {
-                return TableView.UNCONSTRAINED_RESIZE_POLICY;
-            } else {
-                return TableView.CONSTRAINED_RESIZE_POLICY;
-            }
-        } else {
-            if (policy.equals(TreeTableView.UNCONSTRAINED_RESIZE_POLICY.toString())) {
-                return TreeTableView.UNCONSTRAINED_RESIZE_POLICY;
-            } else {
-                return TreeTableView.CONSTRAINED_RESIZE_POLICY;
-            }
-        }
-    }
+  @Override
+  public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super.reset(propMeta, selectedClasses);
+    isTableView = propMeta instanceof TableViewResizePolicyPropertyMetadata;
+  }
 
-
-   @Override
-    public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super.reset(propMeta, selectedClasses);
-        isTableView = propMeta instanceof TableViewResizePolicyPropertyMetadata;
-    }
-
-    @Override
-    protected void updateItems() {
-        getComboBox().getItems().clear();
-        getComboBox().getItems().add(TableView.UNCONSTRAINED_RESIZE_POLICY.toString());
-        getComboBox().getItems().add(TableView.CONSTRAINED_RESIZE_POLICY.toString());
-    }
-
+  @Override
+  protected void updateItems() {
+    getComboBox().getItems().clear();
+    getComboBox().getItems().add(TableView.UNCONSTRAINED_RESIZE_POLICY.toString());
+    getComboBox().getItems().add(TableView.CONSTRAINED_RESIZE_POLICY.toString());
+  }
 }

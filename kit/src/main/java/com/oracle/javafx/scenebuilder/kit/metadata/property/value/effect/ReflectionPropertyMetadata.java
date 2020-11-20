@@ -40,46 +40,63 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.effect.Reflection;
 
-/**
- *
- */
+/** */
 public class ReflectionPropertyMetadata extends ComplexPropertyMetadata<Reflection> {
-    
-    private final DoublePropertyMetadata bottomOpacityMetadata
-            = new DoublePropertyMetadata(new PropertyName("bottomOpacity"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.OPACITY, true /* readWrite */, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata fractionMetadata
-            = new DoublePropertyMetadata(new PropertyName("fraction"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.OPACITY, true /* readWrite */, 0.75, InspectorPath.UNUSED);
-    private final EffectPropertyMetadata inputMetadata
-            = new EffectPropertyMetadata(new PropertyName("input"), //NOI18N
-            true /* readWrite */, null, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata topOffsetMetadata
-            = new DoublePropertyMetadata(new PropertyName("topOffset"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata topOpacityMetadata
-            = new DoublePropertyMetadata(new PropertyName("topOpacity"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.OPACITY, true /* readWrite */, 0.5, InspectorPath.UNUSED);
 
-    public ReflectionPropertyMetadata(PropertyName name, boolean readWrite, 
-            Reflection defaultValue, InspectorPath inspectorPath) {
-        super(name, Reflection.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final DoublePropertyMetadata bottomOpacityMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("bottomOpacity"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.OPACITY,
+          true /* readWrite */,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata fractionMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("fraction"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.OPACITY,
+          true /* readWrite */,
+          0.75,
+          InspectorPath.UNUSED);
+  private final EffectPropertyMetadata inputMetadata =
+      new EffectPropertyMetadata(
+          new PropertyName("input"), // NOI18N
+          true /* readWrite */,
+          null,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata topOffsetMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("topOffset"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata topOpacityMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("topOpacity"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.OPACITY,
+          true /* readWrite */,
+          0.5,
+          InspectorPath.UNUSED);
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Reflection value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        bottomOpacityMetadata.setValue(result, value.getBottomOpacity());
-        fractionMetadata.setValue(result, value.getFraction());
-        inputMetadata.setValue(result, value.getInput());
-        topOffsetMetadata.setValue(result, value.getTopOffset());
-        topOpacityMetadata.setValue(result, value.getTopOpacity());
+  public ReflectionPropertyMetadata(
+      PropertyName name, boolean readWrite, Reflection defaultValue, InspectorPath inspectorPath) {
+    super(name, Reflection.class, readWrite, defaultValue, inspectorPath);
+  }
 
-        return result;
-    }
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Reflection value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    bottomOpacityMetadata.setValue(result, value.getBottomOpacity());
+    fractionMetadata.setValue(result, value.getFraction());
+    inputMetadata.setValue(result, value.getInput());
+    topOffsetMetadata.setValue(result, value.getTopOffset());
+    topOpacityMetadata.setValue(result, value.getTopOpacity());
+
+    return result;
+  }
 }

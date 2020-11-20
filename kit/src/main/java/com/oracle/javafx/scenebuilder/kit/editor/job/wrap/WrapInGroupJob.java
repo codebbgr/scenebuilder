@@ -34,13 +34,11 @@ package com.oracle.javafx.scenebuilder.kit.editor.job.wrap;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import javafx.scene.Group;
 
-/**
- * Job used to wrap selection in a Group.
- */
+/** Job used to wrap selection in a Group. */
 public class WrapInGroupJob extends AbstractWrapInSubComponentJob {
 
-    public WrapInGroupJob(EditorController editorController) {
-        super(editorController);
-        newContainerClass = Group.class;
-    }
+  public WrapInGroupJob(EditorController editorController) {
+    super(editorController);
+    newContainerClass = Group.class;
+  }
 }

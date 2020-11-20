@@ -33,23 +33,23 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.library;
 
 import java.util.Comparator;
 
-/**
- *
- */
+/** */
 class ImportRowComparator implements Comparator<ImportRow> {
 
-    public ImportRowComparator() {
-    }
-    
-    /**
-     * The comparison done here is performed on the SimpleClassName that is
-     * extracted from the JarReportEntry property of the ImportRow; it is done
-     * ignoring case.
-     * @param ir1
-     * @param ir2
-     */
-    @Override
-    public int compare(ImportRow ir1, ImportRow ir2) {
-        return ir1.getJarReportEntry().getKlass().getSimpleName().compareToIgnoreCase(ir2.getJarReportEntry().getKlass().getSimpleName());
-    }
+  public ImportRowComparator() {}
+
+  /**
+   * The comparison done here is performed on the SimpleClassName that is extracted from the
+   * JarReportEntry property of the ImportRow; it is done ignoring case.
+   *
+   * @param ir1
+   * @param ir2
+   */
+  @Override
+  public int compare(ImportRow ir1, ImportRow ir2) {
+    return ir1.getJarReportEntry()
+        .getKlass()
+        .getSimpleName()
+        .compareToIgnoreCase(ir2.getJarReportEntry().getKlass().getSimpleName());
+  }
 }

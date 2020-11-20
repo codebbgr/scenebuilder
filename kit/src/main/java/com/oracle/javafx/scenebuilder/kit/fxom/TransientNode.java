@@ -31,29 +31,25 @@
  */
 package com.oracle.javafx.scenebuilder.kit.fxom;
 
-/**
- *
- * 
- */
+/** */
 class TransientNode {
-    
-    private final TransientNode parentNode;
-    private Object sceneGraphObject;
-    
-    public TransientNode(TransientNode parentNode) {
-        this.parentNode = parentNode;
-    }
 
-    public TransientNode getParentNode() {
-        return parentNode;
-    }
+  private final TransientNode parentNode;
+  private Object sceneGraphObject;
 
-    public Object getSceneGraphObject() {
-        return sceneGraphObject;
-    }
+  public TransientNode(TransientNode parentNode) {
+    this.parentNode = parentNode;
+  }
 
-    public void setSceneGraphObject(Object sceneGraphObject) {
-        this.sceneGraphObject = sceneGraphObject;
-    }
-    
+  public TransientNode getParentNode() {
+    return parentNode;
+  }
+
+  public Object getSceneGraphObject() {
+    return sceneGraphObject;
+  }
+
+  public void setSceneGraphObject(Object sceneGraphObject) {
+    this.sceneGraphObject = sceneGraphObject;
+  }
 }

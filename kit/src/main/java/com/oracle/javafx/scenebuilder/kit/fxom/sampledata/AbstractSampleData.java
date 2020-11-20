@@ -34,74 +34,96 @@ package com.oracle.javafx.scenebuilder.kit.fxom.sampledata;
 
 import javafx.scene.paint.Color;
 
-/**
- *
- */
+/** */
 abstract class AbstractSampleData {
-    
-    private static final String[] lorem = {
-        "Lorem ipsum ", //NOI18N
-        "dolor sit amet, ", //NOI18N
-        "consectetur adipiscing elit. ", //NOI18N
-        "Donec eu justo ", //NOI18N
-        "at tortor porta ", //NOI18N
-        "commodo nec vitae magna. ", //NOI18N
-        "Maecenas tempus ", //NOI18N
-        "hendrerit elementum. ", //NOI18N
-        "Nam sed mi ", //NOI18N
-        "a lorem tincidunt ", //NOI18N
-        "luctus sed non sem. ", //NOI18N
-        "Aliquam erat volutpat. ", //NOI18N
-        "Donec tempus egestas ", //NOI18N
-        "libero a cursus. ", //NOI18N
-        "In lectus nunc, ", //NOI18N
-        "dapibus vel suscipit vel, ", //NOI18N
-        "faucibus eget justo. ", //NOI18N
-        "Aliquam erat volutpat. ", //NOI18N
-        "Nulla facilisi. ", //NOI18N
-        "Donec at enim ipsum, ", //NOI18N
-        "sed facilisis leo. ", //NOI18N
-        "Aliquam tincidunt ", //NOI18N
-        "adipiscing euismod. ", //NOI18N
-        "Sed aliquet eros ", //NOI18N
-        "ut libero congue ", //NOI18N
-        "quis bibendum ", //NOI18N
-        "felis ullamcorper. ", //NOI18N
-        "Vestibulum ipsum ante, ", //NOI18N
-        "semper eu sollicitudin rutrum, ", //NOI18N
-        "consectetur a enim. ", //NOI18N
-        "Ut eget nisl sed turpis ", //NOI18N
-        "egestas viverra ", //NOI18N
-        "ut tristique sem. ", //NOI18N
-        "Nunc in neque nulla. " //NOI18N
-    };
-    
-    private final static Color[] colors = {
-        Color.AZURE, Color.CHARTREUSE, Color.CRIMSON, Color.DARKCYAN
-    };
-    
-    private static final String[] alphabet = {
-        "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", //NOI18N
-        "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" //NOI18N
-    };
-    
-    public abstract void applyTo(Object sceneGraphObject);
-    public abstract void removeFrom(Object sceneGraphObject);
-    
-    
-    /*
-     * Utilites for subclasses
-     */
-    
-    protected static String lorem(int index) {
-        return lorem[index % lorem.length];
-    }
-    
-    protected static Color color(int index) {
-        return colors[index % colors.length];
-    }
 
-    protected static String alphabet(int index) {
-        return alphabet[index % alphabet.length];
-    }
+  private static final String[] lorem = {
+    "Lorem ipsum ", // NOI18N
+    "dolor sit amet, ", // NOI18N
+    "consectetur adipiscing elit. ", // NOI18N
+    "Donec eu justo ", // NOI18N
+    "at tortor porta ", // NOI18N
+    "commodo nec vitae magna. ", // NOI18N
+    "Maecenas tempus ", // NOI18N
+    "hendrerit elementum. ", // NOI18N
+    "Nam sed mi ", // NOI18N
+    "a lorem tincidunt ", // NOI18N
+    "luctus sed non sem. ", // NOI18N
+    "Aliquam erat volutpat. ", // NOI18N
+    "Donec tempus egestas ", // NOI18N
+    "libero a cursus. ", // NOI18N
+    "In lectus nunc, ", // NOI18N
+    "dapibus vel suscipit vel, ", // NOI18N
+    "faucibus eget justo. ", // NOI18N
+    "Aliquam erat volutpat. ", // NOI18N
+    "Nulla facilisi. ", // NOI18N
+    "Donec at enim ipsum, ", // NOI18N
+    "sed facilisis leo. ", // NOI18N
+    "Aliquam tincidunt ", // NOI18N
+    "adipiscing euismod. ", // NOI18N
+    "Sed aliquet eros ", // NOI18N
+    "ut libero congue ", // NOI18N
+    "quis bibendum ", // NOI18N
+    "felis ullamcorper. ", // NOI18N
+    "Vestibulum ipsum ante, ", // NOI18N
+    "semper eu sollicitudin rutrum, ", // NOI18N
+    "consectetur a enim. ", // NOI18N
+    "Ut eget nisl sed turpis ", // NOI18N
+    "egestas viverra ", // NOI18N
+    "ut tristique sem. ", // NOI18N
+    "Nunc in neque nulla. " // NOI18N
+  };
+
+  private static final Color[] colors = {
+    Color.AZURE, Color.CHARTREUSE, Color.CRIMSON, Color.DARKCYAN
+  };
+
+  private static final String[] alphabet = {
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N", // NOI18N
+    "O",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "T",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y",
+    "Z" // NOI18N
+  };
+
+  public abstract void applyTo(Object sceneGraphObject);
+
+  public abstract void removeFrom(Object sceneGraphObject);
+
+  /*
+   * Utilites for subclasses
+   */
+
+  protected static String lorem(int index) {
+    return lorem[index % lorem.length];
+  }
+
+  protected static Color color(int index) {
+    return colors[index % colors.length];
+  }
+
+  protected static String alphabet(int index) {
+    return alphabet[index % alphabet.length];
+  }
 }

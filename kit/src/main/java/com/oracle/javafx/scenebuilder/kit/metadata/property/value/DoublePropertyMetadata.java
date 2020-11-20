@@ -35,121 +35,123 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.layout.Region;
 
-/**
- *
- * 
- */
+/** */
 public class DoublePropertyMetadata extends TextEncodablePropertyMetadata<java.lang.Double> {
-    
-    public enum DoubleKind {
-        COORDINATE,         // any double
-        NULLABLE_COORDINATE,// any double or null
-        SIZE,               // x >= 0
-        USE_COMPUTED_SIZE,      // x >= 0 or x == Region.USE_COMPUTED_SIZE
-        USE_PREF_SIZE,          // x >= 0 or x == Region.USE_COMPUTED_SIZE or x == Region.USE_PREF_SIZE
-        EFFECT_SIZE,        // 0 <= x <= 255.0
-        ANGLE,              // 0 <= x < 360
-        OPACITY,            // 0 <= x <= 1.0
-        PROGRESS,           // 0 <= x <= 1.0
-        PERCENTAGE          // -1 or 0 <= x <= 100.0
-    };
 
-    private final DoubleKind kind;
+  public enum DoubleKind {
+    COORDINATE, // any double
+    NULLABLE_COORDINATE, // any double or null
+    SIZE, // x >= 0
+    USE_COMPUTED_SIZE, // x >= 0 or x == Region.USE_COMPUTED_SIZE
+    USE_PREF_SIZE, // x >= 0 or x == Region.USE_COMPUTED_SIZE or x == Region.USE_PREF_SIZE
+    EFFECT_SIZE, // 0 <= x <= 255.0
+    ANGLE, // 0 <= x < 360
+    OPACITY, // 0 <= x <= 1.0
+    PROGRESS, // 0 <= x <= 1.0
+    PERCENTAGE // -1 or 0 <= x <= 100.0
+  };
 
-    public DoublePropertyMetadata(PropertyName name, DoubleKind kind,
-            boolean readWrite, Double defaultValue, InspectorPath inspectorPath) {
-        super(name, Double.class, readWrite, defaultValue, inspectorPath);
-        assert (kind != DoubleKind.NULLABLE_COORDINATE) || (defaultValue == null);
-        this.kind = kind;
-    }
-    
-    public DoubleKind getKind() {
-        return kind;
-    }
-    
-    public boolean isValidValue(Double value) {
-        final boolean result;
-        
-        if (kind == DoubleKind.NULLABLE_COORDINATE) {
-            result = true;
-        } else if (value == null) {
-            result = false;
-        } else {
-            switch(kind) {
-                case COORDINATE:
-                    result = true;
-                    break;
-                case SIZE:
-                    result = (0 <= value);
-                    break;
-                case USE_COMPUTED_SIZE:
-                    result = ((0 <= value) || (value == Region.USE_COMPUTED_SIZE));
-                    break;
-                case USE_PREF_SIZE:
-                    result = (0 <= value) 
-                            || (value == Region.USE_COMPUTED_SIZE)
-                            || (value == Region.USE_PREF_SIZE);
-                    break;
-                case PERCENTAGE:
-                    result = (value == -1) || ((0 <= value) && (value <= 100.0));
-                    break;
-                case EFFECT_SIZE:
-                case ANGLE:
-                case OPACITY:
-                case PROGRESS:
-                    result = true;
-                    break;
+  private final DoubleKind kind;
 
-                default:
-                    assert false;
-                    result = false;
-                    break;
-            }
-        }
-        
-        return result;
-    }
-    
-    public Double getCanonicalValue(Double value) {
-        final Double result;
-        
-        if (value == null) {
-            result = null;
-        } else {
-            switch(kind) {
-                case COORDINATE:
-                case NULLABLE_COORDINATE:
-                case SIZE:
-                case USE_COMPUTED_SIZE:
-                case USE_PREF_SIZE:
-                    result = value;
-                    break;
-                case EFFECT_SIZE:
-                    result = Math.min(255.0, Math.max(0, value));
-                    break;
-                case ANGLE:
-                    result = Math.IEEEremainder(value, 360.0);
-                    break;
-                case OPACITY:
-                case PROGRESS:
-                    result = Math.min(1, Math.max(0, value));
-                    break;
-                default:
-                    assert false;
-                    result = value;
-                    break;
-            }
-        }
-        
-        return result;
+  public DoublePropertyMetadata(
+      PropertyName name,
+      DoubleKind kind,
+      boolean readWrite,
+      Double defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, Double.class, readWrite, defaultValue, inspectorPath);
+    assert (kind != DoubleKind.NULLABLE_COORDINATE) || (defaultValue == null);
+    this.kind = kind;
+  }
+
+  public DoubleKind getKind() {
+    return kind;
+  }
+
+  public boolean isValidValue(Double value) {
+    final boolean result;
+
+    if (kind == DoubleKind.NULLABLE_COORDINATE) {
+      result = true;
+    } else if (value == null) {
+      result = false;
+    } else {
+      switch (kind) {
+        case COORDINATE:
+          result = true;
+          break;
+        case SIZE:
+          result = (0 <= value);
+          break;
+        case USE_COMPUTED_SIZE:
+          result = ((0 <= value) || (value == Region.USE_COMPUTED_SIZE));
+          break;
+        case USE_PREF_SIZE:
+          result =
+              (0 <= value)
+                  || (value == Region.USE_COMPUTED_SIZE)
+                  || (value == Region.USE_PREF_SIZE);
+          break;
+        case PERCENTAGE:
+          result = (value == -1) || ((0 <= value) && (value <= 100.0));
+          break;
+        case EFFECT_SIZE:
+        case ANGLE:
+        case OPACITY:
+        case PROGRESS:
+          result = true;
+          break;
+
+        default:
+          assert false;
+          result = false;
+          break;
+      }
     }
 
-    /*
-     * SingleValuePropertyMetadata
-     */
-    
-    @Override
-    public Double makeValueFromString(String string) {
-        return Double.valueOf(string);
+    return result;
+  }
+
+  public Double getCanonicalValue(Double value) {
+    final Double result;
+
+    if (value == null) {
+      result = null;
+    } else {
+      switch (kind) {
+        case COORDINATE:
+        case NULLABLE_COORDINATE:
+        case SIZE:
+        case USE_COMPUTED_SIZE:
+        case USE_PREF_SIZE:
+          result = value;
+          break;
+        case EFFECT_SIZE:
+          result = Math.min(255.0, Math.max(0, value));
+          break;
+        case ANGLE:
+          result = Math.IEEEremainder(value, 360.0);
+          break;
+        case OPACITY:
+        case PROGRESS:
+          result = Math.min(1, Math.max(0, value));
+          break;
+        default:
+          assert false;
+          result = value;
+          break;
+      }
     }
+
+    return result;
+  }
+
+  /*
+   * SingleValuePropertyMetadata
+   */
+
+  @Override
+  public Double makeValueFromString(String string) {
+    return Double.valueOf(string);
+  }
 }

@@ -41,88 +41,85 @@ import java.util.Collections;
 import java.util.Locale;
 import javafx.application.Platform;
 
-/**
- *
- */
+/** */
 class WatchingController implements FileWatcher.Delegate {
-    
-    private final EditorController editorController;
-    private final FileWatcher fileWatcher 
-            = new FileWatcher(2000 /*ms*/, this,  EditorController.class.getSimpleName());
 
-    public WatchingController(EditorController editorController) {
-        this.editorController = editorController;
-    }
-    
-    public void fxomDocumentDidChange() {
-        updateFileWatcher();
-    }
-    
-    public void jobManagerRevisionDidChange() {
-        updateFileWatcher();
-    }
-    
-    public void start() {
-        fileWatcher.start();
-    }
-    
-    public void stop() {
-        fileWatcher.stop();
-    }
-    
-    public boolean isStarted() {
-        return fileWatcher.isStarted();
-    }
-    
-    /*
-     * FileWatcher.Delegate
-     */
-    
-    @Override
-    public void fileWatcherDidWatchTargetCreation(Path target) {
-        assert Platform.isFxApplicationThread();
-        updateEditorController("file.watching.file.created", target); //NOI18N
-    }
+  private final EditorController editorController;
+  private final FileWatcher fileWatcher =
+      new FileWatcher(2000 /*ms*/, this, EditorController.class.getSimpleName());
 
-    @Override
-    public void fileWatcherDidWatchTargetDeletion(Path target) {
-        assert Platform.isFxApplicationThread();
-        updateEditorController("file.watching.file.deleted", target); //NOI18N
-    }
+  public WatchingController(EditorController editorController) {
+    this.editorController = editorController;
+  }
 
-    @Override
-    public void fileWatcherDidWatchTargetModification(Path target) {
-        assert Platform.isFxApplicationThread();
-        updateEditorController("file.watching.file.modified", target); //NOI18N
+  public void fxomDocumentDidChange() {
+    updateFileWatcher();
+  }
+
+  public void jobManagerRevisionDidChange() {
+    updateFileWatcher();
+  }
+
+  public void start() {
+    fileWatcher.start();
+  }
+
+  public void stop() {
+    fileWatcher.stop();
+  }
+
+  public boolean isStarted() {
+    return fileWatcher.isStarted();
+  }
+
+  /*
+   * FileWatcher.Delegate
+   */
+
+  @Override
+  public void fileWatcherDidWatchTargetCreation(Path target) {
+    assert Platform.isFxApplicationThread();
+    updateEditorController("file.watching.file.created", target); // NOI18N
+  }
+
+  @Override
+  public void fileWatcherDidWatchTargetDeletion(Path target) {
+    assert Platform.isFxApplicationThread();
+    updateEditorController("file.watching.file.deleted", target); // NOI18N
+  }
+
+  @Override
+  public void fileWatcherDidWatchTargetModification(Path target) {
+    assert Platform.isFxApplicationThread();
+    updateEditorController("file.watching.file.modified", target); // NOI18N
+  }
+
+  /*
+   * Private
+   */
+
+  private void updateFileWatcher() {
+
+    final FXOMDocument fxomDocument = editorController.getFxomDocument();
+    final Collection<Path> targets;
+    if (fxomDocument == null) {
+      targets = Collections.emptyList();
+    } else {
+      final FXOMAssetIndex assetIndex = new FXOMAssetIndex(fxomDocument);
+      targets = assetIndex.getFileAssets().keySet();
     }
-    
-    
-    /*
-     * Private
-     */
-    
-    private void updateFileWatcher() {
-        
-        final FXOMDocument fxomDocument = editorController.getFxomDocument();
-        final Collection<Path> targets;
-        if (fxomDocument == null) {
-            targets = Collections.emptyList();
-        } else {
-            final FXOMAssetIndex assetIndex = new FXOMAssetIndex(fxomDocument);
-            targets = assetIndex.getFileAssets().keySet();
-        }
-        fileWatcher.setTargets(targets);
+    fileWatcher.setTargets(targets);
+  }
+
+  private void updateEditorController(String messageKey, Path target) {
+    final String targetFileName = target.getFileName().toString();
+    editorController.getMessageLog().logInfoMessage(messageKey, targetFileName);
+    editorController.getErrorReport().forget();
+    if (targetFileName.toLowerCase(Locale.ROOT).endsWith(".css")) { // NOI18N
+      editorController.getErrorReport().cssFileDidChange(target);
+      editorController.getFxomDocument().reapplyCSS(target);
+    } else {
+      editorController.getFxomDocument().refreshSceneGraph();
     }
-    
-    private void updateEditorController(String messageKey, Path target) {
-        final String targetFileName = target.getFileName().toString();
-        editorController.getMessageLog().logInfoMessage(messageKey, targetFileName);
-        editorController.getErrorReport().forget();
-        if (targetFileName.toLowerCase(Locale.ROOT).endsWith(".css")) { //NOI18N
-            editorController.getErrorReport().cssFileDidChange(target);
-            editorController.getFxomDocument().reapplyCSS(target);
-        } else {
-            editorController.getFxomDocument().refreshSceneGraph();
-        }
-    }
+  }
 }

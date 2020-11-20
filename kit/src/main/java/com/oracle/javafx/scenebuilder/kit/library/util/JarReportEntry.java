@@ -35,95 +35,95 @@ package com.oracle.javafx.scenebuilder.kit.library.util;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorPlatform;
 import javafx.scene.Node;
 
-/**
- *
- * 
- */
+/** */
 public class JarReportEntry {
-    
-    public enum Status {
-        IGNORED,
-        CANNOT_LOAD,
-        CANNOT_INSTANTIATE,
-        OK
-    }
-    
-    private final String name;
-    private final Status status;
-    private final Class<?> klass;
-    private final Throwable exception;
-    private final String className;
 
-    public JarReportEntry(String name, Status status, Throwable exception, Class<?> klass, String className) {
-        assert name != null;
-        assert (klass != null) || (status != Status.OK);
-        assert (exception == null) || (status != Status.OK);
-        
-        this.name = name;
-        this.status = status;
-        this.klass = klass;
-        this.exception = exception;
-        this.className = className;
+  public enum Status {
+    IGNORED,
+    CANNOT_LOAD,
+    CANNOT_INSTANTIATE,
+    OK
+  }
+
+  private final String name;
+  private final Status status;
+  private final Class<?> klass;
+  private final Throwable exception;
+  private final String className;
+
+  public JarReportEntry(
+      String name, Status status, Throwable exception, Class<?> klass, String className) {
+    assert name != null;
+    assert (klass != null) || (status != Status.OK);
+    assert (exception == null) || (status != Status.OK);
+
+    this.name = name;
+    this.status = status;
+    this.klass = klass;
+    this.exception = exception;
+    this.className = className;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public Status getStatus() {
+    return status;
+  }
+
+  public Class<?> getKlass() {
+    return klass;
+  }
+
+  public Throwable getException() {
+    return exception;
+  }
+
+  public boolean isNode() {
+    return (klass == null) ? false : Node.class.isAssignableFrom(klass);
+  }
+
+  public boolean isGluon() {
+    return className != null && className.startsWith(EditorPlatform.GLUON_PACKAGE);
+  }
+
+  /*
+   * Object
+   */
+
+  @Override
+  public String toString() {
+    final StringBuilder sb = new StringBuilder();
+
+    switch (status) {
+      case OK:
+        assert klass != null;
+        sb.append(klass.getCanonicalName());
+        sb.append(" - OK"); // NOI18N
+        break;
+      case CANNOT_LOAD:
+        assert klass == null;
+        assert exception != null;
+        sb.append(name);
+        sb.append(" - CANNOT_LOAD - "); // NOI18N
+        sb.append(exception.getMessage());
+        break;
+      case CANNOT_INSTANTIATE:
+        assert klass != null;
+        sb.append(klass.getCanonicalName());
+        sb.append(" - CANNOT_INSTANTIATE - "); // NOI18N
+        sb.append(exception.getMessage());
+        break;
+      case IGNORED:
+        assert klass == null;
+        sb.append(name);
+        sb.append(" - IGNORED"); // NOI18N
+        break;
+      default:
+        throw new IllegalStateException("Unexpected status " + status); // NOI18N
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public Status getStatus() {
-        return status;
-    }
-
-    public Class<?> getKlass() {
-        return klass;
-    }
-
-    public Throwable getException() {
-        return exception;
-    }
-    
-    public boolean isNode() {
-        return (klass == null) ? false : Node.class.isAssignableFrom(klass);
-    }
-
-    public boolean isGluon() { return className != null && className.startsWith(EditorPlatform.GLUON_PACKAGE); }
-    
-    /*
-     * Object
-     */
-    
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        
-        switch(status) {
-            case OK:
-                assert klass != null;
-                sb.append(klass.getCanonicalName());
-                sb.append(" - OK"); //NOI18N
-                break;
-            case CANNOT_LOAD:
-                assert klass == null;
-                assert exception != null;
-                sb.append(name);
-                sb.append(" - CANNOT_LOAD - "); //NOI18N
-                sb.append(exception.getMessage());
-                break;
-            case CANNOT_INSTANTIATE:
-                assert klass != null;
-                sb.append(klass.getCanonicalName());
-                sb.append(" - CANNOT_INSTANTIATE - "); //NOI18N
-                sb.append(exception.getMessage());
-                break;
-            case IGNORED:
-                assert klass == null;
-                sb.append(name);
-                sb.append(" - IGNORED"); //NOI18N
-                break;
-            default:
-                throw new IllegalStateException("Unexpected status " + status); //NOI18N
-        }
-        
-        return sb.toString();
-    }
+    return sb.toString();
+  }
 }

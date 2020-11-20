@@ -46,70 +46,65 @@ import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.SplitPane;
 
-/**
- * Job used to wrap selection in a SplitPane.
- */
+/** Job used to wrap selection in a SplitPane. */
 public class WrapInSplitPaneJob extends AbstractWrapInSubComponentJob {
 
-    public WrapInSplitPaneJob(EditorController editorController) {
-        super(editorController);
-        newContainerClass = SplitPane.class;
-    }
+  public WrapInSplitPaneJob(EditorController editorController) {
+    super(editorController);
+    newContainerClass = SplitPane.class;
+  }
 
-    @Override
-    protected void modifyNewContainer(final List<FXOMObject> children) {
-        super.modifyNewContainer(children);
+  @Override
+  protected void modifyNewContainer(final List<FXOMObject> children) {
+    super.modifyNewContainer(children);
 
-        // Update the SplitPane orientation depending on its children positionning
-        final Orientation orientation = getOrientation(children);
-        JobUtils.setOrientation(newContainer, SplitPane.class, orientation.name());
-    }
-    
-    @Override
-    protected Collection<FXOMObject> sortChildren(List<FXOMObject> children) {
-        final List<FXOMObject> sorted = new ArrayList<>(children);
-        final Orientation orientation = getOrientation(children);
-        Collections.sort(sorted, UnidimensionalComparator.of(orientation));
-        return sorted;
-    }
+    // Update the SplitPane orientation depending on its children positionning
+    final Orientation orientation = getOrientation(children);
+    JobUtils.setOrientation(newContainer, SplitPane.class, orientation.name());
+  }
 
-    private Orientation getOrientation(final List<FXOMObject> fxomObjects) {
-        int cols = computeSizeByCourse(fxomObjects, GridCourse.COL_BY_COL);
-        if (cols == fxomObjects.size()) {
-            return Orientation.HORIZONTAL;
+  @Override
+  protected Collection<FXOMObject> sortChildren(List<FXOMObject> children) {
+    final List<FXOMObject> sorted = new ArrayList<>(children);
+    final Orientation orientation = getOrientation(children);
+    Collections.sort(sorted, UnidimensionalComparator.of(orientation));
+    return sorted;
+  }
+
+  private Orientation getOrientation(final List<FXOMObject> fxomObjects) {
+    int cols = computeSizeByCourse(fxomObjects, GridCourse.COL_BY_COL);
+    if (cols == fxomObjects.size()) {
+      return Orientation.HORIZONTAL;
+    }
+    int rows = computeSizeByCourse(fxomObjects, GridCourse.ROW_BY_ROW);
+    if (rows == fxomObjects.size()) {
+      return Orientation.VERTICAL;
+    }
+    final Orientation orientation = cols >= rows ? Orientation.HORIZONTAL : Orientation.VERTICAL;
+    return orientation;
+  }
+
+  private int computeSizeByCourse(final List<FXOMObject> fxomObjects, final GridCourse course) {
+
+    final BidimensionalComparator comparator = new BidimensionalComparator(course);
+    FXOMObject lastObject = null;
+    int rc = 0;
+    int max = -1;
+    for (FXOMObject currentObject : fxomObjects) {
+      if (lastObject != null) {
+        if (comparator.compare(lastObject, currentObject) != 0) {
+          final Node lastNode = (Node) lastObject.getSceneGraphObject();
+          final Node currentNode = (Node) currentObject.getSceneGraphObject();
+          final Bounds lastBounds = lastNode.getBoundsInParent();
+          final Bounds currentBounds = currentNode.getBoundsInParent();
+          if (course.getMinY(currentBounds) >= course.getMaxY(lastBounds)) {
+            rc++;
+          }
         }
-        int rows = computeSizeByCourse(fxomObjects, GridCourse.ROW_BY_ROW);
-        if (rows == fxomObjects.size()) {
-            return Orientation.VERTICAL;
-        }
-        final Orientation orientation = cols >= rows
-                ? Orientation.HORIZONTAL : Orientation.VERTICAL;
-        return orientation;
+      }
+      max = Math.max(max, rc);
+      lastObject = currentObject;
     }
-
-    private int computeSizeByCourse(
-            final List<FXOMObject> fxomObjects,
-            final GridCourse course) {
-
-        final BidimensionalComparator comparator = new BidimensionalComparator(course);
-        FXOMObject lastObject = null;
-        int rc = 0;
-        int max = -1;
-        for (FXOMObject currentObject : fxomObjects) {
-            if (lastObject != null) {
-                if (comparator.compare(lastObject, currentObject) != 0) {
-                    final Node lastNode = (Node) lastObject.getSceneGraphObject();
-                    final Node currentNode = (Node) currentObject.getSceneGraphObject();
-                    final Bounds lastBounds = lastNode.getBoundsInParent();
-                    final Bounds currentBounds = currentNode.getBoundsInParent();
-                    if (course.getMinY(currentBounds) >= course.getMaxY(lastBounds)) {
-                        rc++;
-                    }
-                }
-            }
-            max = Math.max(max, rc);
-            lastObject = currentObject;
-        }
-        return max;
-    }
+    return max;
+  }
 }

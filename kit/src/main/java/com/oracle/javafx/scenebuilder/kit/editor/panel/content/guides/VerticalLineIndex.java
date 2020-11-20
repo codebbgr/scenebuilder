@@ -40,102 +40,98 @@ import java.util.List;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 
-/**
- *
- */
+/** */
 class VerticalLineIndex {
-    
-    private static final VerticalLineComparator comparator = new VerticalLineComparator();
-    
-    private final List<VerticalSegment> lines = new ArrayList<>();
-    private boolean sorted;
-    
 
-    public void addLine(VerticalSegment s) {
-        lines.add(s);
-        sorted = false;
-    }
-    
-    public void clear() {
-        lines.clear();
-    }
-    
-    public boolean isEmpty() {
-        return lines.isEmpty();
-    }
-    
-    public List<VerticalSegment> matchWest(Bounds boundsInScene, double threshold) {
-        assert boundsInScene.isEmpty() == false;
-        return matchX(boundsInScene.getMinX(), threshold);
-    }
-    
-    public List<VerticalSegment> matchEast(Bounds boundsInScene, double threshold) {
-        assert boundsInScene.isEmpty() == false;
-        return matchX(boundsInScene.getMaxX(), threshold);
-    }
-    
-    public List<VerticalSegment> matchCenter(Bounds boundsInScene, double threshold) {
-        assert boundsInScene.isEmpty() == false;
-        final double minX = boundsInScene.getMinX();
-        final double maxX = boundsInScene.getMaxX();
-        return matchX((minX + maxX) / 2.0, threshold);
-    }
+  private static final VerticalLineComparator comparator = new VerticalLineComparator();
 
-    public List<VerticalSegment> matchPoint(Point2D point, double threshold) {
-        assert point != null;
-        return matchXY(point.getX(), point.getY(), threshold);
+  private final List<VerticalSegment> lines = new ArrayList<>();
+  private boolean sorted;
+
+  public void addLine(VerticalSegment s) {
+    lines.add(s);
+    sorted = false;
+  }
+
+  public void clear() {
+    lines.clear();
+  }
+
+  public boolean isEmpty() {
+    return lines.isEmpty();
+  }
+
+  public List<VerticalSegment> matchWest(Bounds boundsInScene, double threshold) {
+    assert boundsInScene.isEmpty() == false;
+    return matchX(boundsInScene.getMinX(), threshold);
+  }
+
+  public List<VerticalSegment> matchEast(Bounds boundsInScene, double threshold) {
+    assert boundsInScene.isEmpty() == false;
+    return matchX(boundsInScene.getMaxX(), threshold);
+  }
+
+  public List<VerticalSegment> matchCenter(Bounds boundsInScene, double threshold) {
+    assert boundsInScene.isEmpty() == false;
+    final double minX = boundsInScene.getMinX();
+    final double maxX = boundsInScene.getMaxX();
+    return matchX((minX + maxX) / 2.0, threshold);
+  }
+
+  public List<VerticalSegment> matchPoint(Point2D point, double threshold) {
+    assert point != null;
+    return matchXY(point.getX(), point.getY(), threshold);
+  }
+
+  /*
+   * Private
+   */
+
+  private List<VerticalSegment> matchX(double targetX, double threshold) {
+    assert threshold >= 0;
+
+    if (sorted == false) {
+      Collections.sort(lines, comparator);
     }
-    
-    /*
-     * Private
-     */
-
-    private List<VerticalSegment> matchX(double targetX, double threshold) {
-        assert threshold >= 0;
-
-        if (sorted == false) {
-            Collections.sort(lines, comparator);
+    double bestDelta = Double.MAX_VALUE;
+    final List<VerticalSegment> result = new ArrayList<>();
+    for (VerticalSegment l : lines) {
+      final double delta = Math.abs(l.getX1() - targetX);
+      if (delta < threshold) {
+        if (MathUtils.equals(delta, bestDelta)) {
+          result.add(l);
+        } else if (delta < bestDelta) {
+          bestDelta = delta;
+          result.clear();
+          result.add(l);
         }
-        double bestDelta = Double.MAX_VALUE;
-        final List<VerticalSegment> result = new ArrayList<>();
-        for (VerticalSegment l : lines) {
-            final double delta = Math.abs(l.getX1() - targetX);
-            if (delta < threshold) {
-                if (MathUtils.equals(delta, bestDelta)) {
-                    result.add(l);
-                } else if (delta < bestDelta) {
-                    bestDelta = delta;
-                    result.clear();
-                    result.add(l);
-                }
-            }
-        }
-
-        return result;
+      }
     }
 
-    private List<VerticalSegment> matchXY(double targetX, double targetY, double threshold) {
-        assert threshold >= 0;
+    return result;
+  }
 
-        if (sorted == false) {
-            Collections.sort(lines, comparator);
-        }
-        double bestDelta = Double.MAX_VALUE;
-        final List<VerticalSegment> result = new ArrayList<>();
-        for (VerticalSegment l : lines) {
-            final double delta = Math.abs(l.getX1() - targetX);
-            if (delta < threshold && targetY >= l.getY1() && targetY <= l.getY2()) {
-                if (MathUtils.equals(delta, bestDelta)) {
-                    result.add(l);
-                } else if (delta < bestDelta) {
-                    bestDelta = delta;
-                    result.clear();
-                    result.add(l);
-                }
-            }
-        }
+  private List<VerticalSegment> matchXY(double targetX, double targetY, double threshold) {
+    assert threshold >= 0;
 
-        return result;
+    if (sorted == false) {
+      Collections.sort(lines, comparator);
     }
-    
+    double bestDelta = Double.MAX_VALUE;
+    final List<VerticalSegment> result = new ArrayList<>();
+    for (VerticalSegment l : lines) {
+      final double delta = Math.abs(l.getX1() - targetX);
+      if (delta < threshold && targetY >= l.getY1() && targetY <= l.getY2()) {
+        if (MathUtils.equals(delta, bestDelta)) {
+          result.add(l);
+        } else if (delta < bestDelta) {
+          bestDelta = delta;
+          result.clear();
+          result.add(l);
+        }
+      }
+    }
+
+    return result;
+  }
 }

@@ -41,20 +41,18 @@ import java.util.List;
 import javafx.geometry.Orientation;
 import javafx.scene.control.ButtonBar;
 
-/**
- * Job used to wrap selection in a ButtonBar.
- */
+/** Job used to wrap selection in a ButtonBar. */
 public class WrapInButtonBarJob extends AbstractWrapInSubComponentJob {
 
-    public WrapInButtonBarJob(EditorController editorController) {
-        super(editorController);
-        newContainerClass = ButtonBar.class;
-    }
+  public WrapInButtonBarJob(EditorController editorController) {
+    super(editorController);
+    newContainerClass = ButtonBar.class;
+  }
 
-    @Override
-    protected Collection<FXOMObject> sortChildren(List<FXOMObject> children) {
-        final List<FXOMObject> sorted = new ArrayList<>(children);
-        Collections.sort(sorted, UnidimensionalComparator.of(Orientation.HORIZONTAL));
-        return sorted;
-    }
+  @Override
+  protected Collection<FXOMObject> sortChildren(List<FXOMObject> children) {
+    final List<FXOMObject> sorted = new ArrayList<>(children);
+    Collections.sort(sorted, UnidimensionalComparator.of(Orientation.HORIZONTAL));
+    return sorted;
+  }
 }

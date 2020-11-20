@@ -37,106 +37,100 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/**
- *
- */
+/** */
 class FxIdCollector {
-    
-    private final Set<String> fxIds = new HashSet<>();
-    private Map<String, Integer> nextIndexes ; // Created lazily
-    
-    public FxIdCollector(Set<String> fxIds) {
-        assert fxIds != null;
-        this.fxIds.addAll(fxIds);
-    }
-    
-    public FxIdCollector(FXOMDocument fxomDocument) {
-        this(fxomDocument.collectFxIds().keySet());
-    }
-    
-    public String importFxId(String sourceFxId) {
-        assert sourceFxId != null;
-        
-        final String result;
-        if (fxIds.contains(sourceFxId)) {
-            if (nextIndexes == null) {
-                createNextIndexes();
-                assert nextIndexes != null;
-            }
-            final PrefixSuffix pf = new PrefixSuffix(sourceFxId);
-            final Integer nextIndex = nextIndexes.get(pf.getPrefix());
-            assert nextIndex != null;
-            result = pf.getPrefix() + nextIndex;
-        } else {
-            result = sourceFxId;
-        }
-        
-        fxIds.add(result);
-        if (nextIndexes != null) {
-            updateNextIndexes(result);
-        }
-        
-        return result;
-    }
-    
-    
-    /*
-     * Private
-     */
-    
-    private void createNextIndexes() {
-        nextIndexes = new HashMap<>();
-        
-        for (String fxId : fxIds) {
-            updateNextIndexes(fxId);
-        }
-    }
-    
-    
-    private void updateNextIndexes(String fxId) {
+
+  private final Set<String> fxIds = new HashSet<>();
+  private Map<String, Integer> nextIndexes; // Created lazily
+
+  public FxIdCollector(Set<String> fxIds) {
+    assert fxIds != null;
+    this.fxIds.addAll(fxIds);
+  }
+
+  public FxIdCollector(FXOMDocument fxomDocument) {
+    this(fxomDocument.collectFxIds().keySet());
+  }
+
+  public String importFxId(String sourceFxId) {
+    assert sourceFxId != null;
+
+    final String result;
+    if (fxIds.contains(sourceFxId)) {
+      if (nextIndexes == null) {
+        createNextIndexes();
         assert nextIndexes != null;
-        
-        final PrefixSuffix pf = new PrefixSuffix(fxId);
-        final Integer nextIndex = nextIndexes.get(pf.getPrefix());
-        if ((nextIndex == null) || (pf.getSuffix() >= nextIndex)) {
-            nextIndexes.put(pf.getPrefix(), pf.getSuffix()+1);
-        } 
+      }
+      final PrefixSuffix pf = new PrefixSuffix(sourceFxId);
+      final Integer nextIndex = nextIndexes.get(pf.getPrefix());
+      assert nextIndex != null;
+      result = pf.getPrefix() + nextIndex;
+    } else {
+      result = sourceFxId;
     }
-    
-    
-    
-    private static class PrefixSuffix {
-        private final String prefix;
-        private final int suffix;
-        
-        public PrefixSuffix(String fxId) {
-            assert fxId != null;
-            assert fxId.isEmpty() == false;
-            
-            int endIndex = fxId.length();
-            while ((endIndex >= 1) && Character.isDigit(fxId.charAt(endIndex-1))) {
-                endIndex--;
-            }
-            if (endIndex < fxId.length()) {
-                this.prefix = fxId.substring(0, endIndex);
-                this.suffix = Integer.parseInt(fxId.substring(endIndex));
-            } else {
-                this.prefix = fxId;
-                this.suffix = -1;
-            }
-        }
 
-        public String getPrefix() {
-            return prefix;
-        }
-
-        public int getSuffix() {
-            return suffix;
-        }
-        
-        @Override
-        public String toString() {
-            return (suffix == -1) ? prefix : prefix+suffix;
-        }
+    fxIds.add(result);
+    if (nextIndexes != null) {
+      updateNextIndexes(result);
     }
+
+    return result;
+  }
+
+  /*
+   * Private
+   */
+
+  private void createNextIndexes() {
+    nextIndexes = new HashMap<>();
+
+    for (String fxId : fxIds) {
+      updateNextIndexes(fxId);
+    }
+  }
+
+  private void updateNextIndexes(String fxId) {
+    assert nextIndexes != null;
+
+    final PrefixSuffix pf = new PrefixSuffix(fxId);
+    final Integer nextIndex = nextIndexes.get(pf.getPrefix());
+    if ((nextIndex == null) || (pf.getSuffix() >= nextIndex)) {
+      nextIndexes.put(pf.getPrefix(), pf.getSuffix() + 1);
+    }
+  }
+
+  private static class PrefixSuffix {
+    private final String prefix;
+    private final int suffix;
+
+    public PrefixSuffix(String fxId) {
+      assert fxId != null;
+      assert fxId.isEmpty() == false;
+
+      int endIndex = fxId.length();
+      while ((endIndex >= 1) && Character.isDigit(fxId.charAt(endIndex - 1))) {
+        endIndex--;
+      }
+      if (endIndex < fxId.length()) {
+        this.prefix = fxId.substring(0, endIndex);
+        this.suffix = Integer.parseInt(fxId.substring(endIndex));
+      } else {
+        this.prefix = fxId;
+        this.suffix = -1;
+      }
+    }
+
+    public String getPrefix() {
+      return prefix;
+    }
+
+    public int getSuffix() {
+      return suffix;
+    }
+
+    @Override
+    public String toString() {
+      return (suffix == -1) ? prefix : prefix + suffix;
+    }
+  }
 }

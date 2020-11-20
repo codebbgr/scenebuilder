@@ -46,169 +46,161 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
-/**
- *
- * 
- */
+/** */
 public class SplitPaneHandles extends AbstractNodeHandles<SplitPane> {
-    
-    private final Group grips = new Group();
-    
-    public SplitPaneHandles(ContentPanelController contentPanelController,
-            FXOMInstance fxomInstance) {
-        super(contentPanelController, fxomInstance, SplitPane.class);
-        
-        getRootNode().getChildren().add(grips); // Above handles
+
+  private final Group grips = new Group();
+
+  public SplitPaneHandles(
+      ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
+    super(contentPanelController, fxomInstance, SplitPane.class);
+
+    getRootNode().getChildren().add(grips); // Above handles
+  }
+
+  /*
+   * AbstractNodeHandles
+   */
+  @Override
+  protected void layoutDecoration() {
+    super.layoutDecoration();
+
+    // Adjusts the number of grip lines to the number of dividers
+    adjustGripCount();
+
+    // Updates grip positions
+    final double[] positions = getSceneGraphObject().getDividerPositions();
+    for (int i = 0, count = positions.length; i < count; i++) {
+      layoutDivider(i);
     }
-    
-    
-    /*
-     * AbstractNodeHandles
-     */
-    @Override
-    protected void layoutDecoration() {
-        super.layoutDecoration();
-             
-        // Adjusts the number of grip lines to the number of dividers
-        adjustGripCount();
-        
-        // Updates grip positions
-        final double[] positions = getSceneGraphObject().getDividerPositions();
-        for (int i = 0, count = positions.length; i < count; i++) {
-            layoutDivider(i);
-        }
+  }
+
+  @Override
+  public AbstractGesture findGesture(Node node) {
+
+    int gripIndex = 0;
+    final int gripCount = grips.getChildren().size();
+    final List<Node> gripNodes = grips.getChildren();
+    while ((gripIndex < gripCount) && (gripNodes.get(gripIndex) != node)) {
+      gripIndex++;
     }
 
-    @Override
-    public AbstractGesture findGesture(Node node) {
-        
-        int gripIndex = 0;
-        final int gripCount = grips.getChildren().size();
-        final List<Node> gripNodes = grips.getChildren();
-        while ((gripIndex < gripCount) && (gripNodes.get(gripIndex) != node)) {
-            gripIndex++;
-        }
-        
-        final AbstractGesture result;
-        if (gripIndex < gripCount) {
-            assert gripNodes.get(gripIndex) == node;
-            result = new AdjustDividerGesture(getContentPanelController(), 
-                    getFxomInstance(), gripIndex);
-        } else {
-            result = super.findGesture(node);
-        }
-        
-        return result;
+    final AbstractGesture result;
+    if (gripIndex < gripCount) {
+      assert gripNodes.get(gripIndex) == node;
+      result = new AdjustDividerGesture(getContentPanelController(), getFxomInstance(), gripIndex);
+    } else {
+      result = super.findGesture(node);
     }
 
-    
+    return result;
+  }
+
+  /*
+   * Private
+   */
+
+  private void adjustGripCount() {
+    final int dividerCount = getSceneGraphObject().getDividerPositions().length;
+    final List<Node> gripChildren = grips.getChildren();
+
+    while (gripChildren.size() < dividerCount) {
+      gripChildren.add(makeGripLine());
+    }
+    while (gripChildren.size() > dividerCount) {
+      gripChildren.remove(gripChildren.size() - 1);
+    }
+  }
+
+  private Line makeGripLine() {
+    final Line result = new Line();
+    result.setStrokeWidth(SELECTION_HANDLES_SIZE);
+    result.setStroke(Color.TRANSPARENT);
+    switch (getSceneGraphObject().getOrientation()) {
+      default:
+      case HORIZONTAL:
+        result.setCursor(Cursor.H_RESIZE);
+        break;
+      case VERTICAL:
+        result.setCursor(Cursor.V_RESIZE);
+        break;
+    }
+    attachHandles(result);
+    return result;
+  }
+
+  private void layoutDivider(int gripIndex) {
+    assert grips.getChildren().get(gripIndex) instanceof Line;
+
     /*
-     * Private
+     *      HORIZONTAL
+     *
+     *               startX
+     *                endX
+     *      +----------+--------------+ startY
+     *      |          |              |
+     *      |          |              |
+     *      |          |              |
+     *      |          |              |
+     *      |          |              |
+     *      |          |              |
+     *      |          |              |
+     *      +----------+--------------+ endY
+     *
+     *
+     *      VERTICAL
+     *
+     *    startX                endX
+     *      +--------------------+
+     *      |                    |
+     *      |                    |
+     *      |                    |
+     *      +--------------------+ startY endY
+     *      |                    |
+     *      |                    |
+     *      |                    |
+     *      |                    |
+     *      |                    |
+     *      +--------------------+
      */
-    
-    private void adjustGripCount() {
-        final int dividerCount = getSceneGraphObject().getDividerPositions().length;
-        final List<Node> gripChildren = grips.getChildren();
-        
-        while (gripChildren.size() < dividerCount) {
-            gripChildren.add(makeGripLine());
-        }
-        while (gripChildren.size() > dividerCount) {
-            gripChildren.remove(gripChildren.size()-1);
-        }
+
+    final SplitPaneDesignInfoX di = new SplitPaneDesignInfoX();
+    final double pos = getSceneGraphObject().getDividerPositions()[gripIndex];
+    final double xy = di.dividerPositionToSplitPaneLocal(getSceneGraphObject(), pos);
+    final Bounds lb = getSceneGraphObject().getLayoutBounds();
+
+    final double startX, startY, endX, endY;
+    switch (getSceneGraphObject().getOrientation()) {
+      default:
+      case HORIZONTAL:
+        startX = xy;
+        startY = lb.getMinY();
+        endX = xy;
+        endY = lb.getMaxY();
+        break;
+      case VERTICAL:
+        startX = lb.getMinX();
+        startY = xy;
+        endX = lb.getMaxX();
+        endY = xy;
+        break;
     }
-    
-    private Line makeGripLine() {
-        final Line result = new Line();
-        result.setStrokeWidth(SELECTION_HANDLES_SIZE);
-        result.setStroke(Color.TRANSPARENT);
-        switch(getSceneGraphObject().getOrientation()) {
-            default:
-            case HORIZONTAL:
-                result.setCursor(Cursor.H_RESIZE);
-                break;
-            case VERTICAL:
-                result.setCursor(Cursor.V_RESIZE);
-                break;
-        }
-        attachHandles(result);
-        return result;
-    }
-    
-    private void layoutDivider(int gripIndex) {
-        assert grips.getChildren().get(gripIndex) instanceof Line;
-        
-        
-        /*
-         *      HORIZONTAL
-         *
-         *               startX
-         *                endX
-         *      +----------+--------------+ startY
-         *      |          |              |
-         *      |          |              |
-         *      |          |              |
-         *      |          |              |
-         *      |          |              |
-         *      |          |              |
-         *      |          |              |
-         *      +----------+--------------+ endY
-         *
-         *
-         *      VERTICAL
-         * 
-         *    startX                endX
-         *      +--------------------+
-         *      |                    |
-         *      |                    |
-         *      |                    |
-         *      +--------------------+ startY endY
-         *      |                    |
-         *      |                    |
-         *      |                    |
-         *      |                    |
-         *      |                    |
-         *      +--------------------+
-         */
-        
-        final SplitPaneDesignInfoX di = new SplitPaneDesignInfoX();
-        final double pos = getSceneGraphObject().getDividerPositions()[gripIndex];
-        final double xy = di.dividerPositionToSplitPaneLocal(getSceneGraphObject(), pos);
-        final Bounds lb = getSceneGraphObject().getLayoutBounds();
-        
-        final double startX, startY, endX, endY;
-        switch(getSceneGraphObject().getOrientation()) {
-            default:
-            case HORIZONTAL:
-                startX = xy;
-                startY = lb.getMinY();
-                endX = xy;
-                endY = lb.getMaxY();
-                break;
-            case VERTICAL:
-                startX = lb.getMinX();
-                startY = xy;
-                endX = lb.getMaxX();
-                endY = xy;
-                break;
-        }
-        
-        final boolean snapToPixel = true;
-        final Point2D startPoint = sceneGraphObjectToDecoration(startX, startY, snapToPixel);
-        final Point2D endPoint = sceneGraphObjectToDecoration(endX, endY, snapToPixel);
-        
-        final Line gripLine = (Line) grips.getChildren().get(gripIndex);
-        gripLine.setStartX(startPoint.getX());
-        gripLine.setStartY(startPoint.getY());
-        gripLine.setEndX(endPoint.getX());
-        gripLine.setEndY(endPoint.getY());
-    }
-    
-    
-    /* 
-     * Wrapper to avoid the 'leaking this in constructor' warning emitted by NB.
-     */
-    private void attachHandles(Node node) {
-        attachHandles(node, this);
-    }
+
+    final boolean snapToPixel = true;
+    final Point2D startPoint = sceneGraphObjectToDecoration(startX, startY, snapToPixel);
+    final Point2D endPoint = sceneGraphObjectToDecoration(endX, endY, snapToPixel);
+
+    final Line gripLine = (Line) grips.getChildren().get(gripIndex);
+    gripLine.setStartX(startPoint.getX());
+    gripLine.setStartY(startPoint.getY());
+    gripLine.setEndX(endPoint.getX());
+    gripLine.setEndY(endPoint.getY());
+  }
+
+  /*
+   * Wrapper to avoid the 'leaking this in constructor' warning emitted by NB.
+   */
+  private void attachHandles(Node node) {
+    attachHandles(node, this);
+  }
 }

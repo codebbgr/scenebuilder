@@ -41,20 +41,18 @@ import java.util.List;
 import javafx.geometry.Orientation;
 import javafx.scene.control.ToolBar;
 
-/**
- * Job used to wrap selection in a ToolBar.
- */
+/** Job used to wrap selection in a ToolBar. */
 public class WrapInToolBarJob extends AbstractWrapInSubComponentJob {
 
-    public WrapInToolBarJob(EditorController editorController) {
-        super(editorController);
-        newContainerClass = ToolBar.class;
-    }
+  public WrapInToolBarJob(EditorController editorController) {
+    super(editorController);
+    newContainerClass = ToolBar.class;
+  }
 
-    @Override
-    protected Collection<FXOMObject> sortChildren(List<FXOMObject> children) {
-        final List<FXOMObject> sorted = new ArrayList<>(children);
-        Collections.sort(sorted, UnidimensionalComparator.of(Orientation.HORIZONTAL));
-        return sorted;
-    }
+  @Override
+  protected Collection<FXOMObject> sortChildren(List<FXOMObject> children) {
+    final List<FXOMObject> sorted = new ArrayList<>(children);
+    Collections.sort(sorted, UnidimensionalComparator.of(Orientation.HORIZONTAL));
+    return sorted;
+  }
 }

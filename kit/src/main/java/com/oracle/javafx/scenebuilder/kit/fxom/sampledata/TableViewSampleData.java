@@ -38,114 +38,108 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
-/**
- *
- */
+/** */
 class TableViewSampleData extends AbstractSampleData {
-    
-    private final List<SampleDataItem> sampleItems = new ArrayList<>();
 
-    public TableViewSampleData() {
-        for (int i = 0; i < 20; i++) {
-            sampleItems.add(new SampleDataItem(i));
-        }
+  private final List<SampleDataItem> sampleItems = new ArrayList<>();
+
+  public TableViewSampleData() {
+    for (int i = 0; i < 20; i++) {
+      sampleItems.add(new SampleDataItem(i));
     }
+  }
 
-    public static boolean canApplyTo(TableView<?> tableView) {
-        final boolean result;
-        
-        /*
-         * We can insert sample data if:
-         * 1) TableView.items() is empty
-         * 2) TableView columns have no cell factory set
-         */
-        
-        if (tableView.getItems().isEmpty() == false) {
-            result = false;
+  public static boolean canApplyTo(TableView<?> tableView) {
+    final boolean result;
+
+    /*
+     * We can insert sample data if:
+     * 1) TableView.items() is empty
+     * 2) TableView columns have no cell factory set
+     */
+
+    if (tableView.getItems().isEmpty() == false) {
+      result = false;
+    } else {
+      final List<TableColumn<?, ?>> columns = new ArrayList<>();
+      columns.addAll(tableView.getColumns());
+      while (columns.isEmpty() == false) {
+        final TableColumn<?, ?> tc = columns.get(0);
+        if (tc.getCellValueFactory() == null) {
+          columns.remove(0);
+          columns.addAll(tc.getColumns());
         } else {
-            final List<TableColumn<?, ?>> columns = new ArrayList<>();
-            columns.addAll(tableView.getColumns());
-            while (columns.isEmpty() == false) {
-                final TableColumn<?,?> tc = columns.get(0);
-                if (tc.getCellValueFactory() == null) {
-                    columns.remove(0);
-                    columns.addAll(tc.getColumns());
-                } else {
-                    break;
-                }
-            }
-            
-            result = columns.isEmpty();
+          break;
         }
-        
-        return result;
-    }
-    
-    
-    /*
-     * AbstractSampleData
-     */
-    
-    
-    @Override
-    public void applyTo(Object sceneGraphObject) {
-        assert sceneGraphObject instanceof TableView;
-        
-        @SuppressWarnings("unchecked")        
-        final TableView<SampleDataItem> tableView = (TableView<SampleDataItem>) sceneGraphObject;
-        
-        tableView.getItems().clear();
-        tableView.getItems().addAll(sampleItems);
-        
-        final List<TableColumn<SampleDataItem, ?>> columns = new ArrayList<>(tableView.getColumns());
-        while (columns.isEmpty() == false) {
-            @SuppressWarnings("unchecked")        
-            final TableColumn<SampleDataItem,String> tc 
-                    = (TableColumn<SampleDataItem,String>)columns.get(0);
-            tc.setCellValueFactory(SampleDataItem.FACTORY);
-            columns.remove(0);
-            columns.addAll(tc.getColumns());
-        }
+      }
+
+      result = columns.isEmpty();
     }
 
-    @Override
-    public void removeFrom(Object sceneGraphObject) {
-        assert sceneGraphObject instanceof TableView;
-        
-        @SuppressWarnings("unchecked")        
-        final TableView<SampleDataItem> tableView = TableView.class.cast(sceneGraphObject);
-        tableView.getItems().clear();
-        
-        final List<TableColumn<SampleDataItem, ?>> columns = new ArrayList<>();
-        columns.addAll(tableView.getColumns());
-        while (columns.isEmpty() == false) {
-            @SuppressWarnings("unchecked")        
-            final TableColumn<SampleDataItem,String> tc 
-                    = (TableColumn<SampleDataItem,String>)columns.get(0);
-            tc.setCellValueFactory(null);
-            columns.remove(0);
-            columns.addAll(tc.getColumns());
-        }
+    return result;
+  }
+
+  /*
+   * AbstractSampleData
+   */
+
+  @Override
+  public void applyTo(Object sceneGraphObject) {
+    assert sceneGraphObject instanceof TableView;
+
+    @SuppressWarnings("unchecked")
+    final TableView<SampleDataItem> tableView = (TableView<SampleDataItem>) sceneGraphObject;
+
+    tableView.getItems().clear();
+    tableView.getItems().addAll(sampleItems);
+
+    final List<TableColumn<SampleDataItem, ?>> columns = new ArrayList<>(tableView.getColumns());
+    while (columns.isEmpty() == false) {
+      @SuppressWarnings("unchecked")
+      final TableColumn<SampleDataItem, String> tc =
+          (TableColumn<SampleDataItem, String>) columns.get(0);
+      tc.setCellValueFactory(SampleDataItem.FACTORY);
+      columns.remove(0);
+      columns.addAll(tc.getColumns());
     }
-  
-    
-    /*
-     * Private
-     */
-    
-    
-    public static class SampleDataItem {
-        int index;
-        
-        public final static PropertyValueFactory<SampleDataItem, String> FACTORY
-                = new PropertyValueFactory<>("prop"); //NOI18N
-        
-        public SampleDataItem(int index) {
-            this.index = index;
-        }
-        
-        public String getProp() {
-            return TableViewSampleData.lorem(index);
-        }
+  }
+
+  @Override
+  public void removeFrom(Object sceneGraphObject) {
+    assert sceneGraphObject instanceof TableView;
+
+    @SuppressWarnings("unchecked")
+    final TableView<SampleDataItem> tableView = TableView.class.cast(sceneGraphObject);
+    tableView.getItems().clear();
+
+    final List<TableColumn<SampleDataItem, ?>> columns = new ArrayList<>();
+    columns.addAll(tableView.getColumns());
+    while (columns.isEmpty() == false) {
+      @SuppressWarnings("unchecked")
+      final TableColumn<SampleDataItem, String> tc =
+          (TableColumn<SampleDataItem, String>) columns.get(0);
+      tc.setCellValueFactory(null);
+      columns.remove(0);
+      columns.addAll(tc.getColumns());
     }
+  }
+
+  /*
+   * Private
+   */
+
+  public static class SampleDataItem {
+    int index;
+
+    public static final PropertyValueFactory<SampleDataItem, String> FACTORY =
+        new PropertyValueFactory<>("prop"); // NOI18N
+
+    public SampleDataItem(int index) {
+      this.index = index;
+    }
+
+    public String getProp() {
+      return TableViewSampleData.lorem(index);
+    }
+  }
 }

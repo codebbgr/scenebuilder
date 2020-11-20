@@ -45,64 +45,63 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.layout.GridPane;
 
-/**
- *
- */
+/** */
 public class MoveColumnContentJob extends BatchDocumentJob {
-    
-    private final IntegerPropertyMetadata columnIndexMeta =
-            new IntegerPropertyMetadata(
-                new PropertyName("columnIndex", GridPane.class), //NOI18N
-                true, /* readWrite */
-                0, /* defaultValue */
-                InspectorPath.UNUSED);
 
-    private final FXOMInstance gridPaneObject;
-    private final int movingColumnIndex;
-    private final int columnIndexDelta;
+  private final IntegerPropertyMetadata columnIndexMeta =
+      new IntegerPropertyMetadata(
+          new PropertyName("columnIndex", GridPane.class), // NOI18N
+          true, /* readWrite */
+          0, /* defaultValue */
+          InspectorPath.UNUSED);
 
-    public MoveColumnContentJob(FXOMObject gridPaneObject, int movingColumnIndex, int columnIndexDelta, EditorController editorController) {
-        super(editorController);
-        assert gridPaneObject instanceof FXOMInstance;
-        assert gridPaneObject.getSceneGraphObject() instanceof GridPane;
-        assert movingColumnIndex >= 0;
-        
-        this.gridPaneObject = (FXOMInstance)gridPaneObject;
-        this.movingColumnIndex = movingColumnIndex;
-        this.columnIndexDelta = columnIndexDelta;
+  private final FXOMInstance gridPaneObject;
+  private final int movingColumnIndex;
+  private final int columnIndexDelta;
+
+  public MoveColumnContentJob(
+      FXOMObject gridPaneObject,
+      int movingColumnIndex,
+      int columnIndexDelta,
+      EditorController editorController) {
+    super(editorController);
+    assert gridPaneObject instanceof FXOMInstance;
+    assert gridPaneObject.getSceneGraphObject() instanceof GridPane;
+    assert movingColumnIndex >= 0;
+
+    this.gridPaneObject = (FXOMInstance) gridPaneObject;
+    this.movingColumnIndex = movingColumnIndex;
+    this.columnIndexDelta = columnIndexDelta;
+  }
+
+  /*
+   * CompositeJob
+   */
+
+  @Override
+  protected List<Job> makeSubJobs() {
+    final List<Job> result = new ArrayList<>();
+
+    final DesignHierarchyMask m = new DesignHierarchyMask(gridPaneObject);
+    assert m.isAcceptingSubComponent();
+
+    for (int i = 0, count = m.getSubComponentCount(); i < count; i++) {
+      assert m.getSubComponentAtIndex(i)
+          instanceof FXOMInstance; // Because children of GridPane are nodes
+      final FXOMInstance child = (FXOMInstance) m.getSubComponentAtIndex(i);
+      if (columnIndexMeta.getValue(child) == movingColumnIndex) {
+        // child belongs to column at movingColumnIndex
+        final MoveCellContentJob subJob =
+            new MoveCellContentJob(child, columnIndexDelta, 0, getEditorController());
+        result.add(subJob);
+      }
     }
 
+    return result;
+  }
 
-    
-    
-    /*
-     * CompositeJob
-     */
-    
-    @Override
-    protected List<Job> makeSubJobs() {
-        final List<Job> result = new ArrayList<>();
-        
-        final DesignHierarchyMask m = new DesignHierarchyMask(gridPaneObject);
-        assert m.isAcceptingSubComponent();
-        
-        for (int i = 0, count = m.getSubComponentCount(); i <  count; i++) {
-            assert m.getSubComponentAtIndex(i) instanceof FXOMInstance; // Because children of GridPane are nodes
-            final FXOMInstance child = (FXOMInstance) m.getSubComponentAtIndex(i);
-            if (columnIndexMeta.getValue(child) == movingColumnIndex) {
-                // child belongs to column at movingColumnIndex
-                final MoveCellContentJob subJob 
-                        = new MoveCellContentJob(child, columnIndexDelta, 0, getEditorController());
-                result.add(subJob);
-            }
-        }
-        
-        return result;
-    }
-
-    @Override
-    protected String makeDescription() {
-        return getClass().getSimpleName();
-    }
-    
+  @Override
+  protected String makeDescription() {
+    return getClass().getSimpleName();
+  }
 }

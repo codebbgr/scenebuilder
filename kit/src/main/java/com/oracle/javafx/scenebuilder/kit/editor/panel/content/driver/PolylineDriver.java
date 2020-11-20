@@ -40,33 +40,30 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import javafx.scene.shape.Polyline;
 
-/**
- *
- */
+/** */
 public class PolylineDriver extends AbstractNodeDriver {
 
-    public PolylineDriver(ContentPanelController contentPanelController) {
-        super(contentPanelController);
-    }
+  public PolylineDriver(ContentPanelController contentPanelController) {
+    super(contentPanelController);
+  }
 
-    /*
-     * AbstractDriver
-     */
-    
-    @Override
-    public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof Polyline;
-        assert fxomObject instanceof FXOMInstance;
-        return new PolylineHandles(contentPanelController, (FXOMInstance)fxomObject);
-    }
+  /*
+   * AbstractDriver
+   */
 
-    @Override
-    public AbstractCurveEditor<?> makeCurveEditor(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof Polyline;
-        assert fxomObject instanceof FXOMInstance;
+  @Override
+  public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof Polyline;
+    assert fxomObject instanceof FXOMInstance;
+    return new PolylineHandles(contentPanelController, (FXOMInstance) fxomObject);
+  }
 
-        final Polyline polygon = (Polyline) fxomObject.getSceneGraphObject();
-        return new PolylineEditor(polygon);
-    }
-    
+  @Override
+  public AbstractCurveEditor<?> makeCurveEditor(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof Polyline;
+    assert fxomObject instanceof FXOMInstance;
+
+    final Polyline polygon = (Polyline) fxomObject.getSceneGraphObject();
+    return new PolylineEditor(polygon);
+  }
 }

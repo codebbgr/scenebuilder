@@ -32,138 +32,148 @@
 package com.oracle.javafx.scenebuilder.kit.editor.panel.library.maven.repository;
 
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
-import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.library.LibraryPanelController;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.library.maven.preset.MavenPresets;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.library.maven.repository.dialog.RepositoryDialogController;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.util.AbstractFxmlWindowController;
+import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.preferences.PreferencesControllerBase;
+import java.util.stream.Collectors;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 
-import java.util.stream.Collectors;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.stage.Modality;
-
-/**
- * Controller for the JAR/FXML Library dialog.
- */
+/** Controller for the JAR/FXML Library dialog. */
 public class RepositoryManagerController extends AbstractFxmlWindowController {
 
-    @FXML
-    private ListView<RepositoryListItem> repositoryListView;
+  @FXML private ListView<RepositoryListItem> repositoryListView;
 
-    private final EditorController editorController;
-    private final Stage owner;
+  private final EditorController editorController;
+  private final Stage owner;
 
-    private ObservableList<RepositoryListItem> listItems;
+  private ObservableList<RepositoryListItem> listItems;
 
-    private final String userM2Repository;
-    private final String tempM2Repository;
-    private final PreferencesControllerBase preferencesControllerBase;
-    
-    public RepositoryManagerController(EditorController editorController, String userM2Repository,
-                                       String tempM2Repository, PreferencesControllerBase preferencesControllerBase,
-                                       Stage owner) {
-        super(LibraryPanelController.class.getResource("RepositoryManager.fxml"), I18N.getBundle(), owner); //NOI18N
-        this.owner = owner;
-        this.editorController = editorController;
-        this.userM2Repository = userM2Repository;
-        this.tempM2Repository = tempM2Repository;
-        this.preferencesControllerBase = preferencesControllerBase;
+  private final String userM2Repository;
+  private final String tempM2Repository;
+  private final PreferencesControllerBase preferencesControllerBase;
+
+  public RepositoryManagerController(
+      EditorController editorController,
+      String userM2Repository,
+      String tempM2Repository,
+      PreferencesControllerBase preferencesControllerBase,
+      Stage owner) {
+    super(
+        LibraryPanelController.class.getResource("RepositoryManager.fxml"),
+        I18N.getBundle(),
+        owner); // NOI18N
+    this.owner = owner;
+    this.editorController = editorController;
+    this.userM2Repository = userM2Repository;
+    this.tempM2Repository = tempM2Repository;
+    this.preferencesControllerBase = preferencesControllerBase;
+  }
+
+  @Override
+  protected void controllerDidCreateStage() {
+    if (this.owner == null) {
+      // Dialog will be appliation modal
+      getStage().initModality(Modality.APPLICATION_MODAL);
+    } else {
+      // Dialog will be window modal
+      getStage().initOwner(this.owner);
+      getStage().initModality(Modality.WINDOW_MODAL);
     }
+  }
 
-    @Override
-    protected void controllerDidCreateStage() {
-        if (this.owner == null) {
-            // Dialog will be appliation modal
-            getStage().initModality(Modality.APPLICATION_MODAL);
-        } else {
-            // Dialog will be window modal
-            getStage().initOwner(this.owner);
-            getStage().initModality(Modality.WINDOW_MODAL);
-        }
-    }
-    
-    @Override
-    public void onCloseRequest(WindowEvent event) {
-        close();
-    }
+  @Override
+  public void onCloseRequest(WindowEvent event) {
+    close();
+  }
 
-    @Override
-    public void openWindow() {
-        super.openWindow();
-        super.getStage().setTitle(I18N.getString("repository.manager.title"));
-        loadRepositoryList();
-    }
+  @Override
+  public void openWindow() {
+    super.openWindow();
+    super.getStage().setTitle(I18N.getString("repository.manager.title"));
+    loadRepositoryList();
+  }
 
-    private void loadRepositoryList() {
-        if (listItems == null) {
-            listItems = FXCollections.observableArrayList();
-        }
-        listItems.clear();
-        repositoryListView.setItems(listItems);
-        repositoryListView.setCellFactory(param -> new RepositoryManagerListCell());
-        
-        // custom repositories
-        listItems.addAll(preferencesControllerBase.getRepositoryPreferences().getRepositories()
-                .stream()
-                .map(r -> new CustomRepositoryListItem(this, r))
-                .collect(Collectors.toList()));
-        
-        // preset on top
-        listItems.addAll(0, MavenPresets.getPresetRepositories()
-            .stream()
+  private void loadRepositoryList() {
+    if (listItems == null) {
+      listItems = FXCollections.observableArrayList();
+    }
+    listItems.clear();
+    repositoryListView.setItems(listItems);
+    repositoryListView.setCellFactory(param -> new RepositoryManagerListCell());
+
+    // custom repositories
+    listItems.addAll(
+        preferencesControllerBase.getRepositoryPreferences().getRepositories().stream()
+            .map(r -> new CustomRepositoryListItem(this, r))
+            .collect(Collectors.toList()));
+
+    // preset on top
+    listItems.addAll(
+        0,
+        MavenPresets.getPresetRepositories().stream()
             .map(r -> new RepositoryListItem(this, r))
             .collect(Collectors.toList()));
-    }
+  }
 
-    @FXML
-    private void close() {
-        repositoryListView.getItems().clear();
-        closeWindow();
-    }
+  @FXML
+  private void close() {
+    repositoryListView.getItems().clear();
+    closeWindow();
+  }
 
-    @FXML
-    private void addRepository() {
-        repositoryDialog(null);
-    }
+  @FXML
+  private void addRepository() {
+    repositoryDialog(null);
+  }
 
-    private void repositoryDialog(Repository repository) {
-        RepositoryDialogController repositoryDialogController = new RepositoryDialogController(editorController,
-                userM2Repository, tempM2Repository, preferencesControllerBase, getStage());
-        repositoryDialogController.openWindow();
-        repositoryDialogController.setRepository(repository);
-        repositoryDialogController.getStage().showingProperty().addListener(new InvalidationListener() {
-            @Override
-            public void invalidated(Observable observable) {
+  private void repositoryDialog(Repository repository) {
+    RepositoryDialogController repositoryDialogController =
+        new RepositoryDialogController(
+            editorController,
+            userM2Repository,
+            tempM2Repository,
+            preferencesControllerBase,
+            getStage());
+    repositoryDialogController.openWindow();
+    repositoryDialogController.setRepository(repository);
+    repositoryDialogController
+        .getStage()
+        .showingProperty()
+        .addListener(
+            new InvalidationListener() {
+              @Override
+              public void invalidated(Observable observable) {
                 if (!repositoryDialogController.getStage().isShowing()) {
-                    loadRepositoryList();
-                    repositoryDialogController.getStage().showingProperty().removeListener(this);
+                  loadRepositoryList();
+                  repositoryDialogController.getStage().showingProperty().removeListener(this);
                 }
-            }
-        });
-    }
-    
-    public void edit(RepositoryListItem item) {
-        repositoryDialog(item.getRepository());
-    }
-    
-    public void delete(RepositoryListItem item) {
-        // Remove repository
-        logInfoMessage("log.user.repository.removed", item.getRepository().getId());
-        preferencesControllerBase.removeRepository(item.getRepository().getId());
-        loadRepositoryList();
-    }
-    
-    private void logInfoMessage(String key, Object... args) {
-        editorController.getMessageLog().logInfoMessage(key, I18N.getBundle(), args);
-    }
-    
+              }
+            });
+  }
+
+  public void edit(RepositoryListItem item) {
+    repositoryDialog(item.getRepository());
+  }
+
+  public void delete(RepositoryListItem item) {
+    // Remove repository
+    logInfoMessage("log.user.repository.removed", item.getRepository().getId());
+    preferencesControllerBase.removeRepository(item.getRepository().getId());
+    loadRepositoryList();
+  }
+
+  private void logInfoMessage(String key, Object... args) {
+    editorController.getMessageLog().logInfoMessage(key, I18N.getBundle(), args);
+  }
 }

@@ -36,58 +36,55 @@ import java.util.List;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
-/**
- * Controller class editor.
- *
- *
- */
+/** Controller class editor. */
 public class ControllerClassEditor extends AutoSuggestEditor {
 
-    private static final String PROPERTY_NAME = "Controller class"; //NOI18N
-    private static final String DEFAULT_VALUE = null;
+  private static final String PROPERTY_NAME = "Controller class"; // NOI18N
+  private static final String DEFAULT_VALUE = null;
 
-    public ControllerClassEditor(List<String> suggestedClasses) {
-        super(PROPERTY_NAME, DEFAULT_VALUE, suggestedClasses);
-        initialize();
-    }
-    
-    private void initialize() {
-        // text field events handling
-        EventHandler<ActionEvent> onActionListener = event -> {
-            if (isHandlingError()) {
-                // Event received because of focus lost due to error dialog
-                return;
+  public ControllerClassEditor(List<String> suggestedClasses) {
+    super(PROPERTY_NAME, DEFAULT_VALUE, suggestedClasses);
+    initialize();
+  }
+
+  private void initialize() {
+    // text field events handling
+    EventHandler<ActionEvent> onActionListener =
+        event -> {
+          if (isHandlingError()) {
+            // Event received because of focus lost due to error dialog
+            return;
+          }
+
+          String value = textField.getText();
+
+          if (value != null && !value.isEmpty()) {
+            if (!JavaLanguage.isClassName(value)) {
+              handleInvalidValue(value);
+              return;
             }
-            
-            String value = textField.getText();
-            
-            if (value != null && !value.isEmpty()) {
-                if (!JavaLanguage.isClassName(value)) {
-                    handleInvalidValue(value);
-                    return;
-                }
-            }
-            
-            userUpdateValueProperty((value == null || value.isEmpty()) ? null : value);
-            textField.selectAll();
+          }
+
+          userUpdateValueProperty((value == null || value.isEmpty()) ? null : value);
+          textField.selectAll();
         };
-        setTextEditorBehavior(this, textField, onActionListener);
-    }
+    setTextEditorBehavior(this, textField, onActionListener);
+  }
 
-    public void reset(List<String> suggestedClasses) {
-        super.reset(PROPERTY_NAME, DEFAULT_VALUE, suggestedClasses);
-    }
+  public void reset(List<String> suggestedClasses) {
+    super.reset(PROPERTY_NAME, DEFAULT_VALUE, suggestedClasses);
+  }
 
-    // DTL-6625. Compared to super implementation we do not call isSetValueDone.
-    @Override
-    public void setValue(Object value) {
-        setValueGeneric(value);
+  // DTL-6625. Compared to super implementation we do not call isSetValueDone.
+  @Override
+  public void setValue(Object value) {
+    setValueGeneric(value);
 
-        if (value == null) {
-            getTextField().setText(null);
-        } else {
-            assert value instanceof String;
-            getTextField().setText((String) value);
-        }
+    if (value == null) {
+      getTextField().setText(null);
+    } else {
+      assert value instanceof String;
+      getTextField().setText((String) value);
     }
+  }
 }

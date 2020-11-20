@@ -33,7 +33,6 @@
 package com.oracle.javafx.scenebuilder.kit.library.util;
 
 import com.oracle.javafx.scenebuilder.kit.library.util.JarReportEntry.Status;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,44 +41,44 @@ import java.util.stream.Stream;
 
 public class FolderExplorer extends ExplorerBase {
 
-    private final Path rootFolderPath;
+  private final Path rootFolderPath;
 
-    public FolderExplorer(Path folderPath) {
-        assert folderPath != null;
-        assert folderPath.isAbsolute();
+  public FolderExplorer(Path folderPath) {
+    assert folderPath != null;
+    assert folderPath.isAbsolute();
 
-        this.rootFolderPath = folderPath;
+    this.rootFolderPath = folderPath;
+  }
+
+  public JarReport explore(ClassLoader classLoader) throws IOException {
+    final JarReport result = new JarReport(rootFolderPath);
+
+    try (Stream<Path> stream = Files.walk(rootFolderPath).filter(p -> !p.toFile().isDirectory())) {
+      stream.forEach(
+          p -> {
+            JarReportEntry explored = exploreEntry(rootFolderPath, p, classLoader);
+            if (explored.getStatus() != Status.IGNORED) result.getEntries().add(explored);
+          });
     }
+    ;
 
-    public JarReport explore(ClassLoader classLoader) throws IOException {
-        final JarReport result = new JarReport(rootFolderPath);
+    return result;
+  }
 
-        try (Stream<Path> stream = Files.walk(rootFolderPath).filter(p -> !p.toFile().isDirectory())) {
-            stream.forEach(p -> {
-                JarReportEntry explored = exploreEntry(rootFolderPath, p, classLoader);
-                if (explored.getStatus() != Status.IGNORED)
-                    result.getEntries().add(explored);
-            });
-        };
+  /*
+   * Private
+   */
 
-        return result;
+  private JarReportEntry exploreEntry(Path rootpath, Path path, ClassLoader classLoader) {
+    File file = path.toFile();
+
+    if (file.isDirectory()) {
+      return new JarReportEntry(file.getName(), Status.IGNORED, null, null, null);
+    } else {
+      Path relativepath = rootpath.relativize(path);
+
+      String className = makeClassName(relativepath.toString(), File.separator);
+      return super.exploreEntry(file.getName(), classLoader, className);
     }
-
-    /*
-     * Private
-     */
-
-    private JarReportEntry exploreEntry(Path rootpath, Path path, ClassLoader classLoader) {
-        File file = path.toFile();
-
-        if (file.isDirectory()) {
-            return new JarReportEntry(file.getName(), Status.IGNORED, null, null, null);
-        } else {
-            Path relativepath = rootpath.relativize(path);
-
-            String className = makeClassName(relativepath.toString(), File.separator);
-            return super.exploreEntry(file.getName(), classLoader, className);
-        }
-    }
-
+  }
 }

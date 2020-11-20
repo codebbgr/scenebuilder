@@ -36,41 +36,38 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.control.ChoiceBox;
 
-/**
- *
- */
+/** */
 class ChoiceBoxSampleData extends AbstractSampleData {
-    
-    private final List<String> samples = new ArrayList<>();
 
-    public ChoiceBoxSampleData() {
-        for (int i = 0; i < 20; i++) {
-            samples.add(lorem(i));
-        }
-    }
+  private final List<String> samples = new ArrayList<>();
 
-    /*
-     * AbstractSampleData
-     */
-    
-    @Override
-    public void applyTo(Object sceneGraphObject) {
-        assert sceneGraphObject != null;
-        
-        @SuppressWarnings("unchecked")        
-        final ChoiceBox<String> choiceBox = (ChoiceBox<String>) sceneGraphObject;
-        choiceBox.getItems().clear();
-        choiceBox.getItems().addAll(samples);
-        choiceBox.getSelectionModel().select(samples.get(0));
+  public ChoiceBoxSampleData() {
+    for (int i = 0; i < 20; i++) {
+      samples.add(lorem(i));
     }
-    
-    @Override
-    public void removeFrom(Object sceneGraphObject) {
-        assert sceneGraphObject != null;
-        
-        @SuppressWarnings("unchecked")        
-        final ChoiceBox<String> choiceBox = (ChoiceBox<String>) sceneGraphObject;
-        choiceBox.getItems().clear();
-    }
-    
+  }
+
+  /*
+   * AbstractSampleData
+   */
+
+  @Override
+  public void applyTo(Object sceneGraphObject) {
+    assert sceneGraphObject != null;
+
+    @SuppressWarnings("unchecked")
+    final ChoiceBox<String> choiceBox = (ChoiceBox<String>) sceneGraphObject;
+    choiceBox.getItems().clear();
+    choiceBox.getItems().addAll(samples);
+    choiceBox.getSelectionModel().select(samples.get(0));
+  }
+
+  @Override
+  public void removeFrom(Object sceneGraphObject) {
+    assert sceneGraphObject != null;
+
+    @SuppressWarnings("unchecked")
+    final ChoiceBox<String> choiceBox = (ChoiceBox<String>) sceneGraphObject;
+    choiceBox.getItems().clear();
+  }
 }

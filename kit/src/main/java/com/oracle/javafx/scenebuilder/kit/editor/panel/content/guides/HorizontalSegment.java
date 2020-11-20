@@ -32,92 +32,95 @@
 
 package com.oracle.javafx.scenebuilder.kit.editor.panel.content.guides;
 
-/**
- *
- */
+/** */
 class HorizontalSegment extends AbstractSegment {
-    
-    private final double x1;
-    private final double x2;
-    private final double y;
-    private final double length;
-    
-    public HorizontalSegment(double x1, double x2, double y) {
-        this.x1 = x1;
-        this.x2 = x2;
-        this.y = y;
-        this.length = Math.abs(x2 - x1);
+
+  private final double x1;
+  private final double x2;
+  private final double y;
+  private final double length;
+
+  public HorizontalSegment(double x1, double x2, double y) {
+    this.x1 = x1;
+    this.x2 = x2;
+    this.y = y;
+    this.length = Math.abs(x2 - x1);
+  }
+
+  /*
+   * AbstractSegment
+   */
+
+  @Override
+  public double getX1() {
+    return x1;
+  }
+
+  @Override
+  public double getX2() {
+    return x2;
+  }
+
+  @Override
+  public double getY1() {
+    return y;
+  }
+
+  @Override
+  public double getY2() {
+    return y;
+  }
+
+  @Override
+  public double getLength() {
+    return length;
+  }
+
+  /*
+   * Object
+   */
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash =
+        89 * hash
+            + (int) (Double.doubleToLongBits(this.x1) ^ (Double.doubleToLongBits(this.x1) >>> 32));
+    hash =
+        89 * hash
+            + (int) (Double.doubleToLongBits(this.x2) ^ (Double.doubleToLongBits(this.x2) >>> 32));
+    hash =
+        89 * hash
+            + (int) (Double.doubleToLongBits(this.y) ^ (Double.doubleToLongBits(this.y) >>> 32));
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
     }
-
-    /*
-     * AbstractSegment
-     */
-
-    @Override
-    public double getX1() {
-        return x1;
+    if (getClass() != obj.getClass()) {
+      return false;
     }
-
-    @Override
-    public double getX2() {
-        return x2;
+    final HorizontalSegment other = (HorizontalSegment) obj;
+    if (Double.doubleToLongBits(this.x1) != Double.doubleToLongBits(other.x1)) {
+      return false;
     }
-
-    @Override
-    public double getY1() {
-        return y;
+    if (Double.doubleToLongBits(this.x2) != Double.doubleToLongBits(other.x2)) {
+      return false;
     }
-
-    @Override
-    public double getY2() {
-        return y;
+    if (Double.doubleToLongBits(this.y) != Double.doubleToLongBits(other.y)) {
+      return false;
     }
+    return true;
+  }
 
-    @Override
-    public double getLength() {
-        return length;
-    }
-
-    /*
-     * Object
-     */
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 89 * hash + (int) (Double.doubleToLongBits(this.x1) ^ (Double.doubleToLongBits(this.x1) >>> 32));
-        hash = 89 * hash + (int) (Double.doubleToLongBits(this.x2) ^ (Double.doubleToLongBits(this.x2) >>> 32));
-        hash = 89 * hash + (int) (Double.doubleToLongBits(this.y) ^ (Double.doubleToLongBits(this.y) >>> 32));
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final HorizontalSegment other = (HorizontalSegment) obj;
-        if (Double.doubleToLongBits(this.x1) != Double.doubleToLongBits(other.x1)) {
-            return false;
-        }
-        if (Double.doubleToLongBits(this.x2) != Double.doubleToLongBits(other.x2)) {
-            return false;
-        }
-        if (Double.doubleToLongBits(this.y) != Double.doubleToLongBits(other.y)) {
-            return false;
-        }
-        return true;
-    }
-
-
-    /*
-     * Comparable
-     */
-    @Override
-    public int compareTo(AbstractSegment o) {
-        assert o != null;
-        return Double.compare(this.length, o.getLength());
-    }
+  /*
+   * Comparable
+   */
+  @Override
+  public int compareTo(AbstractSegment o) {
+    assert o != null;
+    return Double.compare(this.length, o.getLength());
+  }
 }

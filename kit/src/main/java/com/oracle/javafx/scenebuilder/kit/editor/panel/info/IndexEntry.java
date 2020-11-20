@@ -36,72 +36,68 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.info;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import java.util.Objects;
 
-/**
- *
- */
+/** */
 public class IndexEntry {
-    
-    public enum Type {
-        FX_ID,
-        HANDLER,
-        RESOURCE_KEY,
-        STYLECLASS
-    }
-    
-    private final String key;
-    private final Type type;
-    private final FXOMObject fxomObject;
 
-    public IndexEntry(String key, Type type, FXOMObject fxomObject) {
-        this.key = key;
-        this.type = type;
-        this.fxomObject = fxomObject;
-    }
+  public enum Type {
+    FX_ID,
+    HANDLER,
+    RESOURCE_KEY,
+    STYLECLASS
+  }
 
-    public String getKey() {
-        return key;
-    }
+  private final String key;
+  private final Type type;
+  private final FXOMObject fxomObject;
 
-    public Type getType() {
-        return type;
-    }
-    
-    public FXOMObject getFxomObject() {
-        return fxomObject;
-    }
+  public IndexEntry(String key, Type type, FXOMObject fxomObject) {
+    this.key = key;
+    this.type = type;
+    this.fxomObject = fxomObject;
+  }
 
-    /*
-     * Object
-     */
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 79 * hash + Objects.hashCode(this.key);
-        hash = 79 * hash + Objects.hashCode(this.type);
-        hash = 79 * hash + Objects.hashCode(this.fxomObject);
-        return hash;
-    }
+  public String getKey() {
+    return key;
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final IndexEntry other = (IndexEntry) obj;
-        if (!Objects.equals(this.key, other.key)) {
-            return false;
-        }
-        if (this.type != other.type) {
-            return false;
-        }
-        if (this.fxomObject != other.fxomObject) {
-            return false;
-        }
-        return true;
+  public Type getType() {
+    return type;
+  }
+
+  public FXOMObject getFxomObject() {
+    return fxomObject;
+  }
+
+  /*
+   * Object
+   */
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 79 * hash + Objects.hashCode(this.key);
+    hash = 79 * hash + Objects.hashCode(this.type);
+    hash = 79 * hash + Objects.hashCode(this.fxomObject);
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
     }
-    
-    
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final IndexEntry other = (IndexEntry) obj;
+    if (!Objects.equals(this.key, other.key)) {
+      return false;
+    }
+    if (this.type != other.type) {
+      return false;
+    }
+    if (this.fxomObject != other.fxomObject) {
+      return false;
+    }
+    return true;
+  }
 }

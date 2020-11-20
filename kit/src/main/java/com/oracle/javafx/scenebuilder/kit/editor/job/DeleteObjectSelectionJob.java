@@ -32,74 +32,71 @@
 package com.oracle.javafx.scenebuilder.kit.editor.job;
 
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
-import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.AbstractSelectionGroup;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.ObjectSelectionGroup;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.Selection;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
+import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Delete job for ObjectSelectionGroup.
- */
+/** Delete job for ObjectSelectionGroup. */
 public class DeleteObjectSelectionJob extends BatchSelectionJob {
 
-    public DeleteObjectSelectionJob(EditorController editorController) {
-        super(editorController);
+  public DeleteObjectSelectionJob(EditorController editorController) {
+    super(editorController);
+  }
+
+  @Override
+  protected List<Job> makeSubJobs() {
+    final Selection selection = getEditorController().getSelection();
+    assert selection.getGroup() instanceof ObjectSelectionGroup;
+    final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
+    final List<Job> result = new ArrayList<>();
+
+    // Next we make one DeleteObjectJob for each selected objects
+    int cannotDeleteCount = 0;
+    for (FXOMObject candidate : osg.getFlattenItems()) {
+      final DeleteObjectJob subJob = new DeleteObjectJob(candidate, getEditorController());
+      if (subJob.isExecutable()) {
+        result.add(subJob);
+      } else {
+        cannotDeleteCount++;
+      }
     }
 
-    @Override
-    protected List<Job> makeSubJobs() {
-        final Selection selection = getEditorController().getSelection();
-        assert selection.getGroup() instanceof ObjectSelectionGroup;
-        final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
-        final List<Job> result = new ArrayList<>();
-        
-        // Next we make one DeleteObjectJob for each selected objects
-        int cannotDeleteCount = 0;
-        for (FXOMObject candidate : osg.getFlattenItems()) {
-            final DeleteObjectJob subJob
-                    = new DeleteObjectJob(candidate, getEditorController());
-            if (subJob.isExecutable()) {
-                result.add(subJob);
-            } else {
-                cannotDeleteCount++;
-            }
-        }
-        
-        // If some objects cannot be deleted, then we clear all to
-        // make this job not executable.
-        if (cannotDeleteCount >= 1) {
-            result.clear();
-        }
-        
-        return result;
+    // If some objects cannot be deleted, then we clear all to
+    // make this job not executable.
+    if (cannotDeleteCount >= 1) {
+      result.clear();
     }
 
-    @Override
-    protected String makeDescription() {
-        final String result;
-        final int subJobCount = getSubJobs().size();
-        
-        switch (subJobCount) {
-            case 0:
-                result = "Unexecutable Delete"; // NO18N
-                break;
-            case 1: // one delete
-                result = getSubJobs().get(0).getDescription();
-                break;
-            default:
-                result = I18N.getString("label.action.edit.delete.n", subJobCount);
-                break;
-        }
-        
-        return result;
+    return result;
+  }
+
+  @Override
+  protected String makeDescription() {
+    final String result;
+    final int subJobCount = getSubJobs().size();
+
+    switch (subJobCount) {
+      case 0:
+        result = "Unexecutable Delete"; // NO18N
+        break;
+      case 1: // one delete
+        result = getSubJobs().get(0).getDescription();
+        break;
+      default:
+        result = I18N.getString("label.action.edit.delete.n", subJobCount);
+        break;
     }
 
-    @Override
-    protected AbstractSelectionGroup getNewSelectionGroup() {
-        // Selection emptied
-        return null;
-    }
+    return result;
+  }
+
+  @Override
+  protected AbstractSelectionGroup getNewSelectionGroup() {
+    // Selection emptied
+    return null;
+  }
 }

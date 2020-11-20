@@ -32,8 +32,8 @@
  */
 package com.oracle.javafx.scenebuilder.kit.metadata.property.value;
 
-import com.oracle.javafx.scenebuilder.kit.fxom.FXOMProperty;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
+import com.oracle.javafx.scenebuilder.kit.fxom.FXOMProperty;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMPropertyT;
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
@@ -42,153 +42,157 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * 
- */
+/** */
 public class EnumerationPropertyMetadata extends ValuePropertyMetadata {
-    
-    public static final String EQUIV_NONE = "NONE"; //NOI18N
-    public static final String EQUIV_AUTOMATIC = "AUTOMATIC"; //NOI18N
-    public static final String EQUIV_INHERITED = "INHERIT"; //NOI18N
-    
-    private final Class<?> enumClass;
-    private final Enum<?> defaultValue;
-    private final String nullEquivalent;
-    private List<String> validValues;
 
-    public EnumerationPropertyMetadata(PropertyName name, Class<?> enumClass,
-            boolean readWrite, Enum<?> defaultValue, InspectorPath inspectorPath) {
-        super(name, readWrite, inspectorPath);
-        assert enumClass.isEnum();
-        assert (readWrite == false) || (defaultValue != null);
-        this.enumClass = enumClass;
-        this.defaultValue = defaultValue;
-        this.nullEquivalent = null;
-    }
-    
-    public EnumerationPropertyMetadata(PropertyName name, Class<?> enumClass,
-            String nullEquivalent, boolean readWrite, InspectorPath inspectorPath) {
-        super(name, readWrite, inspectorPath);
-        assert enumClass.isEnum();
-        assert nullEquivalent != null;
-        this.enumClass = enumClass;
-        this.defaultValue = null;
-        this.nullEquivalent = nullEquivalent;
-    }
-    
-    public String getValue(FXOMInstance fxomInstance) {
-        final String result;
-        
-        if (isReadWrite()) {
-            final FXOMProperty fxomProperty = fxomInstance.getProperties().get(getName());
-            if (fxomProperty == null) {
-                // propertyName is not specified in the fxom instance.
-                // We return the default value specified in the metadata of the
-                // property
-                result = getDefaultValue();
-            } else {
-                assert fxomProperty instanceof FXOMPropertyT;
-                final FXOMPropertyT fxomPropertyT = (FXOMPropertyT) fxomProperty;
-                final PrefixedValue pv = new PrefixedValue(fxomPropertyT.getValue());
-                if (pv.isBindingExpression()) {
-                    result = getDefaultValue();
-                } else {
-                    result = fxomPropertyT.getValue();
-                }
-            }
+  public static final String EQUIV_NONE = "NONE"; // NOI18N
+  public static final String EQUIV_AUTOMATIC = "AUTOMATIC"; // NOI18N
+  public static final String EQUIV_INHERITED = "INHERIT"; // NOI18N
+
+  private final Class<?> enumClass;
+  private final Enum<?> defaultValue;
+  private final String nullEquivalent;
+  private List<String> validValues;
+
+  public EnumerationPropertyMetadata(
+      PropertyName name,
+      Class<?> enumClass,
+      boolean readWrite,
+      Enum<?> defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, readWrite, inspectorPath);
+    assert enumClass.isEnum();
+    assert (readWrite == false) || (defaultValue != null);
+    this.enumClass = enumClass;
+    this.defaultValue = defaultValue;
+    this.nullEquivalent = null;
+  }
+
+  public EnumerationPropertyMetadata(
+      PropertyName name,
+      Class<?> enumClass,
+      String nullEquivalent,
+      boolean readWrite,
+      InspectorPath inspectorPath) {
+    super(name, readWrite, inspectorPath);
+    assert enumClass.isEnum();
+    assert nullEquivalent != null;
+    this.enumClass = enumClass;
+    this.defaultValue = null;
+    this.nullEquivalent = nullEquivalent;
+  }
+
+  public String getValue(FXOMInstance fxomInstance) {
+    final String result;
+
+    if (isReadWrite()) {
+      final FXOMProperty fxomProperty = fxomInstance.getProperties().get(getName());
+      if (fxomProperty == null) {
+        // propertyName is not specified in the fxom instance.
+        // We return the default value specified in the metadata of the
+        // property
+        result = getDefaultValue();
+      } else {
+        assert fxomProperty instanceof FXOMPropertyT;
+        final FXOMPropertyT fxomPropertyT = (FXOMPropertyT) fxomProperty;
+        final PrefixedValue pv = new PrefixedValue(fxomPropertyT.getValue());
+        if (pv.isBindingExpression()) {
+          result = getDefaultValue();
         } else {
-            final Object o = getName().getValue(fxomInstance.getSceneGraphObject());
-            if (o == null) {
-                result = getDefaultValue();
-            } else {
-                assert o.getClass() == enumClass;
-                result = o.toString();
-            }
+          result = fxomPropertyT.getValue();
         }
-        
-        return result;
+      }
+    } else {
+      final Object o = getName().getValue(fxomInstance.getSceneGraphObject());
+      if (o == null) {
+        result = getDefaultValue();
+      } else {
+        assert o.getClass() == enumClass;
+        result = o.toString();
+      }
     }
 
-    public void setValue(FXOMInstance fxomInstance, String value) {
-        assert isReadWrite();
-        assert value != null;
-        
-        final FXOMProperty fxomProperty = fxomInstance.getProperties().get(getName());
-        if (fxomProperty == null) {
-            // propertyName is not specified in the fxom instance.
-            if (value.equals(getDefaultValue()) == false) {
-                // We insert a new fxom property
-                final FXOMPropertyT newProperty 
-                        = new FXOMPropertyT(fxomInstance.getFxomDocument(),
-                        getName(), value);
-                newProperty.addToParentInstance(-1, fxomInstance);
-            }
-        } else {
-            assert fxomProperty instanceof FXOMPropertyT;
-            final FXOMPropertyT fxomPropertyT = (FXOMPropertyT) fxomProperty;
-            if (value.equals(getDefaultValue())) {
-                fxomPropertyT.removeFromParentInstance();
-            } else {
-                fxomPropertyT.setValue(value);
-            }
+    return result;
+  }
+
+  public void setValue(FXOMInstance fxomInstance, String value) {
+    assert isReadWrite();
+    assert value != null;
+
+    final FXOMProperty fxomProperty = fxomInstance.getProperties().get(getName());
+    if (fxomProperty == null) {
+      // propertyName is not specified in the fxom instance.
+      if (value.equals(getDefaultValue()) == false) {
+        // We insert a new fxom property
+        final FXOMPropertyT newProperty =
+            new FXOMPropertyT(fxomInstance.getFxomDocument(), getName(), value);
+        newProperty.addToParentInstance(-1, fxomInstance);
+      }
+    } else {
+      assert fxomProperty instanceof FXOMPropertyT;
+      final FXOMPropertyT fxomPropertyT = (FXOMPropertyT) fxomProperty;
+      if (value.equals(getDefaultValue())) {
+        fxomPropertyT.removeFromParentInstance();
+      } else {
+        fxomPropertyT.setValue(value);
+      }
+    }
+  }
+
+  public String getDefaultValue() {
+    final String result;
+    if (isReadWrite()) {
+      assert (defaultValue == null) == (nullEquivalent != null);
+      result = (defaultValue == null) ? nullEquivalent : defaultValue.toString();
+    } else {
+      result = null;
+    }
+    return result;
+  }
+
+  public List<String> getValidValues() {
+    if (validValues == null) {
+      validValues = new ArrayList<>();
+
+      for (Object e : enumClass.getEnumConstants()) {
+        validValues.add(e.toString());
+      }
+      if (nullEquivalent != null) {
+        assert defaultValue == null;
+        if (validValues.contains(nullEquivalent) == false) {
+          validValues.add(0, nullEquivalent);
         }
+      }
     }
-    
-    public String getDefaultValue() {
-        final String result;
-        if (isReadWrite()) {
-            assert (defaultValue == null) == (nullEquivalent != null);
-            result = (defaultValue == null) ? nullEquivalent : defaultValue.toString();
-        } else {
-            result = null;
-        }
-        return result;
-    }
-    
-    public List<String> getValidValues() {
-        if (validValues == null) {
-            validValues = new ArrayList<>();
+    return validValues;
+  }
 
-            for (Object e : enumClass.getEnumConstants()) {
-                validValues.add(e.toString());
-            }
-            if (nullEquivalent != null) {
-                assert defaultValue == null;
-                if (validValues.contains(nullEquivalent) == false) {
-                    validValues.add(0, nullEquivalent);
-                }
-            }
-        }
-        return validValues;
-    }
+  public int getValidValuesNumber() {
+    return getValidValues().size();
+  }
 
-    public int getValidValuesNumber() {
-        return getValidValues().size();
-    }
-    
-    /*
-     * ValuePropertyMetadata
-     */
-    
-    @Override
-    public Class<?> getValueClass() {
-        return enumClass;
-    }
+  /*
+   * ValuePropertyMetadata
+   */
 
-    @Override
-    public Object getDefaultValueObject() {
-        return getDefaultValue();
-    }
+  @Override
+  public Class<?> getValueClass() {
+    return enumClass;
+  }
 
-    @Override
-    public Object getValueObject(FXOMInstance fxomInstance) {
-        return getValue(fxomInstance);
-    }
+  @Override
+  public Object getDefaultValueObject() {
+    return getDefaultValue();
+  }
 
-    @Override
-    public void setValueObject(FXOMInstance fxomInstance, Object valueObject) {
-        assert valueObject instanceof String;
-        setValue(fxomInstance, (String) valueObject);
-    }
+  @Override
+  public Object getValueObject(FXOMInstance fxomInstance) {
+    return getValue(fxomInstance);
+  }
+
+  @Override
+  public void setValueObject(FXOMInstance fxomInstance, Object valueObject) {
+    assert valueObject instanceof String;
+    setValue(fxomInstance, (String) valueObject);
+  }
 }

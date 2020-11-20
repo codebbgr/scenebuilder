@@ -33,13 +33,10 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.content.driver;
 
 import com.oracle.javafx.scenebuilder.kit.editor.panel.content.ContentPanelController;
 
-/**
- *
- */
+/** */
 public class GenericDriver extends AbstractNodeDriver {
 
-    public GenericDriver(ContentPanelController contentPanelController) {
-        super(contentPanelController);
-    }
-    
+  public GenericDriver(ContentPanelController contentPanelController) {
+    super(contentPanelController);
+  }
 }

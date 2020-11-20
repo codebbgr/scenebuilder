@@ -31,9 +31,15 @@
  */
 package com.oracle.javafx.scenebuilder.kit.selectionbar;
 
-import java.net.URL;
-
+import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
+import com.oracle.javafx.scenebuilder.kit.editor.panel.util.AbstractFxmlPanelController;
+import com.oracle.javafx.scenebuilder.kit.editor.selection.ObjectSelectionGroup;
+import com.oracle.javafx.scenebuilder.kit.editor.selection.Selection;
+import com.oracle.javafx.scenebuilder.kit.fxom.FXOMDocument;
+import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
+import com.oracle.javafx.scenebuilder.kit.metadata.util.DesignHierarchyMask;
+import java.net.URL;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -47,192 +53,190 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 
-import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
-import com.oracle.javafx.scenebuilder.kit.editor.panel.util.AbstractFxmlPanelController;
-import com.oracle.javafx.scenebuilder.kit.editor.selection.ObjectSelectionGroup;
-import com.oracle.javafx.scenebuilder.kit.editor.selection.Selection;
-import com.oracle.javafx.scenebuilder.kit.fxom.FXOMDocument;
-import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
-import com.oracle.javafx.scenebuilder.kit.metadata.util.DesignHierarchyMask;
-
-/**
- *
- */
+/** */
 public class SelectionBarController extends AbstractFxmlPanelController {
 
-    @FXML
-    private HBox pathBox;
+  @FXML private HBox pathBox;
 
-    private final Image selectionChevronImage;
+  private final Image selectionChevronImage;
 
-    public SelectionBarController(EditorController editorController) {
-        super(SelectionBarController.class.getResource("SelectionBar.fxml"), I18N.getBundle(), editorController); //NOI18N
+  public SelectionBarController(EditorController editorController) {
+    super(
+        SelectionBarController.class.getResource("SelectionBar.fxml"),
+        I18N.getBundle(),
+        editorController); // NOI18N
 
-        // Initialize selection chevron image
-        final URL selectionChevronURL = SelectionBarController.class.getResource("selection-chevron.png"); //NOI18N
-        assert selectionChevronURL != null;
-        selectionChevronImage = new Image(selectionChevronURL.toExternalForm());
+    // Initialize selection chevron image
+    final URL selectionChevronURL =
+        SelectionBarController.class.getResource("selection-chevron.png"); // NOI18N
+    assert selectionChevronURL != null;
+    selectionChevronImage = new Image(selectionChevronURL.toExternalForm());
+  }
+
+  /*
+   * AbstractPanelController
+   */
+  @Override
+  protected void fxomDocumentDidChange(FXOMDocument oldDocument) {
+    if (pathBox != null) {
+      updateSelectionBar();
     }
+  }
 
-    /*
-     * AbstractPanelController
-     */
-    @Override
-    protected void fxomDocumentDidChange(FXOMDocument oldDocument) {
-        if (pathBox != null) {
-            updateSelectionBar();
+  @Override
+  protected void sceneGraphRevisionDidChange() {
+    if (pathBox != null) {
+      updateSelectionBar();
+    }
+  }
+
+  @Override
+  protected void cssRevisionDidChange() {
+    // Nothing to do here
+  }
+
+  @Override
+  protected void jobManagerRevisionDidChange() {
+    sceneGraphRevisionDidChange();
+  }
+
+  @Override
+  protected void editorSelectionDidChange() {
+    if (pathBox != null) {
+      updateSelectionBar();
+    }
+  }
+
+  /*
+   * AbstractFxmlPanelController
+   */
+  @Override
+  protected void controllerDidLoadFxml() {
+
+    // Sanity checks
+    assert pathBox != null;
+
+    // Update
+    updateSelectionBar();
+  }
+
+  /*
+   * Private
+   */
+  private void updateSelectionBar() {
+    final Selection selection = getEditorController().getSelection();
+
+    pathBox.getChildren().clear();
+
+    if (selection.isEmpty()) {
+      pathBox.getChildren().add(new Label(I18N.getString("selectionbar.no.selected")));
+    } else {
+      if (selection.getGroup() instanceof ObjectSelectionGroup) {
+        final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
+        assert osg.getItems().isEmpty() == false;
+
+        FXOMObject fxomObject = osg.getItems().iterator().next();
+        // Recursive error report for the leaf object only
+        //                boolean recursive = true;
+        while (fxomObject != null) {
+          final DesignHierarchyMask mask = new DesignHierarchyMask(fxomObject);
+          final String entryText = makeEntryText(mask);
+          final Hyperlink boxItem = new Hyperlink();
+          boxItem.setText(entryText);
+          final Node graphic;
+          // Do not display warning icon anymore :
+          // See DTL-6535 : Should we show warnings in the selection bar ?
+          //                    final List<ErrorReportEntry> entries =
+          // getErrorReportEntries(fxomObject, recursive);
+          //                    if (entries != null) {
+          //                        assert !entries.isEmpty();
+          //                        final ImageView classNameImageView
+          //                                = new ImageView(mask.getClassNameIcon());
+          //                        final ImageView warningBadgeImageView
+          //                                = new ImageView(warningBadgeImage);
+          //                        final StackPane iconsStack = new StackPane();
+          //                        iconsStack.getChildren().setAll(classNameImageView,
+          // warningBadgeImageView);
+          //                        // Update tooltip with the first entry
+          //                        final Tooltip iconsTooltip = new
+          // Tooltip(entries.get(0).toString());
+          //
+          //                        // We use a label to set a tooltip over the node icon
+          //                        // (StackPane does not allow to set tooltips)
+          //                        graphic = new Label();
+          //                        ((Label) graphic).setGraphic(iconsStack);
+          //                        ((Label) graphic).setTooltip(iconsTooltip);
+          //                    } else {
+          graphic = new ImageView(mask.getClassNameIcon());
+          //                    }
+          boxItem.setGraphic(graphic);
+          boxItem.setFocusTraversable(false);
+          boxItem.setUserData(fxomObject);
+          boxItem.setOnAction(hyperlinkHandler);
+          pathBox.getChildren().add(0, boxItem);
+
+          // The last 2 box item should never show ellipsis
+          if (pathBox.getChildren().size() <= 3) {
+            boxItem.setMinWidth(Region.USE_PREF_SIZE);
+            HBox.setHgrow(boxItem, Priority.ALWAYS);
+          } else {
+            boxItem.setMinWidth(graphic.getBoundsInLocal().getWidth());
+          }
+
+          fxomObject = mask.getParentFXOMObject();
+          // Add selection chevron if needed
+          if (fxomObject != null) {
+            // We cannot share the image view to avoid
+            // Children: duplicate children added
+            ImageView img = new ImageView(selectionChevronImage);
+            StackPane sp = new StackPane();
+            sp.getChildren().add(img);
+            sp.setMinWidth(selectionChevronImage.getWidth());
+            pathBox.getChildren().add(0, sp);
+          }
+          // Non recursive error report for the parent
+          //                    recursive = false;
         }
+
+      } else {
+        pathBox.getChildren().add(new Label(I18N.getString("selectionbar.not.object")));
+      }
     }
+  }
 
-    @Override
-    protected void sceneGraphRevisionDidChange() {
-        if (pathBox != null) {
-            updateSelectionBar();
-        }
+  private String makeEntryText(DesignHierarchyMask mask) {
+    final StringBuilder result = new StringBuilder();
+
+    result.append(mask.getClassNameInfo());
+    final String description = mask.getSingleLineDescription();
+    if (description != null) {
+      result.append(" : "); // NOI18N
+      result.append(description);
     }
+    return result.toString();
+  }
 
-    @Override
-    protected void cssRevisionDidChange() {
-        // Nothing to do here
-    }
-
-    @Override
-    protected void jobManagerRevisionDidChange() {
-        sceneGraphRevisionDidChange();
-    }
-
-    @Override
-    protected void editorSelectionDidChange() {
-        if (pathBox != null) {
-            updateSelectionBar();
-        }
-    }
-
-    /*
-     * AbstractFxmlPanelController
-     */
-    @Override
-    protected void controllerDidLoadFxml() {
-        
-        // Sanity checks
-        assert pathBox != null;
-
-        // Update
-        updateSelectionBar();
-    }
-
-    /*
-     * Private
-     */
-    private void updateSelectionBar() {
-        final Selection selection = getEditorController().getSelection();
-
-        pathBox.getChildren().clear();
-
-        if (selection.isEmpty()) {
-            pathBox.getChildren().add(new Label(I18N.getString("selectionbar.no.selected")));
-        } else {
-            if (selection.getGroup() instanceof ObjectSelectionGroup) {
-                final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
-                assert osg.getItems().isEmpty() == false;
-
-                FXOMObject fxomObject = osg.getItems().iterator().next();
-                // Recursive error report for the leaf object only
-//                boolean recursive = true;
-                while (fxomObject != null) {
-                    final DesignHierarchyMask mask = new DesignHierarchyMask(fxomObject);
-                    final String entryText = makeEntryText(mask);
-                    final Hyperlink boxItem = new Hyperlink();
-                    boxItem.setText(entryText);
-                    final Node graphic;
-                    // Do not display warning icon anymore :
-                    // See DTL-6535 : Should we show warnings in the selection bar ?
-//                    final List<ErrorReportEntry> entries = getErrorReportEntries(fxomObject, recursive);
-//                    if (entries != null) {
-//                        assert !entries.isEmpty();
-//                        final ImageView classNameImageView
-//                                = new ImageView(mask.getClassNameIcon());
-//                        final ImageView warningBadgeImageView
-//                                = new ImageView(warningBadgeImage);
-//                        final StackPane iconsStack = new StackPane();
-//                        iconsStack.getChildren().setAll(classNameImageView, warningBadgeImageView);
-//                        // Update tooltip with the first entry
-//                        final Tooltip iconsTooltip = new Tooltip(entries.get(0).toString());
-//
-//                        // We use a label to set a tooltip over the node icon 
-//                        // (StackPane does not allow to set tooltips)
-//                        graphic = new Label();
-//                        ((Label) graphic).setGraphic(iconsStack);
-//                        ((Label) graphic).setTooltip(iconsTooltip);
-//                    } else {
-                        graphic = new ImageView(mask.getClassNameIcon());
-//                    }
-                    boxItem.setGraphic(graphic);
-                    boxItem.setFocusTraversable(false);
-                    boxItem.setUserData(fxomObject);
-                    boxItem.setOnAction(hyperlinkHandler);
-                    pathBox.getChildren().add(0, boxItem);
-
-                    // The last 2 box item should never show ellipsis
-                    if (pathBox.getChildren().size() <= 3) {
-                        boxItem.setMinWidth(Region.USE_PREF_SIZE);
-                        HBox.setHgrow(boxItem, Priority.ALWAYS);
-                    } else {
-                        boxItem.setMinWidth(graphic.getBoundsInLocal().getWidth());
-                    }
-
-                    fxomObject = mask.getParentFXOMObject();
-                    // Add selection chevron if needed
-                    if (fxomObject != null) {
-                        // We cannot share the image view to avoid 
-                        // Children: duplicate children added
-                        ImageView img = new ImageView(selectionChevronImage);
-                        StackPane sp = new StackPane();
-                        sp.getChildren().add(img);
-                        sp.setMinWidth(selectionChevronImage.getWidth());
-                        pathBox.getChildren().add(0, sp);
-                    }
-                    // Non recursive error report for the parent
-//                    recursive = false;
-                }
-
-            } else {
-                pathBox.getChildren().add(new Label(I18N.getString("selectionbar.not.object")));
-            }
-        }
-    }
-
-    private String makeEntryText(DesignHierarchyMask mask) {
-        final StringBuilder result = new StringBuilder();
-
-        result.append(mask.getClassNameInfo());
-        final String description = mask.getSingleLineDescription();
-        if (description != null) {
-            result.append(" : "); //NOI18N
-            result.append(description);
-        }
-        return result.toString();
-    }
-
-    private final EventHandler<ActionEvent> hyperlinkHandler = t -> {
+  private final EventHandler<ActionEvent> hyperlinkHandler =
+      t -> {
         assert t.getSource() instanceof Hyperlink;
         final Hyperlink hyperlink = (Hyperlink) t.getSource();
         assert hyperlink.getUserData() instanceof FXOMObject;
         handleSelect((FXOMObject) hyperlink.getUserData());
         hyperlink.setVisited(false);
-    };
+      };
 
-    private void handleSelect(FXOMObject fxomObject) {
-        final Selection selection = getEditorController().getSelection();
+  private void handleSelect(FXOMObject fxomObject) {
+    final Selection selection = getEditorController().getSelection();
 
-        assert fxomObject.getFxomDocument() == getEditorController().getFxomDocument();
+    assert fxomObject.getFxomDocument() == getEditorController().getFxomDocument();
 
-        selection.select(fxomObject);
-    }
+    selection.select(fxomObject);
+  }
 
-//    private List<ErrorReportEntry> getErrorReportEntries(FXOMObject fxomObject, boolean recursive) {
-//        assert fxomObject != null;
-//        final ErrorReport errorReport = getEditorController().getErrorReport();
-//        return errorReport.query(fxomObject, recursive);
-//    }
+  //    private List<ErrorReportEntry> getErrorReportEntries(FXOMObject fxomObject, boolean
+  // recursive) {
+  //        assert fxomObject != null;
+  //        final ErrorReport errorReport = getEditorController().getErrorReport();
+  //        return errorReport.query(fxomObject, recursive);
+  //    }
 }

@@ -42,64 +42,64 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Paint;
 import javafx.scene.paint.RadialGradient;
 
-/**
- *
- */
+/** */
 public class PaintPropertyMetadata extends ComplexPropertyMetadata<Paint> {
 
-    private final ColorPropertyMetadata colorMetadata;
-    private final ImagePatternPropertyMetadata imagePatternMetadata;
-    private final LinearGradientPropertyMetadata linearGradientMetadata;
-    private final RadialGradientPropertyMetadata radialGradientMetadata;
+  private final ColorPropertyMetadata colorMetadata;
+  private final ImagePatternPropertyMetadata imagePatternMetadata;
+  private final LinearGradientPropertyMetadata linearGradientMetadata;
+  private final RadialGradientPropertyMetadata radialGradientMetadata;
 
-    public PaintPropertyMetadata(PropertyName name, boolean readWrite,
-            Paint defaultValue, InspectorPath inspectorPath) {
-        super(name, Paint.class, readWrite, defaultValue, inspectorPath);
-        colorMetadata = new ColorPropertyMetadata(name, readWrite, null, inspectorPath);
-        imagePatternMetadata = new ImagePatternPropertyMetadata(name, readWrite, null, inspectorPath);
-        linearGradientMetadata = new LinearGradientPropertyMetadata(name, readWrite, null, inspectorPath);
-        radialGradientMetadata = new RadialGradientPropertyMetadata(name, readWrite, null, inspectorPath);
+  public PaintPropertyMetadata(
+      PropertyName name, boolean readWrite, Paint defaultValue, InspectorPath inspectorPath) {
+    super(name, Paint.class, readWrite, defaultValue, inspectorPath);
+    colorMetadata = new ColorPropertyMetadata(name, readWrite, null, inspectorPath);
+    imagePatternMetadata = new ImagePatternPropertyMetadata(name, readWrite, null, inspectorPath);
+    linearGradientMetadata =
+        new LinearGradientPropertyMetadata(name, readWrite, null, inspectorPath);
+    radialGradientMetadata =
+        new RadialGradientPropertyMetadata(name, readWrite, null, inspectorPath);
+  }
+
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public Paint makeValueFromString(String string) {
+    return colorMetadata.makeValueFromString(string);
+  }
+
+  @Override
+  public boolean canMakeStringFromValue(Paint value) {
+    return value instanceof Color;
+  }
+
+  @Override
+  public String makeStringFromValue(Paint value) {
+    assert value instanceof Color; // Because canMakeStringFromValue() is true
+    return colorMetadata.makeStringFromValue((Color) value);
+  }
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Paint value, FXOMDocument fxomDocument) {
+    final FXOMInstance result;
+
+    if (value instanceof Color) {
+      result = colorMetadata.makeFxomInstanceFromValue((Color) value, fxomDocument);
+    } else if (value instanceof ImagePattern) {
+      result = imagePatternMetadata.makeFxomInstanceFromValue((ImagePattern) value, fxomDocument);
+    } else if (value instanceof LinearGradient) {
+      result =
+          linearGradientMetadata.makeFxomInstanceFromValue((LinearGradient) value, fxomDocument);
+    } else if (value instanceof RadialGradient) {
+      result =
+          radialGradientMetadata.makeFxomInstanceFromValue((RadialGradient) value, fxomDocument);
+    } else {
+      assert false;
+      result = colorMetadata.makeFxomInstanceFromValue(Color.BLACK, fxomDocument);
     }
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    
-    @Override
-    public Paint makeValueFromString(String string) {
-        return colorMetadata.makeValueFromString(string);
-    }
-
-    @Override
-    public boolean canMakeStringFromValue(Paint value) {
-        return value instanceof Color;
-    }
-
-    @Override
-    public String makeStringFromValue(Paint value) {
-        assert value instanceof Color; // Because canMakeStringFromValue() is true
-        return colorMetadata.makeStringFromValue((Color) value);
-    }
-
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Paint value, FXOMDocument fxomDocument) {
-        final FXOMInstance result;
-        
-        if (value instanceof Color) {
-            result = colorMetadata.makeFxomInstanceFromValue((Color) value, fxomDocument);
-        } else if (value instanceof ImagePattern) {
-            result = imagePatternMetadata.makeFxomInstanceFromValue((ImagePattern) value, fxomDocument);
-        } else if (value instanceof LinearGradient) {
-            result = linearGradientMetadata.makeFxomInstanceFromValue((LinearGradient) value, fxomDocument);
-        } else if (value instanceof RadialGradient) {
-            result = radialGradientMetadata.makeFxomInstanceFromValue((RadialGradient) value, fxomDocument);
-        } else {
-            assert false;
-            result = colorMetadata.makeFxomInstanceFromValue(Color.BLACK, fxomDocument);
-        }
-        
-        return result;
-    }
-
+    return result;
+  }
 }

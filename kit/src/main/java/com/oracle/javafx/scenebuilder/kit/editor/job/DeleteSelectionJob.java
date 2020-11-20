@@ -37,62 +37,62 @@ import com.oracle.javafx.scenebuilder.kit.editor.selection.ObjectSelectionGroup;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.Selection;
 
 /**
- * This job manages either an ObjectSelectionGroup or a GridSelectionGroup
- * depending on the selection.
+ * This job manages either an ObjectSelectionGroup or a GridSelectionGroup depending on the
+ * selection.
  */
 public class DeleteSelectionJob extends Job {
 
-    private Job subJob;
+  private Job subJob;
 
-    public DeleteSelectionJob(EditorController editorController) {
-        super(editorController);
-        buildSubJobs();
+  public DeleteSelectionJob(EditorController editorController) {
+    super(editorController);
+    buildSubJobs();
+  }
+
+  /*
+   * Job
+   */
+  @Override
+  public boolean isExecutable() {
+    return subJob != null && subJob.isExecutable();
+  }
+
+  @Override
+  public void execute() {
+    subJob.execute();
+  }
+
+  @Override
+  public void undo() {
+    subJob.undo();
+  }
+
+  @Override
+  public void redo() {
+    subJob.redo();
+  }
+
+  @Override
+  public String getDescription() {
+    return subJob.getDescription();
+  }
+
+  Job getSubJob() {
+    return subJob;
+  }
+
+  /*
+   * Private
+   */
+  private void buildSubJobs() {
+
+    final Selection selection = getEditorController().getSelection();
+    if (selection.getGroup() instanceof ObjectSelectionGroup) {
+      subJob = new DeleteObjectSelectionJob(getEditorController());
+    } else if (selection.getGroup() instanceof GridSelectionGroup) {
+      subJob = new DeleteGridSelectionJob(getEditorController());
+    } else {
+      assert selection.getGroup() == null : "Add implementation for " + selection.getGroup();
     }
-
-    /*
-     * Job
-     */
-    @Override
-    public boolean isExecutable() {
-        return subJob != null && subJob.isExecutable();
-    }
-
-    @Override
-    public void execute() {
-        subJob.execute();
-    }
-
-    @Override
-    public void undo() {
-        subJob.undo();
-    }
-
-    @Override
-    public void redo() {
-        subJob.redo();
-    }
-
-    @Override
-    public String getDescription() {
-        return subJob.getDescription();
-    }
-
-    Job getSubJob() {
-        return subJob;
-    }
-
-    /*
-     * Private
-     */
-    private void buildSubJobs() {
-
-        final Selection selection = getEditorController().getSelection();
-        if (selection.getGroup() instanceof ObjectSelectionGroup) {
-            subJob = new DeleteObjectSelectionJob(getEditorController());
-        } else if (selection.getGroup() instanceof GridSelectionGroup) {
-            subJob = new DeleteGridSelectionJob(getEditorController());
-        } else {
-            assert selection.getGroup() == null : "Add implementation for " + selection.getGroup();
-        }
-    }
+  }
 }

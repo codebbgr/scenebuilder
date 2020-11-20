@@ -32,93 +32,92 @@
 package com.oracle.javafx.scenebuilder.kit.editor.job.atomic;
 
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
-import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.editor.job.Job;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
+import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
 import java.util.Objects;
 
-/**
- *
- */
+/** */
 public class ModifyObjectJob extends Job {
 
-    private final FXOMInstance fxomInstance;
-    private final ValuePropertyMetadata propertyMetadata;
-    private final Object newValue;
-    private final Object oldValue;
-    private final String description;
+  private final FXOMInstance fxomInstance;
+  private final ValuePropertyMetadata propertyMetadata;
+  private final Object newValue;
+  private final Object oldValue;
+  private final String description;
 
-    public ModifyObjectJob(
-            FXOMInstance fxomInstance, 
-            ValuePropertyMetadata propertyMetadata, 
-            Object newValue, 
-            EditorController editorController) {
-        super(editorController);
+  public ModifyObjectJob(
+      FXOMInstance fxomInstance,
+      ValuePropertyMetadata propertyMetadata,
+      Object newValue,
+      EditorController editorController) {
+    super(editorController);
 
-        assert fxomInstance != null;
-        assert fxomInstance.getSceneGraphObject() != null;
-        assert propertyMetadata != null;
+    assert fxomInstance != null;
+    assert fxomInstance.getSceneGraphObject() != null;
+    assert propertyMetadata != null;
 
-        this.fxomInstance = fxomInstance;
-        this.propertyMetadata = propertyMetadata;
-        this.newValue = newValue;
-        this.oldValue = propertyMetadata.getValueObject(fxomInstance);
-        this.description = I18N.getString("label.action.edit.set.1",
-                propertyMetadata.getName().toString(),
-                fxomInstance.getSceneGraphObject().getClass().getSimpleName());
-    }
+    this.fxomInstance = fxomInstance;
+    this.propertyMetadata = propertyMetadata;
+    this.newValue = newValue;
+    this.oldValue = propertyMetadata.getValueObject(fxomInstance);
+    this.description =
+        I18N.getString(
+            "label.action.edit.set.1",
+            propertyMetadata.getName().toString(),
+            fxomInstance.getSceneGraphObject().getClass().getSimpleName());
+  }
 
-    public ModifyObjectJob(
-            FXOMInstance fxomInstance,
-            ValuePropertyMetadata propertyMetadata,
-            Object newValue,
-            EditorController editorController,
-            String description) {
-        super(editorController);
+  public ModifyObjectJob(
+      FXOMInstance fxomInstance,
+      ValuePropertyMetadata propertyMetadata,
+      Object newValue,
+      EditorController editorController,
+      String description) {
+    super(editorController);
 
-        assert fxomInstance != null;
-        assert fxomInstance.getSceneGraphObject() != null;
-        assert propertyMetadata != null;
+    assert fxomInstance != null;
+    assert fxomInstance.getSceneGraphObject() != null;
+    assert propertyMetadata != null;
 
-        this.fxomInstance = fxomInstance;
-        this.propertyMetadata = propertyMetadata;
-        this.newValue = newValue;
-        this.oldValue = propertyMetadata.getValueObject(fxomInstance);
-        this.description = description;
-    }
+    this.fxomInstance = fxomInstance;
+    this.propertyMetadata = propertyMetadata;
+    this.newValue = newValue;
+    this.oldValue = propertyMetadata.getValueObject(fxomInstance);
+    this.description = description;
+  }
 
-    /*
-     * Job
-     */
-    @Override
-    public boolean isExecutable() {
-        final Object currentValue = propertyMetadata.getValueObject(fxomInstance);
-        return Objects.equals(newValue, currentValue) == false;
-    }
+  /*
+   * Job
+   */
+  @Override
+  public boolean isExecutable() {
+    final Object currentValue = propertyMetadata.getValueObject(fxomInstance);
+    return Objects.equals(newValue, currentValue) == false;
+  }
 
-    @Override
-    public void execute() {
-        redo();
-    }
+  @Override
+  public void execute() {
+    redo();
+  }
 
-    @Override
-    public void undo() {
-        getEditorController().getFxomDocument().beginUpdate();
-        this.propertyMetadata.setValueObject(fxomInstance, oldValue);
-        getEditorController().getFxomDocument().endUpdate();
-    }
+  @Override
+  public void undo() {
+    getEditorController().getFxomDocument().beginUpdate();
+    this.propertyMetadata.setValueObject(fxomInstance, oldValue);
+    getEditorController().getFxomDocument().endUpdate();
+  }
 
-    @Override
-    public void redo() {
-        getEditorController().getFxomDocument().beginUpdate();
-        this.propertyMetadata.setValueObject(fxomInstance, newValue);
-        getEditorController().getFxomDocument().endUpdate();
-    }
+  @Override
+  public void redo() {
+    getEditorController().getFxomDocument().beginUpdate();
+    this.propertyMetadata.setValueObject(fxomInstance, newValue);
+    getEditorController().getFxomDocument().endUpdate();
+  }
 
-    @Override
-    public String getDescription() {
-        return description;
-    }
-
+  @Override
+  public String getDescription() {
+    return description;
+  }
 }

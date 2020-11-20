@@ -46,122 +46,119 @@ import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.StackedBarChart;
 import javafx.scene.chart.XYChart;
 
-/**
- *
- */
+/** */
 class XYChartSampleData extends AbstractSampleData {
-    
-    private final List<XYChart.Series<Object,Object>> samples = new ArrayList<>();
-    private final List<String> categories = new ArrayList<>();
-    private Class<?> sampleXAxisClass;
-    private Class<?> sampleYAxisClass;
 
-    public static boolean isKnownXYChart(Object obj) {
-        final boolean result;
-        
-        if (obj instanceof XYChart) {
-            final Class<?> objClass = obj.getClass();
-            result = (objClass == BarChart.class 
-                    || objClass == AreaChart.class
-                    || objClass == BubbleChart.class
-                    || objClass == LineChart.class
-                    || objClass == ScatterChart.class
-                    || objClass == StackedBarChart.class
-                    || objClass == StackedAreaChart.class);
-        } else {
-            result = false;
-        }
-        
-        return result;
+  private final List<XYChart.Series<Object, Object>> samples = new ArrayList<>();
+  private final List<String> categories = new ArrayList<>();
+  private Class<?> sampleXAxisClass;
+  private Class<?> sampleYAxisClass;
+
+  public static boolean isKnownXYChart(Object obj) {
+    final boolean result;
+
+    if (obj instanceof XYChart) {
+      final Class<?> objClass = obj.getClass();
+      result =
+          (objClass == BarChart.class
+              || objClass == AreaChart.class
+              || objClass == BubbleChart.class
+              || objClass == LineChart.class
+              || objClass == ScatterChart.class
+              || objClass == StackedBarChart.class
+              || objClass == StackedAreaChart.class);
+    } else {
+      result = false;
     }
 
-    /*
-     * AbstractSampleData
-     */
-    
-    @Override
-    public void applyTo(Object sceneGraphObject) {
-        assert sceneGraphObject instanceof XYChart;
-        
-        @SuppressWarnings("unchecked")        
-        final XYChart<Object,Object> xyChart = (XYChart<Object,Object>) sceneGraphObject;
-        updateSamples(xyChart);
-        xyChart.getData().clear();
-        xyChart.getData().addAll(samples);
-        if (xyChart.getXAxis().getClass() == CategoryAxis.class) {
-            final CategoryAxis axis = (CategoryAxis)(Axis<?>) xyChart.getXAxis();
-            axis.getCategories().setAll(categories);
-        }
-        if (xyChart.getYAxis().getClass() == CategoryAxis.class) {
-            final CategoryAxis axis = (CategoryAxis)(Axis<?>) xyChart.getYAxis();
-            axis.getCategories().setAll(categories);
-        }
-    }
-    
-    @Override
-    public void removeFrom(Object sceneGraphObject) {
-        assert sceneGraphObject instanceof XYChart;
-        
-        @SuppressWarnings("unchecked")        
-        final XYChart<Object,Object> xyChart = (XYChart<Object,Object>) sceneGraphObject;
-        xyChart.getData().clear();
-        if (xyChart.getXAxis().getClass() == CategoryAxis.class) {
-            final CategoryAxis axis = (CategoryAxis)(Axis<?>) xyChart.getXAxis();
-            axis.getCategories().clear();
-        }
-        if (xyChart.getYAxis().getClass() == CategoryAxis.class) {
-            final CategoryAxis axis = (CategoryAxis)(Axis<?>) xyChart.getYAxis();
-            axis.getCategories().clear();
-        }
-    }
-    
-    
-    /*
-     * Private
-     */
-    
-    private void updateSamples(XYChart<?,?> xyChart) {
-        
-        final Class<?> xAxisClass = xyChart.getXAxis().getClass();
-        final Class<?> yAxisClass = xyChart.getYAxis().getClass();
-        
-        if ((xAxisClass != sampleXAxisClass) || (yAxisClass != sampleYAxisClass)) {
-            sampleXAxisClass = xAxisClass;
-            sampleYAxisClass = yAxisClass;
-            
-            for (int i = 0; i < 3; i++) {
-                final XYChart.Series<Object, Object> serie = new XYChart.Series<>();
-                for (int j = 0; j < 10; j++) {
-                    final Object xValue = makeValue(sampleXAxisClass, i);
-                    final Object yValue = makeValue(sampleYAxisClass, i);
-                    final XYChart.Data<Object, Object> data = new XYChart.Data<>(xValue, yValue);
-                    serie.getData().add(data);
+    return result;
+  }
 
-                }
-                samples.add(serie);
-            }
-            
-            categories.clear();
-            if ((sampleXAxisClass == CategoryAxis.class) || (sampleYAxisClass == CategoryAxis.class)) {
-                for (int j = 0; j < 10; j++) {
-                    categories.add(String.valueOf(2000 + j));
-                }
-            }
-        }
+  /*
+   * AbstractSampleData
+   */
+
+  @Override
+  public void applyTo(Object sceneGraphObject) {
+    assert sceneGraphObject instanceof XYChart;
+
+    @SuppressWarnings("unchecked")
+    final XYChart<Object, Object> xyChart = (XYChart<Object, Object>) sceneGraphObject;
+    updateSamples(xyChart);
+    xyChart.getData().clear();
+    xyChart.getData().addAll(samples);
+    if (xyChart.getXAxis().getClass() == CategoryAxis.class) {
+      final CategoryAxis axis = (CategoryAxis) (Axis<?>) xyChart.getXAxis();
+      axis.getCategories().setAll(categories);
     }
-    
-    private Object makeValue(Class<?> axisClass, int index) {
-        final Object result;
-        
-        if (axisClass == NumberAxis.class) {
-            result = Math.random() * 100.0;
-        } else if (axisClass == CategoryAxis.class) {
-            result = String.valueOf(2000 + index);
-        } else {
-            assert false : "Unexpected Axis subclass" + axisClass;
-            result = String.valueOf(index);
-        }
-        
-        return result;
+    if (xyChart.getYAxis().getClass() == CategoryAxis.class) {
+      final CategoryAxis axis = (CategoryAxis) (Axis<?>) xyChart.getYAxis();
+      axis.getCategories().setAll(categories);
     }
+  }
+
+  @Override
+  public void removeFrom(Object sceneGraphObject) {
+    assert sceneGraphObject instanceof XYChart;
+
+    @SuppressWarnings("unchecked")
+    final XYChart<Object, Object> xyChart = (XYChart<Object, Object>) sceneGraphObject;
+    xyChart.getData().clear();
+    if (xyChart.getXAxis().getClass() == CategoryAxis.class) {
+      final CategoryAxis axis = (CategoryAxis) (Axis<?>) xyChart.getXAxis();
+      axis.getCategories().clear();
+    }
+    if (xyChart.getYAxis().getClass() == CategoryAxis.class) {
+      final CategoryAxis axis = (CategoryAxis) (Axis<?>) xyChart.getYAxis();
+      axis.getCategories().clear();
+    }
+  }
+
+  /*
+   * Private
+   */
+
+  private void updateSamples(XYChart<?, ?> xyChart) {
+
+    final Class<?> xAxisClass = xyChart.getXAxis().getClass();
+    final Class<?> yAxisClass = xyChart.getYAxis().getClass();
+
+    if ((xAxisClass != sampleXAxisClass) || (yAxisClass != sampleYAxisClass)) {
+      sampleXAxisClass = xAxisClass;
+      sampleYAxisClass = yAxisClass;
+
+      for (int i = 0; i < 3; i++) {
+        final XYChart.Series<Object, Object> serie = new XYChart.Series<>();
+        for (int j = 0; j < 10; j++) {
+          final Object xValue = makeValue(sampleXAxisClass, i);
+          final Object yValue = makeValue(sampleYAxisClass, i);
+          final XYChart.Data<Object, Object> data = new XYChart.Data<>(xValue, yValue);
+          serie.getData().add(data);
+        }
+        samples.add(serie);
+      }
+
+      categories.clear();
+      if ((sampleXAxisClass == CategoryAxis.class) || (sampleYAxisClass == CategoryAxis.class)) {
+        for (int j = 0; j < 10; j++) {
+          categories.add(String.valueOf(2000 + j));
+        }
+      }
+    }
+  }
+
+  private Object makeValue(Class<?> axisClass, int index) {
+    final Object result;
+
+    if (axisClass == NumberAxis.class) {
+      result = Math.random() * 100.0;
+    } else if (axisClass == CategoryAxis.class) {
+      result = String.valueOf(2000 + index);
+    } else {
+      assert false : "Unexpected Axis subclass" + axisClass;
+      result = String.valueOf(index);
+    }
+
+    return result;
+  }
 }

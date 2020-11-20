@@ -31,38 +31,32 @@
  */
 package com.oracle.javafx.scenebuilder.kit.metadata.klass;
 
-/**
- *
- * 
- */
+/** */
 public class CustomComponentClassMetadata extends ComponentClassMetadata {
-    
-    private final Exception introspectionException;
 
-    public CustomComponentClassMetadata(Class<?> klass, 
-            ComponentClassMetadata parentMetadata, Exception introspectionException) {
-        super(klass, parentMetadata);
-        this.introspectionException = introspectionException;
-    }
-    
-    public Exception getIntrospectionException() {
-        return introspectionException;
-    }
-    
-    
-    /*
-     * Object
-     */
-    
-    @Override
-    public int hashCode() {
-        return super.hashCode(); // Only to please FindBugs
-    }
+  private final Exception introspectionException;
 
-    @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj); // Only to please FindBugs
-    }
-    
-    
+  public CustomComponentClassMetadata(
+      Class<?> klass, ComponentClassMetadata parentMetadata, Exception introspectionException) {
+    super(klass, parentMetadata);
+    this.introspectionException = introspectionException;
+  }
+
+  public Exception getIntrospectionException() {
+    return introspectionException;
+  }
+
+  /*
+   * Object
+   */
+
+  @Override
+  public int hashCode() {
+    return super.hashCode(); // Only to please FindBugs
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    return super.equals(obj); // Only to please FindBugs
+  }
 }

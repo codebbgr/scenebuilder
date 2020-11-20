@@ -42,93 +42,89 @@ import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.scene.shape.Ellipse;
 
-/**
- *
- * 
- */
+/** */
 public class EllipseResizer extends AbstractResizer<Ellipse> {
 
-    private final double originalRadiusX;
-    private final double originalRadiusY;
-    private final PropertyName radiusXName  = new PropertyName("radiusX"); //NOI18N
-    private final PropertyName radiusYName = new PropertyName("radiusY"); //NOI18N
-    private final List<PropertyName> propertyNames = new ArrayList<>();
-    
-    public EllipseResizer(Ellipse sceneGraphObject) {
-        super(sceneGraphObject);
-        originalRadiusX = sceneGraphObject.getRadiusX();
-        originalRadiusY = sceneGraphObject.getRadiusY();
-        propertyNames.add(radiusXName);
-        propertyNames.add(radiusYName);
+  private final double originalRadiusX;
+  private final double originalRadiusY;
+  private final PropertyName radiusXName = new PropertyName("radiusX"); // NOI18N
+  private final PropertyName radiusYName = new PropertyName("radiusY"); // NOI18N
+  private final List<PropertyName> propertyNames = new ArrayList<>();
+
+  public EllipseResizer(Ellipse sceneGraphObject) {
+    super(sceneGraphObject);
+    originalRadiusX = sceneGraphObject.getRadiusX();
+    originalRadiusY = sceneGraphObject.getRadiusY();
+    propertyNames.add(radiusXName);
+    propertyNames.add(radiusYName);
+  }
+
+  /*
+   * AbstractResizer
+   */
+
+  @Override
+  public final Bounds computeBounds(double width, double height) {
+    final double radiusX = Math.round(width / 2.0);
+    final double radiusY = Math.round(height / 2.0);
+    final double minX = sceneGraphObject.getCenterX() - radiusX;
+    final double minY = sceneGraphObject.getCenterY() - radiusY;
+    return new BoundingBox(minX, minY, 2 * radiusX, 2 * radiusY);
+  }
+
+  @Override
+  public Feature getFeature() {
+    return Feature.FREE;
+  }
+
+  @Override
+  public void changeWidth(double width) {
+    sceneGraphObject.setRadiusX(Math.round(width / 2.0));
+  }
+
+  @Override
+  public void changeHeight(double height) {
+    sceneGraphObject.setRadiusY(Math.round(height / 2.0));
+  }
+
+  @Override
+  public void revertToOriginalSize() {
+    sceneGraphObject.setRadiusX(originalRadiusX);
+    sceneGraphObject.setRadiusY(originalRadiusY);
+  }
+
+  @Override
+  public List<PropertyName> getPropertyNames() {
+    return propertyNames;
+  }
+
+  @Override
+  public Object getValue(PropertyName propertyName) {
+    assert propertyName != null;
+    assert propertyNames.contains(propertyName);
+
+    final Object result;
+    if (propertyName.equals(radiusXName)) {
+      result = sceneGraphObject.getRadiusX();
+    } else if (propertyName.equals(radiusYName)) {
+      result = sceneGraphObject.getRadiusY();
+    } else {
+      // Emergency code
+      result = null;
     }
 
-    /*
-     * AbstractResizer
-     */
-    
-    @Override
-    public final Bounds computeBounds(double width, double height) {
-        final double radiusX = Math.round(width / 2.0);
-        final double radiusY = Math.round(height / 2.0);
-        final double minX = sceneGraphObject.getCenterX() - radiusX;
-        final double minY = sceneGraphObject.getCenterY() - radiusY;
-        return new BoundingBox(minX, minY, 2 * radiusX, 2 * radiusY);
-    }
- 
-    @Override
-    public Feature getFeature() {
-        return Feature.FREE;
-    }
+    return result;
+  }
 
-    @Override
-    public void changeWidth(double width) {
-        sceneGraphObject.setRadiusX(Math.round(width / 2.0));
+  @Override
+  public Map<PropertyName, Object> getChangeMap() {
+    final Map<PropertyName, Object> result = new HashMap<>();
+    if (MathUtils.equals(sceneGraphObject.getRadiusX(), originalRadiusX) == false) {
+      result.put(radiusXName, sceneGraphObject.getRadiusX());
     }
-
-    @Override
-    public void changeHeight(double height) {
-        sceneGraphObject.setRadiusY(Math.round(height / 2.0));
+    if (MathUtils.equals(sceneGraphObject.getRadiusY(), originalRadiusY) == false) {
+      result.put(radiusYName, sceneGraphObject.getRadiusY());
     }
-
-    @Override
-    public void revertToOriginalSize() {
-        sceneGraphObject.setRadiusX(originalRadiusX);
-        sceneGraphObject.setRadiusY(originalRadiusY);
-    }
-
-    @Override
-    public List<PropertyName> getPropertyNames() {
-        return propertyNames;
-    }
-
-    @Override
-    public Object getValue(PropertyName propertyName) {
-        assert propertyName != null;
-        assert propertyNames.contains(propertyName);
-        
-        final Object result;
-        if (propertyName.equals(radiusXName)) {
-            result = sceneGraphObject.getRadiusX();
-        } else if (propertyName.equals(radiusYName)) {
-            result = sceneGraphObject.getRadiusY();
-        } else {
-            // Emergency code
-            result = null;
-        }
-        
-        return result;
-    }
-
-    @Override
-    public Map<PropertyName, Object> getChangeMap() {
-        final Map<PropertyName, Object> result = new HashMap<>();
-        if (MathUtils.equals(sceneGraphObject.getRadiusX(), originalRadiusX) == false) {
-            result.put(radiusXName, sceneGraphObject.getRadiusX());
-        }
-        if (MathUtils.equals(sceneGraphObject.getRadiusY(), originalRadiusY) == false) {
-            result.put(radiusYName, sceneGraphObject.getRadiusY());
-        }
-        return result;
-    }
-
+    return result;
+  }
 }

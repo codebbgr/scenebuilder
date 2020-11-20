@@ -44,50 +44,70 @@ import javafx.scene.effect.BlurType;
 import javafx.scene.effect.Shadow;
 import javafx.scene.paint.Color;
 
-/**
- *
- */
+/** */
 public class ShadowPropertyMetadata extends ComplexPropertyMetadata<Shadow> {
-    
-    private final EnumerationPropertyMetadata blurTypeMetadata
-            = new EnumerationPropertyMetadata(new PropertyName("blurType"), //NOI18N
-            BlurType.class, true, BlurType.THREE_PASS_BOX, InspectorPath.UNUSED);
-    private final ColorPropertyMetadata colorMetadata
-            = new ColorPropertyMetadata(new PropertyName("color"), //NOI18N
-            true /* readWrite */, Color.BLACK, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata heightMetadata
-            = new DoublePropertyMetadata(new PropertyName("height"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.SIZE, true /* readWrite */, 21.0, InspectorPath.UNUSED);
-    private final EffectPropertyMetadata inputMetadata
-            = new EffectPropertyMetadata(new PropertyName("input"), //NOI18N
-            true /* readWrite */, null, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata widthMetadata
-            = new DoublePropertyMetadata(new PropertyName("width"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.SIZE, true /* readWrite */, 21.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata radiusMetadata
-            = new DoublePropertyMetadata(new PropertyName("radius"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.SIZE, true /* readWrite */, 10.0, InspectorPath.UNUSED);
 
-    public ShadowPropertyMetadata(PropertyName name, boolean readWrite, 
-            Shadow defaultValue, InspectorPath inspectorPath) {
-        super(name, Shadow.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final EnumerationPropertyMetadata blurTypeMetadata =
+      new EnumerationPropertyMetadata(
+          new PropertyName("blurType"), // NOI18N
+          BlurType.class,
+          true,
+          BlurType.THREE_PASS_BOX,
+          InspectorPath.UNUSED);
+  private final ColorPropertyMetadata colorMetadata =
+      new ColorPropertyMetadata(
+          new PropertyName("color"), // NOI18N
+          true /* readWrite */,
+          Color.BLACK,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata heightMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("height"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.SIZE,
+          true /* readWrite */,
+          21.0,
+          InspectorPath.UNUSED);
+  private final EffectPropertyMetadata inputMetadata =
+      new EffectPropertyMetadata(
+          new PropertyName("input"), // NOI18N
+          true /* readWrite */,
+          null,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata widthMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("width"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.SIZE,
+          true /* readWrite */,
+          21.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata radiusMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("radius"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.SIZE,
+          true /* readWrite */,
+          10.0,
+          InspectorPath.UNUSED);
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Shadow value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        blurTypeMetadata.setValue(result, value.getBlurType().toString());
-        colorMetadata.setValue(result, value.getColor());
-        heightMetadata.setValue(result, value.getHeight());
-        inputMetadata.setValue(result, value.getInput());
-        radiusMetadata.setValue(result, value.getRadius());
-        widthMetadata.setValue(result, value.getWidth());
+  public ShadowPropertyMetadata(
+      PropertyName name, boolean readWrite, Shadow defaultValue, InspectorPath inspectorPath) {
+    super(name, Shadow.class, readWrite, defaultValue, inspectorPath);
+  }
 
-        return result;
-    }
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Shadow value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    blurTypeMetadata.setValue(result, value.getBlurType().toString());
+    colorMetadata.setValue(result, value.getColor());
+    heightMetadata.setValue(result, value.getHeight());
+    inputMetadata.setValue(result, value.getInput());
+    radiusMetadata.setValue(result, value.getRadius());
+    widthMetadata.setValue(result, value.getWidth());
+
+    return result;
+  }
 }

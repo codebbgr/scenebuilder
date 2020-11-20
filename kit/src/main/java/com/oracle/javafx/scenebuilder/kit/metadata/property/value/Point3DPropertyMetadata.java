@@ -37,39 +37,48 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.geometry.Point3D;
 
-/**
- *
- */
+/** */
 public class Point3DPropertyMetadata extends ComplexPropertyMetadata<Point3D> {
 
-    private final DoublePropertyMetadata xMetadata
-            = new DoublePropertyMetadata(new PropertyName("x"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata yMetadata
-            = new DoublePropertyMetadata(new PropertyName("y"),  //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata zMetadata
-            = new DoublePropertyMetadata(new PropertyName("z"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
+  private final DoublePropertyMetadata xMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("x"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata yMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("y"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata zMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("z"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
 
-    public Point3DPropertyMetadata(PropertyName name, boolean readWrite, 
-            Point3D defaultValue, InspectorPath inspectorPath) {
-        super(name, Point3D.class, readWrite, defaultValue, inspectorPath);
-    }
+  public Point3DPropertyMetadata(
+      PropertyName name, boolean readWrite, Point3D defaultValue, InspectorPath inspectorPath) {
+    super(name, Point3D.class, readWrite, defaultValue, inspectorPath);
+  }
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Point3D value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        xMetadata.setValue(result, value.getX());
-        yMetadata.setValue(result, value.getY());
-        zMetadata.setValue(result, value.getZ());
+  /*
+   * ComplexPropertyMetadata
+   */
 
-        return result;
-    }
-    
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Point3D value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    xMetadata.setValue(result, value.getX());
+    yMetadata.setValue(result, value.getY());
+    zMetadata.setValue(result, value.getZ());
+
+    return result;
+  }
 }

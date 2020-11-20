@@ -40,102 +40,98 @@ import java.util.List;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 
-/**
- *
- */
+/** */
 class HorizontalLineIndex {
-    
-    private static final HorizontalLineComparator comparator = new HorizontalLineComparator();
-    
-    private final List<HorizontalSegment> lines = new ArrayList<>();
-    private boolean sorted;
-    
 
-    public void addLine(HorizontalSegment s) {
-        lines.add(s);
-        sorted = false;
-    }
-    
-    public void clear() {
-        lines.clear();
-    }
-    
-    public boolean isEmpty() {
-        return lines.isEmpty();
-    }
-    
-    public List<HorizontalSegment> matchNorth(Bounds boundsInScene, double threshold) {
-        assert boundsInScene.isEmpty() == false;
-        return matchY(boundsInScene.getMinY(), threshold);
-    }
-    
-    public List<HorizontalSegment> matchSouth(Bounds boundsInScene, double threshold) {
-        assert boundsInScene.isEmpty() == false;
-        return matchY(boundsInScene.getMaxY(), threshold);
-    }
-    
-    public List<HorizontalSegment> matchCenter(Bounds boundsInScene, double threshold) {
-        assert boundsInScene.isEmpty() == false;
-        final double minY = boundsInScene.getMinY();
-        final double maxY = boundsInScene.getMaxY();
-        return matchY((minY + maxY) / 2.0, threshold);
-    }
+  private static final HorizontalLineComparator comparator = new HorizontalLineComparator();
 
-    public List<HorizontalSegment> matchPoint(Point2D point, double threshold) {
-        assert point != null;
-        return matchXY(point.getX(), point.getY(), threshold);
+  private final List<HorizontalSegment> lines = new ArrayList<>();
+  private boolean sorted;
+
+  public void addLine(HorizontalSegment s) {
+    lines.add(s);
+    sorted = false;
+  }
+
+  public void clear() {
+    lines.clear();
+  }
+
+  public boolean isEmpty() {
+    return lines.isEmpty();
+  }
+
+  public List<HorizontalSegment> matchNorth(Bounds boundsInScene, double threshold) {
+    assert boundsInScene.isEmpty() == false;
+    return matchY(boundsInScene.getMinY(), threshold);
+  }
+
+  public List<HorizontalSegment> matchSouth(Bounds boundsInScene, double threshold) {
+    assert boundsInScene.isEmpty() == false;
+    return matchY(boundsInScene.getMaxY(), threshold);
+  }
+
+  public List<HorizontalSegment> matchCenter(Bounds boundsInScene, double threshold) {
+    assert boundsInScene.isEmpty() == false;
+    final double minY = boundsInScene.getMinY();
+    final double maxY = boundsInScene.getMaxY();
+    return matchY((minY + maxY) / 2.0, threshold);
+  }
+
+  public List<HorizontalSegment> matchPoint(Point2D point, double threshold) {
+    assert point != null;
+    return matchXY(point.getX(), point.getY(), threshold);
+  }
+
+  /*
+   * Private
+   */
+
+  private List<HorizontalSegment> matchY(double targetY, double threshold) {
+    assert threshold >= 0;
+
+    if (sorted == false) {
+      Collections.sort(lines, comparator);
     }
-    
-    /*
-     * Private
-     */
-    
-    private List<HorizontalSegment> matchY(double targetY, double threshold) {
-        assert threshold >= 0;
-        
-        if (sorted == false) {
-            Collections.sort(lines, comparator);
+    double bestDelta = Double.MAX_VALUE;
+    final List<HorizontalSegment> result = new ArrayList<>();
+    for (HorizontalSegment l : lines) {
+      final double delta = Math.abs(l.getY1() - targetY);
+      if (delta < threshold) {
+        if (MathUtils.equals(delta, bestDelta)) {
+          result.add(l);
+        } else if (delta < bestDelta) {
+          bestDelta = delta;
+          result.clear();
+          result.add(l);
         }
-        double bestDelta = Double.MAX_VALUE;
-        final List<HorizontalSegment> result = new ArrayList<>();
-        for (HorizontalSegment l : lines) {
-            final double delta = Math.abs(l.getY1() - targetY);
-            if (delta < threshold) {
-                if (MathUtils.equals(delta, bestDelta)) {
-                    result.add(l);
-                } else if (delta < bestDelta) {
-                    bestDelta = delta;
-                    result.clear();
-                    result.add(l);
-                }
-            }
-        }
-        
-        return result;
+      }
     }
 
-    private List<HorizontalSegment> matchXY(double targetX, double targetY, double threshold) {
-        assert threshold >= 0;
+    return result;
+  }
 
-        if (sorted == false) {
-            Collections.sort(lines, comparator);
-        }
-        double bestDelta = Double.MAX_VALUE;
-        final List<HorizontalSegment> result = new ArrayList<>();
-        for (HorizontalSegment l : lines) {
-            final double delta = Math.abs(l.getY1() - targetY);
-            if (delta < threshold && targetX >= l.getX1() && targetX <= l.getX2()) {
-                if (MathUtils.equals(delta, bestDelta)) {
-                    result.add(l);
-                } else if (delta < bestDelta) {
-                    bestDelta = delta;
-                    result.clear();
-                    result.add(l);
-                }
-            }
-        }
+  private List<HorizontalSegment> matchXY(double targetX, double targetY, double threshold) {
+    assert threshold >= 0;
 
-        return result;
+    if (sorted == false) {
+      Collections.sort(lines, comparator);
     }
-    
+    double bestDelta = Double.MAX_VALUE;
+    final List<HorizontalSegment> result = new ArrayList<>();
+    for (HorizontalSegment l : lines) {
+      final double delta = Math.abs(l.getY1() - targetY);
+      if (delta < threshold && targetX >= l.getX1() && targetX <= l.getX2()) {
+        if (MathUtils.equals(delta, bestDelta)) {
+          result.add(l);
+        } else if (delta < bestDelta) {
+          bestDelta = delta;
+          result.clear();
+          result.add(l);
+        }
+      }
+    }
+
+    return result;
+  }
 }

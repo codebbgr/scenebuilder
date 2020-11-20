@@ -40,86 +40,90 @@ import javafx.util.Duration;
 /**
  * Used to schedule :
  *
- * - auto scrolling animation when reaching the TOP/BOTTOM of the hierarchy panel
+ * <p>- auto scrolling animation when reaching the TOP/BOTTOM of the hierarchy panel
  *
- * p
+ * <p>p
+ *
  * @treatAsPrivate
  */
 public class HierarchyAnimationScheduler {
 
-    private Timeline timeline;
-    // Rate value used to set the timeline duration.
-    // The bigger it is, the slower the animation will be.
-    private final double rate = 4.0;
+  private Timeline timeline;
+  // Rate value used to set the timeline duration.
+  // The bigger it is, the slower the animation will be.
+  private final double rate = 4.0;
 
-    public void playDecrementAnimation(final ScrollBar scrollBar) {
-        assert scrollBar != null;
-        final double minValue = scrollBar.getMin();
-        assert isTimelineRunning() == false;
-        // If the scroll bar is not yet at its min value,
-        // we play the scroll bar decrement animation
-        if (scrollBar.getValue() > minValue) {
-            // The timeline duration value depends on :
-            // - the scroll bar height
-            // - the scroll bar thumb size (visibleAmount property)
-            // - the scroll bar value
-            final double scrollBarHeight = scrollBar.getHeight();
-            final double scrollBarVisibleAmount = scrollBar.getVisibleAmount();
-            final double scrollBarValue = scrollBar.getValue();
+  public void playDecrementAnimation(final ScrollBar scrollBar) {
+    assert scrollBar != null;
+    final double minValue = scrollBar.getMin();
+    assert isTimelineRunning() == false;
+    // If the scroll bar is not yet at its min value,
+    // we play the scroll bar decrement animation
+    if (scrollBar.getValue() > minValue) {
+      // The timeline duration value depends on :
+      // - the scroll bar height
+      // - the scroll bar thumb size (visibleAmount property)
+      // - the scroll bar value
+      final double scrollBarHeight = scrollBar.getHeight();
+      final double scrollBarVisibleAmount = scrollBar.getVisibleAmount();
+      final double scrollBarValue = scrollBar.getValue();
 
-            // Height between the scroll bar top and the scroll bar thumb
-            final double height = scrollBarHeight * scrollBarValue;
-            final double duration = height * rate / scrollBarVisibleAmount; // duration in millis
+      // Height between the scroll bar top and the scroll bar thumb
+      final double height = scrollBarHeight * scrollBarValue;
+      final double duration = height * rate / scrollBarVisibleAmount; // duration in millis
 
-            getTimeline().getKeyFrames().setAll(new KeyFrame(
-                    new Duration(duration),
-                    new KeyValue(scrollBar.valueProperty(), minValue)));
-            getTimeline().play();
-        }
+      getTimeline()
+          .getKeyFrames()
+          .setAll(
+              new KeyFrame(
+                  new Duration(duration), new KeyValue(scrollBar.valueProperty(), minValue)));
+      getTimeline().play();
     }
+  }
 
-    public void playIncrementAnimation(final ScrollBar scrollBar) {
-        assert scrollBar != null;
-        final double maxValue = scrollBar.getMax();
-        assert isTimelineRunning() == false;
-        // If the scroll bar is not yet at its max value,
-        // we play the scroll bar increment animation
-        if (scrollBar.getValue() < maxValue) {
-            // The timeline duration value depends on :
-            // - the scroll bar height
-            // - the scroll bar thumb size (visibleAmount property)
-            // - the scroll bar value
-            final double scrollBarHeight = scrollBar.getHeight();
-            final double scrollBarVisibleAmount = scrollBar.getVisibleAmount();
-            final double scrollBarValue = scrollBar.getValue();
+  public void playIncrementAnimation(final ScrollBar scrollBar) {
+    assert scrollBar != null;
+    final double maxValue = scrollBar.getMax();
+    assert isTimelineRunning() == false;
+    // If the scroll bar is not yet at its max value,
+    // we play the scroll bar increment animation
+    if (scrollBar.getValue() < maxValue) {
+      // The timeline duration value depends on :
+      // - the scroll bar height
+      // - the scroll bar thumb size (visibleAmount property)
+      // - the scroll bar value
+      final double scrollBarHeight = scrollBar.getHeight();
+      final double scrollBarVisibleAmount = scrollBar.getVisibleAmount();
+      final double scrollBarValue = scrollBar.getValue();
 
-            // Height between the scroll bar thumb and the scroll bar bottom
-            final double height = scrollBarHeight * (scrollBar.getMax() - scrollBarValue);
-            final double duration = height * rate / scrollBarVisibleAmount; // duration in millis
+      // Height between the scroll bar thumb and the scroll bar bottom
+      final double height = scrollBarHeight * (scrollBar.getMax() - scrollBarValue);
+      final double duration = height * rate / scrollBarVisibleAmount; // duration in millis
 
-            getTimeline().getKeyFrames().setAll(new KeyFrame(
-                    new Duration(duration),
-                    new KeyValue(scrollBar.valueProperty(), maxValue)));
-            getTimeline().play();
-        }
+      getTimeline()
+          .getKeyFrames()
+          .setAll(
+              new KeyFrame(
+                  new Duration(duration), new KeyValue(scrollBar.valueProperty(), maxValue)));
+      getTimeline().play();
     }
+  }
 
-    public boolean isTimelineRunning() {
-        return timeline == null ? false
-                : timeline.getStatus() == Timeline.Status.RUNNING;
-    }
+  public boolean isTimelineRunning() {
+    return timeline == null ? false : timeline.getStatus() == Timeline.Status.RUNNING;
+  }
 
-    public void stopTimeline() {
-        if (timeline != null) {
-            timeline.stop();
-            timeline = null;
-        }
+  public void stopTimeline() {
+    if (timeline != null) {
+      timeline.stop();
+      timeline = null;
     }
+  }
 
-    private Timeline getTimeline() {
-        if (timeline == null) {
-            timeline = new Timeline();
-        }
-        return timeline;
+  private Timeline getTimeline() {
+    if (timeline == null) {
+      timeline = new Timeline();
     }
+    return timeline;
+  }
 }

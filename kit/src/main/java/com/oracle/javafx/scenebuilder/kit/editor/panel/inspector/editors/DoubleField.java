@@ -34,48 +34,45 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors;
 import java.util.Locale;
 import javafx.scene.input.Clipboard;
 
-/**
- * Define a text field that accept only doubles.
- *
- *
- */
+/** Define a text field that accept only doubles. */
 public class DoubleField extends NumberField {
 
-    public DoubleField() {
-    }
+  public DoubleField() {}
 
-    @Override
-    public void replaceText(int start, int end, String text) {
-        String newText = getNewText(start, end, text);
-        if (!text.isEmpty() && // Always allow text deletion
-                !partOfConstants(newText)
-                && (!newText.equals("-") && !newText.equals(".") && !newText.equals("-."))) {
-            try {
-                if (newText.toLowerCase(Locale.ROOT).contains("d") || newText.toLowerCase(Locale.ROOT).contains("f")) {
-                    // 'd' and 'f' are valid for a Double,
-                    // but we don't want to accept them in the editor
-                    return;
-                }
-                // Replace ',' by '.'
-                newText = newText.replace(',', '.');
-                Double.parseDouble(newText);
-            } catch (NumberFormatException e) {
-                return;
-            }
+  @Override
+  public void replaceText(int start, int end, String text) {
+    String newText = getNewText(start, end, text);
+    if (!text.isEmpty()
+        && // Always allow text deletion
+        !partOfConstants(newText)
+        && (!newText.equals("-") && !newText.equals(".") && !newText.equals("-."))) {
+      try {
+        if (newText.toLowerCase(Locale.ROOT).contains("d")
+            || newText.toLowerCase(Locale.ROOT).contains("f")) {
+          // 'd' and 'f' are valid for a Double,
+          // but we don't want to accept them in the editor
+          return;
         }
         // Replace ',' by '.'
-        text = text.replace(',', '.');
-        super.replaceText(start, end, text);
+        newText = newText.replace(',', '.');
+        Double.parseDouble(newText);
+      } catch (NumberFormatException e) {
+        return;
+      }
     }
+    // Replace ',' by '.'
+    text = text.replace(',', '.');
+    super.replaceText(start, end, text);
+  }
 
-    @Override
-    public void paste() {
-        String strToPaste = Clipboard.getSystemClipboard().getString();
-        try {
-            Double.parseDouble(strToPaste);
-        } catch (NumberFormatException e) {
-            return;
-        }
-        super.paste();
+  @Override
+  public void paste() {
+    String strToPaste = Clipboard.getSystemClipboard().getString();
+    try {
+      Double.parseDouble(strToPaste);
+    } catch (NumberFormatException e) {
+      return;
     }
+    super.paste();
+  }
 }

@@ -32,13 +32,11 @@
 package com.oracle.javafx.scenebuilder.kit.util.control.effectpicker;
 
 import com.oracle.javafx.scenebuilder.kit.util.control.paintpicker.PaintPicker;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyIntegerProperty;
@@ -48,109 +46,108 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.effect.Effect;
 import javafx.scene.layout.Pane;
 
-/**
- * Effects editor control.
- */
+/** Effects editor control. */
 public class EffectPicker extends Pane {
 
-    private final EffectPickerController controller;
+  private final EffectPickerController controller;
 
-    private static List<Class<? extends Effect>> effectClasses;
+  private static List<Class<? extends Effect>> effectClasses;
 
-    public synchronized static Collection<Class<? extends Effect>> getEffectClasses() {
-        if (effectClasses == null) {
-            effectClasses = new ArrayList<>();
-            effectClasses.add(javafx.scene.effect.Blend.class);
-            effectClasses.add(javafx.scene.effect.Bloom.class);
-            effectClasses.add(javafx.scene.effect.BoxBlur.class);
-            effectClasses.add(javafx.scene.effect.ColorAdjust.class);
-            effectClasses.add(javafx.scene.effect.ColorInput.class);
-            effectClasses.add(javafx.scene.effect.DisplacementMap.class);
-            effectClasses.add(javafx.scene.effect.DropShadow.class);
-            effectClasses.add(javafx.scene.effect.GaussianBlur.class);
-            effectClasses.add(javafx.scene.effect.Glow.class);
-            effectClasses.add(javafx.scene.effect.ImageInput.class);
-            effectClasses.add(javafx.scene.effect.InnerShadow.class);
-            effectClasses.add(javafx.scene.effect.Lighting.class);
-            effectClasses.add(javafx.scene.effect.MotionBlur.class);
-            effectClasses.add(javafx.scene.effect.PerspectiveTransform.class);
-            effectClasses.add(javafx.scene.effect.Reflection.class);
-            effectClasses.add(javafx.scene.effect.SepiaTone.class);
-            effectClasses.add(javafx.scene.effect.Shadow.class);
-            effectClasses = Collections.unmodifiableList(effectClasses);
-        }
-
-        return effectClasses;
+  public static synchronized Collection<Class<? extends Effect>> getEffectClasses() {
+    if (effectClasses == null) {
+      effectClasses = new ArrayList<>();
+      effectClasses.add(javafx.scene.effect.Blend.class);
+      effectClasses.add(javafx.scene.effect.Bloom.class);
+      effectClasses.add(javafx.scene.effect.BoxBlur.class);
+      effectClasses.add(javafx.scene.effect.ColorAdjust.class);
+      effectClasses.add(javafx.scene.effect.ColorInput.class);
+      effectClasses.add(javafx.scene.effect.DisplacementMap.class);
+      effectClasses.add(javafx.scene.effect.DropShadow.class);
+      effectClasses.add(javafx.scene.effect.GaussianBlur.class);
+      effectClasses.add(javafx.scene.effect.Glow.class);
+      effectClasses.add(javafx.scene.effect.ImageInput.class);
+      effectClasses.add(javafx.scene.effect.InnerShadow.class);
+      effectClasses.add(javafx.scene.effect.Lighting.class);
+      effectClasses.add(javafx.scene.effect.MotionBlur.class);
+      effectClasses.add(javafx.scene.effect.PerspectiveTransform.class);
+      effectClasses.add(javafx.scene.effect.Reflection.class);
+      effectClasses.add(javafx.scene.effect.SepiaTone.class);
+      effectClasses.add(javafx.scene.effect.Shadow.class);
+      effectClasses = Collections.unmodifiableList(effectClasses);
     }
 
-    public EffectPicker(EffectPicker.Delegate epd, PaintPicker.Delegate ppd) {
-        final FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(EffectPicker.class.getResource("EffectPicker.fxml")); //NOI18N
+    return effectClasses;
+  }
 
-        try {
-            // Loading
-            final Object rootObject = loader.load();
-            assert rootObject instanceof Node;
-            final Node rootNode = (Node) rootObject;
-            getChildren().add(rootNode);
+  public EffectPicker(EffectPicker.Delegate epd, PaintPicker.Delegate ppd) {
+    final FXMLLoader loader = new FXMLLoader();
+    loader.setLocation(EffectPicker.class.getResource("EffectPicker.fxml")); // NOI18N
 
-            // Retrieving the controller
-            final Object ctl = loader.getController();
-            assert ctl instanceof EffectPickerController;
-            this.controller = (EffectPickerController) ctl;
-            this.controller.setEffectPickerDelegate(epd);
-            this.controller.setPaintPickerDelegate(ppd);
-        } catch (IOException ex) {
-            throw new IllegalStateException(ex);
-        }
-    }
+    try {
+      // Loading
+      final Object rootObject = loader.load();
+      assert rootObject instanceof Node;
+      final Node rootNode = (Node) rootObject;
+      getChildren().add(rootNode);
 
-    public final ObjectProperty<Effect> rootEffectProperty() {
-        return controller.rootEffectProperty();
+      // Retrieving the controller
+      final Object ctl = loader.getController();
+      assert ctl instanceof EffectPickerController;
+      this.controller = (EffectPickerController) ctl;
+      this.controller.setEffectPickerDelegate(epd);
+      this.controller.setPaintPickerDelegate(ppd);
+    } catch (IOException ex) {
+      throw new IllegalStateException(ex);
     }
+  }
 
-    public final void setRootEffectProperty(Effect value) {
-        // Update model
-        controller.setRootEffectProperty(value);
-        // Update UI
-        controller.updateUI();
-    }
+  public final ObjectProperty<Effect> rootEffectProperty() {
+    return controller.rootEffectProperty();
+  }
 
-    public final Effect getRootEffectProperty() {
-        return controller.getRootEffectProperty();
-    }
+  public final void setRootEffectProperty(Effect value) {
+    // Update model
+    controller.setRootEffectProperty(value);
+    // Update UI
+    controller.updateUI();
+  }
 
-    public ReadOnlyIntegerProperty revisionProperty() {
-        return controller.revisionProperty();
-    }
-    
-    public final ReadOnlyBooleanProperty liveUpdateProperty() {
-        return controller.liveUpdateProperty();
-    }
+  public final Effect getRootEffectProperty() {
+    return controller.getRootEffectProperty();
+  }
 
-    public boolean isLiveUpdate() {
-        return controller.isLiveUpdate();
-    }
-    
-    public String getEffectPath() {
-        return controller.getEffectPath();
-    }
+  public ReadOnlyIntegerProperty revisionProperty() {
+    return controller.revisionProperty();
+  }
 
-    public List<MenuItem> getMenuItems() {
-        final List<MenuItem> menuItems = new ArrayList<>();
-        for (final Class<? extends Effect> clazz : getEffectClasses()) {
-            final MenuItem mi = new MenuItem(clazz.getSimpleName());
-            mi.setOnAction(t -> {
-                final Effect effect = Utils.newInstance(clazz);
-                setRootEffectProperty(effect);
-                controller.incrementRevision();
-            });
-            menuItems.add(mi);
-        }
-        return menuItems;
+  public final ReadOnlyBooleanProperty liveUpdateProperty() {
+    return controller.liveUpdateProperty();
+  }
+
+  public boolean isLiveUpdate() {
+    return controller.isLiveUpdate();
+  }
+
+  public String getEffectPath() {
+    return controller.getEffectPath();
+  }
+
+  public List<MenuItem> getMenuItems() {
+    final List<MenuItem> menuItems = new ArrayList<>();
+    for (final Class<? extends Effect> clazz : getEffectClasses()) {
+      final MenuItem mi = new MenuItem(clazz.getSimpleName());
+      mi.setOnAction(
+          t -> {
+            final Effect effect = Utils.newInstance(clazz);
+            setRootEffectProperty(effect);
+            controller.incrementRevision();
+          });
+      menuItems.add(mi);
     }
-    
-    public static interface Delegate {
-        public void handleError(String warningKey, Object... arguments);
-    }
+    return menuItems;
+  }
+
+  public static interface Delegate {
+    public void handleError(String warningKey, Object... arguments);
+  }
 }

@@ -40,72 +40,79 @@ import java.util.Collections;
 import java.util.List;
 import javafx.scene.layout.ColumnConstraints;
 
-/**
- *
- */
-public class ColumnConstraintsListPropertyMetadata extends ListValuePropertyMetadata<ColumnConstraints> {
+/** */
+public class ColumnConstraintsListPropertyMetadata
+    extends ListValuePropertyMetadata<ColumnConstraints> {
 
-    private static final ColumnConstraintsPropertyMetadata itemMetadata
-            = new ColumnConstraintsPropertyMetadata(new PropertyName("unused"), //NOI18N
-            true /* readWrite */, null, InspectorPath.UNUSED);
-    
-    public ColumnConstraintsListPropertyMetadata(PropertyName name, boolean readWrite, 
-            List<ColumnConstraints> defaultValue, InspectorPath inspectorPath) {
-        super(name, ColumnConstraints.class, itemMetadata, readWrite, defaultValue, inspectorPath);
-    }
-    
-    public ColumnConstraintsListPropertyMetadata() {
-        this(new PropertyName("columnConstraints"), true /* readWrite */, 
-                Collections.emptyList(), InspectorPath.UNUSED);
-    }
-    
-    public void pack(FXOMInstance fxomInstance) {
-        final ColumnConstraints def = new ColumnConstraints();
-        final List<ColumnConstraints> v = new ArrayList<>(getValue(fxomInstance));
-        if (v.isEmpty() == false) {
-            ColumnConstraints last = v.get(v.size()-1);
-            while ((last != null) && ColumnConstraintsPropertyMetadata.equals(last, def)) {
-                v.remove(v.size()-1);
-                if (v.isEmpty()) {
-                    last = null;
-                } else {
-                    last = v.get(v.size()-1);
-                }
-            }
-            setValue(fxomInstance, v);
-        }
-    }
-    
-    public void unpack(FXOMInstance fxomInstance, int columnCount) {
-        final List<ColumnConstraints> value = new ArrayList<>(getValue(fxomInstance));
-        if (value.size() < columnCount) {
-            final List<ColumnConstraints> newValue = new ArrayList<>();
-            newValue.addAll(value);
-            while (newValue.size() < columnCount) {
-                newValue.add(new ColumnConstraints());
-            }
-            setValue(fxomInstance, newValue);
-        }
-    }
-    
-    public static boolean equals(List<ColumnConstraints> l1, List<ColumnConstraints> l2) {
-        
-        assert l1 != null;
-        assert l2 != null;
-        
-        boolean result;
-        if (l1.size() != l2.size()) {
-            result = false;
+  private static final ColumnConstraintsPropertyMetadata itemMetadata =
+      new ColumnConstraintsPropertyMetadata(
+          new PropertyName("unused"), // NOI18N
+          true /* readWrite */,
+          null,
+          InspectorPath.UNUSED);
+
+  public ColumnConstraintsListPropertyMetadata(
+      PropertyName name,
+      boolean readWrite,
+      List<ColumnConstraints> defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, ColumnConstraints.class, itemMetadata, readWrite, defaultValue, inspectorPath);
+  }
+
+  public ColumnConstraintsListPropertyMetadata() {
+    this(
+        new PropertyName("columnConstraints"),
+        true /* readWrite */,
+        Collections.emptyList(),
+        InspectorPath.UNUSED);
+  }
+
+  public void pack(FXOMInstance fxomInstance) {
+    final ColumnConstraints def = new ColumnConstraints();
+    final List<ColumnConstraints> v = new ArrayList<>(getValue(fxomInstance));
+    if (v.isEmpty() == false) {
+      ColumnConstraints last = v.get(v.size() - 1);
+      while ((last != null) && ColumnConstraintsPropertyMetadata.equals(last, def)) {
+        v.remove(v.size() - 1);
+        if (v.isEmpty()) {
+          last = null;
         } else {
-            result = true;
-            for (int i = 0, count = l1.size(); (i < count) && result; i++) {
-                final ColumnConstraints c1 = l1.get(i);
-                final ColumnConstraints c2 = l2.get(i);
-                result = ColumnConstraintsPropertyMetadata.equals(c1, c2);
-            }
+          last = v.get(v.size() - 1);
         }
-        
-        return result;
+      }
+      setValue(fxomInstance, v);
     }
-    
+  }
+
+  public void unpack(FXOMInstance fxomInstance, int columnCount) {
+    final List<ColumnConstraints> value = new ArrayList<>(getValue(fxomInstance));
+    if (value.size() < columnCount) {
+      final List<ColumnConstraints> newValue = new ArrayList<>();
+      newValue.addAll(value);
+      while (newValue.size() < columnCount) {
+        newValue.add(new ColumnConstraints());
+      }
+      setValue(fxomInstance, newValue);
+    }
+  }
+
+  public static boolean equals(List<ColumnConstraints> l1, List<ColumnConstraints> l2) {
+
+    assert l1 != null;
+    assert l2 != null;
+
+    boolean result;
+    if (l1.size() != l2.size()) {
+      result = false;
+    } else {
+      result = true;
+      for (int i = 0, count = l1.size(); (i < count) && result; i++) {
+        final ColumnConstraints c1 = l1.get(i);
+        final ColumnConstraints c2 = l2.get(i);
+        result = ColumnConstraintsPropertyMetadata.equals(c1, c2);
+      }
+    }
+
+    return result;
+  }
 }

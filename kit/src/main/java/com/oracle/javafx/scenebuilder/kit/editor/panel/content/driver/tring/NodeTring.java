@@ -35,13 +35,10 @@ import com.oracle.javafx.scenebuilder.kit.editor.panel.content.ContentPanelContr
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
 import javafx.scene.Node;
 
-/**
- *
- * 
- */
+/** */
 public class NodeTring extends AbstractNodeTring<Node> {
 
-    public NodeTring(ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
-        super(contentPanelController, fxomInstance, Node.class);
-    }
+  public NodeTring(ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
+    super(contentPanelController, fxomInstance, Node.class);
+  }
 }

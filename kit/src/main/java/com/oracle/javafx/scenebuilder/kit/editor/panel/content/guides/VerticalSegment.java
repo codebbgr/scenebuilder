@@ -32,91 +32,94 @@
 
 package com.oracle.javafx.scenebuilder.kit.editor.panel.content.guides;
 
-/**
- *
- */
+/** */
 class VerticalSegment extends AbstractSegment {
 
-    private final double x;
-    private final double y1;
-    private final double y2;
-    private final double length;
+  private final double x;
+  private final double y1;
+  private final double y2;
+  private final double length;
 
-    public VerticalSegment(double x, double y1, double y2) {
-        this.x = x;
-        this.y1 = y1;
-        this.y2 = y2;
-        this.length = Math.abs(y2 - y1);
-    }
+  public VerticalSegment(double x, double y1, double y2) {
+    this.x = x;
+    this.y1 = y1;
+    this.y2 = y2;
+    this.length = Math.abs(y2 - y1);
+  }
 
-    /*
-     * AbstractSegment
-     */
-    @Override
-    public double getX1() {
-        return x;
-    }
+  /*
+   * AbstractSegment
+   */
+  @Override
+  public double getX1() {
+    return x;
+  }
 
-    @Override
-    public double getX2() {
-        return x;
-    }
+  @Override
+  public double getX2() {
+    return x;
+  }
 
-    @Override
-    public double getY1() {
-        return y1;
-    }
+  @Override
+  public double getY1() {
+    return y1;
+  }
 
-    @Override
-    public double getY2() {
-        return y2;
-    }
+  @Override
+  public double getY2() {
+    return y2;
+  }
 
-    @Override
-    public double getLength() {
-        return length;
-    }
+  @Override
+  public double getLength() {
+    return length;
+  }
 
-    /*
-     * Object
-     */
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 67 * hash + (int) (Double.doubleToLongBits(this.x) ^ (Double.doubleToLongBits(this.x) >>> 32));
-        hash = 67 * hash + (int) (Double.doubleToLongBits(this.y1) ^ (Double.doubleToLongBits(this.y1) >>> 32));
-        hash = 67 * hash + (int) (Double.doubleToLongBits(this.y2) ^ (Double.doubleToLongBits(this.y2) >>> 32));
-        return hash;
-    }
+  /*
+   * Object
+   */
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash =
+        67 * hash
+            + (int) (Double.doubleToLongBits(this.x) ^ (Double.doubleToLongBits(this.x) >>> 32));
+    hash =
+        67 * hash
+            + (int) (Double.doubleToLongBits(this.y1) ^ (Double.doubleToLongBits(this.y1) >>> 32));
+    hash =
+        67 * hash
+            + (int) (Double.doubleToLongBits(this.y2) ^ (Double.doubleToLongBits(this.y2) >>> 32));
+    return hash;
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final VerticalSegment other = (VerticalSegment) obj;
-        if (Double.doubleToLongBits(this.x) != Double.doubleToLongBits(other.x)) {
-            return false;
-        }
-        if (Double.doubleToLongBits(this.y1) != Double.doubleToLongBits(other.y1)) {
-            return false;
-        }
-        if (Double.doubleToLongBits(this.y2) != Double.doubleToLongBits(other.y2)) {
-            return false;
-        }
-        return true;
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
     }
-    
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final VerticalSegment other = (VerticalSegment) obj;
+    if (Double.doubleToLongBits(this.x) != Double.doubleToLongBits(other.x)) {
+      return false;
+    }
+    if (Double.doubleToLongBits(this.y1) != Double.doubleToLongBits(other.y1)) {
+      return false;
+    }
+    if (Double.doubleToLongBits(this.y2) != Double.doubleToLongBits(other.y2)) {
+      return false;
+    }
+    return true;
+  }
 
-    /*
-     * Comparable
-     */
-    @Override
-    public int compareTo(AbstractSegment o) {
-        assert o != null;
-        return Double.compare(this.length, o.getLength());
-    }
+  /*
+   * Comparable
+   */
+  @Override
+  public int compareTo(AbstractSegment o) {
+    assert o != null;
+    return Double.compare(this.length, o.getLength());
+  }
 }

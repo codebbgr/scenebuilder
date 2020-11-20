@@ -37,18 +37,18 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import java.util.List;
 import javafx.scene.paint.Color;
 
-/**
- *
- */
+/** */
 public class ColorListPropertyMetadata extends ListValuePropertyMetadata<Color> {
 
-    private final static ColorPropertyMetadata itemMetadata
-            = new ColorPropertyMetadata(new PropertyName("unused"), //NOI18N
-                    true, Color.BLACK, InspectorPath.UNUSED);
+  private static final ColorPropertyMetadata itemMetadata =
+      new ColorPropertyMetadata(
+          new PropertyName("unused"), // NOI18N
+          true,
+          Color.BLACK,
+          InspectorPath.UNUSED);
 
-    public ColorListPropertyMetadata(PropertyName name, boolean readWrite, 
-            List<Color> defaultValue, InspectorPath inspectorPath) {
-        super(name, Color.class, itemMetadata, readWrite, defaultValue, inspectorPath);
-    }
-
+  public ColorListPropertyMetadata(
+      PropertyName name, boolean readWrite, List<Color> defaultValue, InspectorPath inspectorPath) {
+    super(name, Color.class, itemMetadata, readWrite, defaultValue, inspectorPath);
+  }
 }

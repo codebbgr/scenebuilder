@@ -36,38 +36,36 @@ package com.oracle.javafx.scenebuilder.kit.metadata.util;
 import java.net.URL;
 import javafx.scene.image.Image;
 
-/**
- *
- */
+/** */
 public class DesignImage {
-    private final Image image;
-    private final String location; // A URL or a relative path expression using @
-    
-    public DesignImage(Image image, String location) {
-        assert image != null;
-        assert location != null;
-        
-        this.image = image;
-        this.location = location;
-    }
-    
-    public DesignImage(Image image) {
-        assert image != null;
-        assert image.getUrl() != null;
-        
-        this.image = image;
-        this.location = image.getUrl();
-    }
+  private final Image image;
+  private final String location; // A URL or a relative path expression using @
 
-    public Image getImage() {
-        return image;
-    }
+  public DesignImage(Image image, String location) {
+    assert image != null;
+    assert location != null;
 
-    public String getLocation() {
-        return location;
-    }
-    
-    public static URL getVoidImageUrl() {
-        return DesignImage.class.getResource("DesignImage.png"); //NOI18N
-    }
+    this.image = image;
+    this.location = location;
+  }
+
+  public DesignImage(Image image) {
+    assert image != null;
+    assert image.getUrl() != null;
+
+    this.image = image;
+    this.location = image.getUrl();
+  }
+
+  public Image getImage() {
+    return image;
+  }
+
+  public String getLocation() {
+    return location;
+  }
+
+  public static URL getVoidImageUrl() {
+    return DesignImage.class.getResource("DesignImage.png"); // NOI18N
+  }
 }

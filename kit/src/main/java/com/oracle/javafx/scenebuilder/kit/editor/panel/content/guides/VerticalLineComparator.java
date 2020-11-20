@@ -35,31 +35,28 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.content.guides;
 import com.oracle.javafx.scenebuilder.kit.util.MathUtils;
 import java.util.Comparator;
 
-/**
- *
- */
+/** */
 class VerticalLineComparator implements Comparator<VerticalSegment> {
 
-    @Override
-    public int compare(VerticalSegment o1, VerticalSegment o2) {
-        assert o1 != null;
-        assert o2 != null;
-        assert MathUtils.equals(o1.getX1(), o1.getX2());
-        assert MathUtils.equals(o2.getX1(), o2.getX2());
-        
-        final int result;
-        
-        if (o1 == o2) {
-            result = 0;
-        } else if (MathUtils.equals(o1.getX1(), o2.getX1())) {
-            result = 0;
-        } else if (o1.getX1() < o2.getX1()) {
-            result = +1;
-        } else {
-            result = -1;
-        }
-        
-        return result;
+  @Override
+  public int compare(VerticalSegment o1, VerticalSegment o2) {
+    assert o1 != null;
+    assert o2 != null;
+    assert MathUtils.equals(o1.getX1(), o1.getX2());
+    assert MathUtils.equals(o2.getX1(), o2.getX2());
+
+    final int result;
+
+    if (o1 == o2) {
+      result = 0;
+    } else if (MathUtils.equals(o1.getX1(), o2.getX1())) {
+      result = 0;
+    } else if (o1.getX1() < o2.getX1()) {
+      result = +1;
+    } else {
+      result = -1;
     }
-    
+
+    return result;
+  }
 }

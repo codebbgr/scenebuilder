@@ -32,55 +32,51 @@
 
 package com.oracle.javafx.scenebuilder.kit.fxom;
 
+import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
-
 import javafx.fxml.FXMLLoader;
 
-/**
- *
- */
+/** */
 public class BindingExpressionDisabler {
 
-    public static void disable(FXOMDocument fxomDocument) {
-        assert fxomDocument != null;
-        
-        final List<FXOMObject> candidates = new ArrayList<>();
-        if (fxomDocument.getFxomRoot() != null) {
-            candidates.add(fxomDocument.getFxomRoot());
-        }
-        
-        while (candidates.isEmpty() == false) {
-            final FXOMObject candidate = candidates.get(0);
-            candidates.remove(0);
-            
-            if (candidate instanceof FXOMInstance) {
-            	final FXOMInstance inst = (FXOMInstance)candidate;
-            	final Object sceneGraphObject = inst.getSceneGraphObject();
+  public static void disable(FXOMDocument fxomDocument) {
+    assert fxomDocument != null;
 
-                for (Map.Entry<PropertyName, FXOMProperty> e:inst.getProperties().entrySet()) {
-                	FXOMProperty property = e.getValue();
-                	PropertyName propertyName = e.getKey();
-                	
-                	if (property instanceof FXOMPropertyT) {
-                		FXOMPropertyT propertyT = (FXOMPropertyT)property;
-                		if (propertyT.getValue().startsWith(FXMLLoader.BINDING_EXPRESSION_PREFIX)) {
-                			try {
-								propertyName.setValue(sceneGraphObject, propertyT.getValue());
-							} catch (Exception ex) {
-								// Let the exception be, the binding expression can't be escaped 
-								// due to the property type not accepting string value
-								// catching the exception allow the process to go on
-							}
-                		}
-                	}
-                }
-            }
-                        
-            candidates.addAll(candidate.getChildObjects());
-        }
+    final List<FXOMObject> candidates = new ArrayList<>();
+    if (fxomDocument.getFxomRoot() != null) {
+      candidates.add(fxomDocument.getFxomRoot());
     }
+
+    while (candidates.isEmpty() == false) {
+      final FXOMObject candidate = candidates.get(0);
+      candidates.remove(0);
+
+      if (candidate instanceof FXOMInstance) {
+        final FXOMInstance inst = (FXOMInstance) candidate;
+        final Object sceneGraphObject = inst.getSceneGraphObject();
+
+        for (Map.Entry<PropertyName, FXOMProperty> e : inst.getProperties().entrySet()) {
+          FXOMProperty property = e.getValue();
+          PropertyName propertyName = e.getKey();
+
+          if (property instanceof FXOMPropertyT) {
+            FXOMPropertyT propertyT = (FXOMPropertyT) property;
+            if (propertyT.getValue().startsWith(FXMLLoader.BINDING_EXPRESSION_PREFIX)) {
+              try {
+                propertyName.setValue(sceneGraphObject, propertyT.getValue());
+              } catch (Exception ex) {
+                // Let the exception be, the binding expression can't be escaped
+                // due to the property type not accepting string value
+                // catching the exception allow the process to go on
+              }
+            }
+          }
+        }
+      }
+
+      candidates.addAll(candidate.getChildObjects());
+    }
+  }
 }

@@ -31,7 +31,6 @@
  */
 package com.oracle.javafx.scenebuilder.kit.metadata.property.value;
 
-
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMPropertyT;
@@ -39,60 +38,60 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PrefixedValue;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 
-/**
- *
- * 
- */
+/** */
 public abstract class ComplexPropertyMetadata<T> extends SingleValuePropertyMetadata<T> {
 
-    public ComplexPropertyMetadata(PropertyName name, Class<T> valueClass, 
-            boolean readWrite, T defaultValue, InspectorPath inspectorPath) {
-        super(name, valueClass, readWrite, defaultValue, inspectorPath);
-    }
-    
-    /*
-     * SingleValuePropertyMetadata
-     */  
-    @Override
-    public T makeValueFromProperty(FXOMPropertyT fxomProperty) {
-        final T result;
-        
-        final PrefixedValue pv = new PrefixedValue(fxomProperty.getValue());
-        if (pv.isExpression()) {
-            final String fxId = pv.getSuffix();
-            final FXOMObject targetObject = fxomProperty.getFxomDocument().searchWithFxId(fxId);
-            if (targetObject == null) {
-                // Emergency code
-                result = getDefaultValue();
-            } else {
-                result = getValueClass().cast(targetObject.getSceneGraphObject());
-            }
-        } else {
-            result = makeValueFromString(fxomProperty.getValue());
-        }
-        
-        return result;
-    }
-    
-    @Override
-    public T makeValueFromString(String string) {
-        throw new RuntimeException("Bug"); //NOI18N
+  public ComplexPropertyMetadata(
+      PropertyName name,
+      Class<T> valueClass,
+      boolean readWrite,
+      T defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, valueClass, readWrite, defaultValue, inspectorPath);
+  }
+
+  /*
+   * SingleValuePropertyMetadata
+   */
+  @Override
+  public T makeValueFromProperty(FXOMPropertyT fxomProperty) {
+    final T result;
+
+    final PrefixedValue pv = new PrefixedValue(fxomProperty.getValue());
+    if (pv.isExpression()) {
+      final String fxId = pv.getSuffix();
+      final FXOMObject targetObject = fxomProperty.getFxomDocument().searchWithFxId(fxId);
+      if (targetObject == null) {
+        // Emergency code
+        result = getDefaultValue();
+      } else {
+        result = getValueClass().cast(targetObject.getSceneGraphObject());
+      }
+    } else {
+      result = makeValueFromString(fxomProperty.getValue());
     }
 
-    @Override
-    public boolean canMakeStringFromValue(T value) {
-        return value == null;
-    }
+    return result;
+  }
 
-    @Override
-    public String makeStringFromValue(T value) {
-        assert value == null;
-        return "$null"; //NOI18N
-    }
+  @Override
+  public T makeValueFromString(String string) {
+    throw new RuntimeException("Bug"); // NOI18N
+  }
 
-    @Override
-    public T makeValueFromFxomInstance(FXOMInstance valueFxomInstance) {
-        return getValueClass().cast(valueFxomInstance.getSceneGraphObject());
-    }
+  @Override
+  public boolean canMakeStringFromValue(T value) {
+    return value == null;
+  }
 
+  @Override
+  public String makeStringFromValue(T value) {
+    assert value == null;
+    return "$null"; // NOI18N
+  }
+
+  @Override
+  public T makeValueFromFxomInstance(FXOMInstance valueFxomInstance) {
+    return getValueClass().cast(valueFxomInstance.getSceneGraphObject());
+  }
 }

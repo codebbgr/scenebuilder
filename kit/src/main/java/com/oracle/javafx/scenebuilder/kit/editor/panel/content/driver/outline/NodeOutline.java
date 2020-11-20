@@ -37,41 +37,36 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
 
-/**
- *
- */
+/** */
 public class NodeOutline extends AbstractOutline<Node> {
-    
-    public NodeOutline(ContentPanelController contentPanelController, 
-            FXOMInstance fxomInstance) {
-        super(contentPanelController, fxomInstance, Node.class);
-    }
-    
-    
-    /*
-     * AbstractOutline
-     */
-    
-    @Override
-    public Bounds getSceneGraphObjectBounds() {
-        return getSceneGraphObject().getLayoutBounds();
-    }
 
-    @Override
-    public Node getSceneGraphObjectProxy() {
-        return getSceneGraphObject();
-    }
+  public NodeOutline(ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
+    super(contentPanelController, fxomInstance, Node.class);
+  }
 
-    @Override
-    protected void startListeningToSceneGraphObject() {
-        startListeningToLayoutBounds(getSceneGraphObject());
-        startListeningToLocalToSceneTransform(getSceneGraphObject());
-    }
+  /*
+   * AbstractOutline
+   */
 
-    @Override
-    protected void stopListeningToSceneGraphObject() {
-        stopListeningToLayoutBounds(getSceneGraphObject());
-        stopListeningToLocalToSceneTransform(getSceneGraphObject());
-    }
-    
+  @Override
+  public Bounds getSceneGraphObjectBounds() {
+    return getSceneGraphObject().getLayoutBounds();
+  }
+
+  @Override
+  public Node getSceneGraphObjectProxy() {
+    return getSceneGraphObject();
+  }
+
+  @Override
+  protected void startListeningToSceneGraphObject() {
+    startListeningToLayoutBounds(getSceneGraphObject());
+    startListeningToLocalToSceneTransform(getSceneGraphObject());
+  }
+
+  @Override
+  protected void stopListeningToSceneGraphObject() {
+    stopListeningToLayoutBounds(getSceneGraphObject());
+    stopListeningToLocalToSceneTransform(getSceneGraphObject());
+  }
 }

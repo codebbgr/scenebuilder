@@ -36,60 +36,58 @@ import com.oracle.javafx.scenebuilder.kit.editor.job.Job;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import java.util.Objects;
 
-/**
- * Job used to modify the FX controller class.
- *
- */
+/** Job used to modify the FX controller class. */
 public class ModifyFxControllerJob extends Job {
 
-    private final FXOMObject fxomObject;
-    private final String newValue;
-    private final String oldValue;
+  private final FXOMObject fxomObject;
+  private final String newValue;
+  private final String oldValue;
 
-    public ModifyFxControllerJob(FXOMObject fxomObject, String newValue, EditorController editorController) {
-        super(editorController);
+  public ModifyFxControllerJob(
+      FXOMObject fxomObject, String newValue, EditorController editorController) {
+    super(editorController);
 
-        assert fxomObject != null;
+    assert fxomObject != null;
 
-        this.fxomObject = fxomObject;
-        this.newValue = newValue;
-        this.oldValue = fxomObject.getFxController();
-    }
+    this.fxomObject = fxomObject;
+    this.newValue = newValue;
+    this.oldValue = fxomObject.getFxController();
+  }
 
-    /*
-     * Job
-     */
-    @Override
-    public boolean isExecutable() {
-        return Objects.equals(oldValue, newValue) == false;
-    }
+  /*
+   * Job
+   */
+  @Override
+  public boolean isExecutable() {
+    return Objects.equals(oldValue, newValue) == false;
+  }
 
-    @Override
-    public void execute() {
-        redo();
-    }
+  @Override
+  public void execute() {
+    redo();
+  }
 
-    @Override
-    public void undo() {
-        getEditorController().getFxomDocument().beginUpdate();
-        this.fxomObject.setFxController(oldValue);
-        getEditorController().getFxomDocument().endUpdate();
-        assert Objects.equals(fxomObject.getFxController(), oldValue);
-    }
+  @Override
+  public void undo() {
+    getEditorController().getFxomDocument().beginUpdate();
+    this.fxomObject.setFxController(oldValue);
+    getEditorController().getFxomDocument().endUpdate();
+    assert Objects.equals(fxomObject.getFxController(), oldValue);
+  }
 
-    @Override
-    public void redo() {
-        getEditorController().getFxomDocument().beginUpdate();
-        this.fxomObject.setFxController(newValue);
-        getEditorController().getFxomDocument().endUpdate();
-        assert Objects.equals(fxomObject.getFxController(), newValue);
-    }
+  @Override
+  public void redo() {
+    getEditorController().getFxomDocument().beginUpdate();
+    this.fxomObject.setFxController(newValue);
+    getEditorController().getFxomDocument().endUpdate();
+    assert Objects.equals(fxomObject.getFxController(), newValue);
+  }
 
-    @Override
-    public String getDescription() {
-        final StringBuilder result = new StringBuilder();
-        result.append("Set controller class on ");
-        result.append(fxomObject.getGlueElement().getTagName());
-        return result.toString();
-    }
+  @Override
+  public String getDescription() {
+    final StringBuilder result = new StringBuilder();
+    result.append("Set controller class on ");
+    result.append(fxomObject.getGlueElement().getTagName());
+    return result.toString();
+  }
 }

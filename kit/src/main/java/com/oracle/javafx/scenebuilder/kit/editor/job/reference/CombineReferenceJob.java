@@ -38,54 +38,49 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMIntrinsic;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMNode;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMPropertyT;
 
-/**
- *
- */
-public class CombineReferenceJob  extends Job {
-    
-    private final Job subJob;
-    
-    public CombineReferenceJob(FXOMNode reference, EditorController editorController) {
-        super(editorController);
-        if (reference instanceof FXOMIntrinsic) {
-            final FXOMIntrinsic fxomIntrinsic = (FXOMIntrinsic) reference;
-            subJob = new CombineIntrinsicReferenceJob(fxomIntrinsic, getEditorController());
-        } else if (reference instanceof FXOMPropertyT) {
-            final FXOMPropertyT fxomProperty = (FXOMPropertyT) reference;
-            subJob = new CombineExpressionReferenceJob(fxomProperty, getEditorController());
-        } else {
-            throw new RuntimeException("Bug"); //NOI18N
-        }
-    }
-    
-    /*
-     * Job
-     */
-    @Override
-    public boolean isExecutable() {
-        return subJob.isExecutable();
-    }
+/** */
+public class CombineReferenceJob extends Job {
 
-    @Override
-    public void execute() {
-        subJob.execute();
+  private final Job subJob;
+
+  public CombineReferenceJob(FXOMNode reference, EditorController editorController) {
+    super(editorController);
+    if (reference instanceof FXOMIntrinsic) {
+      final FXOMIntrinsic fxomIntrinsic = (FXOMIntrinsic) reference;
+      subJob = new CombineIntrinsicReferenceJob(fxomIntrinsic, getEditorController());
+    } else if (reference instanceof FXOMPropertyT) {
+      final FXOMPropertyT fxomProperty = (FXOMPropertyT) reference;
+      subJob = new CombineExpressionReferenceJob(fxomProperty, getEditorController());
+    } else {
+      throw new RuntimeException("Bug"); // NOI18N
     }
+  }
 
-    @Override
-    public void undo() {
-        subJob.undo();
-    }
+  /*
+   * Job
+   */
+  @Override
+  public boolean isExecutable() {
+    return subJob.isExecutable();
+  }
 
-    @Override
-    public void redo() {
-        subJob.redo();
-    }
+  @Override
+  public void execute() {
+    subJob.execute();
+  }
 
-    @Override
-    public String getDescription() {
-        return subJob.getDescription();
-    }
+  @Override
+  public void undo() {
+    subJob.undo();
+  }
 
+  @Override
+  public void redo() {
+    subJob.redo();
+  }
 
-    
+  @Override
+  public String getDescription() {
+    return subJob.getDescription();
+  }
 }

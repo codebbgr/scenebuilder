@@ -40,68 +40,64 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.paint.Paint;
 
-/**
- *
- * 
- */
+/** */
 public class TabTring extends AbstractTring<Tab> {
 
-    private final TabOutline tabOutline;
+  private final TabOutline tabOutline;
 
-    public TabTring(ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
-        super(contentPanelController, fxomInstance, Tab.class);
-        assert fxomInstance.getSceneGraphObject() instanceof Tab;
-        
-        tabOutline = new TabOutline(getSceneGraphObject());
-        tabOutline.getRingPath().getStyleClass().add(TARGET_RING_CLASS);
-        tabOutline.getRingPath().setMouseTransparent(true);
-        getRootNode().getChildren().add(tabOutline.getRingPath());
-    }
-    
-    public FXOMInstance getFxomInstance() {
-        return (FXOMInstance) getFxomObject();
-    }
+  public TabTring(ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
+    super(contentPanelController, fxomInstance, Tab.class);
+    assert fxomInstance.getSceneGraphObject() instanceof Tab;
 
-    /*
-     * AbstractPring
-     */
-    
-    @Override
-    protected void layoutDecoration() {
-        tabOutline.layout(this);
-    }
-    
-    @Override
-    public void changeStroke(Paint stroke) {
-        tabOutline.getRingPath().setStroke(stroke);
-    }
-    
-    
-    /*
-     * AbstractDecoration
-     */
-    
-    @Override
-    public Bounds getSceneGraphObjectBounds() {
-        return getSceneGraphObject().getTabPane().getLayoutBounds();
-    }
+    tabOutline = new TabOutline(getSceneGraphObject());
+    tabOutline.getRingPath().getStyleClass().add(TARGET_RING_CLASS);
+    tabOutline.getRingPath().setMouseTransparent(true);
+    getRootNode().getChildren().add(tabOutline.getRingPath());
+  }
 
-    @Override
-    public Node getSceneGraphObjectProxy() {
-        return getSceneGraphObject().getTabPane();
-    }
+  public FXOMInstance getFxomInstance() {
+    return (FXOMInstance) getFxomObject();
+  }
 
-    @Override
-    protected void startListeningToSceneGraphObject() {
-        final TabPane tabPane = getSceneGraphObject().getTabPane();
-        startListeningToLayoutBounds(tabPane);
-        startListeningToLocalToSceneTransform(tabPane);
-    }
+  /*
+   * AbstractPring
+   */
 
-    @Override
-    protected void stopListeningToSceneGraphObject() {
-        final TabPane tabPane = getSceneGraphObject().getTabPane();
-        stopListeningToLayoutBounds(tabPane);
-        stopListeningToLocalToSceneTransform(tabPane);
-    }
+  @Override
+  protected void layoutDecoration() {
+    tabOutline.layout(this);
+  }
+
+  @Override
+  public void changeStroke(Paint stroke) {
+    tabOutline.getRingPath().setStroke(stroke);
+  }
+
+  /*
+   * AbstractDecoration
+   */
+
+  @Override
+  public Bounds getSceneGraphObjectBounds() {
+    return getSceneGraphObject().getTabPane().getLayoutBounds();
+  }
+
+  @Override
+  public Node getSceneGraphObjectProxy() {
+    return getSceneGraphObject().getTabPane();
+  }
+
+  @Override
+  protected void startListeningToSceneGraphObject() {
+    final TabPane tabPane = getSceneGraphObject().getTabPane();
+    startListeningToLayoutBounds(tabPane);
+    startListeningToLocalToSceneTransform(tabPane);
+  }
+
+  @Override
+  protected void stopListeningToSceneGraphObject() {
+    final TabPane tabPane = getSceneGraphObject().getTabPane();
+    stopListeningToLayoutBounds(tabPane);
+    stopListeningToLocalToSceneTransform(tabPane);
+  }
 }

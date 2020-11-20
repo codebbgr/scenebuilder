@@ -31,9 +31,9 @@
  */
 package com.oracle.javafx.scenebuilder.kit.editor.panel.hierarchy;
 
-import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.editor.images.ImageUtils;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
+import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.DesignHierarchyMask;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.DesignHierarchyMask.Accessory;
 import java.net.URL;
@@ -42,114 +42,115 @@ import java.util.Objects;
 import javafx.scene.image.Image;
 
 /**
- * Object representing the data contained within the hierarchy TreeItems for the
- * BorderPane top/right/bottom/left/center properties.
+ * Object representing the data contained within the hierarchy TreeItems for the BorderPane
+ * top/right/bottom/left/center properties.
  *
  * @treatAsPrivate
  */
 public class HierarchyItemBorderPane extends HierarchyItem {
 
-    private final Accessory position;
-    // The accessory owner. Used for the equals method.
-    private final DesignHierarchyMask owner;
+  private final Accessory position;
+  // The accessory owner. Used for the equals method.
+  private final DesignHierarchyMask owner;
 
-    /**
-     * Creates a hierarchy item.
-     *
-     * @param owner The accessory owner
-     * @param fxomObject The FX object represented by this item
-     * @param position The position of the FX object within the BorderPane
-     */
-    public HierarchyItemBorderPane(
-            final DesignHierarchyMask owner,
-            final FXOMObject fxomObject,
-            final Accessory position) {
-        assert owner != null;
-        this.owner = owner;
-        // fxomObject can be null for place holder items
-        this.mask = fxomObject == null ? null : new DesignHierarchyMask(fxomObject);
-        this.position = position;
-    }
+  /**
+   * Creates a hierarchy item.
+   *
+   * @param owner The accessory owner
+   * @param fxomObject The FX object represented by this item
+   * @param position The position of the FX object within the BorderPane
+   */
+  public HierarchyItemBorderPane(
+      final DesignHierarchyMask owner, final FXOMObject fxomObject, final Accessory position) {
+    assert owner != null;
+    this.owner = owner;
+    // fxomObject can be null for place holder items
+    this.mask = fxomObject == null ? null : new DesignHierarchyMask(fxomObject);
+    this.position = position;
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final HierarchyItemBorderPane item = (HierarchyItemBorderPane) obj;
-        if (!isEmpty()) {
-            // If the place holder is not empty, we compare the fxom object
-            assert getFxomObject() != null;
-            return getFxomObject().equals(item.getFxomObject());
-        } else {
-            // If the place holder is empty, we compare the position + owner
-            return getOwner().equals(item.getOwner())
-                    && getPosition().equals(item.getPosition());
-        }
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
     }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final HierarchyItemBorderPane item = (HierarchyItemBorderPane) obj;
+    if (!isEmpty()) {
+      // If the place holder is not empty, we compare the fxom object
+      assert getFxomObject() != null;
+      return getFxomObject().equals(item.getFxomObject());
+    } else {
+      // If the place holder is empty, we compare the position + owner
+      return getOwner().equals(item.getOwner()) && getPosition().equals(item.getPosition());
+    }
+  }
 
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 37 * hash + Objects.hashCode(this.mask);
-        hash = 37 * hash + Objects.hashCode(this.owner);
-        hash = 37 * hash + Objects.hashCode(this.position);
-        return hash;
-    }
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 37 * hash + Objects.hashCode(this.mask);
+    hash = 37 * hash + Objects.hashCode(this.owner);
+    hash = 37 * hash + Objects.hashCode(this.position);
+    return hash;
+  }
 
-    @Override
-    public boolean isPlaceHolder() {
-        return true;
-    }
+  @Override
+  public boolean isPlaceHolder() {
+    return true;
+  }
 
-    @Override
-    public boolean isEmpty() {
-        return mask == null;
-    }
+  @Override
+  public boolean isEmpty() {
+    return mask == null;
+  }
 
-    /**
-     * Returns the DesignHierarchyMask owner of this accessory. Cannot be null.
-     *
-     * @return the DesignHierarchyMask owner
-     */
-    public DesignHierarchyMask getOwner() {
-        return owner;
-    }
+  /**
+   * Returns the DesignHierarchyMask owner of this accessory. Cannot be null.
+   *
+   * @return the DesignHierarchyMask owner
+   */
+  public DesignHierarchyMask getOwner() {
+    return owner;
+  }
 
-    /**
-     * Returns the BorderPane position represented by this item.
-     *
-     * @return the BorderPane position represented by this item.
-     */
-    public Accessory getPosition() {
-        return this.position;
-    }
+  /**
+   * Returns the BorderPane position represented by this item.
+   *
+   * @return the BorderPane position represented by this item.
+   */
+  public Accessory getPosition() {
+    return this.position;
+  }
 
-    @Override
-    public Image getPlaceHolderImage() {
-        return ImageUtils.getNodeIcon("BorderPane-" + position.name().toLowerCase(Locale.ROOT) + ".png"); //NOI18N
-    }
+  @Override
+  public Image getPlaceHolderImage() {
+    return ImageUtils.getNodeIcon(
+        "BorderPane-" + position.name().toLowerCase(Locale.ROOT) + ".png"); // NOI18N
+  }
 
-    @Override
-    public String getPlaceHolderInfo() {
-        return (mask != null ? null : I18N.getString("hierarchy.placeholder.insert") + position.name().toUpperCase(Locale.getDefault()));
-    }
+  @Override
+  public String getPlaceHolderInfo() {
+    return (mask != null
+        ? null
+        : I18N.getString("hierarchy.placeholder.insert")
+            + position.name().toUpperCase(Locale.getDefault()));
+  }
 
-    @Override
-    public Image getClassNameIcon() {
-        return (mask == null ? null : mask.getClassNameIcon());
-    }
+  @Override
+  public Image getClassNameIcon() {
+    return (mask == null ? null : mask.getClassNameIcon());
+  }
 
-    @Override
-    public URL getClassNameIconURL() {
-        return (mask == null ? null : mask.getClassNameIconURL());
-    }
+  @Override
+  public URL getClassNameIconURL() {
+    return (mask == null ? null : mask.getClassNameIconURL());
+  }
 
-    @Override
-    public String getClassNameInfo() {
-        return (mask == null ? null : mask.getClassNameInfo());
-    }
+  @Override
+  public String getClassNameInfo() {
+    return (mask == null ? null : mask.getClassNameInfo());
+  }
 }

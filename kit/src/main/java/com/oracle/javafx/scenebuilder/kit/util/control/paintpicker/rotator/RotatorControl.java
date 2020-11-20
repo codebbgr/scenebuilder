@@ -51,97 +51,93 @@ import javafx.scene.layout.GridPane;
 
 public class RotatorControl extends GridPane {
 
-    @FXML
-    private TextField rotator_textfield;
-    @FXML
-    private Button rotator_dial;
-    @FXML
-    private Button rotator_handle;
-    @FXML
-    private Label rotator_label;
-    private final int roundingFactor = 100; // 2 decimals rounding
+  @FXML private TextField rotator_textfield;
+  @FXML private Button rotator_dial;
+  @FXML private Button rotator_handle;
+  @FXML private Label rotator_label;
+  private final int roundingFactor = 100; // 2 decimals rounding
 
-    private final DoubleProperty rotation = new SimpleDoubleProperty();
+  private final DoubleProperty rotation = new SimpleDoubleProperty();
 
-    public RotatorControl(String text) {
-        initialize(text);
+  public RotatorControl(String text) {
+    initialize(text);
+  }
+
+  public final DoubleProperty rotationProperty() {
+    return rotation;
+  }
+
+  public final double getRotationProperty() {
+    return rotation.get();
+  }
+
+  public final void setRotationProperty(double value) {
+    rotation.set(value);
+  }
+
+  /** Private */
+  private void initialize(String text) {
+
+    final FXMLLoader loader = new FXMLLoader();
+    loader.setLocation(RotatorControl.class.getResource("RotatorControl.fxml")); // NOI18N
+    loader.setController(this);
+    loader.setRoot(this);
+    try {
+      loader.load();
+    } catch (IOException ex) {
+      Logger.getLogger(GradientPicker.class.getName()).log(Level.SEVERE, null, ex);
     }
 
-    public final DoubleProperty rotationProperty() {
-        return rotation;
-    }
+    assert rotator_label != null;
+    rotator_label.setText(text);
 
-    public final double getRotationProperty() {
-        return rotation.get();
-    }
-
-    public final void setRotationProperty(double value) {
-        rotation.set(value);
-    }
-
-    /**
-     * Private
-     */
-    private void initialize(String text) {
-
-        final FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(RotatorControl.class.getResource("RotatorControl.fxml")); //NOI18N
-        loader.setController(this);
-        loader.setRoot(this);
-        try {
-            loader.load();
-        } catch (IOException ex) {
-            Logger.getLogger(GradientPicker.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        assert rotator_label != null;
-        rotator_label.setText(text);
-        
-        rotator_dial.setOnAction((ActionEvent event) -> {
-            event.consume();
+    rotator_dial.setOnAction(
+        (ActionEvent event) -> {
+          event.consume();
         });
-        rotator_handle.setOnAction((ActionEvent event) -> {
-            event.consume();
+    rotator_handle.setOnAction(
+        (ActionEvent event) -> {
+          event.consume();
         });
-    }
+  }
 
-    @FXML
-    void rotatorAction(ActionEvent event) {
-        double value = Double.valueOf(rotator_textfield.getText());
-        double rounded = round(value, roundingFactor);
-        rotate(rounded);
-        rotator_textfield.selectAll();
-        event.consume();
-    }
+  @FXML
+  void rotatorAction(ActionEvent event) {
+    double value = Double.valueOf(rotator_textfield.getText());
+    double rounded = round(value, roundingFactor);
+    rotate(rounded);
+    rotator_textfield.selectAll();
+    event.consume();
+  }
 
-    @FXML
-    void rotatorMousePressed(MouseEvent e) {
-        rotatorMouseDragged(e);
-    }
+  @FXML
+  void rotatorMousePressed(MouseEvent e) {
+    rotatorMouseDragged(e);
+  }
 
-    @FXML
-    void rotatorMouseDragged(MouseEvent e) {
-        final Parent p = rotator_dial.getParent();
-        final Bounds b = rotator_dial.getLayoutBounds();
-        final Double centerX = b.getMinX() + (b.getWidth() / 2);
-        final Double centerY = b.getMinY() + (b.getHeight() / 2);
-        final Point2D center = p.localToParent(centerX, centerY);
-        final Point2D mouse = p.localToParent(e.getX(), e.getY());
-        final Double deltaX = mouse.getX() - center.getX();
-        final Double deltaY = mouse.getY() - center.getY();
-        final Double radians = Math.atan2(deltaY, deltaX);
-        rotate(Math.toDegrees(radians));
-    }
+  @FXML
+  void rotatorMouseDragged(MouseEvent e) {
+    final Parent p = rotator_dial.getParent();
+    final Bounds b = rotator_dial.getLayoutBounds();
+    final Double centerX = b.getMinX() + (b.getWidth() / 2);
+    final Double centerY = b.getMinY() + (b.getHeight() / 2);
+    final Point2D center = p.localToParent(centerX, centerY);
+    final Point2D mouse = p.localToParent(e.getX(), e.getY());
+    final Double deltaX = mouse.getX() - center.getX();
+    final Double deltaY = mouse.getY() - center.getY();
+    final Double radians = Math.atan2(deltaY, deltaX);
+    rotate(Math.toDegrees(radians));
+  }
 
-    private void rotate(Double value) {
-        double rounded = round(value, roundingFactor);
-        rotation.set(rounded);
-        rotator_handle.setRotate(rounded);
-        rotator_textfield.setText(Double.toString(rounded));
-    }
+  private void rotate(Double value) {
+    double rounded = round(value, roundingFactor);
+    rotation.set(rounded);
+    rotator_handle.setRotate(rounded);
+    rotator_textfield.setText(Double.toString(rounded));
+  }
 
-    private double round(double value, int roundingFactor) {
-        double doubleRounded = Math.round(value * roundingFactor);
-        return doubleRounded / roundingFactor;
-    }
+  private double round(double value, int roundingFactor) {
+    double doubleRounded = Math.round(value * roundingFactor);
+    return doubleRounded / roundingFactor;
+  }
 }

@@ -45,63 +45,87 @@ import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.RadialGradient;
 import javafx.scene.paint.Stop;
 
-/**
- *
- */
+/** */
 public class RadialGradientPropertyMetadata extends ComplexPropertyMetadata<RadialGradient> {
 
-    private static final List<Stop> DEFAULT_STOPS 
-            = new RadialGradient(0.0, 1.0, 0.0, 0.0, 1.0,
-            true /* proportional */, CycleMethod.NO_CYCLE).getStops();
-    
-    private final DoublePropertyMetadata focusAngleMetadata
-            = new DoublePropertyMetadata(new PropertyName("focusAngle"), 
-            DoublePropertyMetadata.DoubleKind.ANGLE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata focusDistanceMetadata
-            = new DoublePropertyMetadata(new PropertyName("focusDistance"), 
-            DoublePropertyMetadata.DoubleKind.SIZE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata centerXMetadata
-            = new DoublePropertyMetadata(new PropertyName("centerX"), 
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata centerYMetadata
-            = new DoublePropertyMetadata(new PropertyName("centerY"), 
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata radiusMetadata
-            = new DoublePropertyMetadata(new PropertyName("radius"), 
-            DoublePropertyMetadata.DoubleKind.SIZE, true, 0.0, InspectorPath.UNUSED);
-    private final BooleanPropertyMetadata proportionalMetadata
-            = new BooleanPropertyMetadata(new PropertyName("proportional"), 
-            true, true, InspectorPath.UNUSED);
-    private final EnumerationPropertyMetadata cycleMethodMetadata
-            = new EnumerationPropertyMetadata(new PropertyName("cycleMethod"),
-            CycleMethod.class, true, CycleMethod.NO_CYCLE, InspectorPath.UNUSED);
-    private final StopListPropertyMetadata stopsMetadata
-            = new StopListPropertyMetadata(new PropertyName("stops"),
-            true, DEFAULT_STOPS, InspectorPath.UNUSED);
+  private static final List<Stop> DEFAULT_STOPS =
+      new RadialGradient(0.0, 1.0, 0.0, 0.0, 1.0, true /* proportional */, CycleMethod.NO_CYCLE)
+          .getStops();
 
-    public RadialGradientPropertyMetadata(PropertyName name, boolean readWrite, 
-            RadialGradient defaultValue, InspectorPath inspectorPath) {
-        super(name, RadialGradient.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final DoublePropertyMetadata focusAngleMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("focusAngle"),
+          DoublePropertyMetadata.DoubleKind.ANGLE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata focusDistanceMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("focusDistance"),
+          DoublePropertyMetadata.DoubleKind.SIZE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata centerXMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("centerX"),
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata centerYMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("centerY"),
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata radiusMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("radius"),
+          DoublePropertyMetadata.DoubleKind.SIZE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final BooleanPropertyMetadata proportionalMetadata =
+      new BooleanPropertyMetadata(
+          new PropertyName("proportional"), true, true, InspectorPath.UNUSED);
+  private final EnumerationPropertyMetadata cycleMethodMetadata =
+      new EnumerationPropertyMetadata(
+          new PropertyName("cycleMethod"),
+          CycleMethod.class,
+          true,
+          CycleMethod.NO_CYCLE,
+          InspectorPath.UNUSED);
+  private final StopListPropertyMetadata stopsMetadata =
+      new StopListPropertyMetadata(
+          new PropertyName("stops"), true, DEFAULT_STOPS, InspectorPath.UNUSED);
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(RadialGradient value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        focusAngleMetadata.setValue(result, value.getFocusAngle());
-        focusDistanceMetadata.setValue(result, value.getFocusDistance());
-        centerXMetadata.setValue(result, value.getCenterX());
-        centerYMetadata.setValue(result, value.getCenterY());
-        radiusMetadata.setValue(result, value.getRadius());
-        proportionalMetadata.setValue(result, value.isProportional());
-        cycleMethodMetadata.setValue(result, value.getCycleMethod().toString());
-        stopsMetadata.setValue(result, value.getStops());
+  public RadialGradientPropertyMetadata(
+      PropertyName name,
+      boolean readWrite,
+      RadialGradient defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, RadialGradient.class, readWrite, defaultValue, inspectorPath);
+  }
 
-        return result;
-    }
-    
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(RadialGradient value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    focusAngleMetadata.setValue(result, value.getFocusAngle());
+    focusDistanceMetadata.setValue(result, value.getFocusDistance());
+    centerXMetadata.setValue(result, value.getCenterX());
+    centerYMetadata.setValue(result, value.getCenterY());
+    radiusMetadata.setValue(result, value.getRadius());
+    proportionalMetadata.setValue(result, value.isProportional());
+    cycleMethodMetadata.setValue(result, value.getCycleMethod().toString());
+    stopsMetadata.setValue(result, value.getStops());
+
+    return result;
+  }
 }

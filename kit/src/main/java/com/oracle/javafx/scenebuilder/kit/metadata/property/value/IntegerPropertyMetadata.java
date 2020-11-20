@@ -34,27 +34,23 @@ package com.oracle.javafx.scenebuilder.kit.metadata.property.value;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 
-/**
- *
- * 
- */
+/** */
 public class IntegerPropertyMetadata extends TextEncodablePropertyMetadata<Integer> {
 
-    public IntegerPropertyMetadata(PropertyName name, boolean readWrite, 
-            Integer defaultValue, InspectorPath inspectorPath) {
-        super(name, Integer.class, readWrite, defaultValue, inspectorPath);
-    }
-    
-    public boolean isValidValue(Integer value) {
-        return (value != null) && (0 <= value);
-    }
+  public IntegerPropertyMetadata(
+      PropertyName name, boolean readWrite, Integer defaultValue, InspectorPath inspectorPath) {
+    super(name, Integer.class, readWrite, defaultValue, inspectorPath);
+  }
 
-    /*
-     * TextEncodablePropertyMetadata
-     */
-    @Override
-    public Integer makeValueFromString(String string) {
-        return Integer.valueOf(string);
-    }
-    
+  public boolean isValidValue(Integer value) {
+    return (value != null) && (0 <= value);
+  }
+
+  /*
+   * TextEncodablePropertyMetadata
+   */
+  @Override
+  public Integer makeValueFromString(String string) {
+    return Integer.valueOf(string);
+  }
 }

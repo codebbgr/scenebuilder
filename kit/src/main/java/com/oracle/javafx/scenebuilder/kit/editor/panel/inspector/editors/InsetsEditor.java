@@ -33,9 +33,7 @@
 package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors;
 
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
-
 import java.util.Set;
-
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -47,150 +45,144 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
-/**
- * Insets editor (for top/right/bottom/left fields).
- *
- * 
- */
+/** Insets editor (for top/right/bottom/left fields). */
 public class InsetsEditor extends PropertyEditor {
 
-    private Parent root;
-    @FXML
-    private Button linkBt;
-    @FXML
-    private TextField bottomTf;
-    @FXML
-    private TextField leftTf;
-    @FXML
-    private TextField rightTf;
-    @FXML
-    private TextField topTf;
-    TextField[] textFields = new TextField[4];
-    TextField errorTf;
+  private Parent root;
+  @FXML private Button linkBt;
+  @FXML private TextField bottomTf;
+  @FXML private TextField leftTf;
+  @FXML private TextField rightTf;
+  @FXML private TextField topTf;
+  TextField[] textFields = new TextField[4];
+  TextField errorTf;
 
-    public InsetsEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super(propMeta, selectedClasses);
-        initialize();
-    }
+  public InsetsEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super(propMeta, selectedClasses);
+    initialize();
+  }
 
-    //Method to please FindBugs
-    private void initialize() {
-        root = EditorUtils.loadFxml("InsetsEditor.fxml", this);
-        textFields[0] = topTf;
-        textFields[1] = rightTf;
-        textFields[2] = bottomTf;
-        textFields[3] = leftTf;
-        for (TextField tf : textFields) {
-            EventHandler<ActionEvent> valueListener = event -> {
-                if (isHandlingError()) {
-                    // Event received because of focus lost due to error dialog
-                    return;
+  // Method to please FindBugs
+  private void initialize() {
+    root = EditorUtils.loadFxml("InsetsEditor.fxml", this);
+    textFields[0] = topTf;
+    textFields[1] = rightTf;
+    textFields[2] = bottomTf;
+    textFields[3] = leftTf;
+    for (TextField tf : textFields) {
+      EventHandler<ActionEvent> valueListener =
+          event -> {
+            if (isHandlingError()) {
+              // Event received because of focus lost due to error dialog
+              return;
+            }
+            // !! Should check if invalid value !
+            userUpdateValueProperty(getValue());
+          };
+      setNumericEditorBehavior(this, tf, valueListener, false);
+      // Select all text when this editor is selected
+      tf.setOnMousePressed(event -> tf.selectAll());
+      tf.focusedProperty()
+          .addListener(
+              ((observable, oldValue, newValue) -> {
+                if (newValue) {
+                  tf.selectAll();
                 }
-                // !! Should check if invalid value ! 
-                userUpdateValueProperty(getValue());
-            };
-            setNumericEditorBehavior(this, tf, valueListener, false);
-            // Select all text when this editor is selected
-            tf.setOnMousePressed(event -> tf.selectAll());
-            tf.focusedProperty().addListener(((observable, oldValue, newValue) -> {
-                if (newValue){
-                    tf.selectAll();
-                }
-            }));
-        }
-        linkBt.disableProperty().bind(disableProperty());
-        setLayoutFormat(LayoutFormat.SIMPLE_LINE_BOTTOM);
+              }));
+    }
+    linkBt.disableProperty().bind(disableProperty());
+    setLayoutFormat(LayoutFormat.SIMPLE_LINE_BOTTOM);
+  }
+
+  @Override
+  public Node getValueEditor() {
+    return super.handleGenericModes(root);
+  }
+
+  @Override
+  public Object getValue() {
+    Double[] values = new Double[4];
+    int index = 0;
+    for (TextField tf : textFields) {
+      String val = tf.getText();
+      if (val == null || val.isEmpty()) {
+        val = "0"; // NOI18N
+      }
+      try {
+        Double.parseDouble(val);
+      } catch (NumberFormatException e) {
+        errorTf = tf;
+        handleInvalidValue(val);
+        return null;
+      }
+      values[index] = Double.valueOf(val);
+      index++;
+    }
+    return new Insets(values[0], values[1], values[2], values[3]);
+  }
+
+  @Override
+  public void setValue(Object value) {
+    setValueGeneric(value);
+    if (isSetValueDone()) {
+      return;
     }
 
-    @Override
-    public Node getValueEditor() {
-        return super.handleGenericModes(root);
+    if (value == null) {
+      value = Insets.EMPTY;
     }
+    Insets insets = (Insets) value;
+    topTf.setText(EditorUtils.valAsStr(insets.getTop()));
+    rightTf.setText(EditorUtils.valAsStr(insets.getRight()));
+    bottomTf.setText(EditorUtils.valAsStr(insets.getBottom()));
+    leftTf.setText(EditorUtils.valAsStr(insets.getLeft()));
+  }
 
-    @Override
-    public Object getValue() {
-        Double[] values = new Double[4];
-        int index = 0;
-        for (TextField tf : textFields) {
-            String val = tf.getText();
-            if (val == null || val.isEmpty()) {
-                val = "0"; //NOI18N
-            }
-            try {
-                Double.parseDouble(val);
-            } catch (NumberFormatException e) {
-                errorTf = tf;
-                handleInvalidValue(val);
-                return null;
-            }
-            values[index] = Double.valueOf(val);
-            index++;
-        }
-        return new Insets(values[0], values[1], values[2], values[3]);
+  @Override
+  public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super.reset(propMeta, selectedClasses);
+    setLayoutFormat(LayoutFormat.SIMPLE_LINE_BOTTOM);
+  }
+
+  @Override
+  protected void valueIsIndeterminate() {
+    for (TextField tf : textFields) {
+      handleIndeterminate(tf);
     }
+  }
 
-    @Override
-    public void setValue(Object value) {
-        setValueGeneric(value);
-        if (isSetValueDone()) {
-            return;
-        }
+  //
+  // FXML methods
+  //
+  @FXML
+  void linkValuesAction(ActionEvent event) {
+    linkValues();
+  }
 
-        if (value == null) {
-            value = Insets.EMPTY;
-        }
-        Insets insets = (Insets) value;
-        topTf.setText(EditorUtils.valAsStr(insets.getTop()));
-        rightTf.setText(EditorUtils.valAsStr(insets.getRight()));
-        bottomTf.setText(EditorUtils.valAsStr(insets.getBottom()));
-        leftTf.setText(EditorUtils.valAsStr(insets.getLeft()));
+  @FXML
+  void linkValuesKeypressed(KeyEvent event) {
+    if (event.getCode() == KeyCode.ENTER) {
+      linkValues();
     }
+  }
 
-    @Override
-    public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super.reset(propMeta, selectedClasses);
-        setLayoutFormat(LayoutFormat.SIMPLE_LINE_BOTTOM);
-    }
+  private void linkValues() {
+    String t = topTf.getText();
+    rightTf.setText(t);
+    bottomTf.setText(t);
+    leftTf.setText(t);
+    userUpdateValueProperty(getValue());
+  }
 
-    @Override
-    protected void valueIsIndeterminate() {
-        for (TextField tf : textFields) {
-            handleIndeterminate(tf);
-        }
-    }
-
-    //
-    // FXML methods
-    //
-    @FXML
-    void linkValuesAction(ActionEvent event) {
-        linkValues();
-    }
-
-    @FXML
-    void linkValuesKeypressed(KeyEvent event) {
-        if (event.getCode() == KeyCode.ENTER) {
-            linkValues();
-        }
-    }
-
-    private void linkValues() {
-        String t = topTf.getText();
-        rightTf.setText(t);
-        bottomTf.setText(t);
-        leftTf.setText(t);
-        userUpdateValueProperty(getValue());
-    }
-
-    @Override
-    public void requestFocus() {
-        EditorUtils.doNextFrame(() -> {
-            if (errorTf != null) {
-                errorTf.requestFocus();
-            } else {
-                topTf.requestFocus();
-            }
+  @Override
+  public void requestFocus() {
+    EditorUtils.doNextFrame(
+        () -> {
+          if (errorTf != null) {
+            errorTf.requestFocus();
+          } else {
+            topTf.requestFocus();
+          }
         });
-    }
-
+  }
 }

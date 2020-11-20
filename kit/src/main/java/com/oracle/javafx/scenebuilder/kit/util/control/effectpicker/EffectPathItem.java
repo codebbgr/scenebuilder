@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -51,191 +50,188 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 
-/**
- * Effect path item.
- */
+/** Effect path item. */
 public abstract class EffectPathItem extends HBox {
 
-    @FXML
-    protected ImageView image_view;
-    @FXML
-    protected MenuButton menu_button;
-    @FXML
-    protected ToggleButton toggle_button;
-    @FXML
-    protected Tooltip tool_tip;
-    @FXML
-    public MenuItem delete_menuitem;
-    @FXML
-    public MenuItem delete_input_menuitem;
-    @FXML
-    public Menu replace_input_menu;
+  @FXML protected ImageView image_view;
+  @FXML protected MenuButton menu_button;
+  @FXML protected ToggleButton toggle_button;
+  @FXML protected Tooltip tool_tip;
+  @FXML public MenuItem delete_menuitem;
+  @FXML public MenuItem delete_input_menuitem;
+  @FXML public Menu replace_input_menu;
 
-    protected final Effect effect;
-    protected final EffectPathItem parentPahItem;
-    protected final EffectPickerController effectPickerController;
+  protected final Effect effect;
+  protected final EffectPathItem parentPahItem;
+  protected final EffectPickerController effectPickerController;
 
-    public EffectPathItem(EffectPickerController epc, Effect effect, EffectPathItem parentPahItem) {
-        assert epc != null;
-        assert effect != null;
-        this.effectPickerController = epc;
-        this.parentPahItem = parentPahItem;
-        this.effect = effect;
-        initialize();
+  public EffectPathItem(EffectPickerController epc, Effect effect, EffectPathItem parentPahItem) {
+    assert epc != null;
+    assert effect != null;
+    this.effectPickerController = epc;
+    this.parentPahItem = parentPahItem;
+    this.effect = effect;
+    initialize();
+  }
+
+  public Effect getValue() {
+    return effect;
+  }
+
+  ToggleButton getToggleButton() {
+    return toggle_button;
+  }
+
+  abstract EffectPathItem getSelectedInputPathItem();
+
+  Effect getSelectedInputEffect() {
+    return getSelectedInputPathItem() == null ? null : getSelectedInputPathItem().getValue();
+  }
+
+  abstract void setSelectedInputEffect(Effect input);
+
+  String getSimpleName() {
+    return effect.getClass().getSimpleName();
+  }
+
+  @FXML
+  void deleteEffect(ActionEvent event) {
+
+    // Update model
+    // ---------------------------------------------
+    if (parentPahItem != null) {
+      // Delete this effect from the chain but relink it's input to its parent effect
+      final Effect inputEffect = getSelectedInputEffect();
+      parentPahItem.setSelectedInputEffect(inputEffect);
+    } else {
+      // This is the root effect
+      effectPickerController.setRootEffectProperty(null);
+    }
+    effectPickerController.incrementRevision();
+
+    // Update UI
+    // ---------------------------------------------
+    effectPickerController.updateUI();
+  }
+
+  @FXML
+  void deleteEffectInput(ActionEvent event) {
+
+    // Update model
+    // ---------------------------------------------
+    setSelectedInputEffect(null);
+    effectPickerController.incrementRevision();
+
+    // Update UI
+    // ---------------------------------------------
+    effectPickerController.updateUI();
+  }
+
+  @FXML
+  void replaceEffect(ActionEvent event) {
+    final MenuItem menuItem = (MenuItem) event.getSource();
+    final String text = menuItem.getText();
+
+    // Update model
+    // ---------------------------------------------
+    final Effect newEffect = Utils.newInstance(text);
+    // Relink this effect input to the new effect
+    final Effect inputEffect = getSelectedInputEffect();
+    Utils.setDefaultInput(newEffect, inputEffect);
+    // Update effect parent with the new effect
+    if (parentPahItem != null) {
+      parentPahItem.setSelectedInputEffect(newEffect);
+    } else {
+      // This is the root effect
+      effectPickerController.setRootEffectProperty(newEffect);
+    }
+    effectPickerController.incrementRevision();
+
+    // Update UI
+    // ---------------------------------------------
+    effectPickerController.updateUI();
+  }
+
+  @FXML
+  void replaceEffectInput(ActionEvent event) {
+    final MenuItem menuItem = (MenuItem) event.getSource();
+    final String text = menuItem.getText();
+
+    // Update model
+    // ---------------------------------------------
+    final Effect newEffect = Utils.newInstance(text);
+    setSelectedInputEffect(newEffect);
+    effectPickerController.incrementRevision();
+
+    // Update UI
+    // ---------------------------------------------
+    effectPickerController.updateUI();
+  }
+
+  @FXML
+  void selectEffect(ActionEvent event) {
+    effectPickerController.selectEffectPathItem(this);
+    event.consume();
+  }
+
+  private void initialize() {
+    final FXMLLoader loader = new FXMLLoader();
+    loader.setLocation(EffectPathItem.class.getResource("EffectPathItem.fxml")); // NOI18N
+    loader.setController(this);
+    loader.setRoot(this);
+    try {
+      loader.load();
+    } catch (IOException ex) {
+      Logger.getLogger(EffectPathItem.class.getName()).log(Level.SEVERE, null, ex);
     }
 
-    public Effect getValue() {
-        return effect;
-    }
+    assert image_view != null;
+    assert menu_button != null;
+    assert toggle_button != null;
+    assert tool_tip != null;
+    assert delete_menuitem != null;
+    assert delete_input_menuitem != null;
+    assert replace_input_menu != null;
 
-    ToggleButton getToggleButton() {
-        return toggle_button;
-    }
+    // Update ToggleButton
+    final ToggleGroup toggleGroup = effectPickerController.getEffectToggleGroup();
+    toggle_button.setToggleGroup(toggleGroup);
+    toggle_button.setText(getSimpleName());
 
-    abstract EffectPathItem getSelectedInputPathItem();
+    // Update ImageView
+    final URL url =
+        EffectPathItem.class.getResource(
+            "images/" + effect.getClass().getSimpleName() + ".png"); // NOI18N
+    final Image img = new Image(url.toExternalForm());
+    image_view.setImage(img);
 
-    Effect getSelectedInputEffect() {
-        return getSelectedInputPathItem() == null ? null : getSelectedInputPathItem().getValue();
-    }
-
-    abstract void setSelectedInputEffect(Effect input);
-
-    String getSimpleName() {
-        return effect.getClass().getSimpleName();
-    }
-
-    @FXML
-    void deleteEffect(ActionEvent event) {
-
-        // Update model
-        //---------------------------------------------
-        if (parentPahItem != null) {
-            // Delete this effect from the chain but relink it's input to its parent effect
-            final Effect inputEffect = getSelectedInputEffect();
-            parentPahItem.setSelectedInputEffect(inputEffect);
-        } else {
-            // This is the root effect
-            effectPickerController.setRootEffectProperty(null);
-        }
-        effectPickerController.incrementRevision();
-
-        // Update UI
-        //---------------------------------------------
-        effectPickerController.updateUI();
-    }
-
-    @FXML
-    void deleteEffectInput(ActionEvent event) {
-
-        // Update model
-        //---------------------------------------------
-        setSelectedInputEffect(null);
-        effectPickerController.incrementRevision();
-
-        // Update UI
-        //---------------------------------------------
-        effectPickerController.updateUI();
-    }
-
-    @FXML
-    void replaceEffect(ActionEvent event) {
-        final MenuItem menuItem = (MenuItem) event.getSource();
-        final String text = menuItem.getText();
-
-        // Update model
-        //---------------------------------------------
-        final Effect newEffect = Utils.newInstance(text);
-        // Relink this effect input to the new effect
-        final Effect inputEffect = getSelectedInputEffect();
-        Utils.setDefaultInput(newEffect, inputEffect);
-        // Update effect parent with the new effect
-        if (parentPahItem != null) {
-            parentPahItem.setSelectedInputEffect(newEffect);
-        } else {
-            // This is the root effect
-            effectPickerController.setRootEffectProperty(newEffect);
-        }
-        effectPickerController.incrementRevision();
-
-        // Update UI
-        //---------------------------------------------
-        effectPickerController.updateUI();
-    }
-
-    @FXML
-    void replaceEffectInput(ActionEvent event) {
-        final MenuItem menuItem = (MenuItem) event.getSource();
-        final String text = menuItem.getText();
-
-        // Update model
-        //---------------------------------------------
-        final Effect newEffect = Utils.newInstance(text);
-        setSelectedInputEffect(newEffect);
-        effectPickerController.incrementRevision();
-
-        // Update UI
-        //---------------------------------------------
-        effectPickerController.updateUI();
-    }
-
-    @FXML
-    void selectEffect(ActionEvent event) {
-        effectPickerController.selectEffectPathItem(this);
-        event.consume();
-    }
-
-    private void initialize() {
-        final FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(EffectPathItem.class.getResource("EffectPathItem.fxml")); //NOI18N
-        loader.setController(this);
-        loader.setRoot(this);
-        try {
-            loader.load();
-        } catch (IOException ex) {
-            Logger.getLogger(EffectPathItem.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        assert image_view != null;
-        assert menu_button != null;
-        assert toggle_button != null;
-        assert tool_tip != null;
-        assert delete_menuitem != null;
-        assert delete_input_menuitem != null;
-        assert replace_input_menu != null;
-
-        // Update ToggleButton
-        final ToggleGroup toggleGroup = effectPickerController.getEffectToggleGroup();
-        toggle_button.setToggleGroup(toggleGroup);
-        toggle_button.setText(getSimpleName());
-
-        // Update ImageView
-        final URL url = EffectPathItem.class.getResource("images/" + effect.getClass().getSimpleName() + ".png"); //NOI18N
-        final Image img = new Image(url.toExternalForm());
-        image_view.setImage(img);
-
-        menu_button.showingProperty().addListener((ChangeListener<Boolean>) (ov, oldValue, newValue) -> {
-            if (newValue) {
-                // Disable menu item for the Lighting bump input.
-                // javadoc says :
-                // The optional bump map input. If not specified, a bump map 
-                // will be automatically generated from the default input. 
-                // If set to null, or left unspecified, a graphical image of 
-                // the Node to which the Effect is attached will be used to 
-                // generate a default bump map.
-                // Default value:a Shadow effect with a radius of 10
-                //
-                // SB 2.0 just allow to replace the bump input property
-                if (EffectPathItem.this instanceof LightingPathItem) {
-                    delete_input_menuitem.setDisable(true);
-                } else {
-                    delete_input_menuitem.setDisable(false);
-                }
-                if (parentPahItem instanceof LightingPathItem) {
-                    delete_menuitem.setDisable(true);
-                } else {
-                    delete_menuitem.setDisable(false);
-                }
-            }
-        });
-    }
+    menu_button
+        .showingProperty()
+        .addListener(
+            (ChangeListener<Boolean>)
+                (ov, oldValue, newValue) -> {
+                  if (newValue) {
+                    // Disable menu item for the Lighting bump input.
+                    // javadoc says :
+                    // The optional bump map input. If not specified, a bump map
+                    // will be automatically generated from the default input.
+                    // If set to null, or left unspecified, a graphical image of
+                    // the Node to which the Effect is attached will be used to
+                    // generate a default bump map.
+                    // Default value:a Shadow effect with a radius of 10
+                    //
+                    // SB 2.0 just allow to replace the bump input property
+                    if (EffectPathItem.this instanceof LightingPathItem) {
+                      delete_input_menuitem.setDisable(true);
+                    } else {
+                      delete_input_menuitem.setDisable(false);
+                    }
+                    if (parentPahItem instanceof LightingPathItem) {
+                      delete_menuitem.setDisable(true);
+                    } else {
+                      delete_menuitem.setDisable(false);
+                    }
+                  }
+                });
+  }
 }

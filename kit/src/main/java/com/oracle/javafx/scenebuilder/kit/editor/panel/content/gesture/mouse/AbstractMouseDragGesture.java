@@ -33,96 +33,94 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.mouse;
 
 import com.oracle.javafx.scenebuilder.kit.editor.panel.content.ContentPanelController;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.AbstractGesture;
-
 import javafx.scene.Node;
 import javafx.scene.input.InputEvent;
 import javafx.scene.input.MouseEvent;
 
-/**
- *
- * 
- */
+/** */
 public abstract class AbstractMouseDragGesture extends AbstractGesture {
-    
-    
-    private Observer observer;
-    private Node eventTarget;
 
-    public AbstractMouseDragGesture(ContentPanelController contentPanelController) {
-        super(contentPanelController);
-    }
-    
-    
-    protected abstract void mousePressed(MouseEvent e);
-    protected abstract void mouseDragDetected(MouseEvent e);
-    protected abstract void mouseReleased(MouseEvent e);
-    protected abstract void mouseExited(MouseEvent e);
-    
-    /*
-     * AbstractGesture
-     */
+  private Observer observer;
+  private Node eventTarget;
 
-    @Override
-    public void start(InputEvent e, Observer observer) {
-        assert e != null;
-        assert e instanceof MouseEvent;
-        assert e.getEventType() == MouseEvent.MOUSE_PRESSED;
-        assert e.getTarget() instanceof Node;
-        assert observer != null;
-        
-        this.observer = observer;
-        this.eventTarget = (Node) e.getTarget();
+  public AbstractMouseDragGesture(ContentPanelController contentPanelController) {
+    super(contentPanelController);
+  }
 
-        assert eventTarget.getOnDragDetected() == null;
-        assert eventTarget.getOnMouseReleased() == null;
-        assert eventTarget.getOnMouseExited() == null;
-        
-        eventTarget.setOnDragDetected(e1 -> {
-            try {
-                mouseDragDetected(e1);
-            } finally {
-                performTermination();
-            }
-        });
-        eventTarget.setOnMouseReleased(e1 -> {
-            try {
-                mouseReleased(e1);
-            } finally {
-                performTermination();
-            }
-        });
-        eventTarget.setOnMouseExited(e1 -> {
-            try {
-                mouseExited(e1);
-            } finally {
-                performTermination();
-            }
-        });
-        
-        try {
-            mousePressed((MouseEvent) e);
-        } catch(RuntimeException x) {
+  protected abstract void mousePressed(MouseEvent e);
+
+  protected abstract void mouseDragDetected(MouseEvent e);
+
+  protected abstract void mouseReleased(MouseEvent e);
+
+  protected abstract void mouseExited(MouseEvent e);
+
+  /*
+   * AbstractGesture
+   */
+
+  @Override
+  public void start(InputEvent e, Observer observer) {
+    assert e != null;
+    assert e instanceof MouseEvent;
+    assert e.getEventType() == MouseEvent.MOUSE_PRESSED;
+    assert e.getTarget() instanceof Node;
+    assert observer != null;
+
+    this.observer = observer;
+    this.eventTarget = (Node) e.getTarget();
+
+    assert eventTarget.getOnDragDetected() == null;
+    assert eventTarget.getOnMouseReleased() == null;
+    assert eventTarget.getOnMouseExited() == null;
+
+    eventTarget.setOnDragDetected(
+        e1 -> {
+          try {
+            mouseDragDetected(e1);
+          } finally {
             performTermination();
-            throw x;
-        }
+          }
+        });
+    eventTarget.setOnMouseReleased(
+        e1 -> {
+          try {
+            mouseReleased(e1);
+          } finally {
+            performTermination();
+          }
+        });
+    eventTarget.setOnMouseExited(
+        e1 -> {
+          try {
+            mouseExited(e1);
+          } finally {
+            performTermination();
+          }
+        });
+
+    try {
+      mousePressed((MouseEvent) e);
+    } catch (RuntimeException x) {
+      performTermination();
+      throw x;
     }
-    
-    
-    /*
-     * Private
-     */
-    
-    private void performTermination() {
-        eventTarget.setOnDragDetected(null);
-        eventTarget.setOnMouseReleased(null);
-        eventTarget.setOnMouseExited(null);
-        
-        try {
-            observer.gestureDidTerminate(this);
-        } finally {
-            observer = null;
-            eventTarget = null;
-        }
+  }
+
+  /*
+   * Private
+   */
+
+  private void performTermination() {
+    eventTarget.setOnDragDetected(null);
+    eventTarget.setOnMouseReleased(null);
+    eventTarget.setOnMouseExited(null);
+
+    try {
+      observer.gestureDidTerminate(this);
+    } finally {
+      observer = null;
+      eventTarget = null;
     }
-    
+  }
 }

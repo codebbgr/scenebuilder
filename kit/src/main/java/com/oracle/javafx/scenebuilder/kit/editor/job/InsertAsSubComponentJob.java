@@ -52,151 +52,142 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Job used to insert new FXOM objects into a sub component location.
- *
- */
+/** Job used to insert new FXOM objects into a sub component location. */
 public class InsertAsSubComponentJob extends BatchSelectionJob {
 
-    private final FXOMObject newObject;
-    private final FXOMObject targetObject;
-    private final int targetIndex;
+  private final FXOMObject newObject;
+  private final FXOMObject targetObject;
+  private final int targetIndex;
 
-    public InsertAsSubComponentJob(
-            FXOMObject newObject,
-            FXOMObject targetObject,
-            int targetIndex,
-            EditorController editorController) {
-        super(editorController);
+  public InsertAsSubComponentJob(
+      FXOMObject newObject,
+      FXOMObject targetObject,
+      int targetIndex,
+      EditorController editorController) {
+    super(editorController);
 
-        assert newObject != null;
-        assert targetObject != null;
-        assert targetIndex >= -1;
-        assert newObject.getFxomDocument() == getEditorController().getFxomDocument();
-        assert targetObject.getFxomDocument() == getEditorController().getFxomDocument();
+    assert newObject != null;
+    assert targetObject != null;
+    assert targetIndex >= -1;
+    assert newObject.getFxomDocument() == getEditorController().getFxomDocument();
+    assert targetObject.getFxomDocument() == getEditorController().getFxomDocument();
 
-        this.newObject = newObject;
-        this.targetObject = targetObject;
-        this.targetIndex = targetIndex;
+    this.newObject = newObject;
+    this.targetObject = targetObject;
+    this.targetIndex = targetIndex;
+  }
+
+  @Override
+  protected List<Job> makeSubJobs() {
+    final List<Job> result;
+
+    final boolean executable;
+    if (targetObject instanceof FXOMInstance) {
+      final DesignHierarchyMask mask = new DesignHierarchyMask(targetObject);
+      executable = mask.isAcceptingSubComponent(newObject);
+    } else {
+      // TODO(elp): someday we should support insering in FXOMCollection
+      executable = false;
     }
 
-    @Override
-    protected List<Job> makeSubJobs() {
-        final List<Job> result;
-        
-        final boolean executable;
-        if (targetObject instanceof FXOMInstance) {
-            final DesignHierarchyMask mask = new DesignHierarchyMask(targetObject);
-            executable = mask.isAcceptingSubComponent(newObject);
-        } else {
-            // TODO(elp): someday we should support insering in FXOMCollection
-            executable = false;
-        }
-        
-        if (executable) {
-            final FXOMDocument fxomDocument = targetObject.getFxomDocument();
-            final FXOMInstance targetInstance = (FXOMInstance) targetObject;
-            final DesignHierarchyMask mask = new DesignHierarchyMask(targetObject);
-            final PropertyName subComponentName = mask.getSubComponentPropertyName();
-            assert subComponentName != null;
+    if (executable) {
+      final FXOMDocument fxomDocument = targetObject.getFxomDocument();
+      final FXOMInstance targetInstance = (FXOMInstance) targetObject;
+      final DesignHierarchyMask mask = new DesignHierarchyMask(targetObject);
+      final PropertyName subComponentName = mask.getSubComponentPropertyName();
+      assert subComponentName != null;
 
-            /*
-             * Two cases:
-             *  1) targetObject has no sub component yet
-             *      => a new FXOMProperty must created
-             *      => newObject must be added to this property using AddPropertyValueJob
-             *      => new property must be added to targetObject using AddPropertyJob
-             *  2) targetObject has already some sub components
-             *      2.1) property is an FXOMPropertyC
-             *          => newObject must be inserted amongst the existing values
-             *      2.2) property is an empty FXOMPropertyT (see DTL-6206)
-             *          => property must be replaced by an FXOMPropertyC
-             *          => newObject must be inserted in the FXOMPropertyC
-             */
+      /*
+       * Two cases:
+       *  1) targetObject has no sub component yet
+       *      => a new FXOMProperty must created
+       *      => newObject must be added to this property using AddPropertyValueJob
+       *      => new property must be added to targetObject using AddPropertyJob
+       *  2) targetObject has already some sub components
+       *      2.1) property is an FXOMPropertyC
+       *          => newObject must be inserted amongst the existing values
+       *      2.2) property is an empty FXOMPropertyT (see DTL-6206)
+       *          => property must be replaced by an FXOMPropertyC
+       *          => newObject must be inserted in the FXOMPropertyC
+       */
 
-            final FXOMProperty currentProperty
-                    = targetInstance.getProperties().get(subComponentName);
-           
-            final FXOMPropertyC targetProperty;
-            if (currentProperty instanceof FXOMPropertyC) {
-                targetProperty = (FXOMPropertyC) currentProperty;
-            } else {
-                targetProperty = new FXOMPropertyC(fxomDocument, subComponentName);
-            }
-            
-            result = new ArrayList<>();
+      final FXOMProperty currentProperty = targetInstance.getProperties().get(subComponentName);
 
-            /*
-             * RemovePropertyJob
-             */
-            if (currentProperty instanceof FXOMPropertyT) {
-                result.add(new RemovePropertyJob(currentProperty, getEditorController()));
-            }
+      final FXOMPropertyC targetProperty;
+      if (currentProperty instanceof FXOMPropertyC) {
+        targetProperty = (FXOMPropertyC) currentProperty;
+      } else {
+        targetProperty = new FXOMPropertyC(fxomDocument, subComponentName);
+      }
 
-            /*
-             * AddPropertyValueJob
-             */
-            final Job addValueJob 
-                    = new AddPropertyValueJob(newObject, 
-                            targetProperty, 
-                            targetIndex, 
-                            getEditorController());
-            result.add(addValueJob);
+      result = new ArrayList<>();
 
-            /*
-             * AddPropertyJob
-             */
-            if (targetProperty.getParentInstance() == null) {
-                assert targetObject instanceof FXOMInstance;
-                final Job addPropertyJob
-                        = new AddPropertyJob(targetProperty, targetInstance,
-                        -1, getEditorController());
-                result.add(addPropertyJob);
-            }
-            
-            /*
-             * PrunePropertiesJob
-             */
-            final Job pruneJob = new PrunePropertiesJob(newObject, targetObject, 
-                    getEditorController());
-            if (pruneJob.isExecutable()) {
-                result.add(0, pruneJob);
-            }
-            
-        } else {
-            result = Collections.emptyList();
-        }
-        
-        return result;
+      /*
+       * RemovePropertyJob
+       */
+      if (currentProperty instanceof FXOMPropertyT) {
+        result.add(new RemovePropertyJob(currentProperty, getEditorController()));
+      }
+
+      /*
+       * AddPropertyValueJob
+       */
+      final Job addValueJob =
+          new AddPropertyValueJob(newObject, targetProperty, targetIndex, getEditorController());
+      result.add(addValueJob);
+
+      /*
+       * AddPropertyJob
+       */
+      if (targetProperty.getParentInstance() == null) {
+        assert targetObject instanceof FXOMInstance;
+        final Job addPropertyJob =
+            new AddPropertyJob(targetProperty, targetInstance, -1, getEditorController());
+        result.add(addPropertyJob);
+      }
+
+      /*
+       * PrunePropertiesJob
+       */
+      final Job pruneJob = new PrunePropertiesJob(newObject, targetObject, getEditorController());
+      if (pruneJob.isExecutable()) {
+        result.add(0, pruneJob);
+      }
+
+    } else {
+      result = Collections.emptyList();
     }
 
-    @Override
-    protected String makeDescription() {
-        final StringBuilder sb = new StringBuilder();
+    return result;
+  }
 
-        sb.append("Insert ");
+  @Override
+  protected String makeDescription() {
+    final StringBuilder sb = new StringBuilder();
 
-        if (newObject instanceof FXOMInstance) {
-            final Object sceneGraphObject = newObject.getSceneGraphObject();
-            if (sceneGraphObject != null) {
-                sb.append(sceneGraphObject.getClass().getSimpleName());
-            } else {
-                sb.append("Unresolved Object");
-            }
-        } else if (newObject instanceof FXOMCollection) {
-            sb.append("Collection");
-        } else {
-            assert false;
-            sb.append(newObject.getClass().getSimpleName());
-        }
-        
-        return sb.toString();
+    sb.append("Insert ");
+
+    if (newObject instanceof FXOMInstance) {
+      final Object sceneGraphObject = newObject.getSceneGraphObject();
+      if (sceneGraphObject != null) {
+        sb.append(sceneGraphObject.getClass().getSimpleName());
+      } else {
+        sb.append("Unresolved Object");
+      }
+    } else if (newObject instanceof FXOMCollection) {
+      sb.append("Collection");
+    } else {
+      assert false;
+      sb.append(newObject.getClass().getSimpleName());
     }
 
-    @Override
-    protected AbstractSelectionGroup getNewSelectionGroup() {
-        final Set<FXOMObject> newObjects = new HashSet<>();
-        newObjects.add(newObject);
-        return new ObjectSelectionGroup(newObjects, newObject, null);
-    }
+    return sb.toString();
+  }
+
+  @Override
+  protected AbstractSelectionGroup getNewSelectionGroup() {
+    final Set<FXOMObject> newObjects = new HashSet<>();
+    newObjects.add(newObject);
+    return new ObjectSelectionGroup(newObjects, newObject, null);
+  }
 }

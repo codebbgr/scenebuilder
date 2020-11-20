@@ -32,93 +32,92 @@
 package com.oracle.javafx.scenebuilder.kit.editor.job;
 
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
-import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.AbstractSelectionGroup;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.ObjectSelectionGroup;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.Selection;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMDocument;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMNodes;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
+import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.DesignHierarchyMask;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
+/** */
 public class ImportFileJob extends BatchSelectionJob {
 
-    private final File file;
-    private FXOMObject newObject, targetObject;
+  private final File file;
+  private FXOMObject newObject, targetObject;
 
-    public ImportFileJob(File file, EditorController editorController) {
-        super(editorController);
+  public ImportFileJob(File file, EditorController editorController) {
+    super(editorController);
 
-        assert file != null;
-        this.file = file;
-    }
+    assert file != null;
+    this.file = file;
+  }
 
-    public FXOMObject getTargetObject() {
-        return targetObject;
-    }
+  public FXOMObject getTargetObject() {
+    return targetObject;
+  }
 
-    @Override
-    protected List<Job> makeSubJobs() {
-        final List<Job> result = new ArrayList<>();
+  @Override
+  protected List<Job> makeSubJobs() {
+    final List<Job> result = new ArrayList<>();
 
-        final FXOMDocument targetDocument = getEditorController().getFxomDocument();
+    final FXOMDocument targetDocument = getEditorController().getFxomDocument();
 
-        try {
-            newObject = FXOMNodes.newObject(targetDocument, file);
+    try {
+      newObject = FXOMNodes.newObject(targetDocument, file);
 
-            // newObject is null when file is empty
-            if (newObject != null) {
-                // If the document is empty (root object is null), then we 
-                // insert the new object as root.
-                // Otherwise, we insert the new object under the common parent 
-                // of the selected objects.
-                final FXOMObject rootObject = targetDocument.getFxomRoot();
+      // newObject is null when file is empty
+      if (newObject != null) {
+        // If the document is empty (root object is null), then we
+        // insert the new object as root.
+        // Otherwise, we insert the new object under the common parent
+        // of the selected objects.
+        final FXOMObject rootObject = targetDocument.getFxomRoot();
 
-                if (rootObject == null) {
-                    result.add(new SetDocumentRootJob(newObject, getEditorController()));
-                } else {
-                    final Selection selection = getEditorController().getSelection();
-                    if (selection.isEmpty() || selection.isSelected(rootObject)) {
-                        // No selection or root is selected -> we insert below root
-                        targetObject = rootObject;
-                    } else {
-                        // Let's use the common parent of the selected objects.
-                        // It might be null if selection holds some non FXOMObject entries
-                        targetObject = selection.getAncestor();
-                    }
-                    // Build InsertAsSubComponent jobs
-                    final DesignHierarchyMask targetMask = new DesignHierarchyMask(targetObject);
-                    if (targetMask.isAcceptingSubComponent(newObject)) {
-                        result.add(new InsertAsSubComponentJob(
-                                newObject,
-                                targetObject,
-                                targetMask.getSubComponentCount(),
-                                getEditorController()));
-                    }
-                }
-            }
-        } catch (IOException ex) {
+        if (rootObject == null) {
+          result.add(new SetDocumentRootJob(newObject, getEditorController()));
+        } else {
+          final Selection selection = getEditorController().getSelection();
+          if (selection.isEmpty() || selection.isSelected(rootObject)) {
+            // No selection or root is selected -> we insert below root
+            targetObject = rootObject;
+          } else {
+            // Let's use the common parent of the selected objects.
+            // It might be null if selection holds some non FXOMObject entries
+            targetObject = selection.getAncestor();
+          }
+          // Build InsertAsSubComponent jobs
+          final DesignHierarchyMask targetMask = new DesignHierarchyMask(targetObject);
+          if (targetMask.isAcceptingSubComponent(newObject)) {
+            result.add(
+                new InsertAsSubComponentJob(
+                    newObject,
+                    targetObject,
+                    targetMask.getSubComponentCount(),
+                    getEditorController()));
+          }
         }
-
-        return result;
+      }
+    } catch (IOException ex) {
     }
 
-    @Override
-    protected String makeDescription() {
-        return I18N.getString("import.from.file", file.getName());
-    }
+    return result;
+  }
 
-    @Override
-    protected AbstractSelectionGroup getNewSelectionGroup() {
-        final List<FXOMObject> fxomObjects = new ArrayList<>();
-        fxomObjects.add(newObject);
-        return new ObjectSelectionGroup(fxomObjects, newObject, null);
-    }
+  @Override
+  protected String makeDescription() {
+    return I18N.getString("import.from.file", file.getName());
+  }
+
+  @Override
+  protected AbstractSelectionGroup getNewSelectionGroup() {
+    final List<FXOMObject> fxomObjects = new ArrayList<>();
+    fxomObjects.add(newObject);
+    return new ObjectSelectionGroup(fxomObjects, newObject, null);
+  }
 }

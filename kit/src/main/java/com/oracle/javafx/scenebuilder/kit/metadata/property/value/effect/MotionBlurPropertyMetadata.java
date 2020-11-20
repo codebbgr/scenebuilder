@@ -40,38 +40,47 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.effect.MotionBlur;
 
-/**
- *
- */
+/** */
 public class MotionBlurPropertyMetadata extends ComplexPropertyMetadata<MotionBlur> {
-    
-    private final DoublePropertyMetadata angleMetadata
-            = new DoublePropertyMetadata(new PropertyName("angle"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.ANGLE, true /* readWrite */, 0.0, InspectorPath.UNUSED);
-    private final EffectPropertyMetadata inputMetadata
-            = new EffectPropertyMetadata(new PropertyName("input"), //NOI18N
-            true /* readWrite */, null, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata radiusMetadata
-            = new DoublePropertyMetadata(new PropertyName("radius"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.SIZE, true /* readWrite */, 10.0, InspectorPath.UNUSED);
 
-    public MotionBlurPropertyMetadata(PropertyName name, boolean readWrite, 
-            MotionBlur defaultValue, InspectorPath inspectorPath) {
-        super(name, MotionBlur.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final DoublePropertyMetadata angleMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("angle"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.ANGLE,
+          true /* readWrite */,
+          0.0,
+          InspectorPath.UNUSED);
+  private final EffectPropertyMetadata inputMetadata =
+      new EffectPropertyMetadata(
+          new PropertyName("input"), // NOI18N
+          true /* readWrite */,
+          null,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata radiusMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("radius"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.SIZE,
+          true /* readWrite */,
+          10.0,
+          InspectorPath.UNUSED);
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(MotionBlur value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        angleMetadata.setValue(result, value.getAngle());
-        inputMetadata.setValue(result, value.getInput());
-        radiusMetadata.setValue(result, value.getRadius());
+  public MotionBlurPropertyMetadata(
+      PropertyName name, boolean readWrite, MotionBlur defaultValue, InspectorPath inspectorPath) {
+    super(name, MotionBlur.class, readWrite, defaultValue, inspectorPath);
+  }
 
-        return result;
-    }
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(MotionBlur value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    angleMetadata.setValue(result, value.getAngle());
+    inputMetadata.setValue(result, value.getInput());
+    radiusMetadata.setValue(result, value.getRadius());
+
+    return result;
+  }
 }

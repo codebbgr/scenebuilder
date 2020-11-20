@@ -34,10 +34,8 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors;
 import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
 import com.oracle.javafx.scenebuilder.kit.metadata.property.value.CursorPropertyMetadata;
-
 import java.util.Map;
 import java.util.Set;
-
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
@@ -49,142 +47,154 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 
-/**
- * Insets editor (for top/right/bottom/left fields).
- *
- *
- */
+/** Insets editor (for top/right/bottom/left fields). */
 public class CursorEditor extends PropertyEditor {
 
-    private Parent root;
+  private Parent root;
 
-    @FXML
-    private MenuButton cursorMb;
-    @FXML
-    private CheckMenuItem inheritedMi;
-    @FXML
-    private Label inheritedLb;
+  @FXML private MenuButton cursorMb;
+  @FXML private CheckMenuItem inheritedMi;
+  @FXML private Label inheritedLb;
 
-    private Cursor cursor = Cursor.DEFAULT;
-    private String inheritedText, inheritedParentText;
+  private Cursor cursor = Cursor.DEFAULT;
+  private String inheritedText, inheritedParentText;
 
-    public CursorEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super(propMeta, selectedClasses);
-        initialize();
+  public CursorEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super(propMeta, selectedClasses);
+    initialize();
+  }
+
+  // Separate method to please FindBugs
+  private void initialize() {
+    root = EditorUtils.loadFxml("CursorEditor.fxml", this); // NOI18N
+    int index = 0;
+    Map<Cursor, String> predefinedCursors = CursorPropertyMetadata.getCursorMap();
+    // Order the cursors
+    Cursor[] cursorList = {
+      Cursor.DEFAULT,
+      Cursor.CLOSED_HAND,
+      Cursor.OPEN_HAND,
+      Cursor.HAND,
+      Cursor.MOVE,
+      Cursor.WAIT,
+      Cursor.TEXT,
+      Cursor.V_RESIZE,
+      Cursor.H_RESIZE,
+      Cursor.N_RESIZE,
+      Cursor.NE_RESIZE,
+      Cursor.E_RESIZE,
+      Cursor.SE_RESIZE,
+      Cursor.S_RESIZE,
+      Cursor.SW_RESIZE,
+      Cursor.W_RESIZE,
+      Cursor.NW_RESIZE,
+      Cursor.CROSSHAIR,
+      Cursor.NONE,
+      Cursor.DISAPPEAR
+    };
+    for (Cursor cursorObj : cursorList) {
+      String cursorStr = predefinedCursors.get(cursorObj);
+      final Label cursorLabel = new Label(cursorStr);
+      cursorLabel.setCursor(cursorObj);
+      CheckMenuItem menuItem = new CheckMenuItem();
+      menuItem.setGraphic(cursorLabel);
+      // add predefined cursors before "inherited" menu item
+      cursorMb.getItems().add(index++, menuItem);
+      menuItem.setOnAction(
+          e -> {
+            selectCursor(cursorStr);
+            userUpdateValueProperty(getValue());
+          });
     }
 
-    // Separate method to please FindBugs
-    private void initialize() {
-        root = EditorUtils.loadFxml("CursorEditor.fxml", this); //NOI18N
-        int index = 0;
-        Map<Cursor, String> predefinedCursors = CursorPropertyMetadata.getCursorMap();
-        // Order the cursors
-        Cursor[] cursorList = {Cursor.DEFAULT, Cursor.CLOSED_HAND, Cursor.OPEN_HAND, Cursor.HAND, Cursor.MOVE, Cursor.WAIT,
-            Cursor.TEXT, Cursor.V_RESIZE, Cursor.H_RESIZE, Cursor.N_RESIZE, Cursor.NE_RESIZE, Cursor.E_RESIZE, Cursor.SE_RESIZE,
-            Cursor.S_RESIZE, Cursor.SW_RESIZE, Cursor.W_RESIZE, Cursor.NW_RESIZE,
-            Cursor.CROSSHAIR, Cursor.NONE, Cursor.DISAPPEAR};
-        for (Cursor cursorObj : cursorList) {
-            String cursorStr = predefinedCursors.get(cursorObj);
-            final Label cursorLabel = new Label(cursorStr);
-            cursorLabel.setCursor(cursorObj);
-            CheckMenuItem menuItem = new CheckMenuItem();
-            menuItem.setGraphic(cursorLabel);
-            // add predefined cursors before "inherited" menu item
-            cursorMb.getItems().add(index++, menuItem);
-            menuItem.setOnAction(e -> {
-                selectCursor(cursorStr);
-                userUpdateValueProperty(getValue());
-            });
-        }
+    // "inherited" menu item
+    inheritedText = I18N.getString("inspector.cursor.inherited");
+    inheritedParentText = I18N.getString("inspector.cursor.inheritedparent");
+    inheritedLb.setText(inheritedParentText);
+  }
 
-        // "inherited" menu item
-        inheritedText = I18N.getString("inspector.cursor.inherited");
-        inheritedParentText = I18N.getString("inspector.cursor.inheritedparent");
-        inheritedLb.setText(inheritedParentText);
+  @Override
+  public Node getValueEditor() {
+    return super.handleGenericModes(root);
+  }
+
+  @Override
+  public Object getValue() {
+    return cursor;
+  }
+
+  @Override
+  public void setValue(Object value) {
+    setValueGeneric(value);
+    if (isSetValueDone()) {
+      return;
     }
 
-    @Override
-    public Node getValueEditor() {
-        return super.handleGenericModes(root);
+    if (value == null) {
+      cursor = null;
+      selectCursor(inheritedParentText);
+
+    } else {
+      assert value instanceof Cursor;
+      if (value instanceof ImageCursor) {
+        // Custom cursor
+        selectCursor(""); // NOI18N
+        cursorMb.setText(I18N.getString("inspector.cursor.custom"));
+      } else {
+        // predefined cursor
+        // select the corresponding menu item
+        selectCursor(((Cursor) value).toString());
+      }
     }
+  }
 
-    @Override
-    public Object getValue() {
-        return cursor;
-    }
+  @Override
+  public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super.reset(propMeta, selectedClasses);
+  }
 
-    @Override
-    public void setValue(Object value) {
-        setValueGeneric(value);
-        if (isSetValueDone()) {
-            return;
-        }
+  @Override
+  protected void valueIsIndeterminate() {
+    handleIndeterminate(cursorMb);
+  }
 
-        if (value == null) {
-            cursor = null;
-            selectCursor(inheritedParentText);
+  //
+  // FXML methods
+  //
+  @FXML
+  void inherited(ActionEvent event) {
+    cursor = null;
+    selectCursor(inheritedParentText);
+    userUpdateValueProperty(getValue());
+  }
 
+  // Select the menu item corresponding to a cursor string.
+  private void selectCursor(String cursorStr) {
+    for (MenuItem menuItem : cursorMb.getItems()) {
+      if (!(menuItem instanceof CheckMenuItem)) {
+        // inherited action
+        continue;
+      }
+      CheckMenuItem checkMenuItem = (CheckMenuItem) menuItem;
+      assert checkMenuItem.getGraphic() instanceof Label;
+      if (cursorStr.equals(((Label) checkMenuItem.getGraphic()).getText())) {
+        checkMenuItem.setSelected(true);
+        // set the menu button text
+        if (cursorStr.equals(inheritedParentText)) {
+          // change the menu button text to be shorter in this case...
+          cursorMb.setText(inheritedText);
         } else {
-            assert value instanceof Cursor;
-            if (value instanceof ImageCursor) {
-                // Custom cursor
-                selectCursor(""); //NOI18N
-                cursorMb.setText(I18N.getString("inspector.cursor.custom"));
-            } else {
-                // predefined cursor
-                // select the corresponding menu item
-                selectCursor(((Cursor) value).toString());
-            }
+          cursorMb.setText(cursorStr);
         }
+        cursor = checkMenuItem.getGraphic().getCursor();
+      } else {
+        checkMenuItem.setSelected(false);
+      }
     }
+  }
 
-    @Override
-    public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super.reset(propMeta, selectedClasses);
-    }
-
-    @Override
-    protected void valueIsIndeterminate() {
-        handleIndeterminate(cursorMb);
-    }
-
-    //
-    // FXML methods
-    //
-    @FXML
-    void inherited(ActionEvent event) {
-        cursor = null;
-        selectCursor(inheritedParentText);
-        userUpdateValueProperty(getValue());
-    }
-
-    // Select the menu item corresponding to a cursor string.
-    private void selectCursor(String cursorStr) {
-        for (MenuItem menuItem : cursorMb.getItems()) {
-            if (!(menuItem instanceof CheckMenuItem)) {
-                // inherited action
-                continue;
-            }
-            CheckMenuItem checkMenuItem = (CheckMenuItem) menuItem;
-            assert checkMenuItem.getGraphic() instanceof Label;
-            if (cursorStr.equals(((Label) checkMenuItem.getGraphic()).getText())) {
-                checkMenuItem.setSelected(true);
-                // set the menu button text
-                if (cursorStr.equals(inheritedParentText)) {
-                    // change the menu button text to be shorter in this case...
-                    cursorMb.setText(inheritedText);
-                } else {
-                    cursorMb.setText(cursorStr);
-                }
-                cursor = checkMenuItem.getGraphic().getCursor();
-            } else {
-                checkMenuItem.setSelected(false);
-            }
-        }
-    }
-
-    @Override
-    public void requestFocus() {
-        EditorUtils.doNextFrame(() -> cursorMb.requestFocus());
-    }
+  @Override
+  public void requestFocus() {
+    EditorUtils.doNextFrame(() -> cursorMb.requestFocus());
+  }
 }

@@ -36,62 +36,58 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import javafx.stage.Window;
 
-/**
- *
- * 
- */
+/** */
 public class ErrorDialog extends AlertDialog {
-    
-    private String debugInfo;
-    
-    public ErrorDialog(Window owner) {
-        super(owner);
-        setOKButtonVisible(false);
-        setShowDefaultButton(true);
-        setDefaultButtonID(AlertDialog.ButtonID.CANCEL);
-        setCancelButtonTitle(I18N.getString("label.close"));
-        setActionButtonTitle(I18N.getString("error.dialog.label.details"));
-        setActionButtonVisible(true);
-        setActionRunnable(() -> showDetailsDialog());
-        updateActionButtonVisibility(); // not visible by default
+
+  private String debugInfo;
+
+  public ErrorDialog(Window owner) {
+    super(owner);
+    setOKButtonVisible(false);
+    setShowDefaultButton(true);
+    setDefaultButtonID(AlertDialog.ButtonID.CANCEL);
+    setCancelButtonTitle(I18N.getString("label.close"));
+    setActionButtonTitle(I18N.getString("error.dialog.label.details"));
+    setActionButtonVisible(true);
+    setActionRunnable(() -> showDetailsDialog());
+    updateActionButtonVisibility(); // not visible by default
+  }
+
+  public String getDebugInfo() {
+    return debugInfo;
+  }
+
+  public void setDebugInfo(String debugInfo) {
+    this.debugInfo = debugInfo;
+    updateActionButtonVisibility();
+  }
+
+  public void setDebugInfoWithThrowable(Throwable t) {
+    final String info;
+
+    if (t == null) {
+      info = null;
+    } else {
+      final StringWriter sw = new StringWriter();
+      final PrintWriter pw = new PrintWriter(sw);
+      t./**/ printStackTrace(pw);
+      info = sw.toString();
     }
-    
-    public String getDebugInfo() {
-        return debugInfo;
-    }
-    
-    public void setDebugInfo(String debugInfo) {
-        this.debugInfo = debugInfo;
-        updateActionButtonVisibility();
-    }
-    
-    public void setDebugInfoWithThrowable(Throwable t) {
-        final String info;
-        
-        if (t == null) {
-            info = null;
-        } else {
-            final StringWriter sw = new StringWriter();
-            final PrintWriter pw = new PrintWriter(sw);
-            t./**/printStackTrace(pw);
-            info = sw.toString();
-        }
-        
-        setDebugInfo(info);
-    }
-    
-    
-    /*
-     * Private
-     */
-    
-    private void updateActionButtonVisibility() {
-        setActionButtonVisible(debugInfo != null);
-    }
-    
-    private void showDetailsDialog() {
-        final TextViewDialog detailDialog = new TextViewDialog(null);
-        detailDialog.setText(debugInfo);
-        detailDialog.showAndWait();
-    }
+
+    setDebugInfo(info);
+  }
+
+  /*
+   * Private
+   */
+
+  private void updateActionButtonVisibility() {
+    setActionButtonVisible(debugInfo != null);
+  }
+
+  private void showDetailsDialog() {
+    final TextViewDialog detailDialog = new TextViewDialog(null);
+    detailDialog.setText(debugInfo);
+    detailDialog.showAndWait();
+  }
 }

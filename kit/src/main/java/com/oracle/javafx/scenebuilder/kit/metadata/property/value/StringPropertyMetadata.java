@@ -42,106 +42,106 @@ import com.oracle.javafx.scenebuilder.kit.util.URLUtils;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-/**
- *
- */
+/** */
 public class StringPropertyMetadata extends TextEncodablePropertyMetadata<String> {
-    
-    private static final PropertyName valueName = new PropertyName("value"); //NOI18N
 
-    private final boolean detectFileURL;
-    
-    public StringPropertyMetadata(PropertyName name, boolean readWrite, 
-            String defaultValue, InspectorPath inspectorPath, boolean detectFileURL) {
-        super(name, String.class, readWrite, defaultValue, inspectorPath);
-        this.detectFileURL = detectFileURL;
+  private static final PropertyName valueName = new PropertyName("value"); // NOI18N
+
+  private final boolean detectFileURL;
+
+  public StringPropertyMetadata(
+      PropertyName name,
+      boolean readWrite,
+      String defaultValue,
+      InspectorPath inspectorPath,
+      boolean detectFileURL) {
+    super(name, String.class, readWrite, defaultValue, inspectorPath);
+    this.detectFileURL = detectFileURL;
+  }
+
+  public StringPropertyMetadata(
+      PropertyName name, boolean readWrite, String defaultValue, InspectorPath inspectorPath) {
+    this(name, readWrite, defaultValue, inspectorPath, false);
+  }
+
+  /*
+   * Values of a string property can be represented in multiple ways.
+   *
+   * Case 1 : as an XML attribute (ie an FXOMPropertyT)
+   *      text='Button'
+   *      url='@Desktop/Blah.css'
+   *
+   * Case 2 : as an XML element of type String (also an FXOMPropertyT)
+   *      <text><String fx:value='Button'/><text>
+   *
+   * Case 3 : as an XML element of type URL/Boolean/Double... (ie an FXOMPropertyC)
+   *      <text><URL value='@Desktop/Blah.css' /></text>
+   *      <text><Double fx:value='12.0' /></text>
+   */
+
+  /*
+   * TextEncodablePropertyMetadata
+   */
+
+  @Override
+  public String makeValueFromFxomInstance(FXOMInstance valueFxomInstance) {
+    final String result;
+
+    final Class<?> valueClass = valueFxomInstance.getDeclaredClass();
+    if (valueClass == URL.class) {
+      final FXOMProperty p = valueFxomInstance.getProperties().get(valueName);
+      if (p instanceof FXOMPropertyT) {
+        result = ((FXOMPropertyT) p).getValue();
+      } else {
+        assert false;
+        result = getDefaultValue();
+      }
+    } else {
+      result = valueFxomInstance.getFxValue();
     }
 
-    public StringPropertyMetadata(PropertyName name, boolean readWrite, 
-            String defaultValue, InspectorPath inspectorPath) {
-        this(name, readWrite, defaultValue, inspectorPath, false);
+    return result;
+  }
+
+  @Override
+  public boolean canMakeStringFromValue(String value) {
+    return true;
+  }
+
+  @Override
+  public String makeValueFromString(String string) {
+    return string;
+  }
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(String value, FXOMDocument fxomDocument) {
+    final FXOMInstance result;
+
+    boolean shouldEncodeAsURL;
+    final PrefixedValue pv = new PrefixedValue(value);
+    if (pv.isClassLoaderRelativePath() || pv.isDocumentRelativePath()) {
+      shouldEncodeAsURL = true;
+    } else if (pv.isPlainString() && detectFileURL) {
+      try {
+        shouldEncodeAsURL = URLUtils.getFile(value) != null;
+      } catch (URISyntaxException x) {
+        shouldEncodeAsURL = false;
+      }
+    } else {
+      shouldEncodeAsURL = false;
     }
 
-    /*
-     * Values of a string property can be represented in multiple ways.
-     * 
-     * Case 1 : as an XML attribute (ie an FXOMPropertyT)
-     *      text='Button'                                       
-     *      url='@Desktop/Blah.css'
-     * 
-     * Case 2 : as an XML element of type String (also an FXOMPropertyT)
-     *      <text><String fx:value='Button'/><text>
-     * 
-     * Case 3 : as an XML element of type URL/Boolean/Double... (ie an FXOMPropertyC)
-     *      <text><URL value='@Desktop/Blah.css' /></text>
-     *      <text><Double fx:value='12.0' /></text>
-     */
-
-    
-    /*
-     * TextEncodablePropertyMetadata
-     */
-    
-    @Override
-    public String makeValueFromFxomInstance(FXOMInstance valueFxomInstance) {
-        final String result;
-        
-        final Class<?> valueClass = valueFxomInstance.getDeclaredClass();
-        if (valueClass == URL.class) {
-            final FXOMProperty p = valueFxomInstance.getProperties().get(valueName);
-            if (p instanceof FXOMPropertyT) {
-                result = ((FXOMPropertyT) p).getValue();
-            } else {
-                assert false;
-                result = getDefaultValue();
-            }
-        } else {
-            result = valueFxomInstance.getFxValue();
-        }
-
-        return result;
+    if (shouldEncodeAsURL) {
+      // String value must be expressed using a URL element
+      // <URL value="@Desktop/IssueTracking.css" />
+      final FXOMPropertyT newProperty = new FXOMPropertyT(fxomDocument, valueName, value);
+      result = new FXOMInstance(fxomDocument, URL.class);
+      newProperty.addToParentInstance(-1, result);
+    } else {
+      result = new FXOMInstance(fxomDocument, String.class);
+      result.setFxValue(value);
     }
 
-    @Override
-    public boolean canMakeStringFromValue(String value) {
-        return true;
-    }
-
-    @Override
-    public String makeValueFromString(String string) {
-        return string;
-    }
-
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(String value, FXOMDocument fxomDocument) {
-        final FXOMInstance result;
-        
-        boolean shouldEncodeAsURL;
-        final PrefixedValue pv = new PrefixedValue(value);
-        if (pv.isClassLoaderRelativePath() || pv.isDocumentRelativePath()) {
-            shouldEncodeAsURL = true;
-        } else if (pv.isPlainString() && detectFileURL) {
-            try {
-                shouldEncodeAsURL = URLUtils.getFile(value) != null;
-            } catch(URISyntaxException x) {
-                shouldEncodeAsURL = false;
-            }
-        } else {
-            shouldEncodeAsURL = false;
-        }
-        
-        if (shouldEncodeAsURL) {
-            // String value must be expressed using a URL element
-            // <URL value="@Desktop/IssueTracking.css" />
-            final FXOMPropertyT newProperty = new FXOMPropertyT(fxomDocument, valueName, value);
-            result = new FXOMInstance(fxomDocument, URL.class);
-            newProperty.addToParentInstance(-1, result);
-        } else {
-            result = new FXOMInstance(fxomDocument, String.class);
-            result.setFxValue(value);
-        }
-        
-        return result;
-    }
-    
+    return result;
+  }
 }

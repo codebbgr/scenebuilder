@@ -37,115 +37,111 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Objects;
 
-/**
- *
- * 
- */
+/** */
 public class LibraryItem {
-    
-    private final String name;
-    private final String section;
-    private final String fxmlText;
-    private final URL iconURL;
-    private final Library library;
 
-    public LibraryItem(String name, String section, String fxmlText, URL iconURL, Library library) {
-        assert name != null;
-        assert fxmlText != null;
-        assert library != null;
-        
-        this.name = name;
-        this.section = section;
-        this.fxmlText = fxmlText;
-        this.library = library;
-        this.iconURL = iconURL;
-    }
+  private final String name;
+  private final String section;
+  private final String fxmlText;
+  private final URL iconURL;
+  private final Library library;
 
-    public String getName() {
-        return name;
-    }
+  public LibraryItem(String name, String section, String fxmlText, URL iconURL, Library library) {
+    assert name != null;
+    assert fxmlText != null;
+    assert library != null;
 
-    public String getSection() {
-        return section;
-    }
+    this.name = name;
+    this.section = section;
+    this.fxmlText = fxmlText;
+    this.library = library;
+    this.iconURL = iconURL;
+  }
 
-    public String getFxmlText() {
-        return fxmlText;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public URL getIconURL() {
-        return iconURL;
-    }
+  public String getSection() {
+    return section;
+  }
 
-    public Library getLibrary() {
-        return library;
-    }
-    
-    public FXOMDocument instantiate() {
-        FXOMDocument result;
-        
-        try {
-            result = new FXOMDocument(fxmlText, null, library.getClassLoader(), null);
-        } catch(Error|IOException x) {
-            x.printStackTrace();
-            result = null;
-        }
-        
-        return result;
-    }
-    
-    
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 67 * hash + Objects.hashCode(this.name);
-        hash = 67 * hash + Objects.hashCode(this.section);
-        hash = 67 * hash + Objects.hashCode(this.fxmlText);
-        hash = 67 * hash + Objects.hashCode(this.iconURL);
-        hash = 67 * hash + Objects.hashCode(this.library);
-        return hash;
+  public String getFxmlText() {
+    return fxmlText;
+  }
+
+  public URL getIconURL() {
+    return iconURL;
+  }
+
+  public Library getLibrary() {
+    return library;
+  }
+
+  public FXOMDocument instantiate() {
+    FXOMDocument result;
+
+    try {
+      result = new FXOMDocument(fxmlText, null, library.getClassLoader(), null);
+    } catch (Error | IOException x) {
+      x.printStackTrace();
+      result = null;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final LibraryItem other = (LibraryItem) obj;
-        if (!Objects.equals(this.name, other.name)) {
-            return false;
-        }
-        if (!Objects.equals(this.section, other.section)) {
-            return false;
-        }
-        if (!Objects.equals(this.fxmlText, other.fxmlText)) {
-            return false;
-        }
-        if (!Objects.equals(this.iconURL, other.iconURL)) {
-            return false;
-        }
-        return Objects.equals(this.library, other.library);
+    return result;
+  }
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 67 * hash + Objects.hashCode(this.name);
+    hash = 67 * hash + Objects.hashCode(this.section);
+    hash = 67 * hash + Objects.hashCode(this.fxmlText);
+    hash = 67 * hash + Objects.hashCode(this.iconURL);
+    hash = 67 * hash + Objects.hashCode(this.library);
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
     }
-    
-    /*
-     * Object
-     */
-    
-    @Override
-    public String toString() {
-        final StringBuilder result = new StringBuilder();
-        
-        result.append(getClass().getSimpleName());
-        result.append('[');
-        result.append(name);
-        result.append(']');
-        
-        return result.toString();
+    if (obj == null) {
+      return false;
     }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final LibraryItem other = (LibraryItem) obj;
+    if (!Objects.equals(this.name, other.name)) {
+      return false;
+    }
+    if (!Objects.equals(this.section, other.section)) {
+      return false;
+    }
+    if (!Objects.equals(this.fxmlText, other.fxmlText)) {
+      return false;
+    }
+    if (!Objects.equals(this.iconURL, other.iconURL)) {
+      return false;
+    }
+    return Objects.equals(this.library, other.library);
+  }
+
+  /*
+   * Object
+   */
+
+  @Override
+  public String toString() {
+    final StringBuilder result = new StringBuilder();
+
+    result.append(getClass().getSimpleName());
+    result.append('[');
+    result.append(name);
+    result.append(']');
+
+    return result.toString();
+  }
 }

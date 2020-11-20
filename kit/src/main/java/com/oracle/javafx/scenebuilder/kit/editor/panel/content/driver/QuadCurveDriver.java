@@ -40,33 +40,30 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import javafx.scene.shape.QuadCurve;
 
-/**
- *
- */
+/** */
 public class QuadCurveDriver extends AbstractNodeDriver {
 
-    public QuadCurveDriver(ContentPanelController contentPanelController) {
-        super(contentPanelController);
-    }
+  public QuadCurveDriver(ContentPanelController contentPanelController) {
+    super(contentPanelController);
+  }
 
-    /*
-     * AbstractDriver
-     */
-    
-    @Override
-    public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof QuadCurve;
-        assert fxomObject instanceof FXOMInstance;
-        return new QuadCurveHandles(contentPanelController, (FXOMInstance)fxomObject);
-    }
+  /*
+   * AbstractDriver
+   */
 
-    @Override
-    public AbstractCurveEditor<?> makeCurveEditor(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof QuadCurve;
-        assert fxomObject instanceof FXOMInstance;
+  @Override
+  public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof QuadCurve;
+    assert fxomObject instanceof FXOMInstance;
+    return new QuadCurveHandles(contentPanelController, (FXOMInstance) fxomObject);
+  }
 
-        final QuadCurve quadCurve = (QuadCurve) fxomObject.getSceneGraphObject();
-        return new QuadCurveEditor(quadCurve);
-    }
-    
+  @Override
+  public AbstractCurveEditor<?> makeCurveEditor(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof QuadCurve;
+    assert fxomObject instanceof FXOMInstance;
+
+    final QuadCurve quadCurve = (QuadCurve) fxomObject.getSceneGraphObject();
+    return new QuadCurveEditor(quadCurve);
+  }
 }

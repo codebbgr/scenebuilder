@@ -31,9 +31,9 @@
  */
 package com.oracle.javafx.scenebuilder.kit.editor.panel.hierarchy;
 
-import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.editor.images.ImageUtils;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
+import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.DesignHierarchyMask;
 import java.net.URL;
 import java.util.Objects;
@@ -46,93 +46,91 @@ import javafx.scene.image.Image;
  * @treatAsPrivate
  */
 public class HierarchyItemGraphic extends HierarchyItem {
-    
-    // The accessory owner. Used for the equals method.
-    private final DesignHierarchyMask owner;
 
-    /**
-     * Creates a hierarchy item.
-     *
-     * @param owner The accessory owner
-     * @param fxomObject The FX object represented by this item
-     */
-    public HierarchyItemGraphic(
-            final DesignHierarchyMask owner, 
-            final FXOMObject fxomObject) {
-        assert owner != null;
-        this.owner = owner;
-        // fxomObject can be null for place holder items
-        this.mask = fxomObject == null ? null : new DesignHierarchyMask(fxomObject);
-    }
+  // The accessory owner. Used for the equals method.
+  private final DesignHierarchyMask owner;
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final HierarchyItemGraphic item = (HierarchyItemGraphic) obj;
-        if (!isEmpty()) {
-            // If the place holder is not empty, we compare the fxom object
-            assert getFxomObject() != null;
-            return getFxomObject().equals(item.getFxomObject());
-        } else {
-            // If the place holder is empty, we compare the position + owner
-            return getOwner().equals(item.getOwner());
-        }
-    }
+  /**
+   * Creates a hierarchy item.
+   *
+   * @param owner The accessory owner
+   * @param fxomObject The FX object represented by this item
+   */
+  public HierarchyItemGraphic(final DesignHierarchyMask owner, final FXOMObject fxomObject) {
+    assert owner != null;
+    this.owner = owner;
+    // fxomObject can be null for place holder items
+    this.mask = fxomObject == null ? null : new DesignHierarchyMask(fxomObject);
+  }
 
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 37 * hash + Objects.hashCode(this.mask);
-        hash = 37 * hash + Objects.hashCode(this.owner);
-        return hash;
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
     }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final HierarchyItemGraphic item = (HierarchyItemGraphic) obj;
+    if (!isEmpty()) {
+      // If the place holder is not empty, we compare the fxom object
+      assert getFxomObject() != null;
+      return getFxomObject().equals(item.getFxomObject());
+    } else {
+      // If the place holder is empty, we compare the position + owner
+      return getOwner().equals(item.getOwner());
+    }
+  }
 
-    @Override
-    public boolean isPlaceHolder() {
-        return true;
-    }
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 37 * hash + Objects.hashCode(this.mask);
+    hash = 37 * hash + Objects.hashCode(this.owner);
+    return hash;
+  }
 
-    @Override
-    public boolean isEmpty() {
-        return mask == null;
-    }
+  @Override
+  public boolean isPlaceHolder() {
+    return true;
+  }
 
-    /**
-     * Returns the DesignHierarchyMask owner of this accessory. Cannot be null.
-     *
-     * @return the DesignHierarchyMask owner
-     */
-    public DesignHierarchyMask getOwner() {
-        return owner;
-    }
+  @Override
+  public boolean isEmpty() {
+    return mask == null;
+  }
 
-    @Override
-    public Image getPlaceHolderImage() {
-        return ImageUtils.getNodeIcon("Graphic.png"); //NOI18N
-    }
+  /**
+   * Returns the DesignHierarchyMask owner of this accessory. Cannot be null.
+   *
+   * @return the DesignHierarchyMask owner
+   */
+  public DesignHierarchyMask getOwner() {
+    return owner;
+  }
 
-    @Override
-    public String getPlaceHolderInfo() {
-        return (mask != null ? null : I18N.getString("hierarchy.placeholder.insert.graphic"));
-    }
+  @Override
+  public Image getPlaceHolderImage() {
+    return ImageUtils.getNodeIcon("Graphic.png"); // NOI18N
+  }
 
-    @Override
-    public Image getClassNameIcon() {
-        return (mask == null ? null : mask.getClassNameIcon());
-    }
+  @Override
+  public String getPlaceHolderInfo() {
+    return (mask != null ? null : I18N.getString("hierarchy.placeholder.insert.graphic"));
+  }
 
-    @Override
-    public URL getClassNameIconURL() {
-        return (mask == null ? null : mask.getClassNameIconURL());
-    }
+  @Override
+  public Image getClassNameIcon() {
+    return (mask == null ? null : mask.getClassNameIcon());
+  }
 
-    @Override
-    public String getClassNameInfo() {
-        return (mask == null ? null : mask.getClassNameInfo());
-    }
+  @Override
+  public URL getClassNameIconURL() {
+    return (mask == null ? null : mask.getClassNameIconURL());
+  }
+
+  @Override
+  public String getClassNameInfo() {
+    return (mask == null ? null : mask.getClassNameInfo());
+  }
 }

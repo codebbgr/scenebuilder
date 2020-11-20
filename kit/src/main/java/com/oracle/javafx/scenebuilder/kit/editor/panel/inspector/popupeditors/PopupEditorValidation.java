@@ -31,18 +31,16 @@
  */
 package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.popupeditors;
 
-/**
- * Interface for concrete popup editors (font, paint, ...).
- */
+/** Interface for concrete popup editors (font, paint, ...). */
 public interface PopupEditorValidation {
 
-    // Commit the value in the model.
-    public void commitValue(Object value);
+  // Commit the value in the model.
+  public void commitValue(Object value);
 
-    // Set the value in the model, skipping the undo/redo mechanism.
-    // Typically used when a Slider is moved.
-    public void transientValue(Object value);
+  // Set the value in the model, skipping the undo/redo mechanism.
+  // Typically used when a Slider is moved.
+  public void transientValue(Object value);
 
-    // Handle an invalid value.
-    public void invalidValue(Object value);
+  // Handle an invalid value.
+  public void invalidValue(Object value);
 }

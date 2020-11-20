@@ -35,59 +35,58 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.TextField;
 
-/**
- * Define a text field that accept only numbers.
- *
- */
+/** Define a text field that accept only numbers. */
 public abstract class NumberField extends TextField {
-    // Constants allowed for this editor
-    List<String> constants = new ArrayList<>();
-    
-    public NumberField() {
-        // Select all text when this editor is selected
-        setOnMousePressed(event -> selectAll());
-        focusedProperty().addListener((ChangeListener<Boolean>) (ov, prevVal, newVal) -> {
-            if (newVal) {
-                selectAll();
-            }
-        });
-    }
+  // Constants allowed for this editor
+  List<String> constants = new ArrayList<>();
 
-    public void setConstants(List<String> constants) {
-        this.constants.clear();
-        this.constants.addAll(constants);
-    }
-    
-    public String getNewText(int start, int end, String text) {
-        String oldText = getText();
-        String toReplace = oldText.substring(start, end);
-        String newText;
-        if (toReplace.isEmpty()) {
-            // start/end is outside oldText ==> add
-            newText = oldText + text;
-        } else {
-            String headerStr = oldText.substring(0, start);
-            String trailerStr = "";
-            if (end < oldText.length()) {
-                trailerStr = oldText.substring(end, oldText.length());
-            }
-            newText = headerStr + text + trailerStr;
-        }
-        return newText;
-     }
+  public NumberField() {
+    // Select all text when this editor is selected
+    setOnMousePressed(event -> selectAll());
+    focusedProperty()
+        .addListener(
+            (ChangeListener<Boolean>)
+                (ov, prevVal, newVal) -> {
+                  if (newVal) {
+                    selectAll();
+                  }
+                });
+  }
 
-    protected boolean partOfConstants(String text) {
-        // Check if the text is a part of a constant
-        text = text.toLowerCase(Locale.ROOT);
-        for (String constant : constants) {
-            if (constant.toLowerCase(Locale.ROOT).startsWith(text)) {
-                return true;
-            }
-        }
-        return false;
+  public void setConstants(List<String> constants) {
+    this.constants.clear();
+    this.constants.addAll(constants);
+  }
+
+  public String getNewText(int start, int end, String text) {
+    String oldText = getText();
+    String toReplace = oldText.substring(start, end);
+    String newText;
+    if (toReplace.isEmpty()) {
+      // start/end is outside oldText ==> add
+      newText = oldText + text;
+    } else {
+      String headerStr = oldText.substring(0, start);
+      String trailerStr = "";
+      if (end < oldText.length()) {
+        trailerStr = oldText.substring(end, oldText.length());
+      }
+      newText = headerStr + text + trailerStr;
     }
+    return newText;
+  }
+
+  protected boolean partOfConstants(String text) {
+    // Check if the text is a part of a constant
+    text = text.toLowerCase(Locale.ROOT);
+    for (String constant : constants) {
+      if (constant.toLowerCase(Locale.ROOT).startsWith(text)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

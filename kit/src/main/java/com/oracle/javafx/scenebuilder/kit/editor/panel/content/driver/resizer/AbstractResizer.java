@@ -37,37 +37,40 @@ import java.util.Map;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
 
-/**
- *
- * 
- */
+/** */
 public abstract class AbstractResizer<T extends Node> {
-    
-    public enum Feature {
-        FREE,
-        WIDTH_ONLY,
-        HEIGHT_ONLY,
-        SCALING
-    }
-    
-    protected final T sceneGraphObject;
-    
-    public AbstractResizer(T sceneGraphObject) {
-        assert sceneGraphObject != null;
-        this.sceneGraphObject = sceneGraphObject;
-    }
-    
-    public T getSceneGraphObject() {
-        return sceneGraphObject;
-    }
-    
-    public abstract Bounds computeBounds(double width, double height);
-    public abstract Feature getFeature();
-    public abstract void changeWidth(double width);
-    public abstract void changeHeight(double height);
-    public abstract void revertToOriginalSize();
 
-    public abstract List<PropertyName> getPropertyNames();
-    public abstract Object getValue(PropertyName propertyName);
-    public abstract Map<PropertyName, Object> getChangeMap();
+  public enum Feature {
+    FREE,
+    WIDTH_ONLY,
+    HEIGHT_ONLY,
+    SCALING
+  }
+
+  protected final T sceneGraphObject;
+
+  public AbstractResizer(T sceneGraphObject) {
+    assert sceneGraphObject != null;
+    this.sceneGraphObject = sceneGraphObject;
+  }
+
+  public T getSceneGraphObject() {
+    return sceneGraphObject;
+  }
+
+  public abstract Bounds computeBounds(double width, double height);
+
+  public abstract Feature getFeature();
+
+  public abstract void changeWidth(double width);
+
+  public abstract void changeHeight(double height);
+
+  public abstract void revertToOriginalSize();
+
+  public abstract List<PropertyName> getPropertyNames();
+
+  public abstract Object getValue(PropertyName propertyName);
+
+  public abstract Map<PropertyName, Object> getChangeMap();
 }

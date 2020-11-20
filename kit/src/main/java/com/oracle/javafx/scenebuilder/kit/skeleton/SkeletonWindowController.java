@@ -34,11 +34,9 @@ package com.oracle.javafx.scenebuilder.kit.skeleton;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.util.AbstractFxmlWindowController;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMDocument;
-
+import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -47,127 +45,136 @@ import javafx.scene.control.TextArea;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.DataFormat;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 
-/**
- *
- */
+/** */
 public class SkeletonWindowController extends AbstractFxmlWindowController {
 
-    @FXML
-    CheckBox commentCheckBox;
-    @FXML
-    CheckBox formatCheckBox;
-    @FXML
-    TextArea textArea;
+  @FXML CheckBox commentCheckBox;
+  @FXML CheckBox formatCheckBox;
+  @FXML TextArea textArea;
 
-    @FXML
-    private void onCopyAction(ActionEvent event) {
-        final Map<DataFormat, Object> content = new HashMap<>();
+  @FXML
+  private void onCopyAction(ActionEvent event) {
+    final Map<DataFormat, Object> content = new HashMap<>();
 
-        if (textArea.getSelection().getLength() == 0) {
-            content.put(DataFormat.PLAIN_TEXT, textArea.getText());
-        } else {
-            content.put(DataFormat.PLAIN_TEXT, textArea.getSelectedText());
-        }
-
-        Clipboard.getSystemClipboard().setContent(content);
+    if (textArea.getSelection().getLength() == 0) {
+      content.put(DataFormat.PLAIN_TEXT, textArea.getText());
+    } else {
+      content.put(DataFormat.PLAIN_TEXT, textArea.getSelectedText());
     }
 
-    private final EditorController editorController;
-    private boolean dirty = false;
+    Clipboard.getSystemClipboard().setContent(content);
+  }
 
-    private String documentName;
+  private final EditorController editorController;
+  private boolean dirty = false;
 
-    public SkeletonWindowController(EditorController editorController, String documentName, Stage owner) {
-        super(SkeletonWindowController.class.getResource("SkeletonWindow.fxml"), I18N.getBundle(), owner); //NOI18N
-        this.editorController = editorController;
-        this.documentName = documentName;
+  private String documentName;
 
-        this.editorController.fxomDocumentProperty().addListener(
-                (ChangeListener<FXOMDocument>) (ov, od, nd) -> {
-                    assert editorController.getFxomDocument() == nd;
-                    if (od != null) {
-                        od.sceneGraphRevisionProperty().removeListener(fxomDocumentRevisionListener);
-                    }
-                    if (nd != null) {
-                        nd.sceneGraphRevisionProperty().addListener(fxomDocumentRevisionListener);
-                        update();
-                    }
+  public SkeletonWindowController(
+      EditorController editorController, String documentName, Stage owner) {
+    super(
+        SkeletonWindowController.class.getResource("SkeletonWindow.fxml"),
+        I18N.getBundle(),
+        owner); // NOI18N
+    this.editorController = editorController;
+    this.documentName = documentName;
+
+    this.editorController
+        .fxomDocumentProperty()
+        .addListener(
+            (ChangeListener<FXOMDocument>)
+                (ov, od, nd) -> {
+                  assert editorController.getFxomDocument() == nd;
+                  if (od != null) {
+                    od.sceneGraphRevisionProperty().removeListener(fxomDocumentRevisionListener);
+                  }
+                  if (nd != null) {
+                    nd.sceneGraphRevisionProperty().addListener(fxomDocumentRevisionListener);
+                    update();
+                  }
                 });
 
-        if (editorController.getFxomDocument() != null) {
-            editorController.getFxomDocument().sceneGraphRevisionProperty().addListener(fxomDocumentRevisionListener);
-        }
+    if (editorController.getFxomDocument() != null) {
+      editorController
+          .getFxomDocument()
+          .sceneGraphRevisionProperty()
+          .addListener(fxomDocumentRevisionListener);
     }
+  }
 
-    @Override
-    public void onCloseRequest(WindowEvent event) {
-        getStage().close();
+  @Override
+  public void onCloseRequest(WindowEvent event) {
+    getStage().close();
+  }
+
+  @Override
+  public void openWindow() {
+    super.openWindow();
+
+    if (dirty) {
+      update();
     }
+  }
 
-    @Override
-    public void openWindow() {
-        super.openWindow();
+  /*
+   * AbstractFxmlWindowController
+   */
+  @Override
+  protected void controllerDidLoadFxml() {
+    super.controllerDidLoadFxml();
+    assert commentCheckBox != null;
+    assert formatCheckBox != null;
+    assert textArea != null;
 
-        if (dirty) {
-            update();
-        }
+    commentCheckBox
+        .selectedProperty()
+        .addListener((ChangeListener<Boolean>) (ov, t, t1) -> update());
+
+    formatCheckBox
+        .selectedProperty()
+        .addListener((ChangeListener<Boolean>) (ov, t, t1) -> update());
+
+    update();
+  }
+
+  /*
+   * Private
+   */
+  private final ChangeListener<Number> fxomDocumentRevisionListener =
+      (observable, oldValue, newValue) -> update();
+
+  private void updateTitle() {
+    final String title = I18N.getString("skeleton.window.title", documentName);
+    getStage().setTitle(title);
+  }
+
+  private void update() {
+    assert editorController.getFxomDocument() != null;
+
+    // No need to eat CPU if the skeleton window isn't opened
+    if (getStage().isShowing()) {
+      updateTitle();
+      final SkeletonBuffer buf =
+          new SkeletonBuffer(editorController.getFxomDocument(), documentName);
+
+      if (commentCheckBox.isSelected()) {
+        buf.setTextType(SkeletonBuffer.TEXT_TYPE.WITH_COMMENTS);
+      } else {
+        buf.setTextType(SkeletonBuffer.TEXT_TYPE.WITHOUT_COMMENTS);
+      }
+
+      if (formatCheckBox.isSelected()) {
+        buf.setFormat(SkeletonBuffer.FORMAT_TYPE.FULL);
+      } else {
+        buf.setFormat(SkeletonBuffer.FORMAT_TYPE.COMPACT);
+      }
+
+      textArea.setText(buf.toString());
+      dirty = false;
+    } else {
+      dirty = true;
     }
-
-    /*
-     * AbstractFxmlWindowController
-     */
-    @Override
-    protected void controllerDidLoadFxml() {
-        super.controllerDidLoadFxml();
-        assert commentCheckBox != null;
-        assert formatCheckBox != null;
-        assert textArea != null;
-
-        commentCheckBox.selectedProperty().addListener((ChangeListener<Boolean>) (ov, t, t1) -> update());
-
-        formatCheckBox.selectedProperty().addListener((ChangeListener<Boolean>) (ov, t, t1) -> update());
-
-        update();
-    }
-
-    /*
-     * Private
-     */
-    private final ChangeListener<Number> fxomDocumentRevisionListener
-            = (observable, oldValue, newValue) -> update();
-
-    private void updateTitle() {
-        final String title = I18N.getString("skeleton.window.title", documentName);
-        getStage().setTitle(title);
-    }
-
-    private void update() {
-        assert editorController.getFxomDocument() != null;
-
-        // No need to eat CPU if the skeleton window isn't opened
-        if (getStage().isShowing()) {
-            updateTitle();
-            final SkeletonBuffer buf = new SkeletonBuffer(editorController.getFxomDocument(), documentName);
-
-            if (commentCheckBox.isSelected()) {
-                buf.setTextType(SkeletonBuffer.TEXT_TYPE.WITH_COMMENTS);
-            } else {
-                buf.setTextType(SkeletonBuffer.TEXT_TYPE.WITHOUT_COMMENTS);
-            }
-
-            if (formatCheckBox.isSelected()) {
-                buf.setFormat(SkeletonBuffer.FORMAT_TYPE.FULL);
-            } else {
-                buf.setFormat(SkeletonBuffer.FORMAT_TYPE.COMPACT);
-            }
-
-            textArea.setText(buf.toString());
-            dirty = false;
-        } else {
-            dirty = true;
-        }
-    }
+  }
 }

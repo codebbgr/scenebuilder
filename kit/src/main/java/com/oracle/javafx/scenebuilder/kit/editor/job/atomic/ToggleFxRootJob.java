@@ -32,52 +32,52 @@
 package com.oracle.javafx.scenebuilder.kit.editor.job.atomic;
 
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
-import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.editor.job.Job;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMDocument;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
+import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 
 /**
- * Job used to enable/disable fx:root on the fxom document associated
- * to the editor controller (if any).
+ * Job used to enable/disable fx:root on the fxom document associated to the editor controller (if
+ * any).
  */
 public class ToggleFxRootJob extends Job {
 
-    public ToggleFxRootJob(EditorController editorController) {
-        super(editorController);
-    }
+  public ToggleFxRootJob(EditorController editorController) {
+    super(editorController);
+  }
 
-    /*
-     * Job
-     */
-    @Override
-    public boolean isExecutable() {
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        return (fxomDocument != null) && (fxomDocument.getFxomRoot() instanceof FXOMInstance);
-    }
+  /*
+   * Job
+   */
+  @Override
+  public boolean isExecutable() {
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    return (fxomDocument != null) && (fxomDocument.getFxomRoot() instanceof FXOMInstance);
+  }
 
-    @Override
-    public void execute() {
-        redo();
-    }
+  @Override
+  public void execute() {
+    redo();
+  }
 
-    @Override
-    public void undo() {
-        redo();
-    }
+  @Override
+  public void undo() {
+    redo();
+  }
 
-    @Override
-    public void redo() {
-        assert getEditorController().getFxomDocument() != null;
-        assert getEditorController().getFxomDocument().getFxomRoot() instanceof FXOMInstance;
+  @Override
+  public void redo() {
+    assert getEditorController().getFxomDocument() != null;
+    assert getEditorController().getFxomDocument().getFxomRoot() instanceof FXOMInstance;
 
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        final FXOMInstance rootInstance = (FXOMInstance) fxomDocument.getFxomRoot();
-        rootInstance.toggleFxRoot();
-    }
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    final FXOMInstance rootInstance = (FXOMInstance) fxomDocument.getFxomRoot();
+    rootInstance.toggleFxRoot();
+  }
 
-    @Override
-    public String getDescription() {
-        return I18N.getString("job.toggle.fx.root");
-    }
+  @Override
+  public String getDescription() {
+    return I18N.getString("job.toggle.fx.root");
+  }
 }

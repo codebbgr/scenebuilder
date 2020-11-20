@@ -35,10 +35,11 @@ import java.util.List;
 
 public interface ExternalDesignHierarchyMaskProvider {
 
-    /**
-     * list of items that their design mask deserves a
-     * resizing while used as top element of the layout
-     * @return a List of classes
-     */
-    List<Class<?>> getResizableItems();
+  /**
+   * list of items that their design mask deserves a resizing while used as top element of the
+   * layout
+   *
+   * @return a List of classes
+   */
+  List<Class<?>> getResizableItems();
 }

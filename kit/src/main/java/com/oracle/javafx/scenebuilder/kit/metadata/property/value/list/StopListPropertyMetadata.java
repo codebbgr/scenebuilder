@@ -37,18 +37,18 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import java.util.List;
 import javafx.scene.paint.Stop;
 
-/**
- *
- */
+/** */
 public class StopListPropertyMetadata extends ListValuePropertyMetadata<Stop> {
-    
-    private static final StopPropertyMetadata itemMetadata
-            = new StopPropertyMetadata(new PropertyName("unused"), //NOI18N
-            true /* readWrite */, null, InspectorPath.UNUSED);
-    
-    public StopListPropertyMetadata(PropertyName name, boolean readWrite, 
-            List<Stop> defaultValue, InspectorPath inspectorPath) {
-        super(name, Stop.class, itemMetadata, readWrite, defaultValue, inspectorPath);
-    }
-    
+
+  private static final StopPropertyMetadata itemMetadata =
+      new StopPropertyMetadata(
+          new PropertyName("unused"), // NOI18N
+          true /* readWrite */,
+          null,
+          InspectorPath.UNUSED);
+
+  public StopListPropertyMetadata(
+      PropertyName name, boolean readWrite, List<Stop> defaultValue, InspectorPath inspectorPath) {
+    super(name, Stop.class, itemMetadata, readWrite, defaultValue, inspectorPath);
+  }
 }

@@ -42,124 +42,124 @@ import java.util.ResourceBundle;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
-/**
- *
- */
+/** */
 public class MessageLog {
-    
-    private final List<MessageLogEntry> entries = new ArrayList<>();
-    private final SimpleIntegerProperty revision = new SimpleIntegerProperty();
-    private final SimpleIntegerProperty numOfWarningMessages = new SimpleIntegerProperty();
-    private final static String TIMESTAMP_PATTERN = "h:mm a EEEEEEEEE d MMM. yyyy"; //NOI18N
-    private static SimpleDateFormat TIMESTAMP_DATE_FORMAT;
-    
-    
-    /*
-     * Public
-     */
-    
-    public void logInfoMessage(String infoKey, ResourceBundle bundle, Object... arguments) {
-        logMessage(MessageLogEntry.Type.INFO, bundle, infoKey, arguments);
-    }
-    
-    public void logWarningMessage(String warningKey, ResourceBundle bundle, Object... arguments) {
-        logMessage(MessageLogEntry.Type.WARNING, bundle, warningKey, arguments);
-    }
-    
-    public void logInfoMessage(String infoKey, Object... arguments) {
-        logInfoMessage(infoKey, I18N.getBundle(), arguments);
-    }
-    
-    public void logWarningMessage(String warningKey, Object... arguments) {
-        logWarningMessage(warningKey, I18N.getBundle(), arguments);
-    }
-    
-    public IntegerProperty revisionProperty() {
-        return revision;
-    }
-    
-    public IntegerProperty numOfWarningMessagesProperty() {
-        return numOfWarningMessages;
-    }
-    
-    public List<MessageLogEntry> getEntries() {
-        return Collections.unmodifiableList(entries);
-    }
-    
-    public MessageLogEntry getYoungestEntry() {
-        return entries.isEmpty() ? null : entries.get(0);
-    }
-    
-    public int getEntryCount() {
-        return entries.size();
-    }
-    
-    public int getWarningEntryCount() {
-        int count = 0;
-        for (MessageLogEntry entry : entries) {
-            if (entry.getType() == MessageLogEntry.Type.WARNING) {
-                count++;
-            }
-        }
-        return count;
-    }
-    
-    public void clear() {
-        if (entries.isEmpty() == false) {
-            entries.clear();
-            incrementRevision();
-            resetNumOfWarningMessages();
-        }
-    }
-    
-    public void clearEntry(MessageLogEntry entry) {
-        assert entry != null;
-        assert entries.contains(entry);
-        entries.remove(entry);
-        incrementRevision();
-        
-        if (entry.getType().equals(MessageLogEntry.Type.WARNING)) {
-            decrementNumOfWarningMessages();
-        }
-    }
-    
 
-    /*
-     * Private
-     */
-    
-    private synchronized String getTimeStamp() {
-        // We create TIMESTAMP_DATE_FORMAT lazily because it seems to be slow
-        if (TIMESTAMP_DATE_FORMAT == null) {
-            TIMESTAMP_DATE_FORMAT = new SimpleDateFormat(TIMESTAMP_PATTERN);
-        }
-        return TIMESTAMP_DATE_FORMAT.format(new Date());
+  private final List<MessageLogEntry> entries = new ArrayList<>();
+  private final SimpleIntegerProperty revision = new SimpleIntegerProperty();
+  private final SimpleIntegerProperty numOfWarningMessages = new SimpleIntegerProperty();
+  private static final String TIMESTAMP_PATTERN = "h:mm a EEEEEEEEE d MMM. yyyy"; // NOI18N
+  private static SimpleDateFormat TIMESTAMP_DATE_FORMAT;
+
+  /*
+   * Public
+   */
+
+  public void logInfoMessage(String infoKey, ResourceBundle bundle, Object... arguments) {
+    logMessage(MessageLogEntry.Type.INFO, bundle, infoKey, arguments);
+  }
+
+  public void logWarningMessage(String warningKey, ResourceBundle bundle, Object... arguments) {
+    logMessage(MessageLogEntry.Type.WARNING, bundle, warningKey, arguments);
+  }
+
+  public void logInfoMessage(String infoKey, Object... arguments) {
+    logInfoMessage(infoKey, I18N.getBundle(), arguments);
+  }
+
+  public void logWarningMessage(String warningKey, Object... arguments) {
+    logWarningMessage(warningKey, I18N.getBundle(), arguments);
+  }
+
+  public IntegerProperty revisionProperty() {
+    return revision;
+  }
+
+  public IntegerProperty numOfWarningMessagesProperty() {
+    return numOfWarningMessages;
+  }
+
+  public List<MessageLogEntry> getEntries() {
+    return Collections.unmodifiableList(entries);
+  }
+
+  public MessageLogEntry getYoungestEntry() {
+    return entries.isEmpty() ? null : entries.get(0);
+  }
+
+  public int getEntryCount() {
+    return entries.size();
+  }
+
+  public int getWarningEntryCount() {
+    int count = 0;
+    for (MessageLogEntry entry : entries) {
+      if (entry.getType() == MessageLogEntry.Type.WARNING) {
+        count++;
+      }
     }
-    
-    private void logMessage(MessageLogEntry.Type messageType, ResourceBundle bundle, String messageKey, Object... arguments) {
-        final String messageText = MessageFormat.format(bundle.getString(messageKey), arguments);
-        final MessageLogEntry entry = new MessageLogEntry(messageType, messageText, getTimeStamp());
-        entries.add(0, entry);
-        incrementRevision();
-        
-        if (messageType.equals(MessageLogEntry.Type.WARNING)) {
-            incrementNumOfWarningMessages();
-        }
+    return count;
+  }
+
+  public void clear() {
+    if (entries.isEmpty() == false) {
+      entries.clear();
+      incrementRevision();
+      resetNumOfWarningMessages();
     }
-    
-    private void incrementRevision() {
-        revision.set(revision.get() + 1);
+  }
+
+  public void clearEntry(MessageLogEntry entry) {
+    assert entry != null;
+    assert entries.contains(entry);
+    entries.remove(entry);
+    incrementRevision();
+
+    if (entry.getType().equals(MessageLogEntry.Type.WARNING)) {
+      decrementNumOfWarningMessages();
     }
-    
-    private void incrementNumOfWarningMessages() {
-        numOfWarningMessages.set(numOfWarningMessages.get() + 1);
+  }
+
+  /*
+   * Private
+   */
+
+  private synchronized String getTimeStamp() {
+    // We create TIMESTAMP_DATE_FORMAT lazily because it seems to be slow
+    if (TIMESTAMP_DATE_FORMAT == null) {
+      TIMESTAMP_DATE_FORMAT = new SimpleDateFormat(TIMESTAMP_PATTERN);
     }
-    
-    private void decrementNumOfWarningMessages() {
-        numOfWarningMessages.set(numOfWarningMessages.get() - 1);
+    return TIMESTAMP_DATE_FORMAT.format(new Date());
+  }
+
+  private void logMessage(
+      MessageLogEntry.Type messageType,
+      ResourceBundle bundle,
+      String messageKey,
+      Object... arguments) {
+    final String messageText = MessageFormat.format(bundle.getString(messageKey), arguments);
+    final MessageLogEntry entry = new MessageLogEntry(messageType, messageText, getTimeStamp());
+    entries.add(0, entry);
+    incrementRevision();
+
+    if (messageType.equals(MessageLogEntry.Type.WARNING)) {
+      incrementNumOfWarningMessages();
     }
-    
-    private void resetNumOfWarningMessages() {
-        numOfWarningMessages.set(0);
-    }
+  }
+
+  private void incrementRevision() {
+    revision.set(revision.get() + 1);
+  }
+
+  private void incrementNumOfWarningMessages() {
+    numOfWarningMessages.set(numOfWarningMessages.get() + 1);
+  }
+
+  private void decrementNumOfWarningMessages() {
+    numOfWarningMessages.set(numOfWarningMessages.get() - 1);
+  }
+
+  private void resetNumOfWarningMessages() {
+    numOfWarningMessages.set(0);
+  }
 }

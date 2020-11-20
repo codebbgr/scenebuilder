@@ -44,42 +44,40 @@ import java.util.stream.Stream;
 import org.eclipse.aether.artifact.DefaultArtifact;
 
 public class LocalSearch implements Search {
-            
-    private final String m2;
-        
-    public LocalSearch(String userM2Repostory) {
-        m2 = userM2Repostory + File.separator;
+
+  private final String m2;
+
+  public LocalSearch(String userM2Repostory) {
+    m2 = userM2Repostory + File.separator;
+  }
+
+  @Override
+  public List<DefaultArtifact> getCoordinates(String query) {
+
+    final Map<String, String> map = new HashMap<>();
+    map.put("Repository", MavenPresets.LOCAL);
+
+    try {
+      return Files.find(Paths.get(m2), 999, (p, bfa) -> bfa.isRegularFile())
+          .map(p -> p.toAbsolutePath().toString())
+          .filter(s -> s.endsWith(".jar"))
+          .map(
+              s -> {
+                String d[] = s.substring(m2.length()).split("\\" + File.separator);
+                int length = d.length;
+                if (length > 3) {
+                  String a = d[length - 3];
+                  String g = Stream.of(d).limit(length - 3).collect(Collectors.joining("."));
+                  return g + ":" + a + ":" + MIN_VERSION;
+                }
+                return null;
+              })
+          .filter(gav -> gav != null && gav.contains(query))
+          .distinct()
+          .map(gav -> new DefaultArtifact(gav, map))
+          .collect(Collectors.toList());
+    } catch (IOException ex) {
     }
-    
-    @Override
-    public List<DefaultArtifact> getCoordinates(String query) {
-        
-        final Map<String, String> map = new HashMap<>();
-        map.put("Repository", MavenPresets.LOCAL);
-        
-        try {
-            return Files
-                    .find(Paths.get(m2), 999, (p, bfa) -> bfa.isRegularFile())
-                    .map(p -> p.toAbsolutePath().toString())
-                    .filter(s -> s.endsWith(".jar"))
-                    .map(s -> {
-                        String d[] = s.substring(m2.length()).split("\\" + File.separator);
-                        int length = d.length;
-                        if (length > 3) {
-                            String a = d[length - 3];
-                            String g = Stream.of(d)
-                                    .limit(length - 3)
-                                    .collect(Collectors.joining("."));
-                            return g + ":" + a + ":" + MIN_VERSION;
-                        }
-                        return null;
-                    })
-                    .filter(gav -> gav != null && gav.contains(query))
-                    .distinct()
-                    .map(gav -> new DefaultArtifact(gav, map))
-                    .collect(Collectors.toList());
-        } catch (IOException ex) { }
-        return null;
-    }
-    
+    return null;
+  }
 }

@@ -33,7 +33,6 @@
 package com.oracle.javafx.scenebuilder.kit.editor.job.togglegroup;
 
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
-import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.editor.job.BatchDocumentJob;
 import com.oracle.javafx.scenebuilder.kit.editor.job.Job;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.ObjectSelectionGroup;
@@ -41,82 +40,79 @@ import com.oracle.javafx.scenebuilder.kit.editor.selection.Selection;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMDocument;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
+import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.control.ToggleGroup;
 
-/**
- *
- */
+/** */
 public class ModifySelectionToggleGroupJob extends BatchDocumentJob {
 
-    private final String toggleGroupId;
+  private final String toggleGroupId;
 
-    public ModifySelectionToggleGroupJob(String toggleGroupId, EditorController editorController) {
-        super(editorController);
-        
-        assert editorController.getFxomDocument() != null;
-        
-        this.toggleGroupId = toggleGroupId;
-    }
-    
-    
+  public ModifySelectionToggleGroupJob(String toggleGroupId, EditorController editorController) {
+    super(editorController);
+
+    assert editorController.getFxomDocument() != null;
+
+    this.toggleGroupId = toggleGroupId;
+  }
+
+  /*
+   * BatchSelectionJob
+   */
+
+  @Override
+  protected List<Job> makeSubJobs() {
+    final List<Job> result = new ArrayList<>();
+
     /*
-     * BatchSelectionJob
+     * Checks that toggleGroupId is:
+     *  0) either null
+     *  1) either an unused fx:id
+     *  2) either the fx:id of an existing ToggleGroup instance
      */
-    
-    @Override
-    protected List<Job> makeSubJobs() {
-        final List<Job> result = new ArrayList<>();
-        
-        /*
-         * Checks that toggleGroupId is:
-         *  0) either null
-         *  1) either an unused fx:id
-         *  2) either the fx:id of an existing ToggleGroup instance
-         */
-        
-        final boolean executable;
-        if (toggleGroupId == null) {
-            executable = true;
-        } else {
-            final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-            final FXOMObject toggleGroupObject = fxomDocument.searchWithFxId(toggleGroupId);
-            if (toggleGroupObject == null) {
-                // Case #1
-                executable = true;
-            } else if (toggleGroupObject instanceof FXOMInstance) {
-                // Case #2
-                final FXOMInstance toggleGroupInstance = (FXOMInstance) toggleGroupObject;
-                executable = toggleGroupInstance.getDeclaredClass() == ToggleGroup.class;
-            } else {
-                executable = false;
-            }
-        }
-        
-        /*
-         * Creates some ModifyToggleGroupJob instances
-         */
-        if (executable) {
-            final Selection selection = getEditorController().getSelection();
-            if (selection.getGroup() instanceof ObjectSelectionGroup) {
-                final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
-                for (FXOMObject fxomObject : osg.getItems()) {
-                    final Job subJob
-                            = new ModifyToggleGroupJob(fxomObject, toggleGroupId, getEditorController());
-                    if (subJob.isExecutable()) {
-                        result.add(subJob);
-                    }
-                }
-            }
-        }
-        
-        return result;
+
+    final boolean executable;
+    if (toggleGroupId == null) {
+      executable = true;
+    } else {
+      final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+      final FXOMObject toggleGroupObject = fxomDocument.searchWithFxId(toggleGroupId);
+      if (toggleGroupObject == null) {
+        // Case #1
+        executable = true;
+      } else if (toggleGroupObject instanceof FXOMInstance) {
+        // Case #2
+        final FXOMInstance toggleGroupInstance = (FXOMInstance) toggleGroupObject;
+        executable = toggleGroupInstance.getDeclaredClass() == ToggleGroup.class;
+      } else {
+        executable = false;
+      }
     }
 
-    @Override
-    protected String makeDescription() {
-        return I18N.getString("job.set.toggle.group");
+    /*
+     * Creates some ModifyToggleGroupJob instances
+     */
+    if (executable) {
+      final Selection selection = getEditorController().getSelection();
+      if (selection.getGroup() instanceof ObjectSelectionGroup) {
+        final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
+        for (FXOMObject fxomObject : osg.getItems()) {
+          final Job subJob =
+              new ModifyToggleGroupJob(fxomObject, toggleGroupId, getEditorController());
+          if (subJob.isExecutable()) {
+            result.add(subJob);
+          }
+        }
+      }
     }
-    
+
+    return result;
+  }
+
+  @Override
+  protected String makeDescription() {
+    return I18N.getString("job.set.toggle.group");
+  }
 }

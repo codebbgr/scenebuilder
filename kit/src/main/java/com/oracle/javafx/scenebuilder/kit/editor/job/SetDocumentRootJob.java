@@ -40,77 +40,80 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.DesignHierarchyMask;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
+/** */
 public class SetDocumentRootJob extends BatchSelectionJob {
 
-    private final FXOMObject newRoot;
-    private final boolean usePredefinedSize;
-    private final String description;
+  private final FXOMObject newRoot;
+  private final boolean usePredefinedSize;
+  private final String description;
 
-    public SetDocumentRootJob(FXOMObject newRoot, 
-            boolean usePredefinedSize, 
-            String description,
-            EditorController editorController) {
-        super(editorController);
+  public SetDocumentRootJob(
+      FXOMObject newRoot,
+      boolean usePredefinedSize,
+      String description,
+      EditorController editorController) {
+    super(editorController);
 
-        assert editorController.getFxomDocument() != null;
-        assert (newRoot == null) || (newRoot.getFxomDocument() == editorController.getFxomDocument());
-        assert description != null;
+    assert editorController.getFxomDocument() != null;
+    assert (newRoot == null) || (newRoot.getFxomDocument() == editorController.getFxomDocument());
+    assert description != null;
 
-        this.newRoot = newRoot;
-        this.usePredefinedSize = usePredefinedSize;
-        this.description = description;
-    }
-    
-    public SetDocumentRootJob(FXOMObject newRoot, EditorController editorController) {
-        this(newRoot, false /* usePredefinedSize */, 
-                SetDocumentRootJob.class.getSimpleName(), editorController);
-    }
+    this.newRoot = newRoot;
+    this.usePredefinedSize = usePredefinedSize;
+    this.description = description;
+  }
 
-    public FXOMObject getNewRoot() {
-        return newRoot;
-    }
+  public SetDocumentRootJob(FXOMObject newRoot, EditorController editorController) {
+    this(
+        newRoot,
+        false /* usePredefinedSize */,
+        SetDocumentRootJob.class.getSimpleName(),
+        editorController);
+  }
 
-    @Override
-    protected List<Job> makeSubJobs() {
-        final List<Job> result = new ArrayList<>();
-        if (newRoot != getEditorController().getFxomDocument().getFxomRoot()) {
-            // Before setting newRoot as the root of the fxom document,
-            // we must remove its static properties.
-            // We create a RemovePropertyJob for each existing static property
-            if (newRoot != null) {
-                result.add(new PrunePropertiesJob(newRoot, null, getEditorController()));
-            }
-            
-            // Adds job that effectively modifes the root
-            result.add(new SetFxomRootJob(newRoot, getEditorController()));
-            
-            // If need, we add a job for resizing the root object
-            if ((newRoot != null) && usePredefinedSize) {
-                final DesignHierarchyMask mask = new DesignHierarchyMask(newRoot);
-                if (mask.needResizeWhenTopElement()) {
-                    result.add(new UsePredefinedSizeJob(getEditorController(), 
-                            EditorController.Size.SIZE_DEFAULT, newRoot));
-                }
-            }
+  public FXOMObject getNewRoot() {
+    return newRoot;
+  }
+
+  @Override
+  protected List<Job> makeSubJobs() {
+    final List<Job> result = new ArrayList<>();
+    if (newRoot != getEditorController().getFxomDocument().getFxomRoot()) {
+      // Before setting newRoot as the root of the fxom document,
+      // we must remove its static properties.
+      // We create a RemovePropertyJob for each existing static property
+      if (newRoot != null) {
+        result.add(new PrunePropertiesJob(newRoot, null, getEditorController()));
+      }
+
+      // Adds job that effectively modifes the root
+      result.add(new SetFxomRootJob(newRoot, getEditorController()));
+
+      // If need, we add a job for resizing the root object
+      if ((newRoot != null) && usePredefinedSize) {
+        final DesignHierarchyMask mask = new DesignHierarchyMask(newRoot);
+        if (mask.needResizeWhenTopElement()) {
+          result.add(
+              new UsePredefinedSizeJob(
+                  getEditorController(), EditorController.Size.SIZE_DEFAULT, newRoot));
         }
-        return result;
+      }
     }
+    return result;
+  }
 
-    @Override
-    protected String makeDescription() {
-        return description;
-    }
+  @Override
+  protected String makeDescription() {
+    return description;
+  }
 
-    @Override
-    protected AbstractSelectionGroup getNewSelectionGroup() {
-        if (newRoot == null) {
-            return null;
-        }
-        List<FXOMObject> newObjects = new ArrayList<>();
-        newObjects.add(newRoot);
-        return new ObjectSelectionGroup(newObjects, newRoot, null);
+  @Override
+  protected AbstractSelectionGroup getNewSelectionGroup() {
+    if (newRoot == null) {
+      return null;
     }
+    List<FXOMObject> newObjects = new ArrayList<>();
+    newObjects.add(newRoot);
+    return new ObjectSelectionGroup(newObjects, newRoot, null);
+  }
 }

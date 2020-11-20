@@ -40,91 +40,83 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 
-/**
- * Simple string popup editor.
- */
+/** Simple string popup editor. */
 public class BoundsPopupEditor extends PopupEditor {
 
-    @FXML
-    Label minX;
-    @FXML
-    Label minY;
-    @FXML
-    Label minZ;
-    @FXML
-    Label maxX;
-    @FXML
-    Label maxY;
-    @FXML
-    Label maxZ;
-    @FXML
-    Label width;
-    @FXML
-    Label height;
-    @FXML
-    Label depth;
+  @FXML Label minX;
+  @FXML Label minY;
+  @FXML Label minZ;
+  @FXML Label maxX;
+  @FXML Label maxY;
+  @FXML Label maxZ;
+  @FXML Label width;
+  @FXML Label height;
+  @FXML Label depth;
 
-    private Parent root;
-    private Bounds bounds;
+  private Parent root;
+  private Bounds bounds;
 
-    public BoundsPopupEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super(propMeta, selectedClasses);
+  public BoundsPopupEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super(propMeta, selectedClasses);
+  }
+
+  //
+  // Interface from PopupEditor.
+  // Methods called by PopupEditor.
+  //
+
+  @Override
+  public void initializePopupContent() {
+    root = EditorUtils.loadPopupFxml("BoundsPopupEditor.fxml", this); // NOI18N
+  }
+
+  @Override
+  public String getPreviewString(Object value) {
+    // value should never be null
+    assert value instanceof Bounds;
+    Bounds boundsVal = (Bounds) value;
+    String valueAsString;
+    if (isIndeterminate()) {
+      valueAsString = "-"; // NOI18N
+    } else {
+      valueAsString =
+          EditorUtils.valAsStr(boundsVal.getMinX())
+              + "," // NOI18N
+              + EditorUtils.valAsStr(boundsVal.getMinY())
+              + "  "
+              + EditorUtils.valAsStr(boundsVal.getWidth()) // NOI18N
+              + "x"
+              + EditorUtils.valAsStr(boundsVal.getHeight()); // NOI18N
     }
+    return valueAsString;
+  }
 
-    //
-    // Interface from PopupEditor.
-    // Methods called by PopupEditor.
-    //
-    
-    @Override
-    public void initializePopupContent() {
-        root = EditorUtils.loadPopupFxml("BoundsPopupEditor.fxml", this); //NOI18N
+  @Override
+  public void setPopupContentValue(Object value) {
+    if (value == null) {
+      bounds = null;
+      updateValues();
+    } else {
+      assert value instanceof Bounds;
+      bounds = (Bounds) value;
+      updateValues();
     }
+  }
 
-    @Override
-    public String getPreviewString(Object value) {
-        // value should never be null
-        assert value instanceof Bounds;
-        Bounds boundsVal = (Bounds) value;
-        String valueAsString;
-        if (isIndeterminate()) {
-            valueAsString = "-"; //NOI18N
-        } else {
-            valueAsString = EditorUtils.valAsStr(boundsVal.getMinX()) + "," //NOI18N
-                    + EditorUtils.valAsStr(boundsVal.getMinY())
-                    + "  " + EditorUtils.valAsStr(boundsVal.getWidth()) //NOI18N
-                    + "x" + EditorUtils.valAsStr(boundsVal.getHeight()); //NOI18N
-        }
-        return valueAsString;
-    }
+  @Override
+  public Node getPopupContentNode() {
+    return root;
+  }
 
-    @Override
-    public void setPopupContentValue(Object value) {
-        if (value == null) {
-            bounds = null;
-            updateValues();
-        } else {
-            assert value instanceof Bounds;
-            bounds = (Bounds) value;
-            updateValues();
-        }
-    }
-
-    @Override
-    public Node getPopupContentNode() {
-        return root;
-    }
-    
-    private void updateValues() {
-        minX.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getMinX() : ""));//NOI18N
-        minY.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getMinY() : ""));//NOI18N
-        minZ.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getMinZ() : ""));//NOI18N
-        maxX.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getMaxX() : ""));//NOI18N
-        maxY.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getMaxY() : ""));//NOI18N
-        maxZ.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getMaxZ() : ""));//NOI18N
-        width.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getWidth() : ""));//NOI18N
-        height.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getHeight() : ""));//NOI18N
-        depth.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getDepth() : ""));//NOI18N
-    }
-
+  private void updateValues() {
+    minX.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getMinX() : "")); // NOI18N
+    minY.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getMinY() : "")); // NOI18N
+    minZ.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getMinZ() : "")); // NOI18N
+    maxX.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getMaxX() : "")); // NOI18N
+    maxY.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getMaxY() : "")); // NOI18N
+    maxZ.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getMaxZ() : "")); // NOI18N
+    width.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getWidth() : "")); // NOI18N
+    height.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getHeight() : "")); // NOI18N
+    depth.setText(EditorUtils.valAsStr((bounds != null) ? bounds.getDepth() : "")); // NOI18N
+  }
 }

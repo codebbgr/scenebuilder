@@ -37,37 +37,39 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.text.Font;
 
-/**
- *
- * 
- */
+/** */
 public class FontPropertyMetadata extends ComplexPropertyMetadata<Font> {
 
-    private final StringPropertyMetadata nameMetadata
-            = new StringPropertyMetadata(new PropertyName("name"), //NOI18N
-            true, Font.getDefault().getName(), InspectorPath.UNUSED);
-    private final DoublePropertyMetadata sizeMetadata
-            = new DoublePropertyMetadata(new PropertyName("size"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.SIZE, true, 0.0, InspectorPath.UNUSED);
+  private final StringPropertyMetadata nameMetadata =
+      new StringPropertyMetadata(
+          new PropertyName("name"), // NOI18N
+          true,
+          Font.getDefault().getName(),
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata sizeMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("size"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.SIZE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
 
-    
-    public FontPropertyMetadata(PropertyName name, boolean readWrite, 
-            Font defaultValue, InspectorPath inspectorPath) {
-        super(name, Font.class, readWrite, defaultValue, inspectorPath);
-    }
+  public FontPropertyMetadata(
+      PropertyName name, boolean readWrite, Font defaultValue, InspectorPath inspectorPath) {
+    super(name, Font.class, readWrite, defaultValue, inspectorPath);
+  }
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Font value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, getValueClass());
-        
-        nameMetadata.setValue(result, value.getName());
-        sizeMetadata.setValue(result, value.getSize());
+  /*
+   * ComplexPropertyMetadata
+   */
 
-        return result;
-    }
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Font value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, getValueClass());
 
+    nameMetadata.setValue(result, value.getName());
+    sizeMetadata.setValue(result, value.getSize());
+
+    return result;
+  }
 }

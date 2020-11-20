@@ -32,7 +32,6 @@
 package com.oracle.javafx.scenebuilder.kit.editor.job;
 
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
-import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.AbstractSelectionGroup;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.ObjectSelectionGroup;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.Selection;
@@ -40,6 +39,7 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMDocument;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMIntrinsic;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMNodes;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
+import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.DesignHierarchyMask;
 import com.oracle.javafx.scenebuilder.kit.util.URLUtils;
 import java.io.File;
@@ -48,85 +48,84 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
+/** */
 public class IncludeFileJob extends BatchSelectionJob {
 
-    private final File file;
-    private FXOMObject targetObject;
-    private FXOMIntrinsic newInclude;
+  private final File file;
+  private FXOMObject targetObject;
+  private FXOMIntrinsic newInclude;
 
-    public IncludeFileJob(File file, EditorController editorController) {
-        super(editorController);
+  public IncludeFileJob(File file, EditorController editorController) {
+    super(editorController);
 
-        assert file != null;
-        this.file = file;
-    }
+    assert file != null;
+    this.file = file;
+  }
 
-    public FXOMObject getTargetObject() {
-        return targetObject;
-    }
+  public FXOMObject getTargetObject() {
+    return targetObject;
+  }
 
-    @Override
-    protected List<Job> makeSubJobs() {
-        final List<Job> result = new ArrayList<>();
+  @Override
+  protected List<Job> makeSubJobs() {
+    final List<Job> result = new ArrayList<>();
 
-        try {
-            final FXOMDocument targetDocument = getEditorController().getFxomDocument();
-            final URL documentURL = getEditorController().getFxmlLocation();
-            final URL fileURL = file.toURI().toURL();
+    try {
+      final FXOMDocument targetDocument = getEditorController().getFxomDocument();
+      final URL documentURL = getEditorController().getFxmlLocation();
+      final URL fileURL = file.toURI().toURL();
 
-            // Cannot include in non saved document
-            // Cannot include same file as document one which will create cyclic reference
-            if (documentURL != null && URLUtils.equals(documentURL, fileURL) == false) {
-                newInclude = FXOMNodes.newInclude(targetDocument, file);
+      // Cannot include in non saved document
+      // Cannot include same file as document one which will create cyclic reference
+      if (documentURL != null && URLUtils.equals(documentURL, fileURL) == false) {
+        newInclude = FXOMNodes.newInclude(targetDocument, file);
 
-                // newInclude is null when file is empty
-                if (newInclude != null) {
+        // newInclude is null when file is empty
+        if (newInclude != null) {
 
-                    // Cannot include as root
-                    final FXOMObject rootObject = targetDocument.getFxomRoot();
-                    if (rootObject != null) {
-                        // We include the new object under the common parent
-                        // of the selected objects.
-                        final Selection selection = getEditorController().getSelection();
-                        if (selection.isEmpty() || selection.isSelected(rootObject)) {
-                            // No selection or root is selected -> we insert below root
-                            targetObject = rootObject;
-                        } else {
-                            // Let's use the common parent of the selected objects.
-                            // It might be null if selection holds some non FXOMObject entries
-                            targetObject = selection.getAncestor();
-                        }
-                        // Build InsertAsSubComponent jobs
-                        final DesignHierarchyMask targetMask = new DesignHierarchyMask(targetObject);
-                        if (targetMask.isAcceptingSubComponent(newInclude)) {
-                            result.add(new InsertAsSubComponentJob(
-                                    newInclude,
-                                    targetObject,
-                                    targetMask.getSubComponentCount(),
-                                    getEditorController()));
-                        }
-                    }
-                }
+          // Cannot include as root
+          final FXOMObject rootObject = targetDocument.getFxomRoot();
+          if (rootObject != null) {
+            // We include the new object under the common parent
+            // of the selected objects.
+            final Selection selection = getEditorController().getSelection();
+            if (selection.isEmpty() || selection.isSelected(rootObject)) {
+              // No selection or root is selected -> we insert below root
+              targetObject = rootObject;
+            } else {
+              // Let's use the common parent of the selected objects.
+              // It might be null if selection holds some non FXOMObject entries
+              targetObject = selection.getAncestor();
             }
-        } catch (IOException ex) {
-            result.clear();
+            // Build InsertAsSubComponent jobs
+            final DesignHierarchyMask targetMask = new DesignHierarchyMask(targetObject);
+            if (targetMask.isAcceptingSubComponent(newInclude)) {
+              result.add(
+                  new InsertAsSubComponentJob(
+                      newInclude,
+                      targetObject,
+                      targetMask.getSubComponentCount(),
+                      getEditorController()));
+            }
+          }
         }
-
-        return result;
+      }
+    } catch (IOException ex) {
+      result.clear();
     }
 
-    @Override
-    protected String makeDescription() {
-        return I18N.getString("include.file", file.getName());
-    }
+    return result;
+  }
 
-    @Override
-    protected AbstractSelectionGroup getNewSelectionGroup() {
-        final List<FXOMObject> fxomObjects = new ArrayList<>();
-        fxomObjects.add(newInclude);
-        return new ObjectSelectionGroup(fxomObjects, newInclude, null);
-    }
+  @Override
+  protected String makeDescription() {
+    return I18N.getString("include.file", file.getName());
+  }
+
+  @Override
+  protected AbstractSelectionGroup getNewSelectionGroup() {
+    final List<FXOMObject> fxomObjects = new ArrayList<>();
+    fxomObjects.add(newInclude);
+    return new ObjectSelectionGroup(fxomObjects, newInclude, null);
+  }
 }

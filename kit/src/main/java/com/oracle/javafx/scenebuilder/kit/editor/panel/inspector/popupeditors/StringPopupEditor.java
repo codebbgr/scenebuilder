@@ -33,66 +33,61 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.popupeditors;
 
 import com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors.EditorUtils;
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
-
 import java.util.Set;
-
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.TextField;
 
-/**
- * Simple string popup editor.
- */
+/** Simple string popup editor. */
 public class StringPopupEditor extends PopupEditor {
 
-    @FXML
-    TextField textField;
+  @FXML TextField textField;
 
-    private Parent root;
+  private Parent root;
 
-    public StringPopupEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super(propMeta, selectedClasses);
+  public StringPopupEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super(propMeta, selectedClasses);
+  }
+
+  //
+  // Interface from PopupEditor.
+  // Methods called by PopupEditor.
+  //
+
+  @Override
+  public void initializePopupContent() {
+    root = EditorUtils.loadPopupFxml("StringPopupEditor.fxml", this);
+    assert textField != null;
+    textField.setOnAction(t -> commitValue(textField.getText()));
+  }
+
+  @Override
+  public void setPopupContentValue(Object value) {
+    if (value == null) {
+      textField.setText(null);
+    } else {
+      assert value instanceof String;
+      textField.setText((String) value);
     }
+  }
 
-    //
-    // Interface from PopupEditor.
-    // Methods called by PopupEditor.
-    //
-    
-    @Override
-    public void initializePopupContent() {
-        root = EditorUtils.loadPopupFxml("StringPopupEditor.fxml", this);
-        assert textField != null;
-        textField.setOnAction(t -> commitValue(textField.getText()));
+  @Override
+  public String getPreviewString(Object value) {
+    if (value == null) {
+      return ""; // NOI18N
     }
+    String valueAsString;
+    if (isIndeterminate()) {
+      valueAsString = "-"; // NOI18N
+    } else {
+      valueAsString = value.toString();
+    }
+    return valueAsString;
+  }
 
-    @Override
-    public void setPopupContentValue(Object value) {
-        if (value == null) {
-            textField.setText(null);
-        } else {
-            assert value instanceof String;
-            textField.setText((String) value);
-        }
-    }
-
-    @Override
-    public String getPreviewString(Object value) {
-        if (value == null) {
-            return ""; //NOI18N
-        }
-        String valueAsString;
-        if (isIndeterminate()) {
-            valueAsString = "-"; //NOI18N
-        } else {
-            valueAsString = value.toString();
-        }
-        return valueAsString;
-    }
-
-    @Override
-    public Node getPopupContentNode() {
-        return root;
-    }
+  @Override
+  public Node getPopupContentNode() {
+    return root;
+  }
 }

@@ -40,33 +40,30 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import javafx.scene.shape.CubicCurve;
 
-/**
- *
- */
+/** */
 public class CubicCurveDriver extends AbstractNodeDriver {
 
-    public CubicCurveDriver(ContentPanelController contentPanelController) {
-        super(contentPanelController);
-    }
+  public CubicCurveDriver(ContentPanelController contentPanelController) {
+    super(contentPanelController);
+  }
 
-    /*
-     * AbstractDriver
-     */
-    
-    @Override
-    public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof CubicCurve;
-        assert fxomObject instanceof FXOMInstance;
-        return new CubicCurveHandles(contentPanelController, (FXOMInstance)fxomObject);
-    }
+  /*
+   * AbstractDriver
+   */
 
-    @Override
-    public AbstractCurveEditor<?> makeCurveEditor(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof CubicCurve;
-        assert fxomObject instanceof FXOMInstance;
+  @Override
+  public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof CubicCurve;
+    assert fxomObject instanceof FXOMInstance;
+    return new CubicCurveHandles(contentPanelController, (FXOMInstance) fxomObject);
+  }
 
-        final CubicCurve cubicCurve = (CubicCurve) fxomObject.getSceneGraphObject();
-        return new CubicCurveEditor(cubicCurve);
-    }
-    
+  @Override
+  public AbstractCurveEditor<?> makeCurveEditor(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof CubicCurve;
+    assert fxomObject instanceof FXOMInstance;
+
+    final CubicCurve cubicCurve = (CubicCurve) fxomObject.getSceneGraphObject();
+    return new CubicCurveEditor(cubicCurve);
+  }
 }

@@ -34,9 +34,9 @@ package com.oracle.javafx.scenebuilder.kit.editor.job.gridpane;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import com.oracle.javafx.scenebuilder.kit.editor.job.BatchSelectionJob;
 import com.oracle.javafx.scenebuilder.kit.editor.job.Job;
-import com.oracle.javafx.scenebuilder.kit.editor.job.gridpane.GridPaneJobUtils.Position;
 import com.oracle.javafx.scenebuilder.kit.editor.job.atomic.AddPropertyValueJob;
 import com.oracle.javafx.scenebuilder.kit.editor.job.atomic.RemoveObjectJob;
+import com.oracle.javafx.scenebuilder.kit.editor.job.gridpane.GridPaneJobUtils.Position;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.AbstractSelectionGroup;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.GridSelectionGroup;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.Selection;
@@ -53,198 +53,192 @@ import java.util.List;
 import java.util.Set;
 import javafx.scene.layout.ColumnConstraints;
 
-/**
- * Job invoked when moving columns BEFORE or AFTER.
- */
+/** Job invoked when moving columns BEFORE or AFTER. */
 public class MoveColumnJob extends BatchSelectionJob {
 
-    private FXOMObject targetGridPane;
-    private final List<Integer> targetIndexes = new ArrayList<>();
-    private final GridPaneJobUtils.Position position;
+  private FXOMObject targetGridPane;
+  private final List<Integer> targetIndexes = new ArrayList<>();
+  private final GridPaneJobUtils.Position position;
 
-    public MoveColumnJob(final EditorController editorController, final Position position) {
-        super(editorController);
-        assert position == Position.BEFORE || position == Position.AFTER;
-        this.position = position;
+  public MoveColumnJob(final EditorController editorController, final Position position) {
+    super(editorController);
+    assert position == Position.BEFORE || position == Position.AFTER;
+    this.position = position;
+  }
+
+  @Override
+  protected List<Job> makeSubJobs() {
+
+    final List<Job> result = new ArrayList<>();
+
+    if (GridPaneJobUtils.canPerformMove(getEditorController(), position)) {
+
+      // Retrieve the target GridPane
+      final Selection selection = getEditorController().getSelection();
+      final AbstractSelectionGroup asg = selection.getGroup();
+      assert asg instanceof GridSelectionGroup; // Because of (1)
+      final GridSelectionGroup gsg = (GridSelectionGroup) asg;
+
+      targetGridPane = gsg.getParentObject();
+      targetIndexes.addAll(gsg.getIndexes());
+
+      // Add sub jobs
+      // First move the column constraints
+      result.addAll(moveColumnConstraints());
+      // Then move the column content
+      result.addAll(moveColumnContent());
+    }
+    return result;
+  }
+
+  @Override
+  protected String makeDescription() {
+    return "Move Column " + position.name(); // NOI18N
+  }
+
+  @Override
+  protected AbstractSelectionGroup getNewSelectionGroup() {
+    final Set<Integer> movedIndexes = new HashSet<>();
+    for (int targetIndex : targetIndexes) {
+      int movedIndex = position == Position.BEFORE ? targetIndex - 1 : targetIndex + 1;
+      movedIndexes.add(movedIndex);
+    }
+    return new GridSelectionGroup(targetGridPane, GridSelectionGroup.Type.COLUMN, movedIndexes);
+  }
+
+  private List<Job> moveColumnConstraints() {
+
+    final List<Job> result = new ArrayList<>();
+
+    // Retrieve the constraints property for the specified target GridPane
+    final PropertyName propertyName = new PropertyName("columnConstraints"); // NOI18N
+    assert targetGridPane instanceof FXOMInstance;
+    FXOMProperty constraintsProperty =
+        ((FXOMInstance) targetGridPane).getProperties().get(propertyName);
+    // GridPane has no constraints property => no constraints to move
+    if (constraintsProperty == null) {
+      return result;
     }
 
-    @Override
-    protected List<Job> makeSubJobs() {
+    final DesignHierarchyMask mask = new DesignHierarchyMask(targetGridPane);
+    for (int targetIndex : targetIndexes) {
 
-        final List<Job> result = new ArrayList<>();
+      final int positionIndex;
+      switch (position) {
+        case BEFORE:
+          positionIndex = targetIndex - 1;
+          break;
+        case AFTER:
+          positionIndex = targetIndex + 1;
+          break;
+        default:
+          assert false;
+          return result;
+      }
 
-        if (GridPaneJobUtils.canPerformMove(getEditorController(), position)) {
+      // Retrieve the target constraints
+      final FXOMObject targetConstraints = mask.getColumnConstraintsAtIndex(targetIndex);
 
-            // Retrieve the target GridPane
-            final Selection selection = getEditorController().getSelection();
-            final AbstractSelectionGroup asg = selection.getGroup();
-            assert asg instanceof GridSelectionGroup; // Because of (1)
-            final GridSelectionGroup gsg = (GridSelectionGroup) asg;
+      // The target index is associated to an existing constraints value :
+      // we remove the target constraints and add it back at new position
+      // No need to move the constraints of the column before/after :
+      // indeed, they are automatically shifted while updating the target ones
+      if (targetConstraints != null) {
+        // First remove current target constraints
+        final Job removeValueJob = new RemoveObjectJob(targetConstraints, getEditorController());
+        result.add(removeValueJob);
 
-            targetGridPane = gsg.getParentObject();
-            targetIndexes.addAll(gsg.getIndexes());
+        // Then add the target constraints at new positionIndex
+        final Job addValueJob =
+            new AddPropertyValueJob(
+                targetConstraints,
+                (FXOMPropertyC) constraintsProperty,
+                positionIndex,
+                getEditorController());
+        result.add(addValueJob);
+      } //
+      // The target index is not associated to an existing constraints value :
+      // we may need to move the constraints before the target one if any
+      else if (position == Position.BEFORE) {
+        // Retrieve the constraints before the target one
+        final FXOMObject beforeConstraints = mask.getColumnConstraintsAtIndex(targetIndex - 1);
 
-            // Add sub jobs
-            // First move the column constraints
-            result.addAll(moveColumnConstraints());
-            // Then move the column content
-            result.addAll(moveColumnContent());
+        // The index before is associated to an existing constraints value :
+        // we insert a new constraints with default values at the position index
+        if (beforeConstraints != null) {
+          // Create new empty constraints for the target column
+          final FXOMInstance addedConstraints = makeColumnConstraintsInstance();
+          final Job addValueJob =
+              new AddPropertyValueJob(
+                  addedConstraints,
+                  (FXOMPropertyC) constraintsProperty,
+                  positionIndex,
+                  getEditorController());
+          result.add(addValueJob);
         }
-        return result;
+      }
     }
+    return result;
+  }
 
-    @Override
-    protected String makeDescription() {
-        return "Move Column " + position.name(); //NOI18N
-    }
+  private List<Job> moveColumnContent() {
 
-    @Override
-    protected AbstractSelectionGroup getNewSelectionGroup() {
-        final Set<Integer> movedIndexes = new HashSet<>();
-        for (int targetIndex : targetIndexes) {
-            int movedIndex = position == Position.BEFORE
-                    ? targetIndex - 1 : targetIndex + 1;
-            movedIndexes.add(movedIndex);
-        }
-        return new GridSelectionGroup(targetGridPane, GridSelectionGroup.Type.COLUMN, movedIndexes);
-    }
+    final List<Job> result = new ArrayList<>();
 
-    private List<Job> moveColumnConstraints() {
+    for (int targetIndex : targetIndexes) {
 
-        final List<Job> result = new ArrayList<>();
-
-        // Retrieve the constraints property for the specified target GridPane
-        final PropertyName propertyName = new PropertyName("columnConstraints"); //NOI18N
-        assert targetGridPane instanceof FXOMInstance;
-        FXOMProperty constraintsProperty
-                = ((FXOMInstance) targetGridPane).getProperties().get(propertyName);
-        // GridPane has no constraints property => no constraints to move
-        if (constraintsProperty == null) {
-            return result;
-        }
-
-        final DesignHierarchyMask mask = new DesignHierarchyMask(targetGridPane);
-        for (int targetIndex : targetIndexes) {
-
-            final int positionIndex;
-            switch (position) {
-                case BEFORE:
-                    positionIndex = targetIndex - 1;
-                    break;
-                case AFTER:
-                    positionIndex = targetIndex + 1;
-                    break;
-                default:
-                    assert false;
-                    return result;
+      switch (position) {
+        case BEFORE:
+          // First move the target column content
+          result.add(
+              new ReIndexColumnContentJob(getEditorController(), -1, targetGridPane, targetIndex));
+          int beforeIndex = targetIndex - 1;
+          // Then move the content of the column before the target one
+          // If the index before is not part of the target indexes (selected indexes),
+          // we move the column content as many times as consecutive target indexes
+          if (targetIndexes.contains(beforeIndex) == false) {
+            int shiftIndex = 1;
+            while (targetIndexes.contains(targetIndex + shiftIndex)) {
+              shiftIndex++;
             }
-
-            // Retrieve the target constraints
-            final FXOMObject targetConstraints
-                    = mask.getColumnConstraintsAtIndex(targetIndex);
-
-            // The target index is associated to an existing constraints value :
-            // we remove the target constraints and add it back at new position
-            // No need to move the constraints of the column before/after :
-            // indeed, they are automatically shifted while updating the target ones 
-            if (targetConstraints != null) {
-                // First remove current target constraints
-                final Job removeValueJob = new RemoveObjectJob(
-                        targetConstraints,
-                        getEditorController());
-                result.add(removeValueJob);
-
-                // Then add the target constraints at new positionIndex
-                final Job addValueJob = new AddPropertyValueJob(
-                        targetConstraints,
-                        (FXOMPropertyC) constraintsProperty,
-                        positionIndex, getEditorController());
-                result.add(addValueJob);
-            }//
-            // The target index is not associated to an existing constraints value :
-            // we may need to move the constraints before the target one if any
-            else if (position == Position.BEFORE) {
-                // Retrieve the constraints before the target one
-                final FXOMObject beforeConstraints
-                        = mask.getColumnConstraintsAtIndex(targetIndex - 1);
-
-                // The index before is associated to an existing constraints value :
-                // we insert a new constraints with default values at the position index
-                if (beforeConstraints != null) {
-                    // Create new empty constraints for the target column
-                    final FXOMInstance addedConstraints = makeColumnConstraintsInstance();
-                    final Job addValueJob = new AddPropertyValueJob(
-                            addedConstraints,
-                            (FXOMPropertyC) constraintsProperty,
-                            positionIndex, getEditorController());
-                    result.add(addValueJob);
-                }
+            result.add(
+                new ReIndexColumnContentJob(
+                    getEditorController(), shiftIndex, targetGridPane, beforeIndex));
+          }
+          break;
+        case AFTER:
+          // First move the target column content
+          result.add(
+              new ReIndexColumnContentJob(getEditorController(), +1, targetGridPane, targetIndex));
+          int afterIndex = targetIndex + 1;
+          // Then move the content of the column after the target one
+          // If the index after is not part of the target indexes (selected indexes),
+          // we move the column content as many times as consecutive target indexes
+          if (targetIndexes.contains(afterIndex) == false) {
+            int shiftIndex = -1;
+            while (targetIndexes.contains(targetIndex + shiftIndex)) {
+              shiftIndex--;
             }
-        }
-        return result;
+            result.add(
+                new ReIndexColumnContentJob(
+                    getEditorController(), shiftIndex, targetGridPane, afterIndex));
+          }
+          break;
+        default:
+          assert false;
+      }
     }
+    return result;
+  }
 
-    private List<Job> moveColumnContent() {
+  private FXOMInstance makeColumnConstraintsInstance() {
 
-        final List<Job> result = new ArrayList<>();
+    // Create new constraints instance
+    final FXOMDocument newDocument = new FXOMDocument();
+    final FXOMInstance result = new FXOMInstance(newDocument, ColumnConstraints.class);
+    newDocument.setFxomRoot(result);
+    result.moveToFxomDocument(getEditorController().getFxomDocument());
 
-        for (int targetIndex : targetIndexes) {
-
-            switch (position) {
-                case BEFORE:
-                    // First move the target column content
-                    result.add(new ReIndexColumnContentJob(
-                            getEditorController(),
-                            -1, targetGridPane, targetIndex));
-                    int beforeIndex = targetIndex - 1;
-                    // Then move the content of the column before the target one
-                    // If the index before is not part of the target indexes (selected indexes),
-                    // we move the column content as many times as consecutive target indexes
-                    if (targetIndexes.contains(beforeIndex) == false) {
-                        int shiftIndex = 1;
-                        while (targetIndexes.contains(targetIndex + shiftIndex)) {
-                            shiftIndex++;
-                        }
-                        result.add(new ReIndexColumnContentJob(
-                                getEditorController(),
-                                shiftIndex, targetGridPane, beforeIndex));
-                    }
-                    break;
-                case AFTER:
-                    // First move the target column content
-                    result.add(new ReIndexColumnContentJob(
-                            getEditorController(),
-                            +1, targetGridPane, targetIndex));
-                    int afterIndex = targetIndex + 1;
-                    // Then move the content of the column after the target one
-                    // If the index after is not part of the target indexes (selected indexes),
-                    // we move the column content as many times as consecutive target indexes
-                    if (targetIndexes.contains(afterIndex) == false) {
-                        int shiftIndex = -1;
-                        while (targetIndexes.contains(targetIndex + shiftIndex)) {
-                            shiftIndex--;
-                        }
-                        result.add(new ReIndexColumnContentJob(
-                                getEditorController(),
-                                shiftIndex, targetGridPane, afterIndex));
-                    }
-                    break;
-                default:
-                    assert false;
-            }
-        }
-        return result;
-    }
-
-    private FXOMInstance makeColumnConstraintsInstance() {
-
-        // Create new constraints instance
-        final FXOMDocument newDocument = new FXOMDocument();
-        final FXOMInstance result
-                = new FXOMInstance(newDocument, ColumnConstraints.class);
-        newDocument.setFxomRoot(result);
-        result.moveToFxomDocument(getEditorController().getFxomDocument());
-
-        return result;
-    }
+    return result;
+  }
 }

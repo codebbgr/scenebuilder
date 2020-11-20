@@ -42,85 +42,84 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/**
- *
- */
+/** */
 public class UpdateSelectionJob extends Job {
 
-    private AbstractSelectionGroup oldSelectionGroup;
-    private final AbstractSelectionGroup newSelectionGroup;
+  private AbstractSelectionGroup oldSelectionGroup;
+  private final AbstractSelectionGroup newSelectionGroup;
 
-    public UpdateSelectionJob(AbstractSelectionGroup group, EditorController editorController) {
-        super(editorController);
-        newSelectionGroup = group;
+  public UpdateSelectionJob(AbstractSelectionGroup group, EditorController editorController) {
+    super(editorController);
+    newSelectionGroup = group;
+  }
+
+  public UpdateSelectionJob(FXOMObject newSelectedObject, EditorController editorController) {
+    super(editorController);
+
+    assert newSelectedObject != null;
+    final List<FXOMObject> newSelectedObjects = new ArrayList<>();
+    newSelectedObjects.add(newSelectedObject);
+    newSelectionGroup = new ObjectSelectionGroup(newSelectedObjects, newSelectedObject, null);
+  }
+
+  public UpdateSelectionJob(
+      Collection<FXOMObject> newSelectedObjects, EditorController editorController) {
+    super(editorController);
+
+    assert newSelectedObjects != null; // But possibly empty
+    if (newSelectedObjects.isEmpty()) {
+      newSelectionGroup = null;
+    } else {
+      newSelectionGroup =
+          new ObjectSelectionGroup(newSelectedObjects, newSelectedObjects.iterator().next(), null);
+    }
+  }
+
+  /*
+   * Job
+   */
+
+  @Override
+  public boolean isExecutable() {
+    return true;
+  }
+
+  @Override
+  public void execute() {
+    final Selection selection = getEditorController().getSelection();
+
+    // Saves the current selection
+    try {
+      if (selection.getGroup() == null) {
+        this.oldSelectionGroup = null;
+      } else {
+        this.oldSelectionGroup = selection.getGroup().clone();
+      }
+    } catch (CloneNotSupportedException x) {
+      throw new RuntimeException("Bug", x);
     }
 
-    public UpdateSelectionJob(FXOMObject newSelectedObject, EditorController editorController) {
-        super(editorController);
+    // Now same as redo()
+    redo();
+  }
 
-        assert newSelectedObject != null;
-        final List<FXOMObject> newSelectedObjects = new ArrayList<>();
-        newSelectedObjects.add(newSelectedObject);
-        newSelectionGroup = new ObjectSelectionGroup(newSelectedObjects, newSelectedObject, null);
-    }
+  @Override
+  public void undo() {
+    final Selection selection = getEditorController().getSelection();
+    selection.select(oldSelectionGroup);
+    assert selection.isValid(getEditorController().getFxomDocument());
+  }
 
-    public UpdateSelectionJob(Collection<FXOMObject> newSelectedObjects, EditorController editorController) {
-        super(editorController);
+  @Override
+  public void redo() {
+    final Selection selection = getEditorController().getSelection();
+    selection.select(newSelectionGroup);
+    assert selection.isValid(getEditorController().getFxomDocument());
+  }
 
-        assert newSelectedObjects != null; // But possibly empty
-        if (newSelectedObjects.isEmpty()) {
-            newSelectionGroup = null;
-        } else {
-            newSelectionGroup = new ObjectSelectionGroup(newSelectedObjects, newSelectedObjects.iterator().next(), null);
-        }
-    }
-
-    /*
-     * Job
-     */
-
-    @Override
-    public boolean isExecutable() {
-        return true;
-    }
-
-    @Override
-    public void execute() {
-        final Selection selection = getEditorController().getSelection();
-        
-        // Saves the current selection
-        try {
-            if (selection.getGroup() == null) {
-                this.oldSelectionGroup = null;
-            } else {
-                this.oldSelectionGroup = selection.getGroup().clone();
-            }
-        } catch(CloneNotSupportedException x) {
-            throw new RuntimeException("Bug", x);
-        }
-        
-        // Now same as redo()
-        redo();
-    }
-
-    @Override
-    public void undo() {
-        final Selection selection = getEditorController().getSelection();
-        selection.select(oldSelectionGroup);
-        assert selection.isValid(getEditorController().getFxomDocument());
-    }
-
-    @Override
-    public void redo() {
-        final Selection selection = getEditorController().getSelection();
-        selection.select(newSelectionGroup);
-        assert selection.isValid(getEditorController().getFxomDocument());
-    }
-
-    @Override
-    public String getDescription() {
-        // Not expected to reach the user
-        return getClass().getSimpleName();
-    }
-    
+  @Override
+  public String getDescription() {
+    // Not expected to reach the user
+    return getClass().getSimpleName();
+  }
 }

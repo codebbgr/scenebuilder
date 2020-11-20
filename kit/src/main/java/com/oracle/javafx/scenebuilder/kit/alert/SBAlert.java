@@ -34,22 +34,20 @@ package com.oracle.javafx.scenebuilder.kit.alert;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 
-/**
- * All SB alerts should extend from this class to have a consistent look and feel
- */
+/** All SB alerts should extend from this class to have a consistent look and feel */
 public class SBAlert extends Alert {
 
-    public SBAlert(AlertType alertType, Stage owner) {
-        super(alertType);
+  public SBAlert(AlertType alertType, Stage owner) {
+    super(alertType);
 
-        initOwner(owner);
-        getDialogPane().getStyleClass().add("SB-alert");
-        getDialogPane().getStylesheets().add(SBAlert.class.getResource("Alert.css").toString());
-        setIcons(owner);
-    }
+    initOwner(owner);
+    getDialogPane().getStyleClass().add("SB-alert");
+    getDialogPane().getStylesheets().add(SBAlert.class.getResource("Alert.css").toString());
+    setIcons(owner);
+  }
 
-    private void setIcons(Stage owner) {
-        Stage alertStage = (Stage) getDialogPane().getScene().getWindow();
-        alertStage.getIcons().setAll(owner.getIcons());
-    }
+  private void setIcons(Stage owner) {
+    Stage alertStage = (Stage) getDialogPane().getScene().getWindow();
+    alertStage.getIcons().setAll(owner.getIcons());
+  }
 }

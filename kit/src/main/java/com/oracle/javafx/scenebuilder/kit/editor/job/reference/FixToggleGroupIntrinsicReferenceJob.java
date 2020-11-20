@@ -44,109 +44,102 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMPropertyC;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- *
- */
+/** */
 public class FixToggleGroupIntrinsicReferenceJob extends InlineDocumentJob {
-    
-    private final FXOMIntrinsic reference;
 
-    public FixToggleGroupIntrinsicReferenceJob(
-            FXOMIntrinsic reference, 
-            EditorController editorController) {
-        super(editorController);
-        
-        assert reference != null;
-        assert reference.getFxomDocument() == editorController.getFxomDocument();
-        
-        this.reference = reference;
-    }
-    
+  private final FXOMIntrinsic reference;
+
+  public FixToggleGroupIntrinsicReferenceJob(
+      FXOMIntrinsic reference, EditorController editorController) {
+    super(editorController);
+
+    assert reference != null;
+    assert reference.getFxomDocument() == editorController.getFxomDocument();
+
+    this.reference = reference;
+  }
+
+  /*
+   * InlineDocumentJob
+   */
+  @Override
+  protected List<Job> makeAndExecuteSubJobs() {
+    final List<Job> result = new LinkedList<>();
+
+    // 1) Locates the referee
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    final String fxId = FXOMNodes.extractReferenceSource(reference);
+    final FXOMObject referee = fxomDocument.searchWithFxId(fxId);
+
     /*
-     * InlineDocumentJob
+     *    <RadioButton>
+     *       <toggleGroup>
+     *           <fx:reference source="oxebo" />        // reference        //NOI18N
+     *       </toggleGroup>
+     *    </RadioButton>
+     *    ...
+     *    <RadioButton>
+     *       <toggleGroup>
+     *           <ToggleGroup fx:id="oxebo" />          // referee          //NOI18N
+     *       </toggleGroup>
+     *    </RadioButton>
      */
-    @Override
-    protected List<Job> makeAndExecuteSubJobs() {
-        final List<Job> result = new LinkedList<>();
-        
-        // 1) Locates the referee
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        final String fxId = FXOMNodes.extractReferenceSource(reference);
-        final FXOMObject referee = fxomDocument.searchWithFxId(fxId);
-        
-        /*
-         *    <RadioButton>
-         *       <toggleGroup>
-         *           <fx:reference source="oxebo" />        // reference        //NOI18N
-         *       </toggleGroup>
-         *    </RadioButton>
-         *    ...
-         *    <RadioButton>
-         *       <toggleGroup>
-         *           <ToggleGroup fx:id="oxebo" />          // referee          //NOI18N
-         *       </toggleGroup>
-         *    </RadioButton>
-         */
-        
-        if (referee != null) {
-            assert referee.getParentProperty() != null;
-            
-            final FXOMPropertyC referenceProperty = reference.getParentProperty();
-            final FXOMPropertyC refereeProperty = referee.getParentProperty();
-            
-            // 2a.1) Removes referenceProperty
-            final RemovePropertyJob removeReferenceJob 
-                    = new RemovePropertyJob(referenceProperty, getEditorController());
-            removeReferenceJob.execute();
-            result.add(removeReferenceJob);
-            
-            // 2a.2) Removes refereeProperty
-            final RemovePropertyJob removeRefereeJob 
-                    = new RemovePropertyJob(refereeProperty, getEditorController());
-            removeRefereeJob.execute();
-            result.add(removeRefereeJob);
-            
-            // 2a.3) Adds referenceProperty where refereeProperty was
-            final Job addReferenceJob 
-                    = removeRefereeJob.makeMirrorJob(referenceProperty);
-            addReferenceJob.execute();
-            result.add(addReferenceJob);
-            
-            // 2a.4) Adds refereeProperty where referenceProperty was
-            final Job addRefereeJob 
-                    = removeRefereeJob.makeMirrorJob(refereeProperty);
-            addRefereeJob.execute();
-            result.add(addReferenceJob);
-            
-        } else {
-            
-            // 2b.1) Removes reference
-            final FXOMPropertyC referenceProperty = reference.getParentProperty();
-            final RemovePropertyJob removeReferenceJob 
-                    = new RemovePropertyJob(referenceProperty, getEditorController());
-            removeReferenceJob.execute();
-            result.add(removeReferenceJob);
-            
-            // 2b.2) Creates and adds toggle group
-            final FXOMPropertyC newToggleGroup = FXOMNodes.makeToggleGroup(fxomDocument, fxId);
-            final Job addJob = removeReferenceJob.makeMirrorJob(newToggleGroup);
-            addJob.execute();
-            result.add(addJob);
-        }
-                
-        return result;
+
+    if (referee != null) {
+      assert referee.getParentProperty() != null;
+
+      final FXOMPropertyC referenceProperty = reference.getParentProperty();
+      final FXOMPropertyC refereeProperty = referee.getParentProperty();
+
+      // 2a.1) Removes referenceProperty
+      final RemovePropertyJob removeReferenceJob =
+          new RemovePropertyJob(referenceProperty, getEditorController());
+      removeReferenceJob.execute();
+      result.add(removeReferenceJob);
+
+      // 2a.2) Removes refereeProperty
+      final RemovePropertyJob removeRefereeJob =
+          new RemovePropertyJob(refereeProperty, getEditorController());
+      removeRefereeJob.execute();
+      result.add(removeRefereeJob);
+
+      // 2a.3) Adds referenceProperty where refereeProperty was
+      final Job addReferenceJob = removeRefereeJob.makeMirrorJob(referenceProperty);
+      addReferenceJob.execute();
+      result.add(addReferenceJob);
+
+      // 2a.4) Adds refereeProperty where referenceProperty was
+      final Job addRefereeJob = removeRefereeJob.makeMirrorJob(refereeProperty);
+      addRefereeJob.execute();
+      result.add(addReferenceJob);
+
+    } else {
+
+      // 2b.1) Removes reference
+      final FXOMPropertyC referenceProperty = reference.getParentProperty();
+      final RemovePropertyJob removeReferenceJob =
+          new RemovePropertyJob(referenceProperty, getEditorController());
+      removeReferenceJob.execute();
+      result.add(removeReferenceJob);
+
+      // 2b.2) Creates and adds toggle group
+      final FXOMPropertyC newToggleGroup = FXOMNodes.makeToggleGroup(fxomDocument, fxId);
+      final Job addJob = removeReferenceJob.makeMirrorJob(newToggleGroup);
+      addJob.execute();
+      result.add(addJob);
     }
 
-    @Override
-    protected String makeDescription() {
-        return getClass().getSimpleName(); // Not expected to reach the user
-    }
+    return result;
+  }
 
-    @Override
-    public boolean isExecutable() {
-        return ((reference.getType() == FXOMIntrinsic.Type.FX_REFERENCE) &&
-                (reference.getParentProperty() != null));
-    }
-    
-    
+  @Override
+  protected String makeDescription() {
+    return getClass().getSimpleName(); // Not expected to reach the user
+  }
+
+  @Override
+  public boolean isExecutable() {
+    return ((reference.getType() == FXOMIntrinsic.Type.FX_REFERENCE)
+        && (reference.getParentProperty() != null));
+  }
 }

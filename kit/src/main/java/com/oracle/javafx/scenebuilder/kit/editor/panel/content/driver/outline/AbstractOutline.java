@@ -44,57 +44,55 @@ import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.PathElement;
 
-/**
- *
- */
+/** */
 public abstract class AbstractOutline<T> extends AbstractDecoration<T> {
 
-    public static final String OUTLINE_RING_CLASS = "outline-ring"; //NOI18N
+  public static final String OUTLINE_RING_CLASS = "outline-ring"; // NOI18N
 
-    
-    protected final Path ringPath = new Path();
-    private final MoveTo moveTo0 = new MoveTo();
-    private final LineTo lineTo1 = new LineTo();
-    private final LineTo lineTo2 = new LineTo();
-    private final LineTo lineTo3 = new LineTo();
-    
-    public AbstractOutline(ContentPanelController contentPanelController,
-            FXOMObject fxomObject, Class<T> sceneGraphClass) {
-        super(contentPanelController, fxomObject, sceneGraphClass);
-        
-        final List<PathElement> ringElements = ringPath.getElements();
-        ringElements.add(moveTo0);
-        ringElements.add(lineTo1);
-        ringElements.add(lineTo2);
-        ringElements.add(lineTo3);
-        ringElements.add(new ClosePath());
-        ringPath.getStyleClass().add(OUTLINE_RING_CLASS);
-        ringPath.setMouseTransparent(true);
-        getRootNode().getChildren().add(ringPath);
-    }
-    
-    /*
-     * AbstractDecoration
-     */
-    
-    @Override
-    protected void layoutDecoration() {
-        final Bounds b = getSceneGraphObjectBounds();
-        
-        final boolean snapToPixel = true;
-        final Point2D p0 = sceneGraphObjectToDecoration(b.getMinX(), b.getMinY(), snapToPixel);
-        final Point2D p1 = sceneGraphObjectToDecoration(b.getMaxX(), b.getMinY(), snapToPixel);
-        final Point2D p2 = sceneGraphObjectToDecoration(b.getMaxX(), b.getMaxY(), snapToPixel);
-        final Point2D p3 = sceneGraphObjectToDecoration(b.getMinX(), b.getMaxY(), snapToPixel);
-        
-        moveTo0.setX(p0.getX());
-        moveTo0.setY(p0.getY());
-        lineTo1.setX(p1.getX());
-        lineTo1.setY(p1.getY());
-        lineTo2.setX(p2.getX());
-        lineTo2.setY(p2.getY());
-        lineTo3.setX(p3.getX());
-        lineTo3.setY(p3.getY());
-    }
-    
+  protected final Path ringPath = new Path();
+  private final MoveTo moveTo0 = new MoveTo();
+  private final LineTo lineTo1 = new LineTo();
+  private final LineTo lineTo2 = new LineTo();
+  private final LineTo lineTo3 = new LineTo();
+
+  public AbstractOutline(
+      ContentPanelController contentPanelController,
+      FXOMObject fxomObject,
+      Class<T> sceneGraphClass) {
+    super(contentPanelController, fxomObject, sceneGraphClass);
+
+    final List<PathElement> ringElements = ringPath.getElements();
+    ringElements.add(moveTo0);
+    ringElements.add(lineTo1);
+    ringElements.add(lineTo2);
+    ringElements.add(lineTo3);
+    ringElements.add(new ClosePath());
+    ringPath.getStyleClass().add(OUTLINE_RING_CLASS);
+    ringPath.setMouseTransparent(true);
+    getRootNode().getChildren().add(ringPath);
+  }
+
+  /*
+   * AbstractDecoration
+   */
+
+  @Override
+  protected void layoutDecoration() {
+    final Bounds b = getSceneGraphObjectBounds();
+
+    final boolean snapToPixel = true;
+    final Point2D p0 = sceneGraphObjectToDecoration(b.getMinX(), b.getMinY(), snapToPixel);
+    final Point2D p1 = sceneGraphObjectToDecoration(b.getMaxX(), b.getMinY(), snapToPixel);
+    final Point2D p2 = sceneGraphObjectToDecoration(b.getMaxX(), b.getMaxY(), snapToPixel);
+    final Point2D p3 = sceneGraphObjectToDecoration(b.getMinX(), b.getMaxY(), snapToPixel);
+
+    moveTo0.setX(p0.getX());
+    moveTo0.setY(p0.getY());
+    lineTo1.setX(p1.getX());
+    lineTo1.setY(p1.getY());
+    lineTo2.setX(p2.getX());
+    lineTo2.setY(p2.getY());
+    lineTo3.setX(p3.getX());
+    lineTo3.setY(p3.getY());
+  }
 }

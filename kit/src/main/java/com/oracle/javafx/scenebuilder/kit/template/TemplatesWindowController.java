@@ -39,40 +39,40 @@ import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 
 public class TemplatesWindowController extends TemplatesBaseWindowController {
-    private final Window owner;
+  private final Window owner;
 
-    public TemplatesWindowController(Stage owner) {
-        super(TemplatesWindowController.class.getResource("TemplatesWindow.fxml"), //NOI18N
-                I18N.getBundle(), owner);
-        this.owner = owner;
+  public TemplatesWindowController(Stage owner) {
+    super(
+        TemplatesWindowController.class.getResource("TemplatesWindow.fxml"), // NOI18N
+        I18N.getBundle(),
+        owner);
+    this.owner = owner;
+  }
+
+  @Override
+  protected void controllerDidLoadFxml() {
+    super.controllerDidLoadFxml();
+
+    setupTemplateButtonHandlers();
+  }
+
+  @Override
+  public void onCloseRequest(WindowEvent event) {
+    getStage().hide();
+  }
+
+  @Override
+  protected void controllerDidCreateStage() {
+    super.controllerDidCreateStage();
+    getStage().setTitle(I18N.getString("template.dialog.title"));
+
+    if (this.owner == null) {
+      // Window will be application modal
+      getStage().initModality(Modality.APPLICATION_MODAL);
+    } else {
+      // Window will be window modal
+      getStage().initOwner(this.owner);
+      getStage().initModality(Modality.WINDOW_MODAL);
     }
-
-    @Override
-    protected void controllerDidLoadFxml() {
-        super.controllerDidLoadFxml();
-
-        setupTemplateButtonHandlers();
-    }
-
-
-    @Override
-    public void onCloseRequest(WindowEvent event) {
-        getStage().hide();
-    }
-
-    @Override
-    protected void controllerDidCreateStage() {
-        super.controllerDidCreateStage();
-        getStage().setTitle(I18N.getString("template.dialog.title"));
-
-        if (this.owner == null) {
-            // Window will be application modal
-            getStage().initModality(Modality.APPLICATION_MODAL);
-        } else {
-            // Window will be window modal
-            getStage().initOwner(this.owner);
-            getStage().initModality(Modality.WINDOW_MODAL);
-        }
-    }
+  }
 }
-

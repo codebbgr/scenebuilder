@@ -36,45 +36,43 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
 
-/**
- *
- * 
- */
+/** */
 public abstract class AbstractNodeTring<T extends Node> extends AbstractGenericTring<T> {
 
-    public AbstractNodeTring(ContentPanelController contentPanelController, 
-            FXOMInstance fxomInstance, Class<T> sceneGraphClass) {
-        super(contentPanelController, fxomInstance, sceneGraphClass);
-    }
-    
-    public FXOMInstance getFxomInstance() {
-        return (FXOMInstance) getFxomObject();
-    }
+  public AbstractNodeTring(
+      ContentPanelController contentPanelController,
+      FXOMInstance fxomInstance,
+      Class<T> sceneGraphClass) {
+    super(contentPanelController, fxomInstance, sceneGraphClass);
+  }
 
-    
-    /*
-     * AbstractGenericPring
-     */
-    
-    @Override
-    public Bounds getSceneGraphObjectBounds() {
-        return getSceneGraphObject().getLayoutBounds();
-    }
+  public FXOMInstance getFxomInstance() {
+    return (FXOMInstance) getFxomObject();
+  }
 
-    @Override
-    public Node getSceneGraphObjectProxy() {
-        return getSceneGraphObject();
-    }
+  /*
+   * AbstractGenericPring
+   */
 
-    @Override
-    protected void startListeningToSceneGraphObject() {
-        startListeningToLayoutBounds(getSceneGraphObject());
-        startListeningToLocalToSceneTransform(getSceneGraphObject());
-    }
+  @Override
+  public Bounds getSceneGraphObjectBounds() {
+    return getSceneGraphObject().getLayoutBounds();
+  }
 
-    @Override
-    protected void stopListeningToSceneGraphObject() {
-        stopListeningToLayoutBounds(getSceneGraphObject());
-        stopListeningToLocalToSceneTransform(getSceneGraphObject());
-    }
+  @Override
+  public Node getSceneGraphObjectProxy() {
+    return getSceneGraphObject();
+  }
+
+  @Override
+  protected void startListeningToSceneGraphObject() {
+    startListeningToLayoutBounds(getSceneGraphObject());
+    startListeningToLocalToSceneTransform(getSceneGraphObject());
+  }
+
+  @Override
+  protected void stopListeningToSceneGraphObject() {
+    stopListeningToLayoutBounds(getSceneGraphObject());
+    stopListeningToLocalToSceneTransform(getSceneGraphObject());
+  }
 }

@@ -35,12 +35,10 @@ package com.oracle.javafx.scenebuilder.kit.editor.job.atomic;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import java.util.Collections;
 
-/**
- *
- */
+/** */
 public class ClearSelectionJob extends UpdateSelectionJob {
-    
-    public ClearSelectionJob(EditorController editorController) {
-        super(Collections.emptyList(), editorController);
-    }
+
+  public ClearSelectionJob(EditorController editorController) {
+    super(Collections.emptyList(), editorController);
+  }
 }

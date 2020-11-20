@@ -36,42 +36,39 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 
-/**
- *
- */
+/** */
 public class ObjectPropertyMetadata extends SingleValuePropertyMetadata<Object> {
 
-    public ObjectPropertyMetadata(PropertyName name, boolean readWrite, 
-            Object defaultValue, InspectorPath inspectorPath) {
-        super(name, Object.class, readWrite, defaultValue, inspectorPath);
-    }
+  public ObjectPropertyMetadata(
+      PropertyName name, boolean readWrite, Object defaultValue, InspectorPath inspectorPath) {
+    super(name, Object.class, readWrite, defaultValue, inspectorPath);
+  }
 
-    /*
-     * SingleValuePropertyMetadata
-     */
-    @Override
-    public Object makeValueFromString(String string) {
-        return string;
-    }
+  /*
+   * SingleValuePropertyMetadata
+   */
+  @Override
+  public Object makeValueFromString(String string) {
+    return string;
+  }
 
-    @Override
-    public Object makeValueFromFxomInstance(FXOMInstance valueFxomInstance) {
-        return valueFxomInstance.getSceneGraphObject();
-    }
+  @Override
+  public Object makeValueFromFxomInstance(FXOMInstance valueFxomInstance) {
+    return valueFxomInstance.getSceneGraphObject();
+  }
 
-    @Override
-    public boolean canMakeStringFromValue(Object value) {
-        return false;
-    }
+  @Override
+  public boolean canMakeStringFromValue(Object value) {
+    return false;
+  }
 
-    @Override
-    public String makeStringFromValue(Object value) {
-        throw new RuntimeException("Bug"); //NOI18N
-    }
+  @Override
+  public String makeStringFromValue(Object value) {
+    throw new RuntimeException("Bug"); // NOI18N
+  }
 
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Object value, FXOMDocument fxomDocument) {
-        throw new RuntimeException("Bug"); //NOI18N
-    }
-    
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Object value, FXOMDocument fxomDocument) {
+    throw new RuntimeException("Bug"); // NOI18N
+  }
 }

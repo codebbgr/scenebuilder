@@ -36,13 +36,14 @@ import com.oracle.javafx.scenebuilder.kit.editor.drag.source.AbstractDragSource;
 import com.oracle.javafx.scenebuilder.kit.editor.job.Job;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 
-/**
- *
- */
+/** */
 public abstract class AbstractDropTarget {
-    
-    public abstract FXOMObject getTargetObject();
-    public abstract boolean acceptDragSource(AbstractDragSource dragSource);
-    public abstract Job makeDropJob(AbstractDragSource dragSource, EditorController editorController);
-    public abstract boolean isSelectRequiredAfterDrop();
+
+  public abstract FXOMObject getTargetObject();
+
+  public abstract boolean acceptDragSource(AbstractDragSource dragSource);
+
+  public abstract Job makeDropJob(AbstractDragSource dragSource, EditorController editorController);
+
+  public abstract boolean isSelectRequiredAfterDrop();
 }

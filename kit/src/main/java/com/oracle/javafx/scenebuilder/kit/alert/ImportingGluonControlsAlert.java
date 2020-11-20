@@ -37,22 +37,20 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Stage;
 
-
-/**
- * Used when the user is importing Gluon controls
- */
+/** Used when the user is importing Gluon controls */
 public class ImportingGluonControlsAlert extends SBAlert {
 
-    public ImportingGluonControlsAlert(Stage owner) {
-        super(AlertType.WARNING, owner);
+  public ImportingGluonControlsAlert(Stage owner) {
+    super(AlertType.WARNING, owner);
 
-        setTitle(I18N.getString("alert.importing.gluon.title"));
-        setHeaderText(I18N.getString("alert.importing.gluon.headertext"));
-        setContentText(I18N.getString("alert.importing.gluon.contenttext"));
+    setTitle(I18N.getString("alert.importing.gluon.title"));
+    setHeaderText(I18N.getString("alert.importing.gluon.headertext"));
+    setContentText(I18N.getString("alert.importing.gluon.contenttext"));
 
-        ButtonType OKButton = new ButtonType(I18N.getString("alert.importing.gluon.ok.button"), ButtonBar.ButtonData.OK_DONE);
+    ButtonType OKButton =
+        new ButtonType(
+            I18N.getString("alert.importing.gluon.ok.button"), ButtonBar.ButtonData.OK_DONE);
 
-        getButtonTypes().setAll(OKButton);
-    }
-
+    getButtonTypes().setAll(OKButton);
+  }
 }

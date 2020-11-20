@@ -36,41 +36,38 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.control.ComboBox;
 
-/**
- *
- */
+/** */
 class ComboBoxSampleData extends AbstractSampleData {
-    
-    private final List<String> samples = new ArrayList<>();
 
-    public ComboBoxSampleData() {
-        for (int i = 0; i < 20; i++) {
-            samples.add(lorem(i));
-        }
-    }
+  private final List<String> samples = new ArrayList<>();
 
-    /*
-     * AbstractSampleData
-     */
-    
-    @Override
-    public void applyTo(Object sceneGraphObject) {
-        assert sceneGraphObject != null;
-        
-        @SuppressWarnings("unchecked")        
-        final ComboBox<String> comboBox = (ComboBox<String>) sceneGraphObject;
-        comboBox.getItems().clear();
-        comboBox.getItems().addAll(samples);
-        comboBox.getSelectionModel().select(samples.get(0));
+  public ComboBoxSampleData() {
+    for (int i = 0; i < 20; i++) {
+      samples.add(lorem(i));
     }
-    
-    @Override
-    public void removeFrom(Object sceneGraphObject) {
-        assert sceneGraphObject != null;
-        
-        @SuppressWarnings("unchecked")        
-        final ComboBox<String> comboBox = (ComboBox<String>) sceneGraphObject;
-        comboBox.getItems().clear();
-    }
-    
+  }
+
+  /*
+   * AbstractSampleData
+   */
+
+  @Override
+  public void applyTo(Object sceneGraphObject) {
+    assert sceneGraphObject != null;
+
+    @SuppressWarnings("unchecked")
+    final ComboBox<String> comboBox = (ComboBox<String>) sceneGraphObject;
+    comboBox.getItems().clear();
+    comboBox.getItems().addAll(samples);
+    comboBox.getSelectionModel().select(samples.get(0));
+  }
+
+  @Override
+  public void removeFrom(Object sceneGraphObject) {
+    assert sceneGraphObject != null;
+
+    @SuppressWarnings("unchecked")
+    final ComboBox<String> comboBox = (ComboBox<String>) sceneGraphObject;
+    comboBox.getItems().clear();
+  }
 }

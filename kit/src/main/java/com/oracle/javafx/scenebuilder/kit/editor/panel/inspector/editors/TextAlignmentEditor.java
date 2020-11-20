@@ -32,114 +32,104 @@
 package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors;
 
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
-
 import java.util.Set;
-
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.text.TextAlignment;
 
-/**
- * TextAlignment property editor (left/center/right/justify toggle buttons with
- * icons).
- *
- */
+/** TextAlignment property editor (left/center/right/justify toggle buttons with icons). */
 public class TextAlignmentEditor extends PropertyEditor {
 
-    private Parent root;
-    @FXML
-    private ToggleButton leftTb;
-    @FXML
-    private ToggleButton centerTb;
-    @FXML
-    private ToggleButton rightTb;
-    @FXML
-    private ToggleButton justifyTb;
+  private Parent root;
+  @FXML private ToggleButton leftTb;
+  @FXML private ToggleButton centerTb;
+  @FXML private ToggleButton rightTb;
+  @FXML private ToggleButton justifyTb;
 
-    private final ToggleButton[] toggleButtons = new ToggleButton[4];
+  private final ToggleButton[] toggleButtons = new ToggleButton[4];
 
-    public TextAlignmentEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super(propMeta, selectedClasses);
-        initialize();
+  public TextAlignmentEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super(propMeta, selectedClasses);
+    initialize();
+  }
+
+  // Method to please FindBugs
+  private void initialize() {
+    root = EditorUtils.loadFxml("TextAlignmentEditor.fxml", this); // NOI18N
+
+    toggleButtons[0] = leftTb;
+    toggleButtons[1] = centerTb;
+    toggleButtons[2] = rightTb;
+    toggleButtons[3] = justifyTb;
+    for (ToggleButton tb : toggleButtons) {
+      tb.setOnAction(t -> userUpdateValueProperty(getValue()));
+      tb.disableProperty().bind(disableProperty());
     }
+    setLayoutFormat(LayoutFormat.SIMPLE_LINE_BOTTOM);
+  }
 
-    //Method to please FindBugs
-    private void initialize() {
-        root = EditorUtils.loadFxml("TextAlignmentEditor.fxml", this); //NOI18N
+  @Override
+  public Node getValueEditor() {
+    return super.handleGenericModes(root);
+  }
 
-        toggleButtons[0] = leftTb;
-        toggleButtons[1] = centerTb;
-        toggleButtons[2] = rightTb;
-        toggleButtons[3] = justifyTb;
-        for (ToggleButton tb : toggleButtons) {
-            tb.setOnAction(t -> userUpdateValueProperty(getValue()));
-            tb.disableProperty().bind(disableProperty());
+  @Override
+  public Object getValue() {
+    for (ToggleButton tb : toggleButtons) {
+      if (tb.isSelected()) {
+        if (tb.equals(leftTb)) {
+          return TextAlignment.LEFT.toString();
+        } else if (tb.equals(centerTb)) {
+          return TextAlignment.CENTER.toString();
+        } else if (tb.equals(rightTb)) {
+          return TextAlignment.RIGHT.toString();
+        } else if (tb.equals(justifyTb)) {
+          return TextAlignment.JUSTIFY.toString();
         }
-        setLayoutFormat(LayoutFormat.SIMPLE_LINE_BOTTOM);
+      }
+    }
+    return getPropertyMeta().getDefaultValueObject();
+  }
+
+  @Override
+  public void setValue(Object value) {
+    setValueGeneric(value);
+    if (isSetValueDone()) {
+      return;
     }
 
-    @Override
-    public Node getValueEditor() {
-        return super.handleGenericModes(root);
+    if (value == null) {
+      value = getPropertyMeta().getDefaultValueObject();
     }
 
-    @Override
-    public Object getValue() {
-        for (ToggleButton tb : toggleButtons) {
-            if (tb.isSelected()) {
-                if (tb.equals(leftTb)) {
-                    return TextAlignment.LEFT.toString();
-                } else if (tb.equals(centerTb)) {
-                    return TextAlignment.CENTER.toString();
-                } else if (tb.equals(rightTb)) {
-                    return TextAlignment.RIGHT.toString();
-                } else if (tb.equals(justifyTb)) {
-                    return TextAlignment.JUSTIFY.toString();
-                }
-            }
-        }
-        return getPropertyMeta().getDefaultValueObject();
+    if (value.toString().equals(TextAlignment.LEFT.toString())) {
+      leftTb.setSelected(true);
+    } else if (value.toString().equals(TextAlignment.CENTER.toString())) {
+      centerTb.setSelected(true);
+    } else if (value.toString().equals(TextAlignment.RIGHT.toString())) {
+      rightTb.setSelected(true);
+    } else if (value.toString().equals(TextAlignment.JUSTIFY.toString())) {
+      justifyTb.setSelected(true);
     }
+  }
 
-    @Override
-    public void setValue(Object value) {
-        setValueGeneric(value);
-        if (isSetValueDone()) {
-            return;
-        }
+  @Override
+  public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super.reset(propMeta, selectedClasses);
+    setLayoutFormat(LayoutFormat.SIMPLE_LINE_BOTTOM);
+  }
 
-        if (value == null) {
-            value = getPropertyMeta().getDefaultValueObject();
-        }
-
-        if (value.toString().equals(TextAlignment.LEFT.toString())) {
-            leftTb.setSelected(true);
-        } else if (value.toString().equals(TextAlignment.CENTER.toString())) {
-            centerTb.setSelected(true);
-        } else if (value.toString().equals(TextAlignment.RIGHT.toString())) {
-            rightTb.setSelected(true);
-        } else if (value.toString().equals(TextAlignment.JUSTIFY.toString())) {
-            justifyTb.setSelected(true);
-        }
+  @Override
+  protected void valueIsIndeterminate() {
+    for (ToggleButton tb : toggleButtons) {
+      tb.setSelected(false);
     }
+  }
 
-    @Override
-    public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super.reset(propMeta, selectedClasses);
-        setLayoutFormat(LayoutFormat.SIMPLE_LINE_BOTTOM);
-    }
-
-    @Override
-    protected void valueIsIndeterminate() {
-        for (ToggleButton tb : toggleButtons) {
-            tb.setSelected(false);
-        }
-    }
-
-    @Override
-    public void requestFocus() {
-        EditorUtils.doNextFrame(() -> leftTb.requestFocus());
-    }
+  @Override
+  public void requestFocus() {
+    EditorUtils.doNextFrame(() -> leftTb.requestFocus());
+  }
 }

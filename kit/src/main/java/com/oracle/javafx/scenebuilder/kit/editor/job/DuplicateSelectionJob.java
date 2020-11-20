@@ -31,9 +31,8 @@
  */
 package com.oracle.javafx.scenebuilder.kit.editor.job;
 
-import com.oracle.javafx.scenebuilder.kit.editor.job.atomic.RelocateNodeJob;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
-import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
+import com.oracle.javafx.scenebuilder.kit.editor.job.atomic.RelocateNodeJob;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.AbstractSelectionGroup;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.ObjectSelectionGroup;
 import com.oracle.javafx.scenebuilder.kit.editor.selection.Selection;
@@ -42,6 +41,7 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMDocument;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMNodes;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
+import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.DesignHierarchyMask;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -49,145 +49,146 @@ import java.util.List;
 import java.util.Map;
 import javafx.scene.Node;
 
-/**
- *
- */
+/** */
 public class DuplicateSelectionJob extends BatchSelectionJob {
 
-    private final static double offset = 10;
-    final Map<FXOMObject, FXOMObject> newFxomObjects = new LinkedHashMap<>();
+  private static final double offset = 10;
+  final Map<FXOMObject, FXOMObject> newFxomObjects = new LinkedHashMap<>();
 
-    public DuplicateSelectionJob(EditorController editorController) {
-        super(editorController);
+  public DuplicateSelectionJob(EditorController editorController) {
+    super(editorController);
+  }
+
+  @Override
+  protected List<Job> makeSubJobs() {
+    final List<Job> result = new LinkedList<>();
+
+    if (canDuplicate()) { // (1)
+
+      final Selection selection = getEditorController().getSelection();
+      final AbstractSelectionGroup asg = selection.getGroup();
+      assert asg instanceof ObjectSelectionGroup; // Because of (1)
+      final ObjectSelectionGroup osg = (ObjectSelectionGroup) asg;
+      assert osg.hasSingleParent() == true; // Because of (1)
+      final FXOMObject targetObject = osg.getAncestor();
+      assert targetObject != null; // Because of (1)
+      final FXOMDocument targetDocument = getEditorController().getFxomDocument();
+      for (FXOMObject selectedObject : osg.getSortedItems()) {
+        final FXOMDocument newDocument = FXOMNodes.newDocument(selectedObject);
+        final FXOMObject newObject = newDocument.getFxomRoot();
+        newObject.moveToFxomDocument(targetDocument);
+        assert newDocument.getFxomRoot() == null;
+        newFxomObjects.put(selectedObject, newObject);
+      }
+      assert newFxomObjects.isEmpty() == false; // Because of (1)
+
+      // Build InsertAsSubComponent jobs
+      final DesignHierarchyMask targetMask = new DesignHierarchyMask(targetObject);
+      if (targetMask.isAcceptingSubComponent(newFxomObjects.keySet())) {
+        int index = 0;
+        for (Map.Entry<FXOMObject, FXOMObject> entry : newFxomObjects.entrySet()) {
+          final FXOMObject selectedFxomObject = entry.getKey();
+          final FXOMObject newFxomObject = entry.getValue();
+          final InsertAsSubComponentJob insertSubJob =
+              new InsertAsSubComponentJob(
+                  newFxomObject,
+                  targetObject,
+                  targetMask.getSubComponentCount() + index++,
+                  getEditorController());
+          result.add(insertSubJob);
+          final Object selectedSceneGraphObject = selectedFxomObject.getSceneGraphObject();
+          // Relocate duplicated objects if needed
+          if (selectedSceneGraphObject instanceof Node) {
+            final Node selectedNode = (Node) selectedSceneGraphObject;
+            final double newLayoutX = Math.round(selectedNode.getLayoutX() + offset);
+            final double newLayoutY = Math.round(selectedNode.getLayoutY() + offset);
+            assert newFxomObject instanceof FXOMInstance;
+            final RelocateNodeJob relocateSubJob =
+                new RelocateNodeJob(
+                    (FXOMInstance) newFxomObject, newLayoutX, newLayoutY, getEditorController());
+            result.add(relocateSubJob);
+          }
+        }
+      }
+    }
+    return result;
+  }
+
+  @Override
+  protected String makeDescription() {
+    final String result;
+    assert newFxomObjects.values().isEmpty() == false;
+    if (newFxomObjects.values().size() == 1) {
+      result = makeSingleSelectionDescription();
+    } else {
+      result = makeMultipleSelectionDescription();
     }
 
-    @Override
-    protected List<Job> makeSubJobs() {
-        final List<Job> result = new LinkedList<>();
+    return result;
+  }
 
-        if (canDuplicate()) { // (1)
-            
-            final Selection selection = getEditorController().getSelection();
-            final AbstractSelectionGroup asg = selection.getGroup();
-            assert asg instanceof ObjectSelectionGroup; // Because of (1)
-            final ObjectSelectionGroup osg = (ObjectSelectionGroup) asg;
-            assert osg.hasSingleParent() == true; // Because of (1)
-            final FXOMObject targetObject = osg.getAncestor();
-            assert targetObject != null; // Because of (1)
-            final FXOMDocument targetDocument = getEditorController().getFxomDocument();
-            for (FXOMObject selectedObject : osg.getSortedItems()) {
-                final FXOMDocument newDocument = FXOMNodes.newDocument(selectedObject);
-                final FXOMObject newObject = newDocument.getFxomRoot();
-                newObject.moveToFxomDocument(targetDocument);
-                assert newDocument.getFxomRoot() == null;
-                newFxomObjects.put(selectedObject, newObject);
-            }
-            assert newFxomObjects.isEmpty() == false; // Because of (1)
+  @Override
+  protected AbstractSelectionGroup getNewSelectionGroup() {
+    assert newFxomObjects != null; // But possibly empty
+    if (newFxomObjects.isEmpty()) {
+      return null;
+    } else {
+      return new ObjectSelectionGroup(
+          newFxomObjects.values(), newFxomObjects.values().iterator().next(), null);
+    }
+  }
 
-            // Build InsertAsSubComponent jobs
-            final DesignHierarchyMask targetMask = new DesignHierarchyMask(targetObject);
-            if (targetMask.isAcceptingSubComponent(newFxomObjects.keySet())) {
-                int index = 0;
-                for (Map.Entry<FXOMObject, FXOMObject> entry : newFxomObjects.entrySet()) {
-                    final FXOMObject selectedFxomObject = entry.getKey();
-                    final FXOMObject newFxomObject = entry.getValue();
-                    final InsertAsSubComponentJob insertSubJob = new InsertAsSubComponentJob(
-                            newFxomObject,
-                            targetObject,
-                            targetMask.getSubComponentCount() + index++,
-                            getEditorController());
-                    result.add(insertSubJob);
-                    final Object selectedSceneGraphObject = selectedFxomObject.getSceneGraphObject();
-                    // Relocate duplicated objects if needed
-                    if (selectedSceneGraphObject instanceof Node) {
-                        final Node selectedNode = (Node) selectedSceneGraphObject;
-                        final double newLayoutX = Math.round(selectedNode.getLayoutX() + offset);
-                        final double newLayoutY = Math.round(selectedNode.getLayoutY() + offset);
-                        assert newFxomObject instanceof FXOMInstance;
-                        final RelocateNodeJob relocateSubJob = new RelocateNodeJob(
-                                (FXOMInstance) newFxomObject,
-                                newLayoutX,
-                                newLayoutY,
-                                getEditorController());
-                        result.add(relocateSubJob);
-                    }
-                }
-            }
-        }
-        return result;
+  private boolean canDuplicate() {
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    if (fxomDocument == null) {
+      return false;
+    }
+    final Selection selection = getEditorController().getSelection();
+    if (selection.isEmpty()) {
+      return false;
+    }
+    final FXOMObject rootObject = fxomDocument.getFxomRoot();
+    if (selection.isSelected(rootObject)) {
+      return false;
+    }
+    final AbstractSelectionGroup asg = selection.getGroup();
+    if ((asg instanceof ObjectSelectionGroup) == false) {
+      return false;
+    }
+    final ObjectSelectionGroup osg = (ObjectSelectionGroup) asg;
+    for (FXOMObject fxomObject : osg.getItems()) {
+      if (fxomObject.getSceneGraphObject() == null) { // Unresolved custom type
+        return false;
+      }
+    }
+    return osg.hasSingleParent() == true;
+  }
+
+  private String makeSingleSelectionDescription() {
+    final String result;
+
+    final FXOMObject newObject = newFxomObjects.values().iterator().next();
+    if (newObject instanceof FXOMInstance) {
+      final Object sceneGraphObject = newObject.getSceneGraphObject();
+      if (sceneGraphObject != null) {
+        result =
+            I18N.getString(
+                "label.action.edit.duplicate.1", sceneGraphObject.getClass().getSimpleName());
+      } else {
+        result = I18N.getString("label.action.edit.duplicate.unresolved");
+      }
+    } else if (newObject instanceof FXOMCollection) {
+      result = I18N.getString("label.action.edit.duplicate.collection");
+    } else {
+      assert false;
+      result =
+          I18N.getString("label.action.edit.duplicate.1", newObject.getClass().getSimpleName());
     }
 
-    @Override
-    protected String makeDescription() {
-        final String result;
-        assert newFxomObjects.values().isEmpty() == false;
-        if (newFxomObjects.values().size() == 1) {
-            result = makeSingleSelectionDescription();
-        } else {
-            result = makeMultipleSelectionDescription();
-        }
+    return result;
+  }
 
-        return result;
-    }
-
-    @Override
-    protected AbstractSelectionGroup getNewSelectionGroup() {
-        assert newFxomObjects != null; // But possibly empty
-        if (newFxomObjects.isEmpty()) {
-            return null;
-        } else {
-            return new ObjectSelectionGroup(newFxomObjects.values(), newFxomObjects.values().iterator().next(), null);
-        }
-    }
-
-    private boolean canDuplicate() {
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        if (fxomDocument == null) {
-            return false;
-        }
-        final Selection selection = getEditorController().getSelection();
-        if (selection.isEmpty()) {
-            return false;
-        }
-        final FXOMObject rootObject = fxomDocument.getFxomRoot();
-        if (selection.isSelected(rootObject)) {
-            return false;
-        }
-        final AbstractSelectionGroup asg = selection.getGroup();
-        if ((asg instanceof ObjectSelectionGroup) == false) {
-            return false;
-        }
-        final ObjectSelectionGroup osg = (ObjectSelectionGroup) asg;
-        for (FXOMObject fxomObject : osg.getItems()) {
-            if (fxomObject.getSceneGraphObject() == null) { // Unresolved custom type
-                return false;
-            }
-        }
-        return osg.hasSingleParent() == true;
-    }
-
-    private String makeSingleSelectionDescription() {
-        final String result;
-
-        final FXOMObject newObject = newFxomObjects.values().iterator().next();
-        if (newObject instanceof FXOMInstance) {
-            final Object sceneGraphObject = newObject.getSceneGraphObject();
-            if (sceneGraphObject != null) {
-                result = I18N.getString("label.action.edit.duplicate.1", sceneGraphObject.getClass().getSimpleName());
-            } else {
-                result = I18N.getString("label.action.edit.duplicate.unresolved");
-            }
-        } else if (newObject instanceof FXOMCollection) {
-            result = I18N.getString("label.action.edit.duplicate.collection");
-        } else {
-            assert false;
-            result = I18N.getString("label.action.edit.duplicate.1", newObject.getClass().getSimpleName());
-        }
-
-        return result;
-    }
-
-    private String makeMultipleSelectionDescription() {
-        return I18N.getString("label.action.edit.duplicate.n", newFxomObjects.values().size());
-    }
+  private String makeMultipleSelectionDescription() {
+    return I18N.getString("label.action.edit.duplicate.n", newFxomObjects.values().size());
+  }
 }

@@ -34,33 +34,27 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors;
 import javafx.scene.Node;
 import javafx.scene.control.MenuButton;
 
-/**
- *
- * Base class for all editors.
- *
- * 
- */
+/** Base class for all editors. */
 public abstract class Editor {
-    
-    public static final String topAnchorPropName = "AnchorPane.topAnchor";
-    public static final String rightAnchorPropName = "AnchorPane.rightAnchor";
-    public static final String bottomAnchorPropName = "AnchorPane.bottomAnchor";
-    public static final String leftAnchorPropName = "AnchorPane.leftAnchor";
-    
-    // ScrollPane scroll bar min and max
-    public static final String hValuePropName = "hvalue";
-    public static final String hMinPropName = "hmin";
-    public static final String hMaxPropName = "hmax";
-    public static final String vValuePropName = "vvalue";
-    public static final String vMinPropName = "vmin";
-    public static final String vMaxPropName = "vmax";
 
-    public static final String INDETERMINATE_STR = "-"; //NOI18N
+  public static final String topAnchorPropName = "AnchorPane.topAnchor";
+  public static final String rightAnchorPropName = "AnchorPane.rightAnchor";
+  public static final String bottomAnchorPropName = "AnchorPane.bottomAnchor";
+  public static final String leftAnchorPropName = "AnchorPane.leftAnchor";
 
-    public abstract Node getValueEditor();
+  // ScrollPane scroll bar min and max
+  public static final String hValuePropName = "hvalue";
+  public static final String hMinPropName = "hmin";
+  public static final String hMaxPropName = "hmax";
+  public static final String vValuePropName = "vvalue";
+  public static final String vMinPropName = "vmin";
+  public static final String vMaxPropName = "vmax";
 
-    public abstract MenuButton getMenu();
+  public static final String INDETERMINATE_STR = "-"; // NOI18N
 
-    public abstract void removeAllListeners();
+  public abstract Node getValueEditor();
 
+  public abstract MenuButton getMenu();
+
+  public abstract void removeAllListeners();
 }

@@ -37,48 +37,46 @@
 
 package com.oracle.javafx.scenebuilder.kit.template;
 
-import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
-
-import java.net.URL;
-
 import static com.oracle.javafx.scenebuilder.kit.template.Type.DESKTOP;
 import static com.oracle.javafx.scenebuilder.kit.template.Type.PHONE;
 
+import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
+import java.net.URL;
+
 public enum Template {
+  EMPTY_APP(DESKTOP, null),
+  BASIC_DESKTOP_APP(DESKTOP, "BasicDesktopApplication.fxml"),
+  COMPLEX_DESKTOP_APP(DESKTOP, "ComplexDesktopApplication.fxml"),
+  EMPTY_PHONE_APP(PHONE, "EmptyPhoneApplication.fxml"),
+  BASIC_PHONE_APP(PHONE, "BasicPhoneApplication.fxml");
 
-    EMPTY_APP(DESKTOP, null),
-    BASIC_DESKTOP_APP (DESKTOP, "BasicDesktopApplication.fxml"),
-    COMPLEX_DESKTOP_APP (DESKTOP, "ComplexDesktopApplication.fxml"),
-    EMPTY_PHONE_APP (PHONE, "EmptyPhoneApplication.fxml"),
-    BASIC_PHONE_APP (PHONE, "BasicPhoneApplication.fxml");
+  private Type type;
+  private String fxmlFileName;
 
-    private Type type;
-    private String fxmlFileName;
+  Template(Type type, String fxmlFileName) {
+    this.type = type;
+    this.fxmlFileName = fxmlFileName;
+  }
 
-    Template(Type type, String fxmlFileName) {
-        this.type = type;
-        this.fxmlFileName = fxmlFileName;
+  public Type getType() {
+    return type;
+  }
+
+  public String getFXMLFileName() {
+    return fxmlFileName;
+  }
+
+  public URL getFXMLURL() {
+    final String name = getFXMLFileName();
+    if (name == null) {
+      return null;
     }
+    return Template.class.getResource(name);
+  }
 
-    public Type getType() {
-        return type;
+  public static void prepareDocument(EditorController editorController, Template template) {
+    if (template.getType() == Type.PHONE) {
+      editorController.performEditAction(EditorController.EditAction.SET_SIZE_335x600);
     }
-
-    public String getFXMLFileName() {
-        return fxmlFileName;
-    }
-
-    public URL getFXMLURL() {
-        final String name = getFXMLFileName();
-        if (name == null) {
-            return null;
-        }
-        return Template.class.getResource(name);
-    }
-
-    public static void prepareDocument(EditorController editorController, Template template) {
-        if (template.getType() == Type.PHONE) {
-            editorController.performEditAction(EditorController.EditAction.SET_SIZE_335x600);
-        }
-    }
+  }
 }

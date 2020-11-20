@@ -32,39 +32,33 @@
 package com.oracle.javafx.scenebuilder.kit.fxom;
 
 import com.oracle.javafx.scenebuilder.kit.fxom.glue.GlueElement;
-
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- * 
- */
+/** */
 class TransientIntrinsic extends TransientNode {
-    
-    private final FXOMIntrinsic.Type type;
-    private final GlueElement glueElement;
-    private final List<FXOMProperty> properties = new ArrayList<>();
 
-    public TransientIntrinsic(
-            TransientNode parentNode,
-            FXOMIntrinsic.Type type,
-            GlueElement glueElement) {
-        super(parentNode);
-        this.type = type;
-        this.glueElement = glueElement;
-    }
+  private final FXOMIntrinsic.Type type;
+  private final GlueElement glueElement;
+  private final List<FXOMProperty> properties = new ArrayList<>();
 
-    public FXOMIntrinsic makeFxomIntrinsic(FXOMDocument fxomDocument) {
-        final FXOMIntrinsic result
-                = new FXOMIntrinsic(fxomDocument, glueElement, getSceneGraphObject(), properties);
-        assert result.getType() == type;
-        // need to deal with a charset property here
-        result.addIntrinsicProperty(fxomDocument);
-        return result;
-    }
+  public TransientIntrinsic(
+      TransientNode parentNode, FXOMIntrinsic.Type type, GlueElement glueElement) {
+    super(parentNode);
+    this.type = type;
+    this.glueElement = glueElement;
+  }
 
-    public List<FXOMProperty> getProperties() {
-        return properties;
-    }
+  public FXOMIntrinsic makeFxomIntrinsic(FXOMDocument fxomDocument) {
+    final FXOMIntrinsic result =
+        new FXOMIntrinsic(fxomDocument, glueElement, getSceneGraphObject(), properties);
+    assert result.getType() == type;
+    // need to deal with a charset property here
+    result.addIntrinsicProperty(fxomDocument);
+    return result;
+  }
+
+  public List<FXOMProperty> getProperties() {
+    return properties;
+  }
 }

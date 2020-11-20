@@ -33,9 +33,7 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors;
 
 import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
-
 import java.util.List;
-
 import javafx.animation.FadeTransition;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Label;
@@ -45,95 +43,97 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.util.Duration;
 
-/**
- *
- * 
- */
+/** */
 public abstract class PropertiesEditor extends Editor {
 
-    private final HBox nameNode;
-    private MenuButton menu;
-    private final MenuItem resetvalueMenuItem = new MenuItem(I18N.getString("inspector.editors.resetvalue"));
-    private FadeTransition fadeTransition = null;
-    private final String name;
+  private final HBox nameNode;
+  private MenuButton menu;
+  private final MenuItem resetvalueMenuItem =
+      new MenuItem(I18N.getString("inspector.editors.resetvalue"));
+  private FadeTransition fadeTransition = null;
+  private final String name;
 
-    public PropertiesEditor(String name) {
-        // HBox for consistency with PropertyEditor, and potentially have an hyperlink
-        this.name = name;
-        nameNode = new HBox();
-        nameNode.getChildren().add(new Label(name));
-    }
+  public PropertiesEditor(String name) {
+    // HBox for consistency with PropertyEditor, and potentially have an hyperlink
+    this.name = name;
+    nameNode = new HBox();
+    nameNode.getChildren().add(new Label(name));
+  }
 
-    public HBox getNameNode() {
-        return nameNode;
-    }
-    
-    public String getPropertyNameText() {
-        return name;
-    }
+  public HBox getNameNode() {
+    return nameNode;
+  }
 
-    public abstract List<PropertyEditor> getPropertyEditors();
+  public String getPropertyNameText() {
+    return name;
+  }
 
-    @Override
-    public final MenuButton getMenu() {
-        if (menu == null) {
-            menu = new MenuButton();
-            
-            Region region = new Region();
-            menu.setGraphic(region);
-            region.getStyleClass().add("cog-shape"); //NOI18N
-            
-            menu.getStyleClass().add("cog-menubutton"); //NOI18N
-            menu.setOpacity(0);
-            fadeTransition = new FadeTransition(Duration.millis(500), menu);
-            EditorUtils.handleFading(fadeTransition, menu);
-            EditorUtils.handleFading(fadeTransition, getValueEditor());
+  public abstract List<PropertyEditor> getPropertyEditors();
 
-            menu.focusedProperty().addListener((ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
-                if (newValue) {
-                    // focused
-                    EditorUtils.fadeTo(fadeTransition, 1);
-                } else {
-                    // focus lost
-                    EditorUtils.fadeTo(fadeTransition, 0);
-                }
-            });
-            menu.getItems().add(resetvalueMenuItem);
-            resetvalueMenuItem.setOnAction(e -> {
-                for (PropertyEditor propertyEditor : getPropertyEditors()) {
-                    propertyEditor.setValue(propertyEditor.getPropertyMeta().getDefaultValueObject());
-                }
-            });
-        }
-        return menu;
-    }
+  @Override
+  public final MenuButton getMenu() {
+    if (menu == null) {
+      menu = new MenuButton();
 
-    @Override
-    public void removeAllListeners() {
-        for (PropertyEditor propertyEditor : getPropertyEditors()) {
-            propertyEditor.removeAllListeners();
-        }
-    }
+      Region region = new Region();
+      menu.setGraphic(region);
+      region.getStyleClass().add("cog-shape"); // NOI18N
 
-    protected void propertyChanged() {
-        boolean allDefault = true;
-        for (PropertyEditor propertyEditor : getPropertyEditors()) {
-            Object value = propertyEditor.valueProperty().getValue();
-            ValuePropertyMetadata propMeta = propertyEditor.getPropertyMeta();
-            if (value == null) {
-                if (!(propMeta.getDefaultValueObject() == null)) {
-                    allDefault = false;
-                    break;
-                }
-            } else if (!value.equals(propMeta.getDefaultValueObject())) {
-                    allDefault = false;
-                    break;
-                }
+      menu.getStyleClass().add("cog-menubutton"); // NOI18N
+      menu.setOpacity(0);
+      fadeTransition = new FadeTransition(Duration.millis(500), menu);
+      EditorUtils.handleFading(fadeTransition, menu);
+      EditorUtils.handleFading(fadeTransition, getValueEditor());
+
+      menu.focusedProperty()
+          .addListener(
+              (ChangeListener<Boolean>)
+                  (observable, oldValue, newValue) -> {
+                    if (newValue) {
+                      // focused
+                      EditorUtils.fadeTo(fadeTransition, 1);
+                    } else {
+                      // focus lost
+                      EditorUtils.fadeTo(fadeTransition, 0);
+                    }
+                  });
+      menu.getItems().add(resetvalueMenuItem);
+      resetvalueMenuItem.setOnAction(
+          e -> {
+            for (PropertyEditor propertyEditor : getPropertyEditors()) {
+              propertyEditor.setValue(propertyEditor.getPropertyMeta().getDefaultValueObject());
             }
-            if (allDefault) {
-                resetvalueMenuItem.setDisable(true);
-            } else {
-                resetvalueMenuItem.setDisable(false);
-            }
-        }
+          });
     }
+    return menu;
+  }
+
+  @Override
+  public void removeAllListeners() {
+    for (PropertyEditor propertyEditor : getPropertyEditors()) {
+      propertyEditor.removeAllListeners();
+    }
+  }
+
+  protected void propertyChanged() {
+    boolean allDefault = true;
+    for (PropertyEditor propertyEditor : getPropertyEditors()) {
+      Object value = propertyEditor.valueProperty().getValue();
+      ValuePropertyMetadata propMeta = propertyEditor.getPropertyMeta();
+      if (value == null) {
+        if (!(propMeta.getDefaultValueObject() == null)) {
+          allDefault = false;
+          break;
+        }
+      } else if (!value.equals(propMeta.getDefaultValueObject())) {
+        allDefault = false;
+        break;
+      }
+    }
+    if (allDefault) {
+      resetvalueMenuItem.setDisable(true);
+    } else {
+      resetvalueMenuItem.setDisable(false);
+    }
+  }
+}

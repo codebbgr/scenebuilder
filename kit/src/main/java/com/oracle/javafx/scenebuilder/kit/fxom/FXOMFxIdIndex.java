@@ -37,81 +37,78 @@ import java.util.List;
 import java.util.Map;
 import javafx.scene.control.ToggleGroup;
 
-/**
- *
- */
+/** */
 public class FXOMFxIdIndex {
-    
-    private final FXOMDocument fxomDocument;
-    private final Map<String, FXOMObject> fxIds;
-    
-    public FXOMFxIdIndex(FXOMDocument fxomDocument) {
-        assert fxomDocument != null;
-        this.fxomDocument = fxomDocument;
-        this.fxIds = fxomDocument.collectFxIds();
+
+  private final FXOMDocument fxomDocument;
+  private final Map<String, FXOMObject> fxIds;
+
+  public FXOMFxIdIndex(FXOMDocument fxomDocument) {
+    assert fxomDocument != null;
+    this.fxomDocument = fxomDocument;
+    this.fxIds = fxomDocument.collectFxIds();
+  }
+
+  public FXOMDocument getFxomDocument() {
+    return fxomDocument;
+  }
+
+  public FXOMObject lookup(String fxId) {
+    assert fxId != null;
+    return fxIds.get(fxId);
+  }
+
+  public Map<String, FXOMObject> getFxIds() {
+    return fxIds;
+  }
+
+  public List<FXOMInstance> collectToggleGroups() {
+    final List<FXOMInstance> result = new ArrayList<>();
+
+    for (Map.Entry<String, FXOMObject> e : fxIds.entrySet()) {
+      final FXOMObject fxomObject = e.getValue();
+      if (fxomObject instanceof FXOMInstance) {
+        final FXOMInstance fxomInstance = (FXOMInstance) fxomObject;
+        if (fxomInstance.getDeclaredClass() == ToggleGroup.class) {
+          result.add(fxomInstance);
+        }
+      }
     }
 
-    public FXOMDocument getFxomDocument() {
-        return fxomDocument;
+    return result;
+  }
+
+  /**
+   * Returns true if tree below fxomObject does not contain any fx:reference pointing outside of the
+   * tree.
+   *
+   * @param fxomObject an fxom object (never null)
+   * @return true if fxomObject subtree is self-contained
+   */
+  public boolean isSelfContained(FXOMObject fxomObject) {
+    final List<FXOMIntrinsic> references = fxomObject.collectReferences(null);
+    int externalCount = 0;
+    for (FXOMIntrinsic reference : references) {
+      assert reference.getSource() != null;
+      final FXOMObject target = fxIds.get(reference.getSource());
+      assert target != null;
+      if (target.isDescendantOf(fxomObject) == false) {
+        externalCount++;
+      }
     }
-    
-    public FXOMObject lookup(String fxId) {
-        assert fxId != null;
-        return fxIds.get(fxId);
-    }
-    
-    public Map<String, FXOMObject> getFxIds() {
-        return fxIds;
-    }
-    
-    public List<FXOMInstance> collectToggleGroups() {
-        final List<FXOMInstance> result = new ArrayList<>();
-        
-        for (Map.Entry<String, FXOMObject> e : fxIds.entrySet()) {
-            final FXOMObject fxomObject = e.getValue();
-            if (fxomObject instanceof FXOMInstance) {
-                final FXOMInstance fxomInstance = (FXOMInstance) fxomObject;
-                if (fxomInstance.getDeclaredClass() == ToggleGroup.class) {
-                    result.add(fxomInstance);
-                }
-            }
-        }
-        
-        return result;
-    }
-    
-    /**
-     * Returns true if tree below fxomObject does not contain any fx:reference
-     * pointing outside of the tree.
-     * 
-     * @param fxomObject an fxom object (never null)
-     * @return true if fxomObject subtree is self-contained
-     */
-    public boolean isSelfContained(FXOMObject fxomObject) {
-        final List<FXOMIntrinsic> references = fxomObject.collectReferences(null);
-        int externalCount = 0;
-        for (FXOMIntrinsic reference : references) {
-            assert reference.getSource() != null;
-            final FXOMObject target = fxIds.get(reference.getSource());
-            assert target != null;
-            if (target.isDescendantOf(fxomObject) == false) {
-                externalCount++;
-            }
-        }
-        
-        return externalCount == 0;
-    }
-    
-    
-    /**
-     * Facility : creates an FXOMFxIdIndex and check if the specified object is
- self-contained. Use this only if you have one object to check.
-     * 
-     * @param fxomObject an fxom object (cannot be null)
-     * @return true if fxom object is self contained
-     */
-    public static boolean isSelfContainedObject(FXOMObject fxomObject) {
-        final FXOMFxIdIndex fxomIndex = new FXOMFxIdIndex(fxomObject.getFxomDocument());
-        return fxomIndex.isSelfContained(fxomObject);
-    }
+
+    return externalCount == 0;
+  }
+
+  /**
+   * Facility : creates an FXOMFxIdIndex and check if the specified object is self-contained. Use
+   * this only if you have one object to check.
+   *
+   * @param fxomObject an fxom object (cannot be null)
+   * @return true if fxom object is self contained
+   */
+  public static boolean isSelfContainedObject(FXOMObject fxomObject) {
+    final FXOMFxIdIndex fxomIndex = new FXOMFxIdIndex(fxomObject.getFxomDocument());
+    return fxomIndex.isSelfContained(fxomObject);
+  }
 }

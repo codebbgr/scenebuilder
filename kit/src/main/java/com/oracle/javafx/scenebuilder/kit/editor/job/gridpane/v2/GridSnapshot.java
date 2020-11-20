@@ -38,65 +38,63 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *
- */
+/** */
 public class GridSnapshot {
-    
-    private final Map<FXOMObject, GridSnapshotItem> items = new HashMap<>();
-    
-    public GridSnapshot(Collection<FXOMObject> fxomObjects) {
-        assert fxomObjects != null;
-        assert fxomObjects.isEmpty() == false; // (1)
-        
-        for (FXOMObject fxomObject : fxomObjects) {
-            assert items.containsKey(fxomObject) == false;
-            items.put(fxomObject, new GridSnapshotItem(fxomObject));
-        }
+
+  private final Map<FXOMObject, GridSnapshotItem> items = new HashMap<>();
+
+  public GridSnapshot(Collection<FXOMObject> fxomObjects) {
+    assert fxomObjects != null;
+    assert fxomObjects.isEmpty() == false; // (1)
+
+    for (FXOMObject fxomObject : fxomObjects) {
+      assert items.containsKey(fxomObject) == false;
+      items.put(fxomObject, new GridSnapshotItem(fxomObject));
     }
-    
-    public GridSnapshot(Collection<FXOMObject> fxomObjects, int columnCount) {
-        assert fxomObjects != null;
-        assert fxomObjects.isEmpty() == false;
-        assert columnCount >= 1;
-        
-        int columnIndex = 0;
-        int rowIndex = 0;
-        for (FXOMObject fxomObject : fxomObjects) {
-            items.put(fxomObject, new GridSnapshotItem(fxomObject, columnIndex, rowIndex));
-            columnIndex++;
-            if (columnIndex >= columnCount) {
-                columnIndex = 0;
-                rowIndex++;
-            }
-        }
+  }
+
+  public GridSnapshot(Collection<FXOMObject> fxomObjects, int columnCount) {
+    assert fxomObjects != null;
+    assert fxomObjects.isEmpty() == false;
+    assert columnCount >= 1;
+
+    int columnIndex = 0;
+    int rowIndex = 0;
+    for (FXOMObject fxomObject : fxomObjects) {
+      items.put(fxomObject, new GridSnapshotItem(fxomObject, columnIndex, rowIndex));
+      columnIndex++;
+      if (columnIndex >= columnCount) {
+        columnIndex = 0;
+        rowIndex++;
+      }
     }
-    
-    public int getColumnIndex(FXOMObject fxomObject) {
-        assert fxomObject != null;
-        assert items.containsKey(fxomObject);
-        return items.get(fxomObject).getColumnIndex();
+  }
+
+  public int getColumnIndex(FXOMObject fxomObject) {
+    assert fxomObject != null;
+    assert items.containsKey(fxomObject);
+    return items.get(fxomObject).getColumnIndex();
+  }
+
+  public int getRowIndex(FXOMObject fxomObject) {
+    assert fxomObject != null;
+    assert items.containsKey(fxomObject);
+    return items.get(fxomObject).getRowIndex();
+  }
+
+  public GridBounds getBounds() {
+    GridBounds result = null;
+
+    for (Map.Entry<FXOMObject, GridSnapshotItem> e : items.entrySet()) {
+      if (result == null) {
+        result = e.getValue().getBounds();
+      } else {
+        result = result.union(e.getValue().getBounds());
+      }
     }
-    
-    public int getRowIndex(FXOMObject fxomObject) {
-        assert fxomObject != null;
-        assert items.containsKey(fxomObject);
-        return items.get(fxomObject).getRowIndex();
-    }
-    
-    public GridBounds getBounds() {
-        GridBounds result = null;
-        
-        for (Map.Entry<FXOMObject, GridSnapshotItem> e : items.entrySet()) {
-            if (result == null) {
-                result = e.getValue().getBounds();
-            } else {
-                result = result.union(e.getValue().getBounds());
-            }
-        }
-        
-        assert result != null; // Because (1)
-        
-        return result;
-    }
+
+    assert result != null; // Because (1)
+
+    return result;
+  }
 }

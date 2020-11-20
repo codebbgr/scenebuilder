@@ -42,235 +42,227 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- *
- * 
- */
+/** */
 public class FXOMCollection extends FXOMObject {
-    
-    private final List<FXOMObject> items = new ArrayList<>();
-    private Class<?> declaredClass;
 
-    FXOMCollection(
-            FXOMDocument fxomDocument, 
-            GlueElement glueElement, 
-            Class<?> declaredClass,
-            Object sceneGraphObject,
-            List<FXOMObject> items) {
-        super(fxomDocument, glueElement, sceneGraphObject);
-        
-        assert (declaredClass != null);
-        assert (declaredClass.getSimpleName().equals(glueElement.getTagName()));
-        assert sceneGraphObject instanceof Collection;
-        assert items != null;
-        
-        this.declaredClass = declaredClass;
-        for (FXOMObject i : items) {
-            this.items.add(i);
-            i.setParentCollection(this);
-        }
+  private final List<FXOMObject> items = new ArrayList<>();
+  private Class<?> declaredClass;
+
+  FXOMCollection(
+      FXOMDocument fxomDocument,
+      GlueElement glueElement,
+      Class<?> declaredClass,
+      Object sceneGraphObject,
+      List<FXOMObject> items) {
+    super(fxomDocument, glueElement, sceneGraphObject);
+
+    assert (declaredClass != null);
+    assert (declaredClass.getSimpleName().equals(glueElement.getTagName()));
+    assert sceneGraphObject instanceof Collection;
+    assert items != null;
+
+    this.declaredClass = declaredClass;
+    for (FXOMObject i : items) {
+      this.items.add(i);
+      i.setParentCollection(this);
     }
-    
-    
-    FXOMCollection(
-            FXOMDocument fxomDocument,
-            Class<?> declaredClass) {
-        super(fxomDocument, declaredClass.getSimpleName());
-        this.declaredClass = declaredClass;
-    }
-    
-    public Class<?> getDeclaredClass() {
-        return declaredClass;
-    }
+  }
 
-    public void setDeclaredClass(Class<?> declaredClass) {
-        this.declaredClass = declaredClass;
-    }
+  FXOMCollection(FXOMDocument fxomDocument, Class<?> declaredClass) {
+    super(fxomDocument, declaredClass.getSimpleName());
+    this.declaredClass = declaredClass;
+  }
 
-    public List<FXOMObject> getItems() {
-        return Collections.unmodifiableList(items);
-    }    
-    
-    
-    /*
-     * FXOMObject
-     */
+  public Class<?> getDeclaredClass() {
+    return declaredClass;
+  }
 
-    @Override
-    public List<FXOMObject> getChildObjects() {
-        return Collections.unmodifiableList(items);
-    }
+  public void setDeclaredClass(Class<?> declaredClass) {
+    this.declaredClass = declaredClass;
+  }
 
+  public List<FXOMObject> getItems() {
+    return Collections.unmodifiableList(items);
+  }
 
-    @Override
-    public FXOMObject searchWithSceneGraphObject(Object sceneGraphObject) {
-        FXOMObject result;
-        
-        result = super.searchWithSceneGraphObject(sceneGraphObject);
-        if (result == null) {
-            final Iterator<FXOMObject> it = items.iterator();
-            while ((result == null) && it.hasNext()) {
-                final FXOMObject item = it.next();
-                result = item.searchWithSceneGraphObject(sceneGraphObject);
-            }
-        }
-        
-        return result;
+  /*
+   * FXOMObject
+   */
+
+  @Override
+  public List<FXOMObject> getChildObjects() {
+    return Collections.unmodifiableList(items);
+  }
+
+  @Override
+  public FXOMObject searchWithSceneGraphObject(Object sceneGraphObject) {
+    FXOMObject result;
+
+    result = super.searchWithSceneGraphObject(sceneGraphObject);
+    if (result == null) {
+      final Iterator<FXOMObject> it = items.iterator();
+      while ((result == null) && it.hasNext()) {
+        final FXOMObject item = it.next();
+        result = item.searchWithSceneGraphObject(sceneGraphObject);
+      }
     }
 
-    @Override
-    public FXOMObject searchWithFxId(String fxId) {
-        FXOMObject result;
-        
-        result = super.searchWithFxId(fxId);
-        if (result == null) {
-            final Iterator<FXOMObject> it = items.iterator();
-            while ((result == null) && it.hasNext()) {
-                final FXOMObject item = it.next();
-                result = item.searchWithFxId(fxId);
-            }
-        }
-        
-        return result;
-    }
-    
-    @Override
-    protected void collectDeclaredClasses(Set<Class<?>> result) {
-        assert result != null;
-        
-        result.add(declaredClass);
-        
-        for (FXOMObject i : items) {
-            i.collectDeclaredClasses(result);
-        }
+    return result;
+  }
+
+  @Override
+  public FXOMObject searchWithFxId(String fxId) {
+    FXOMObject result;
+
+    result = super.searchWithFxId(fxId);
+    if (result == null) {
+      final Iterator<FXOMObject> it = items.iterator();
+      while ((result == null) && it.hasNext()) {
+        final FXOMObject item = it.next();
+        result = item.searchWithFxId(fxId);
+      }
     }
 
-    @Override
-    protected void collectProperties(PropertyName propertyName, List<FXOMProperty> result) {
-        assert propertyName != null;
-        assert result != null;
-        
-        for (FXOMObject i : items) {
-            i.collectProperties(propertyName, result);
-        }
+    return result;
+  }
+
+  @Override
+  protected void collectDeclaredClasses(Set<Class<?>> result) {
+    assert result != null;
+
+    result.add(declaredClass);
+
+    for (FXOMObject i : items) {
+      i.collectDeclaredClasses(result);
+    }
+  }
+
+  @Override
+  protected void collectProperties(PropertyName propertyName, List<FXOMProperty> result) {
+    assert propertyName != null;
+    assert result != null;
+
+    for (FXOMObject i : items) {
+      i.collectProperties(propertyName, result);
+    }
+  }
+
+  @Override
+  protected void collectNullProperties(List<FXOMPropertyT> result) {
+    assert result != null;
+
+    for (FXOMObject i : items) {
+      i.collectNullProperties(result);
+    }
+  }
+
+  @Override
+  protected void collectPropertiesT(List<FXOMPropertyT> result) {
+    assert result != null;
+
+    for (FXOMObject i : items) {
+      i.collectPropertiesT(result);
+    }
+  }
+
+  @Override
+  protected void collectReferences(String source, List<FXOMIntrinsic> result) {
+    for (FXOMObject i : items) {
+      i.collectReferences(source, result);
+    }
+  }
+
+  @Override
+  protected void collectReferences(String source, FXOMObject scope, List<FXOMNode> result) {
+    if ((scope == null) || (scope != this)) {
+      for (FXOMObject i : items) {
+        i.collectReferences(source, scope, result);
+      }
+    }
+  }
+
+  @Override
+  protected void collectIncludes(String source, List<FXOMIntrinsic> result) {
+    for (FXOMObject i : items) {
+      i.collectIncludes(source, result);
+    }
+  }
+
+  @Override
+  protected void collectFxIds(Map<String, FXOMObject> result) {
+    final String fxId = getFxId();
+    if (fxId != null) {
+      result.put(fxId, this);
     }
 
-    @Override
-    protected void collectNullProperties(List<FXOMPropertyT> result) {
-        assert result != null;
-        
-        for (FXOMObject i : items) {
-            i.collectNullProperties(result);
-        }
+    for (FXOMObject i : items) {
+      i.collectFxIds(result);
     }
+  }
 
-    @Override
-    protected void collectPropertiesT(List<FXOMPropertyT> result) {
-        assert result != null;
-        
-        for (FXOMObject i : items) {
-            i.collectPropertiesT(result);
-        }
+  @Override
+  protected void collectObjectWithSceneGraphObjectClass(
+      Class<?> sceneGraphObjectClass, List<FXOMObject> result) {
+    if (getSceneGraphObject() != null) {
+      if (getSceneGraphObject().getClass() == sceneGraphObjectClass) {
+        result.add(this);
+      }
+      for (FXOMObject i : items) {
+        i.collectObjectWithSceneGraphObjectClass(sceneGraphObjectClass, result);
+      }
     }
+  }
 
-    @Override
-    protected void collectReferences(String source, List<FXOMIntrinsic> result) {
-        for (FXOMObject i : items) {
-            i.collectReferences(source, result);
-        }
+  @Override
+  protected void collectEventHandlers(List<FXOMPropertyT> result) {
+    if (getSceneGraphObject() != null) {
+      for (FXOMObject i : items) {
+        i.collectEventHandlers(result);
+      }
     }
+  }
 
-    @Override
-    protected void collectReferences(String source, FXOMObject scope, List<FXOMNode> result) {
-        if ((scope == null) || (scope != this)) {
-            for (FXOMObject i : items) {
-                i.collectReferences(source, scope, result);
-            }
-        }
-    }
+  /*
+   * FXOMNode
+   */
 
-    @Override
-    protected void collectIncludes(String source, List<FXOMIntrinsic> result) {
-        for (FXOMObject i : items) {
-            i.collectIncludes(source, result);
-        }
-    }
+  @Override
+  protected void changeFxomDocument(FXOMDocument destination) {
 
-    @Override
-    protected void collectFxIds(Map<String, FXOMObject> result) {
-        final String fxId = getFxId();
-        if (fxId != null) {
-            result.put(fxId, this);
-        }
-        
-        for (FXOMObject i : items) {
-            i.collectFxIds(result);
-        }
+    super.changeFxomDocument(destination);
+    for (FXOMObject i : items) {
+      i.changeFxomDocument(destination);
     }
+  }
 
-    @Override
-    protected void collectObjectWithSceneGraphObjectClass(Class<?> sceneGraphObjectClass, List<FXOMObject> result) {
-        if (getSceneGraphObject() != null) {
-            if (getSceneGraphObject().getClass() == sceneGraphObjectClass) {
-                result.add(this);
-            }
-            for (FXOMObject i : items) {
-                i.collectObjectWithSceneGraphObjectClass(sceneGraphObjectClass, result);
-            }
-        }
+  @Override
+  public void documentLocationWillChange(URL newLocation) {
+    for (FXOMObject i : items) {
+      i.documentLocationWillChange(newLocation);
     }
+  }
 
-    @Override
-    protected void collectEventHandlers(List<FXOMPropertyT> result) {
-        if (getSceneGraphObject() != null) {
-            for (FXOMObject i : items) {
-                i.collectEventHandlers(result);
-            }
-        }
-    }
+  /*
+   * Package
+   */
 
-    /*
-     * FXOMNode
-     */
-    
-    @Override
-    protected void changeFxomDocument(FXOMDocument destination) {
-        
-        super.changeFxomDocument(destination);
-        for (FXOMObject i : items) {
-            i.changeFxomDocument(destination);
-        }
+  /* Reserved to FXOMObject.addToParentCollection() private use */
+  void addValue(int index, FXOMObject item) {
+    assert item != null;
+    assert item.getParentCollection() == this;
+    assert items.contains(item) == false;
+    if (index == -1) {
+      items.add(item);
+    } else {
+      items.add(index, item);
     }
+  }
 
-    @Override
-    public void documentLocationWillChange(URL newLocation) {
-        for (FXOMObject i : items) {
-            i.documentLocationWillChange(newLocation);
-        }
-    }
-    
-    
-    /*
-     * Package
-     */
-    
-    /* Reserved to FXOMObject.addToParentCollection() private use */
-    void addValue(int index, FXOMObject item) {
-        assert item != null;
-        assert item.getParentCollection() == this;
-        assert items.contains(item) == false;
-        if (index == -1) {
-            items.add(item);
-        } else {
-            items.add(index, item);
-        }
-    }
-    
-    /* Reserved to FXOMObject.removeFromParentCollection() private use */
-    void removeValue(FXOMObject item) {
-        assert item != null;
-        assert item.getParentProperty() == null;
-        assert items.contains(item);
-        items.remove(item);
-    }
+  /* Reserved to FXOMObject.removeFromParentCollection() private use */
+  void removeValue(FXOMObject item) {
+    assert item != null;
+    assert item.getParentProperty() == null;
+    assert items.contains(item);
+    items.remove(item);
+  }
 }

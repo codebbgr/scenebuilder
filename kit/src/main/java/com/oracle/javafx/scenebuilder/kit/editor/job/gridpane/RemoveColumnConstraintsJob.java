@@ -41,53 +41,48 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.DesignHierarchyMask;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Job invoked when removing column constraints.
- */
+/** Job invoked when removing column constraints. */
 public class RemoveColumnConstraintsJob extends BatchDocumentJob {
 
-    private final FXOMObject targetGridPane;
-    private final List<Integer> targetIndexes;
+  private final FXOMObject targetGridPane;
+  private final List<Integer> targetIndexes;
 
-    public RemoveColumnConstraintsJob(
-            final EditorController editorController,
-            final FXOMObject targetGridPane,
-            final List<Integer> targetIndexes) {
-        super(editorController);
+  public RemoveColumnConstraintsJob(
+      final EditorController editorController,
+      final FXOMObject targetGridPane,
+      final List<Integer> targetIndexes) {
+    super(editorController);
 
-        assert targetGridPane != null;
-        assert targetIndexes != null;
-        this.targetGridPane = targetGridPane;
-        this.targetIndexes = targetIndexes;
+    assert targetGridPane != null;
+    assert targetIndexes != null;
+    this.targetGridPane = targetGridPane;
+    this.targetIndexes = targetIndexes;
+  }
+
+  @Override
+  protected List<Job> makeSubJobs() {
+
+    final List<Job> result = new ArrayList<>();
+
+    // Remove column constraints job
+    assert targetGridPane instanceof FXOMInstance;
+    assert targetIndexes.isEmpty() == false;
+
+    final DesignHierarchyMask mask = new DesignHierarchyMask(targetGridPane);
+    for (int targetIndex : targetIndexes) {
+      final FXOMObject targetConstraints = mask.getColumnConstraintsAtIndex(targetIndex);
+      // The target index is associated to an existing constraints value :
+      // => we remove the constraints value
+      if (targetConstraints != null) {
+        final Job removeValueJob = new DeleteObjectJob(targetConstraints, getEditorController());
+        result.add(removeValueJob);
+      }
     }
+    return result;
+  }
 
-    @Override
-    protected List<Job> makeSubJobs() {
-
-        final List<Job> result = new ArrayList<>();
-
-        // Remove column constraints job
-        assert targetGridPane instanceof FXOMInstance;
-        assert targetIndexes.isEmpty() == false;
-
-        final DesignHierarchyMask mask = new DesignHierarchyMask(targetGridPane);
-        for (int targetIndex : targetIndexes) {
-            final FXOMObject targetConstraints
-                    = mask.getColumnConstraintsAtIndex(targetIndex);
-            // The target index is associated to an existing constraints value :
-            // => we remove the constraints value
-            if (targetConstraints != null) {
-                final Job removeValueJob = new DeleteObjectJob(
-                        targetConstraints,
-                        getEditorController());
-                result.add(removeValueJob);
-            }
-        }
-        return result;
-    }
-
-    @Override
-    protected String makeDescription() {
-        return "Remove Column Constraints"; //NOI18N
-    }
+  @Override
+  protected String makeDescription() {
+    return "Remove Column Constraints"; // NOI18N
+  }
 }

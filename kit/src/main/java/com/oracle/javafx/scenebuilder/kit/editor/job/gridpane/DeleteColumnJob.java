@@ -43,128 +43,123 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-/**
- * Job invoked when removing columns.
- */
+/** Job invoked when removing columns. */
 public class DeleteColumnJob extends BatchSelectionJob {
 
-    private FXOMObject targetGridPane;
-    private final List<Integer> targetIndexes = new ArrayList<>();
+  private FXOMObject targetGridPane;
+  private final List<Integer> targetIndexes = new ArrayList<>();
 
-    public DeleteColumnJob(EditorController editorController) {
-        super(editorController);
+  public DeleteColumnJob(EditorController editorController) {
+    super(editorController);
+  }
+
+  @Override
+  protected List<Job> makeSubJobs() {
+
+    final List<Job> result = new ArrayList<>();
+
+    if (GridPaneJobUtils.canPerformRemove(getEditorController())) { // (1)
+
+      // Retrieve the target GridPane
+      final Selection selection = getEditorController().getSelection();
+      final AbstractSelectionGroup asg = selection.getGroup();
+      assert asg instanceof GridSelectionGroup; // Because of (1)
+      final GridSelectionGroup gsg = (GridSelectionGroup) asg;
+
+      targetGridPane = gsg.getParentObject();
+      targetIndexes.addAll(gsg.getIndexes());
+
+      // Add sub jobs
+      // First remove the column constraints
+      final Job removeConstraints =
+          new RemoveColumnConstraintsJob(getEditorController(), targetGridPane, targetIndexes);
+      result.add(removeConstraints);
+      // Then remove the column content
+      final Job removeContent =
+          new RemoveColumnContentJob(getEditorController(), targetGridPane, targetIndexes);
+      result.add(removeContent);
+      // Finally shift the column content
+      result.addAll(moveColumnContent());
     }
+    return result;
+  }
 
-    @Override
-    protected List<Job> makeSubJobs() {
-
-        final List<Job> result = new ArrayList<>();
-
-        if (GridPaneJobUtils.canPerformRemove(getEditorController())) { // (1)
-
-            // Retrieve the target GridPane
-            final Selection selection = getEditorController().getSelection();
-            final AbstractSelectionGroup asg = selection.getGroup();
-            assert asg instanceof GridSelectionGroup; // Because of (1)
-            final GridSelectionGroup gsg = (GridSelectionGroup) asg;
-
-            targetGridPane = gsg.getParentObject();
-            targetIndexes.addAll(gsg.getIndexes());
-
-            // Add sub jobs
-            // First remove the column constraints
-            final Job removeConstraints = new RemoveColumnConstraintsJob(
-                    getEditorController(), targetGridPane, targetIndexes);
-            result.add(removeConstraints);
-            // Then remove the column content
-            final Job removeContent = new RemoveColumnContentJob(
-                    getEditorController(), targetGridPane, targetIndexes);
-            result.add(removeContent);
-            // Finally shift the column content
-            result.addAll(moveColumnContent());
-        }
-        return result;
+  @Override
+  protected String makeDescription() {
+    String result;
+    switch (targetIndexes.size()) {
+      case 0:
+        result = "Unexecutable Delete"; // NO18N
+        break;
+      case 1:
+        result = "Delete Column"; // NO18N
+        break;
+      default:
+        result = makeMultipleSelectionDescription();
+        break;
     }
+    return result;
+  }
 
-    @Override
-    protected String makeDescription() {
-        String result;
-        switch (targetIndexes.size()) {
-            case 0:
-                result = "Unexecutable Delete"; //NO18N
-                break;
-            case 1:
-                result = "Delete Column"; //NO18N
-                break;
-            default:
-                result = makeMultipleSelectionDescription();
-                break;
-        }
-        return result;
+  @Override
+  protected AbstractSelectionGroup getNewSelectionGroup() {
+    // Selection emptied
+    return null;
+  }
+
+  private List<Job> moveColumnContent() {
+
+    final List<Job> result = new ArrayList<>();
+
+    final DesignHierarchyMask targetGridPaneMask = new DesignHierarchyMask(targetGridPane);
+    final int columnsSize = targetGridPaneMask.getColumnsSize();
+    final Iterator<Integer> iterator = targetIndexes.iterator();
+
+    int shiftIndex = 0;
+    int targetIndex, nextTargetIndex;
+    targetIndex = iterator.next();
+    while (targetIndex != -1) {
+      // Move the columns content :
+      // - from the target index
+      // - to the next target index if any or the last column index otherwise
+      int fromIndex, toIndex;
+
+      // fromIndex excluded
+      // toIndex excluded
+      fromIndex = targetIndex + 1;
+      if (iterator.hasNext()) {
+        nextTargetIndex = iterator.next();
+        toIndex = nextTargetIndex - 1;
+      } else {
+        nextTargetIndex = -1;
+        toIndex = columnsSize - 1;
+      }
+
+      // When we delete 2 consecutive columns
+      // => no content to move between the 2 columns
+      // When we delete the last column
+      // => no column content to move after the last column
+      if (nextTargetIndex != (targetIndex + 1) && fromIndex < columnsSize) {
+        final int offset = -1 + shiftIndex;
+        final List<Integer> indexes = GridPaneJobUtils.getIndexes(fromIndex, toIndex);
+        final ReIndexColumnContentJob reIndexJob =
+            new ReIndexColumnContentJob(getEditorController(), offset, targetGridPane, indexes);
+        result.add(reIndexJob);
+      }
+
+      targetIndex = nextTargetIndex;
+      shiftIndex--;
     }
+    return result;
+  }
 
-    @Override
-    protected AbstractSelectionGroup getNewSelectionGroup() {
-        // Selection emptied
-        return null;
-    }
+  private String makeMultipleSelectionDescription() {
+    final StringBuilder result = new StringBuilder();
 
-    private List<Job> moveColumnContent() {
+    result.append("Delete ");
+    result.append(targetIndexes.size());
+    result.append(" Columns");
 
-        final List<Job> result = new ArrayList<>();
-
-        final DesignHierarchyMask targetGridPaneMask
-                = new DesignHierarchyMask(targetGridPane);
-        final int columnsSize = targetGridPaneMask.getColumnsSize();
-        final Iterator<Integer> iterator = targetIndexes.iterator();
-
-        int shiftIndex = 0;
-        int targetIndex, nextTargetIndex;
-        targetIndex = iterator.next();
-        while (targetIndex != -1) {
-            // Move the columns content :
-            // - from the target index 
-            // - to the next target index if any or the last column index otherwise
-            int fromIndex, toIndex;
-
-            // fromIndex excluded
-            // toIndex excluded
-            fromIndex = targetIndex + 1;
-            if (iterator.hasNext()) {
-                nextTargetIndex = iterator.next();
-                toIndex = nextTargetIndex - 1;
-            } else {
-                nextTargetIndex = -1;
-                toIndex = columnsSize - 1;
-            }
-
-            // When we delete 2 consecutive columns 
-            // => no content to move between the 2 columns
-            // When we delete the last column 
-            // => no column content to move after the last column
-            if (nextTargetIndex != (targetIndex + 1)
-                    && fromIndex < columnsSize) {
-                final int offset = -1 + shiftIndex;
-                final List<Integer> indexes
-                        = GridPaneJobUtils.getIndexes(fromIndex, toIndex);
-                final ReIndexColumnContentJob reIndexJob = new ReIndexColumnContentJob(
-                        getEditorController(), offset, targetGridPane, indexes);
-                result.add(reIndexJob);
-            }
-
-            targetIndex = nextTargetIndex;
-            shiftIndex--;
-        }
-        return result;
-    }
-
-    private String makeMultipleSelectionDescription() {
-        final StringBuilder result = new StringBuilder();
-
-        result.append("Delete ");
-        result.append(targetIndexes.size());
-        result.append(" Columns");
-
-        return result.toString();
-    }
+    return result.toString();
+  }
 }

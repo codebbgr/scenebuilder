@@ -39,67 +39,66 @@ import java.util.List;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
-/**
- * fx:id editor.
- *
- *
- */
+/** fx:id editor. */
 public class FxIdEditor extends AutoSuggestEditor {
 
-    private static final String PROPERTY_NAME = "fx:id";
-    private static final String DEFAULT_VALUE = null;
-    private EditorController editorController;
+  private static final String PROPERTY_NAME = "fx:id";
+  private static final String DEFAULT_VALUE = null;
+  private EditorController editorController;
 
-    public FxIdEditor(List<String> suggestedFxIds, EditorController editorController) {
-        super(PROPERTY_NAME, DEFAULT_VALUE, suggestedFxIds); //NOI18N
-        initialize(editorController);
-    }
-    
-    private void initialize(EditorController editorController) {
-        this.editorController = editorController;
+  public FxIdEditor(List<String> suggestedFxIds, EditorController editorController) {
+    super(PROPERTY_NAME, DEFAULT_VALUE, suggestedFxIds); // NOI18N
+    initialize(editorController);
+  }
 
-        // text field events handling
-        EventHandler<ActionEvent> onActionListener = event -> {
-            if (isHandlingError()) {
-                // Event received because of focus lost due to error dialog
-                return;
+  private void initialize(EditorController editorController) {
+    this.editorController = editorController;
+
+    // text field events handling
+    EventHandler<ActionEvent> onActionListener =
+        event -> {
+          if (isHandlingError()) {
+            // Event received because of focus lost due to error dialog
+            return;
+          }
+          String value = textField.getText();
+          if (value != null && !value.isEmpty()) {
+            if (!JavaLanguage.isIdentifier(value)) {
+              //
+              // System.err.println(I18N.getString("log.warning.invalid.fxid", value));
+              handleInvalidValue(value);
+              return;
             }
-            String value = textField.getText();
-            if (value != null && !value.isEmpty()) {
-                if (!JavaLanguage.isIdentifier(value)) {
-//                        System.err.println(I18N.getString("log.warning.invalid.fxid", value));
-                    handleInvalidValue(value);
-                    return;
-                }
-                if (isValueChanged(value)) {
-                    // Avoid multiple identical messages
-                    if (getFxIdsInUse().contains(value)) {
-                        editorController.getMessageLog().logWarningMessage(
-                                "log.warning.duplicate.fxid", value); //NOI18N
-                    } else if ((getControllerClass() != null) && !getSuggestedList().contains(value)) {
-                        editorController.getMessageLog().logWarningMessage(
-                                "log.warning.no.injectable.fxid", value); //NOI18N
-                    }
-                }
+            if (isValueChanged(value)) {
+              // Avoid multiple identical messages
+              if (getFxIdsInUse().contains(value)) {
+                editorController
+                    .getMessageLog()
+                    .logWarningMessage("log.warning.duplicate.fxid", value); // NOI18N
+              } else if ((getControllerClass() != null) && !getSuggestedList().contains(value)) {
+                editorController
+                    .getMessageLog()
+                    .logWarningMessage("log.warning.no.injectable.fxid", value); // NOI18N
+              }
             }
-            userUpdateValueProperty((value == null || value.isEmpty()) ? null : value);
-            textField.selectAll();
+          }
+          userUpdateValueProperty((value == null || value.isEmpty()) ? null : value);
+          textField.selectAll();
         };
-        setTextEditorBehavior(this, textField, onActionListener);
-    }
+    setTextEditorBehavior(this, textField, onActionListener);
+  }
 
-    public void reset(List<String> suggestedFxIds, EditorController editorController) {
-        reset(PROPERTY_NAME, DEFAULT_VALUE, suggestedFxIds);
-        this.editorController = editorController;
-    }
+  public void reset(List<String> suggestedFxIds, EditorController editorController) {
+    reset(PROPERTY_NAME, DEFAULT_VALUE, suggestedFxIds);
+    this.editorController = editorController;
+  }
 
-    private List<String> getFxIdsInUse() {
-        FXOMFxIdIndex fxomIndex = new FXOMFxIdIndex(editorController.getFxomDocument());
-        return new ArrayList<>(fxomIndex.getFxIds().keySet());
-    }
+  private List<String> getFxIdsInUse() {
+    FXOMFxIdIndex fxomIndex = new FXOMFxIdIndex(editorController.getFxomDocument());
+    return new ArrayList<>(fxomIndex.getFxIds().keySet());
+  }
 
-    private String getControllerClass() {
-        return editorController.getFxomDocument().getFxomRoot().getFxController();
-    }
-
+  private String getControllerClass() {
+    return editorController.getFxomDocument().getFxomRoot().getFxController();
+  }
 }

@@ -34,7 +34,6 @@ package com.oracle.javafx.scenebuilder.kit.util.control.paintpicker;
 import com.oracle.javafx.scenebuilder.kit.util.control.paintpicker.PaintPicker.Mode;
 import com.oracle.javafx.scenebuilder.kit.util.control.paintpicker.colorpicker.ColorPicker;
 import com.oracle.javafx.scenebuilder.kit.util.control.paintpicker.gradientpicker.GradientPicker;
-
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -52,239 +51,238 @@ import javafx.scene.paint.Paint;
 import javafx.scene.paint.RadialGradient;
 import javafx.stage.Window;
 
-/**
- * Controller class for the paint editor.
- */
+/** Controller class for the paint editor. */
 public class PaintPickerController {
 
-    @FXML
-    private VBox root_vbox;
-    @FXML
-    private ToggleButton colorToggleButton;
-    @FXML
-    private ToggleButton linearToggleButton;
-    @FXML
-    private ToggleButton radialToggleButton;
+  @FXML private VBox root_vbox;
+  @FXML private ToggleButton colorToggleButton;
+  @FXML private ToggleButton linearToggleButton;
+  @FXML private ToggleButton radialToggleButton;
 
-    private ColorPicker colorPicker;
-    private GradientPicker gradientPicker;
-    private PaintPicker.Delegate delegate;
+  private ColorPicker colorPicker;
+  private GradientPicker gradientPicker;
+  private PaintPicker.Delegate delegate;
 
-    private final ObjectProperty<Paint> paint = new SimpleObjectProperty<>();
-    private final BooleanProperty liveUpdate = new SimpleBooleanProperty();
+  private final ObjectProperty<Paint> paint = new SimpleObjectProperty<>();
+  private final BooleanProperty liveUpdate = new SimpleBooleanProperty();
 
-    public final static Color DEFAULT_COLOR = Color.BLACK;
-    public final static LinearGradient DEFAULT_LINEAR
-            = new LinearGradient(0.0, 0.0, 1.0, 1.0, true, CycleMethod.NO_CYCLE);
-    public final static RadialGradient DEFAULT_RADIAL
-            = new RadialGradient(0.0, 0.0, 0.5, 0.5, 0.5, true, CycleMethod.NO_CYCLE);
+  public static final Color DEFAULT_COLOR = Color.BLACK;
+  public static final LinearGradient DEFAULT_LINEAR =
+      new LinearGradient(0.0, 0.0, 1.0, 1.0, true, CycleMethod.NO_CYCLE);
+  public static final RadialGradient DEFAULT_RADIAL =
+      new RadialGradient(0.0, 0.0, 0.5, 0.5, 0.5, true, CycleMethod.NO_CYCLE);
 
-    public final ObjectProperty<Paint> paintProperty() {
-        return paint;
+  public final ObjectProperty<Paint> paintProperty() {
+    return paint;
+  }
+
+  public final Paint getPaintProperty() {
+    return paint.get();
+  }
+
+  public final void setPaintProperty(Paint value) {
+    paint.setValue(value);
+  }
+
+  public final BooleanProperty liveUpdateProperty() {
+    return liveUpdate;
+  }
+
+  public boolean isLiveUpdate() {
+    return liveUpdate.get();
+  }
+
+  public void setLiveUpdate(boolean value) {
+    liveUpdate.setValue(value);
+  }
+
+  public ColorPicker getColorPicker() {
+    return colorPicker;
+  }
+
+  public GradientPicker getGradientPicker() {
+    return gradientPicker;
+  }
+
+  public PaintPicker.Delegate getDelegate() {
+    return delegate;
+  }
+
+  public VBox getRoot() {
+    return root_vbox;
+  }
+
+  /**
+   * Simple utility function which clamps the given value to be strictly between the min and max
+   * values.
+   *
+   * @param min
+   * @param value
+   * @param max
+   * @return
+   * @treatAsPrivate
+   */
+  public static double clamp(double min, double value, double max) {
+    if (value < min) return min;
+    if (value > max) return max;
+    return value;
+  }
+
+  void setDelegate(PaintPicker.Delegate delegate) {
+    this.delegate = delegate;
+  }
+
+  public Mode getMode() {
+    final Mode mode;
+    final Paint value = getPaintProperty();
+    if (value instanceof Color) {
+      mode = Mode.COLOR;
+    } else if (value instanceof LinearGradient) {
+      mode = Mode.LINEAR;
+    } else {
+      assert value instanceof RadialGradient;
+      mode = Mode.RADIAL;
     }
+    return mode;
+  }
 
-    public final Paint getPaintProperty() {
-        return paint.get();
+  public void updateUI(Paint value) {
+    if (value != null) {
+      setMode(value);
+      if (value instanceof Color) {
+        colorPicker.updateUI((Color) value);
+      } else if (value instanceof LinearGradient) {
+        gradientPicker.updateUI((LinearGradient) value);
+      } else if (value instanceof RadialGradient) {
+        gradientPicker.updateUI((RadialGradient) value);
+      } else {
+        // Case not yet handled
+        assert value instanceof ImagePattern;
+      }
     }
+  }
 
-    public final void setPaintProperty(Paint value) {
-        paint.setValue(value);
-    }
+  @FXML
+  public void initialize() {
+    assert root_vbox != null;
+    assert colorToggleButton != null;
+    assert linearToggleButton != null;
+    assert radialToggleButton != null;
 
-    public final BooleanProperty liveUpdateProperty() {
-        return liveUpdate;
-    }
+    colorPicker = new ColorPicker(this);
+    gradientPicker = new GradientPicker(this);
 
-    public boolean isLiveUpdate() {
-        return liveUpdate.get();
-    }
-    
-    public void setLiveUpdate(boolean value) {
-        liveUpdate.setValue(value);
-    }
-    
-    public ColorPicker getColorPicker() {
-        return colorPicker;
-    }
+    // Default value
+    setPaintProperty(DEFAULT_COLOR);
 
-    public GradientPicker getGradientPicker() {
-        return gradientPicker;
+    // Resize the window so it matches the selected editor size
+    root_vbox
+        .heightProperty()
+        .addListener(
+            (ChangeListener<Number>)
+                (ov, t, t1) -> {
+                  final Window window = root_vbox.getScene().getWindow();
+                  window.sizeToScene();
+                });
+    root_vbox.getChildren().add(colorPicker);
+  }
+
+  void setSingleMode(Mode mode) {
+    // First disable toggle buttons so we cannot switch from 1 mode to another
+    colorToggleButton.setManaged(false);
+    linearToggleButton.setManaged(false);
+    radialToggleButton.setManaged(false);
+
+    final Paint value;
+    switch (mode) {
+      case COLOR:
+        value = DEFAULT_COLOR;
+        break;
+      case LINEAR:
+        value = DEFAULT_LINEAR;
+        break;
+      case RADIAL:
+        value = DEFAULT_RADIAL;
+        break;
+      default:
+        value = null;
+        assert false;
+        break;
     }
+    // Update model
+    setPaintProperty(value);
+    // Update UI
+    updateUI(value);
+  }
 
-    public PaintPicker.Delegate getDelegate() {
-        return delegate;
+  private void setMode(Paint value) {
+    if (value instanceof Color) {
+      // make sure that a second click doesn't deselect the button
+      if (colorToggleButton.isSelected() == false) {
+        colorToggleButton.setSelected(true);
+      }
+      root_vbox.getChildren().remove(gradientPicker);
+    } else if (value instanceof LinearGradient) {
+      // make sure that a second click doesn't deselect the button
+      if (linearToggleButton.isSelected() == false) {
+        linearToggleButton.setSelected(true);
+      }
+      if (!root_vbox.getChildren().contains(gradientPicker)) {
+        root_vbox.getChildren().add(gradientPicker);
+      }
+    } else if (value instanceof RadialGradient) {
+      // make sure that a second click doesn't deselect the button
+      if (radialToggleButton.isSelected() == false) {
+        radialToggleButton.setSelected(true);
+      }
+      if (!root_vbox.getChildren().contains(gradientPicker)) {
+        root_vbox.getChildren().add(gradientPicker);
+      }
+    } else {
+      // Case not yet handled
+      assert value instanceof ImagePattern;
     }
-    
-    public VBox getRoot() {
-        return root_vbox;
-    }
+  }
 
-    /**
-     * Simple utility function which clamps the given value to be strictly
-     * between the min and max values.
-     * @param min
-     * @param value
-     * @param max
-     * @return 
-     * @treatAsPrivate
-     */
-    public static double clamp(double min, double value, double max) {
-        if (value < min) return min;
-        if (value > max) return max;
-        return value;
-    }
+  @FXML
+  void onColorButtonAction(ActionEvent event) {
+    final ToggleButton tb = (ToggleButton) event.getTarget();
+    assert tb == colorToggleButton;
+    final Color value = colorPicker.getValue();
+    // Update UI
+    setMode(value);
+    // Update model
+    setPaintProperty(value);
+    event.consume();
+  }
 
-    void setDelegate(PaintPicker.Delegate delegate) {
-        this.delegate = delegate;
-    }
-    
-    public Mode getMode() {
-        final Mode mode;
-        final Paint value = getPaintProperty();
-        if (value instanceof Color) {
-            mode = Mode.COLOR;
-        } else if (value instanceof LinearGradient) {
-            mode = Mode.LINEAR;
-        } else {
-            assert value instanceof RadialGradient;
-            mode = Mode.RADIAL;
-        }
-        return mode;
-    }
+  @FXML
+  void onLinearButtonAction(ActionEvent event) {
+    final ToggleButton tb = (ToggleButton) event.getTarget();
+    assert tb == linearToggleButton;
+    final Paint value = gradientPicker.getValue(Mode.LINEAR);
+    assert value instanceof LinearGradient;
+    // Update UI
+    setMode(value);
+    gradientPicker.setMode(value);
+    gradientPicker.updatePreview(value);
+    // Update model
+    setPaintProperty(value);
+    event.consume();
+  }
 
-    public void updateUI(Paint value) {
-        if (value != null) {
-            setMode(value);
-            if (value instanceof Color) {
-                colorPicker.updateUI((Color) value);
-            } else if (value instanceof LinearGradient) {
-                gradientPicker.updateUI((LinearGradient) value);
-            } else if (value instanceof RadialGradient) {
-                gradientPicker.updateUI((RadialGradient) value);
-            } else {
-                // Case not yet handled
-                assert value instanceof ImagePattern;
-            }
-        }
-    }
-
-    @FXML
-    public void initialize() {
-        assert root_vbox != null;
-        assert colorToggleButton != null;
-        assert linearToggleButton != null;
-        assert radialToggleButton != null;
-
-        colorPicker = new ColorPicker(this);
-        gradientPicker = new GradientPicker(this);
-
-        // Default value
-        setPaintProperty(DEFAULT_COLOR);
-
-        // Resize the window so it matches the selected editor size
-        root_vbox.heightProperty().addListener((ChangeListener<Number>) (ov, t, t1) -> {
-            final Window window = root_vbox.getScene().getWindow();
-            window.sizeToScene();
-        });
-        root_vbox.getChildren().add(colorPicker);
-    }
-
-    void setSingleMode(Mode mode) {
-        // First disable toggle buttons so we cannot switch from 1 mode to another
-        colorToggleButton.setManaged(false);
-        linearToggleButton.setManaged(false);
-        radialToggleButton.setManaged(false);
-
-        final Paint value;
-        switch (mode) {
-            case COLOR:
-                value = DEFAULT_COLOR;
-                break;
-            case LINEAR:
-                value = DEFAULT_LINEAR;
-                break;
-            case RADIAL:
-                value = DEFAULT_RADIAL;
-                break;
-            default:
-                value = null;
-                assert false;
-                break;
-        }
-        // Update model
-        setPaintProperty(value);
-        // Update UI
-        updateUI(value);
-    }
-
-    private void setMode(Paint value) {
-        if (value instanceof Color) {
-            // make sure that a second click doesn't deselect the button
-            if (colorToggleButton.isSelected() == false) {
-                colorToggleButton.setSelected(true);
-            }
-            root_vbox.getChildren().remove(gradientPicker);
-        } else if (value instanceof LinearGradient) {
-            // make sure that a second click doesn't deselect the button
-            if (linearToggleButton.isSelected() == false) {
-                linearToggleButton.setSelected(true);
-            }
-            if (!root_vbox.getChildren().contains(gradientPicker)) {
-                root_vbox.getChildren().add(gradientPicker);
-            }
-        } else if (value instanceof RadialGradient) {
-            // make sure that a second click doesn't deselect the button
-            if (radialToggleButton.isSelected() == false) {
-                radialToggleButton.setSelected(true);
-            }
-            if (!root_vbox.getChildren().contains(gradientPicker)) {
-                root_vbox.getChildren().add(gradientPicker);
-            }
-        } else {
-            // Case not yet handled
-            assert value instanceof ImagePattern;
-        }
-    }
-
-    @FXML
-    void onColorButtonAction(ActionEvent event) {
-        final ToggleButton tb = (ToggleButton) event.getTarget();
-        assert tb == colorToggleButton;
-        final Color value = colorPicker.getValue();
-        // Update UI
-        setMode(value);
-        // Update model
-        setPaintProperty(value);
-        event.consume();
-    }
-
-    @FXML
-    void onLinearButtonAction(ActionEvent event) {
-        final ToggleButton tb = (ToggleButton) event.getTarget();
-        assert tb == linearToggleButton;
-        final Paint value = gradientPicker.getValue(Mode.LINEAR);
-        assert value instanceof LinearGradient;
-        // Update UI
-        setMode(value);
-        gradientPicker.setMode(value);
-        gradientPicker.updatePreview(value);
-        // Update model
-        setPaintProperty(value);
-        event.consume();
-    }
-
-    @FXML
-    void onRadialButtonAction(ActionEvent event) {
-        final ToggleButton tb = (ToggleButton) event.getTarget();
-        assert tb == radialToggleButton;
-        final Paint value = gradientPicker.getValue(Mode.RADIAL);
-        assert value instanceof RadialGradient;
-        // Update UI
-        setMode(value);
-        gradientPicker.setMode(value);
-        gradientPicker.updatePreview(value);
-        // Update model
-        setPaintProperty(value);
-        event.consume();
-    }
+  @FXML
+  void onRadialButtonAction(ActionEvent event) {
+    final ToggleButton tb = (ToggleButton) event.getTarget();
+    assert tb == radialToggleButton;
+    final Paint value = gradientPicker.getValue(Mode.RADIAL);
+    assert value instanceof RadialGradient;
+    // Update UI
+    setMode(value);
+    gradientPicker.setMode(value);
+    gradientPicker.updatePreview(value);
+    // Update model
+    setPaintProperty(value);
+    event.consume();
+  }
 }

@@ -32,9 +32,7 @@
 package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors;
 
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
-
 import java.util.Set;
-
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -42,62 +40,58 @@ import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.layout.HBox;
 
-/**
- * Editor for boolean properties.
- *
- *
- */
+/** Editor for boolean properties. */
 public class BooleanEditor extends PropertyEditor {
 
-    private final CheckBox checkBox;
-    private final HBox activeZone;
+  private final CheckBox checkBox;
+  private final HBox activeZone;
 
-    public BooleanEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super(propMeta, selectedClasses);
-        checkBox = new CheckBox();
-        checkBox.disableProperty().bind(disableProperty());
-        EventHandler<ActionEvent> onActionListener = event -> userUpdateValueProperty(getValue());
-        checkBox.setOnAction(onActionListener);
-        setCommitListener(onActionListener);
-        activeZone = new HBox();
-        activeZone.setAlignment(Pos.CENTER_LEFT);
-        EditorUtils.makeWidthStretchable(activeZone);
-        activeZone.getChildren().add(checkBox);
-    }
+  public BooleanEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super(propMeta, selectedClasses);
+    checkBox = new CheckBox();
+    checkBox.disableProperty().bind(disableProperty());
+    EventHandler<ActionEvent> onActionListener = event -> userUpdateValueProperty(getValue());
+    checkBox.setOnAction(onActionListener);
+    setCommitListener(onActionListener);
+    activeZone = new HBox();
+    activeZone.setAlignment(Pos.CENTER_LEFT);
+    EditorUtils.makeWidthStretchable(activeZone);
+    activeZone.getChildren().add(checkBox);
+  }
 
-    @Override
-    public Node getValueEditor() {
-        return super.handleGenericModes(activeZone);
-    }
+  @Override
+  public Node getValueEditor() {
+    return super.handleGenericModes(activeZone);
+  }
 
-    @Override
-    public Object getValue() {
-        return checkBox.isSelected();
-    }
+  @Override
+  public Object getValue() {
+    return checkBox.isSelected();
+  }
 
-    @Override
-    public void setValue(Object value) {
-        setValueGeneric(value);
-        if (isSetValueDone()) {
-            return;
-        }
-        assert value instanceof Boolean;
-        checkBox.setSelected((Boolean) value);
+  @Override
+  public void setValue(Object value) {
+    setValueGeneric(value);
+    if (isSetValueDone()) {
+      return;
     }
+    assert value instanceof Boolean;
+    checkBox.setSelected((Boolean) value);
+  }
 
-    @Override
-    public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super.reset(propMeta, selectedClasses);
-        checkBox.setIndeterminate(false);
-    }
+  @Override
+  public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super.reset(propMeta, selectedClasses);
+    checkBox.setIndeterminate(false);
+  }
 
-    @Override
-    protected void valueIsIndeterminate() {
-        handleIndeterminate(checkBox);
-    }
+  @Override
+  protected void valueIsIndeterminate() {
+    handleIndeterminate(checkBox);
+  }
 
-    @Override
-    public void requestFocus() {
-        EditorUtils.doNextFrame(() -> checkBox.requestFocus());
-    }
+  @Override
+  public void requestFocus() {
+    EditorUtils.doNextFrame(() -> checkBox.requestFocus());
+  }
 }

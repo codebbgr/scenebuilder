@@ -37,7 +37,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
@@ -45,92 +44,84 @@ import javafx.scene.Parent;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 
-/**
- * This class allows to pick objects at a given position in scene graph.
- * 
- * 
- */
+/** This class allows to pick objects at a given position in scene graph. */
 public class Picker {
 
-    private final static double THRESHOLD = 3;
-    
-    private final Set<Node> excludes = new HashSet<>();
-    private final List<Node> matches = new ArrayList<>();
-    
-    /**
-     * Returns the list of nodes below (sceneX, sceneY).
-     * Topmost node is at index 0.
-     * Search starts from startNode.
-     * 
-     * @param startNode
-     * @param sceneX
-     * @param sceneY
-     * @return the list of nodes below (sceneX, sceneY).
-     */
-    public List<Node> pick(Node startNode, double sceneX, double sceneY) {
-        assert startNode != null;
-        assert startNode.getScene() != null;
-        assert Double.isNaN(sceneX) == false;
-        assert Double.isNaN(sceneY) == false;
-        
-        final Point2D localXY = startNode.sceneToLocal(sceneX, sceneY, true /* rootScene */);
-        return pickInLocal(startNode, localXY.getX(), localXY.getY());
-    }
-    
-    public List<Node> pickInLocal(Node startNode, double localX, double localY) {
-        assert startNode != null;
-        assert startNode.getScene() != null;
-        assert Double.isNaN(localX) == false;
-        assert Double.isNaN(localY) == false;
-        
-        this.matches.clear();
-        performPick(startNode, localX, localY);
-        return matches.isEmpty() ? null : Collections.unmodifiableList(matches);
-    }
+  private static final double THRESHOLD = 3;
 
-    public Set<Node> getExcludes() {
-        return excludes;
-    }
-    
+  private final Set<Node> excludes = new HashSet<>();
+  private final List<Node> matches = new ArrayList<>();
 
-    private void performPick(Node startNode, double localX, double localY) {
+  /**
+   * Returns the list of nodes below (sceneX, sceneY). Topmost node is at index 0. Search starts
+   * from startNode.
+   *
+   * @param startNode
+   * @param sceneX
+   * @param sceneY
+   * @return the list of nodes below (sceneX, sceneY).
+   */
+  public List<Node> pick(Node startNode, double sceneX, double sceneY) {
+    assert startNode != null;
+    assert startNode.getScene() != null;
+    assert Double.isNaN(sceneX) == false;
+    assert Double.isNaN(sceneY) == false;
 
-        if ((excludes.contains(startNode) == false) && startNode.isVisible()){
-            if (match(startNode, localX, localY)) {
-                matches.add(0, startNode);
-            }
-        
-            if (startNode instanceof Parent) {
-                final Parent startParent = (Parent) startNode;
-                for (Node child : startParent.getChildrenUnmodifiable()) {
-                    final Point2D childLocalXY = child.parentToLocal(localX, localY);
-                    // Note : childLocalXY may be null.
-                    // For example, child is a Button with scaleX == 0.
-                    if (childLocalXY != null) {
-                        performPick(child, childLocalXY.getX(), childLocalXY.getY());
-                    }
-                }
-            }
+    final Point2D localXY = startNode.sceneToLocal(sceneX, sceneY, true /* rootScene */);
+    return pickInLocal(startNode, localXY.getX(), localXY.getY());
+  }
+
+  public List<Node> pickInLocal(Node startNode, double localX, double localY) {
+    assert startNode != null;
+    assert startNode.getScene() != null;
+    assert Double.isNaN(localX) == false;
+    assert Double.isNaN(localY) == false;
+
+    this.matches.clear();
+    performPick(startNode, localX, localY);
+    return matches.isEmpty() ? null : Collections.unmodifiableList(matches);
+  }
+
+  public Set<Node> getExcludes() {
+    return excludes;
+  }
+
+  private void performPick(Node startNode, double localX, double localY) {
+
+    if ((excludes.contains(startNode) == false) && startNode.isVisible()) {
+      if (match(startNode, localX, localY)) {
+        matches.add(0, startNode);
+      }
+
+      if (startNode instanceof Parent) {
+        final Parent startParent = (Parent) startNode;
+        for (Node child : startParent.getChildrenUnmodifiable()) {
+          final Point2D childLocalXY = child.parentToLocal(localX, localY);
+          // Note : childLocalXY may be null.
+          // For example, child is a Button with scaleX == 0.
+          if (childLocalXY != null) {
+            performPick(child, childLocalXY.getX(), childLocalXY.getY());
+          }
         }
+      }
     }
+  }
 
-    private boolean match(Node node, double x, double y) {
-        assert node != null;
-        
-        final Bounds bounds = node.getLayoutBounds();
-        if (bounds.isEmpty())
-            return false;
-        final boolean result;
-        if (node instanceof Line) {
-            final Line line = (Line) node;
-            final Point2D point = new Point2D(x, y);          
-            result = DistanceUtils.getDistFromPointToLine(point, line) < THRESHOLD;
-        } else if (node instanceof Shape) {
-            result = ((Shape) node).contains(x, y);
-        } else {
-            result = bounds.contains(x, y);
-        }
-        return result;
+  private boolean match(Node node, double x, double y) {
+    assert node != null;
+
+    final Bounds bounds = node.getLayoutBounds();
+    if (bounds.isEmpty()) return false;
+    final boolean result;
+    if (node instanceof Line) {
+      final Line line = (Line) node;
+      final Point2D point = new Point2D(x, y);
+      result = DistanceUtils.getDistFromPointToLine(point, line) < THRESHOLD;
+    } else if (node instanceof Shape) {
+      result = ((Shape) node).contains(x, y);
+    } else {
+      result = bounds.contains(x, y);
     }
-    
+    return result;
+  }
 }

@@ -35,25 +35,29 @@ import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.popupeditors.PaintPopupEditor;
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
 import com.oracle.javafx.scenebuilder.kit.util.control.paintpicker.PaintPicker;
-
 import java.util.Set;
 
 /**
- * The editor is shown as a MenuButton. This button then shows a popup
- * to select a {@link javafx.scene.paint.Color}.
+ * The editor is shown as a MenuButton. This button then shows a popup to select a {@link
+ * javafx.scene.paint.Color}.
  */
 public class ColorPopupEditor extends PaintPopupEditor {
 
-    private EditorController editorController;
+  private EditorController editorController;
 
-    public ColorPopupEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses, EditorController editorController) {
-        super(propMeta, selectedClasses, editorController);
-        this.editorController = editorController;
-    }
+  public ColorPopupEditor(
+      ValuePropertyMetadata propMeta,
+      Set<Class<?>> selectedClasses,
+      EditorController editorController) {
+    super(propMeta, selectedClasses, editorController);
+    this.editorController = editorController;
+  }
 
-    @Override
-    public void initializePopupContent() {
-        final PaintPicker.Delegate delegate = (warningKey, arguments) -> editorController.getMessageLog().logWarningMessage(warningKey, arguments);
-        paintPicker = new PaintPicker(delegate, PaintPicker.Mode.COLOR);
-    }
+  @Override
+  public void initializePopupContent() {
+    final PaintPicker.Delegate delegate =
+        (warningKey, arguments) ->
+            editorController.getMessageLog().logWarningMessage(warningKey, arguments);
+    paintPicker = new PaintPicker(delegate, PaintPicker.Mode.COLOR);
+  }
 }

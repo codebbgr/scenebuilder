@@ -49,121 +49,117 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
-/**
- *
- * 
- */
+/** */
 public class TreeTableViewHandles extends AbstractNodeHandles<Node> {
-    
-    private final Group grips = new Group();
-    
-    public TreeTableViewHandles(ContentPanelController contentPanelController,
-            FXOMInstance fxomInstance) {
-        super(contentPanelController, fxomInstance, Node.class);
-        assert fxomInstance.getSceneGraphObject() instanceof TreeTableView;
-        
-        getRootNode().getChildren().add(grips); // Above handles
+
+  private final Group grips = new Group();
+
+  public TreeTableViewHandles(
+      ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
+    super(contentPanelController, fxomInstance, Node.class);
+    assert fxomInstance.getSceneGraphObject() instanceof TreeTableView;
+
+    getRootNode().getChildren().add(grips); // Above handles
+  }
+
+  public TreeTableView<?> getTreeTableView() {
+    return (TreeTableView<?>) getSceneGraphObject();
+  }
+
+  /*
+   * AbstractNodeHandles
+   */
+  @Override
+  protected void layoutDecoration() {
+    super.layoutDecoration();
+
+    // Adjusts the number of grip lines to the number of dividers
+    adjustGripCount();
+
+    // Updates grip positions
+    for (int i = 0, count = getTreeTableView().getColumns().size(); i < count; i++) {
+      layoutGrip(i);
     }
-    
-    public TreeTableView<?> getTreeTableView() {
-        return (TreeTableView<?>) getSceneGraphObject();
-    }
-    
-    /*
-     * AbstractNodeHandles
-     */
-    @Override
-    protected void layoutDecoration() {
-        super.layoutDecoration();
-             
-        // Adjusts the number of grip lines to the number of dividers
-        adjustGripCount();
-        
-        // Updates grip positions
-        for (int i = 0, count = getTreeTableView().getColumns().size(); i < count; i++) {
-            layoutGrip(i);
-        }
+  }
+
+  @Override
+  public AbstractGesture findGesture(Node node) {
+    final AbstractGesture result;
+
+    final int gripIndex = grips.getChildren().indexOf(node);
+    if (gripIndex != -1) {
+      final DesignHierarchyMask m = new DesignHierarchyMask(getFxomInstance());
+      final FXOMObject columnObject = m.getSubComponentAtIndex(gripIndex);
+      assert columnObject instanceof FXOMInstance;
+      result =
+          new ResizeTreeTableColumnGesture(
+              getContentPanelController(), (FXOMInstance) columnObject);
+    } else {
+      result = super.findGesture(node);
     }
 
-    @Override
-    public AbstractGesture findGesture(Node node) {
-        final AbstractGesture result;
-        
-        final int gripIndex = grips.getChildren().indexOf(node);
-        if (gripIndex != -1) {
-            final DesignHierarchyMask m = new DesignHierarchyMask(getFxomInstance());
-            final FXOMObject columnObject = m.getSubComponentAtIndex(gripIndex);
-            assert columnObject instanceof FXOMInstance;
-            result = new ResizeTreeTableColumnGesture(getContentPanelController(), 
-                    (FXOMInstance) columnObject);
-        } else {
-            result = super.findGesture(node);
-        }
-        
-        return result;
-    }
+    return result;
+  }
 
-    
-    /*
-     * Private
-     */
-    
-    private void adjustGripCount() {
-        final int columnCount = getTreeTableView().getColumns().size();
-        final List<Node> gripChildren = grips.getChildren();
-        
-        while (gripChildren.size() < columnCount) {
-            gripChildren.add(makeGripLine());
-        }
-        while (gripChildren.size() > columnCount) {
-            gripChildren.remove(gripChildren.size()-1);
-        }
-    }
-    
-    private Line makeGripLine() {
-        final Line result = new Line();
-        result.setStrokeWidth(SELECTION_HANDLES_SIZE);
-        result.setStroke(Color.TRANSPARENT);
-        result.setCursor(Cursor.H_RESIZE);
-        attachHandles(result);
-        return result;
-    }
-    
-    private void layoutGrip(int gripIndex) {
-        assert grips.getChildren().get(gripIndex) instanceof Line;
-        
-        final TreeTableColumn<?,?> tc = getTreeTableView().getColumns().get(gripIndex);
-        
-        if (tc.isVisible()) {
-            final TreeTableViewDesignInfoX di = new TreeTableViewDesignInfoX();
-            final Bounds b = di.getColumnHeaderBounds(tc);
-            final double startX = b.getMaxX();
-            final double startY = b.getMinY();
-            final double endY = b.getMaxY();
+  /*
+   * Private
+   */
 
-            final boolean snapToPixel = true;
-            final Point2D startPoint = sceneGraphObjectToDecoration(startX, startY, snapToPixel);
-            final Point2D endPoint = sceneGraphObjectToDecoration(startX, endY, snapToPixel);
+  private void adjustGripCount() {
+    final int columnCount = getTreeTableView().getColumns().size();
+    final List<Node> gripChildren = grips.getChildren();
 
-            final Line gripLine = (Line) grips.getChildren().get(gripIndex);
-            gripLine.setVisible(true);
-            gripLine.setManaged(true);
-            gripLine.setStartX(startPoint.getX());
-            gripLine.setStartY(startPoint.getY());
-            gripLine.setEndX(endPoint.getX());
-            gripLine.setEndY(endPoint.getY());
-        } else {
-            final Line gripLine = (Line) grips.getChildren().get(gripIndex);
-            gripLine.setVisible(false);
-            gripLine.setManaged(false);
-        }
+    while (gripChildren.size() < columnCount) {
+      gripChildren.add(makeGripLine());
     }
-    
-    
-    /* 
-     * Wrapper to avoid the 'leaking this in constructor' warning emitted by NB.
-     */
-    private void attachHandles(Node node) {
-        attachHandles(node, this);
+    while (gripChildren.size() > columnCount) {
+      gripChildren.remove(gripChildren.size() - 1);
     }
+  }
+
+  private Line makeGripLine() {
+    final Line result = new Line();
+    result.setStrokeWidth(SELECTION_HANDLES_SIZE);
+    result.setStroke(Color.TRANSPARENT);
+    result.setCursor(Cursor.H_RESIZE);
+    attachHandles(result);
+    return result;
+  }
+
+  private void layoutGrip(int gripIndex) {
+    assert grips.getChildren().get(gripIndex) instanceof Line;
+
+    final TreeTableColumn<?, ?> tc = getTreeTableView().getColumns().get(gripIndex);
+
+    if (tc.isVisible()) {
+      final TreeTableViewDesignInfoX di = new TreeTableViewDesignInfoX();
+      final Bounds b = di.getColumnHeaderBounds(tc);
+      final double startX = b.getMaxX();
+      final double startY = b.getMinY();
+      final double endY = b.getMaxY();
+
+      final boolean snapToPixel = true;
+      final Point2D startPoint = sceneGraphObjectToDecoration(startX, startY, snapToPixel);
+      final Point2D endPoint = sceneGraphObjectToDecoration(startX, endY, snapToPixel);
+
+      final Line gripLine = (Line) grips.getChildren().get(gripIndex);
+      gripLine.setVisible(true);
+      gripLine.setManaged(true);
+      gripLine.setStartX(startPoint.getX());
+      gripLine.setStartY(startPoint.getY());
+      gripLine.setEndX(endPoint.getX());
+      gripLine.setEndY(endPoint.getY());
+    } else {
+      final Line gripLine = (Line) grips.getChildren().get(gripIndex);
+      gripLine.setVisible(false);
+      gripLine.setManaged(false);
+    }
+  }
+
+  /*
+   * Wrapper to avoid the 'leaking this in constructor' warning emitted by NB.
+   */
+  private void attachHandles(Node node) {
+    attachHandles(node, this);
+  }
 }

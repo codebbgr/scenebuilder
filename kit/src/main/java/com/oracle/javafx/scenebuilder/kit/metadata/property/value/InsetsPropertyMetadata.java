@@ -38,44 +38,55 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.InspectorPath;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.geometry.Insets;
 
-/**
- *
- * 
- */
+/** */
 public class InsetsPropertyMetadata extends ComplexPropertyMetadata<Insets> {
-    
-    private final DoublePropertyMetadata topMetadata
-            = new DoublePropertyMetadata(new PropertyName("top"), 
-            DoubleKind.COORDINATE, true, Insets.EMPTY.getTop(), InspectorPath.UNUSED);
-    private final DoublePropertyMetadata bottomMetadata
-            = new DoublePropertyMetadata(new PropertyName("bottom"), 
-            DoubleKind.COORDINATE, true, Insets.EMPTY.getBottom(), InspectorPath.UNUSED);
-    private final DoublePropertyMetadata leftMetadata
-            = new DoublePropertyMetadata(new PropertyName("left"), 
-            DoubleKind.COORDINATE, true, Insets.EMPTY.getLeft(), InspectorPath.UNUSED);
-    private final DoublePropertyMetadata rightMetadata
-            = new DoublePropertyMetadata(new PropertyName("right"), 
-            DoubleKind.COORDINATE, true, Insets.EMPTY.getRight(), InspectorPath.UNUSED);
 
-    
-    public InsetsPropertyMetadata(PropertyName name, boolean readWrite, 
-            Insets defaultValue, InspectorPath inspectorPath) {
-        super(name, Insets.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final DoublePropertyMetadata topMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("top"),
+          DoubleKind.COORDINATE,
+          true,
+          Insets.EMPTY.getTop(),
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata bottomMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("bottom"),
+          DoubleKind.COORDINATE,
+          true,
+          Insets.EMPTY.getBottom(),
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata leftMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("left"),
+          DoubleKind.COORDINATE,
+          true,
+          Insets.EMPTY.getLeft(),
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata rightMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("right"),
+          DoubleKind.COORDINATE,
+          true,
+          Insets.EMPTY.getRight(),
+          InspectorPath.UNUSED);
 
-    /*
-     * ComplexValuePropertyMetadata
-     */
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Insets value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, getValueClass());
+  public InsetsPropertyMetadata(
+      PropertyName name, boolean readWrite, Insets defaultValue, InspectorPath inspectorPath) {
+    super(name, Insets.class, readWrite, defaultValue, inspectorPath);
+  }
 
-        topMetadata.setValue(result, value.getTop());
-        bottomMetadata.setValue(result, value.getBottom());
-        leftMetadata.setValue(result, value.getLeft());
-        rightMetadata.setValue(result, value.getRight());
-        result.setSceneGraphObject(value);
-        return result;
-    }
+  /*
+   * ComplexValuePropertyMetadata
+   */
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Insets value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, getValueClass());
 
+    topMetadata.setValue(result, value.getTop());
+    bottomMetadata.setValue(result, value.getBottom());
+    leftMetadata.setValue(result, value.getLeft());
+    rightMetadata.setValue(result, value.getRight());
+    result.setSceneGraphObject(value);
+    return result;
+  }
 }

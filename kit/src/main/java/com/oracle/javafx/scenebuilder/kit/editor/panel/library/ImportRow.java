@@ -36,63 +36,61 @@ import com.oracle.javafx.scenebuilder.kit.library.util.JarReportEntry;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
-/**
- *
- */
+/** */
 class ImportRow {
 
-    private final BooleanProperty importRequired;
-    private final JarReportEntry jre;
-    private PrefSize prefSize;
-    private final String canonicalClassName;
+  private final BooleanProperty importRequired;
+  private final JarReportEntry jre;
+  private PrefSize prefSize;
+  private final String canonicalClassName;
 
-    public ImportRow(boolean importRequired, JarReportEntry jre, PrefSize prefSize) {
-        this.importRequired = new SimpleBooleanProperty(importRequired);
-        this.jre = jre;
-        this.canonicalClassName = jre.getKlass().getCanonicalName();
+  public ImportRow(boolean importRequired, JarReportEntry jre, PrefSize prefSize) {
+    this.importRequired = new SimpleBooleanProperty(importRequired);
+    this.jre = jre;
+    this.canonicalClassName = jre.getKlass().getCanonicalName();
 
-        if (prefSize == null) {
-            this.prefSize = PrefSize.DEFAULT;
-        } else {
-            this.prefSize = prefSize;
-        }
+    if (prefSize == null) {
+      this.prefSize = PrefSize.DEFAULT;
+    } else {
+      this.prefSize = prefSize;
     }
+  }
 
-    public final BooleanProperty importRequired() {
-        return importRequired;
-    }
+  public final BooleanProperty importRequired() {
+    return importRequired;
+  }
 
-    public boolean isImportRequired() {
-        return importRequired.get();
-    }
+  public boolean isImportRequired() {
+    return importRequired.get();
+  }
 
-    public void setImportRequired(boolean v) {
-        importRequired().set(v);
-    }
+  public void setImportRequired(boolean v) {
+    importRequired().set(v);
+  }
 
-    public JarReportEntry getJarReportEntry() {
-        return this.jre;
-    }
+  public JarReportEntry getJarReportEntry() {
+    return this.jre;
+  }
 
-    public PrefSize getPrefSize() {
-        return this.prefSize;
-    }
+  public PrefSize getPrefSize() {
+    return this.prefSize;
+  }
 
-    public void setPrefSize(PrefSize value) {
-        this.prefSize = value;
-    }
-    
-    public String getCanonicalClassName() {
-        return this.canonicalClassName;
-    }
-    
-    /**
-     * Used by the CheckBoxListCell
-     * @return 
-     */
-    @Override
-    public String toString() {
-        return this.jre.getKlass().getSimpleName();
-    }
+  public void setPrefSize(PrefSize value) {
+    this.prefSize = value;
+  }
 
+  public String getCanonicalClassName() {
+    return this.canonicalClassName;
+  }
+
+  /**
+   * Used by the CheckBoxListCell
+   *
+   * @return
+   */
+  @Override
+  public String toString() {
+    return this.jre.getKlass().getSimpleName();
+  }
 }

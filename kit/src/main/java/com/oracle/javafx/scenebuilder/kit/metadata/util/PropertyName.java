@@ -31,156 +31,151 @@
  */
 package com.oracle.javafx.scenebuilder.kit.metadata.util;
 
-
-/**
- *
- */
+/** */
 public class PropertyName implements Comparable<PropertyName> {
-    
-    private final String name;
-    private final Class<?> residenceClass;
 
-    public PropertyName(String propertyName, Class<?> foreignClass) {
-        assert propertyName != null;
-        
-        this.residenceClass = foreignClass;
-        this.name = propertyName;
-    }
+  private final String name;
+  private final Class<?> residenceClass;
 
-    public PropertyName(String propertyName) {
-        this(propertyName, null);
-    }
-    
-    public Class<?> getResidenceClass() {
-        return residenceClass;
-    }
+  public PropertyName(String propertyName, Class<?> foreignClass) {
+    assert propertyName != null;
 
-    public String getName() {
-        return name;
-    }
-    
-    public Object getValue(Object sceneGraphObject) {
-        final Object result;
-        
-        if (residenceClass == null) {
-            final BeanPropertyIntrospector bpi 
-                    = new BeanPropertyIntrospector(sceneGraphObject);
-            result = bpi.getValue(name);
-        } else {
-            final StaticPropertyIntrospector spi 
-                    = new StaticPropertyIntrospector(sceneGraphObject, residenceClass);
-            result = spi.getValue(name);
-        }
-        
-        return result;
-    }
-    
-    public void setValue(Object sceneGraphObject, Object value) {
-        if (residenceClass == null) {
-            final BeanPropertyIntrospector bpi 
-                    = new BeanPropertyIntrospector(sceneGraphObject);
-            bpi.setValue(name, value);
-        } else {
-            final StaticPropertyIntrospector spi 
-                    = new StaticPropertyIntrospector(sceneGraphObject, residenceClass);
-            spi.setValue(name, value);
-        }
-    }
-    
-    
-    public static String makeClassFullName(Class<?> aClass) {
-        assert aClass != null;
-        
-        final StringBuilder result = new StringBuilder();
-        result.append(aClass.getSimpleName());
-        Class<?> declaringClass = aClass.getDeclaringClass();
-        while (declaringClass != null) {
-            result.insert(0, '.');
-            result.insert(0, declaringClass.getSimpleName());
-            declaringClass = declaringClass.getDeclaringClass();
-        }
-        
-        return result.toString();
-    }
-    
-    /*
-     * Object
-     */
-    
-    @Override
-    public boolean equals(Object o) {
-        boolean result;
-        
-        if (this == o) {
-            result = true;
-        } else if ((o == null) || (o.getClass() != this.getClass())) {
-            result = false;
-        } else {
-            final PropertyName other = (PropertyName) o;
-            
-            result = true;
-            if (residenceClass == null) {
-                result = result && (other.residenceClass == null);
-            } else {
-                result = result && residenceClass.equals(other.residenceClass);
-            }
-            result = result && name.equals(other.name);
-        }
-        
-        return result;
-    }
-            
-    
-    @Override
-    public int hashCode() {
-        int result = 7;
-        if (residenceClass != null) {
-            result = 31 * result + residenceClass.hashCode();
-        }
-        result = 31 * result + name.hashCode();
-        return result;
+    this.residenceClass = foreignClass;
+    this.name = propertyName;
+  }
+
+  public PropertyName(String propertyName) {
+    this(propertyName, null);
+  }
+
+  public Class<?> getResidenceClass() {
+    return residenceClass;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public Object getValue(Object sceneGraphObject) {
+    final Object result;
+
+    if (residenceClass == null) {
+      final BeanPropertyIntrospector bpi = new BeanPropertyIntrospector(sceneGraphObject);
+      result = bpi.getValue(name);
+    } else {
+      final StaticPropertyIntrospector spi =
+          new StaticPropertyIntrospector(sceneGraphObject, residenceClass);
+      result = spi.getValue(name);
     }
 
-    
-    @Override
-    public String toString() {
-        final String result;
-        
-        if (residenceClass == null) {
-            result = name;
-        } else {
-            result = makeClassFullName(residenceClass) + "." + name; //NOI18N
-        }
-        
-        return result;
+    return result;
+  }
+
+  public void setValue(Object sceneGraphObject, Object value) {
+    if (residenceClass == null) {
+      final BeanPropertyIntrospector bpi = new BeanPropertyIntrospector(sceneGraphObject);
+      bpi.setValue(name, value);
+    } else {
+      final StaticPropertyIntrospector spi =
+          new StaticPropertyIntrospector(sceneGraphObject, residenceClass);
+      spi.setValue(name, value);
+    }
+  }
+
+  public static String makeClassFullName(Class<?> aClass) {
+    assert aClass != null;
+
+    final StringBuilder result = new StringBuilder();
+    result.append(aClass.getSimpleName());
+    Class<?> declaringClass = aClass.getDeclaringClass();
+    while (declaringClass != null) {
+      result.insert(0, '.');
+      result.insert(0, declaringClass.getSimpleName());
+      declaringClass = declaringClass.getDeclaringClass();
     }
 
-    /*
-     * Comparable
-     */
-    @Override
-    public int compareTo(PropertyName t) {
-        int result;
-        
-        if (this == t) {
-            result = 0;
-        } else if (t == null) {
-            result = -1;
-        } else {
-            if ((this.residenceClass == null) && (t.residenceClass == null)) {
-                result = 0;
-            } else if (t.residenceClass == null) {
-                result = +1;
-            } else if (this.residenceClass == null) {
-                result = -1;
-            }  else {
-                result = residenceClass.getCanonicalName().compareToIgnoreCase(t.residenceClass.getCanonicalName());
-            }
-            if (result == 0) {
-                result = name.compareToIgnoreCase(t.name);
-            }
-        }
-        
-        return result;
+    return result.toString();
+  }
+
+  /*
+   * Object
+   */
+
+  @Override
+  public boolean equals(Object o) {
+    boolean result;
+
+    if (this == o) {
+      result = true;
+    } else if ((o == null) || (o.getClass() != this.getClass())) {
+      result = false;
+    } else {
+      final PropertyName other = (PropertyName) o;
+
+      result = true;
+      if (residenceClass == null) {
+        result = result && (other.residenceClass == null);
+      } else {
+        result = result && residenceClass.equals(other.residenceClass);
+      }
+      result = result && name.equals(other.name);
     }
+
+    return result;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = 7;
+    if (residenceClass != null) {
+      result = 31 * result + residenceClass.hashCode();
+    }
+    result = 31 * result + name.hashCode();
+    return result;
+  }
+
+  @Override
+  public String toString() {
+    final String result;
+
+    if (residenceClass == null) {
+      result = name;
+    } else {
+      result = makeClassFullName(residenceClass) + "." + name; // NOI18N
+    }
+
+    return result;
+  }
+
+  /*
+   * Comparable
+   */
+  @Override
+  public int compareTo(PropertyName t) {
+    int result;
+
+    if (this == t) {
+      result = 0;
+    } else if (t == null) {
+      result = -1;
+    } else {
+      if ((this.residenceClass == null) && (t.residenceClass == null)) {
+        result = 0;
+      } else if (t.residenceClass == null) {
+        result = +1;
+      } else if (this.residenceClass == null) {
+        result = -1;
+      } else {
+        result =
+            residenceClass
+                .getCanonicalName()
+                .compareToIgnoreCase(t.residenceClass.getCanonicalName());
+      }
+      if (result == 0) {
+        result = name.compareToIgnoreCase(t.name);
+      }
+    }
+
+    return result;
+  }
 }

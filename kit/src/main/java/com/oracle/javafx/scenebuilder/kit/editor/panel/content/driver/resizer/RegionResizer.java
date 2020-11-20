@@ -41,177 +41,177 @@ import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.scene.layout.Region;
 
-/**
- *
- * 
- */
+/** */
 public class RegionResizer extends AbstractResizer<Region> {
 
-    private final double originalMinWidth;
-    private final double originalMinHeight;
-    private final double originalPrefWidth;
-    private final double originalPrefHeight;
-    private final double originalMaxWidth;
-    private final double originalMaxHeight;
-    private final PropertyName minWidthName  = new PropertyName("minWidth"); //NOI18N
-    private final PropertyName minHeightName = new PropertyName("minHeight"); //NOI18N
-    private final PropertyName prefWidthName  = new PropertyName("prefWidth"); //NOI18N
-    private final PropertyName prefHeightName = new PropertyName("prefHeight"); //NOI18N
-    private final PropertyName maxWidthName  = new PropertyName("maxWidth"); //NOI18N
-    private final PropertyName maxHeightName = new PropertyName("maxHeight"); //NOI18N
-    private final List<PropertyName> propertyNames = new ArrayList<>();
-    
-    public RegionResizer(Region sceneGraphObject) {
-        super(sceneGraphObject);
-        originalMinWidth   = sceneGraphObject.getMinWidth();
-        originalMinHeight  = sceneGraphObject.getMinHeight();
-        originalPrefWidth  = sceneGraphObject.getPrefWidth();
-        originalPrefHeight = sceneGraphObject.getPrefHeight();
-        originalMaxWidth   = sceneGraphObject.getMaxWidth();
-        originalMaxHeight  = sceneGraphObject.getMaxHeight();
-        propertyNames.add(prefWidthName);
-        propertyNames.add(prefHeightName);
-        propertyNames.add(minWidthName);
-        propertyNames.add(minHeightName);
-        propertyNames.add(maxWidthName);
-        propertyNames.add(maxHeightName);
+  private final double originalMinWidth;
+  private final double originalMinHeight;
+  private final double originalPrefWidth;
+  private final double originalPrefHeight;
+  private final double originalMaxWidth;
+  private final double originalMaxHeight;
+  private final PropertyName minWidthName = new PropertyName("minWidth"); // NOI18N
+  private final PropertyName minHeightName = new PropertyName("minHeight"); // NOI18N
+  private final PropertyName prefWidthName = new PropertyName("prefWidth"); // NOI18N
+  private final PropertyName prefHeightName = new PropertyName("prefHeight"); // NOI18N
+  private final PropertyName maxWidthName = new PropertyName("maxWidth"); // NOI18N
+  private final PropertyName maxHeightName = new PropertyName("maxHeight"); // NOI18N
+  private final List<PropertyName> propertyNames = new ArrayList<>();
+
+  public RegionResizer(Region sceneGraphObject) {
+    super(sceneGraphObject);
+    originalMinWidth = sceneGraphObject.getMinWidth();
+    originalMinHeight = sceneGraphObject.getMinHeight();
+    originalPrefWidth = sceneGraphObject.getPrefWidth();
+    originalPrefHeight = sceneGraphObject.getPrefHeight();
+    originalMaxWidth = sceneGraphObject.getMaxWidth();
+    originalMaxHeight = sceneGraphObject.getMaxHeight();
+    propertyNames.add(prefWidthName);
+    propertyNames.add(prefHeightName);
+    propertyNames.add(minWidthName);
+    propertyNames.add(minHeightName);
+    propertyNames.add(maxWidthName);
+    propertyNames.add(maxHeightName);
+  }
+
+  public static String makeSizeString(double size) {
+    final String result;
+    if (size == Double.MAX_VALUE) {
+      result = "MAX_VALUE"; // NOI18N
+    } else {
+      result = String.valueOf(size);
     }
-    
-    public static String makeSizeString(double size) {
-        final String result;
-        if (size == Double.MAX_VALUE) {
-            result = "MAX_VALUE"; //NOI18N
-        } else {
-            result = String.valueOf(size);
-        }
-        return result;
+    return result;
+  }
+
+  public static String makeComputedSizeString(double size) {
+    final String result;
+    if (size == Region.USE_COMPUTED_SIZE) {
+      result = "USE_COMPUTED_SIZE"; // NOI18N
+    } else {
+      result = makeSizeString(size);
     }
-    
-    public static String makeComputedSizeString(double size) {
-        final String result;
-        if (size == Region.USE_COMPUTED_SIZE) {
-            result = "USE_COMPUTED_SIZE"; //NOI18N
-        } else {
-            result = makeSizeString(size);
-        }
-        return result;
+    return result;
+  }
+
+  public static String makePrefSizeString(double size) {
+    final String result;
+    if (size == Region.USE_PREF_SIZE) {
+      result = "USE_PREF_SIZE"; // NOI18N
+    } else {
+      result = makeComputedSizeString(size);
     }
-    
-    public static String makePrefSizeString(double size) {
-        final String result;
-        if (size == Region.USE_PREF_SIZE) {
-            result = "USE_PREF_SIZE"; //NOI18N
-        } else {
-            result = makeComputedSizeString(size);
-        }
-        return result;
+    return result;
+  }
+
+  /*
+   * AbstractResizer
+   */
+
+  @Override
+  public final Bounds computeBounds(double width, double height) {
+    return new BoundingBox(0, 0, Math.round(width), Math.round(height));
+  }
+
+  @Override
+  public Feature getFeature() {
+    return Feature.FREE;
+  }
+
+  @Override
+  public void changeWidth(double weight) {
+    final double w = Math.round(weight);
+
+    sceneGraphObject.setPrefWidth(w);
+
+    if ((originalMinWidth != Region.USE_COMPUTED_SIZE)
+        && (originalMinWidth != Region.USE_PREF_SIZE)) {
+      sceneGraphObject.setMinWidth(Math.min(w, originalMinWidth));
+    }
+    if ((originalMaxWidth != Region.USE_COMPUTED_SIZE)
+        && (originalMaxWidth != Region.USE_PREF_SIZE)) {
+      sceneGraphObject.setMaxWidth(Math.max(w, originalMaxWidth));
+    }
+  }
+
+  @Override
+  public void changeHeight(double height) {
+    final double h = Math.round(height);
+
+    sceneGraphObject.setPrefHeight(h);
+
+    if ((originalMinHeight != Region.USE_COMPUTED_SIZE)
+        && (originalMinHeight != Region.USE_PREF_SIZE)) {
+      sceneGraphObject.setMinHeight(Math.min(h, originalMinHeight));
+    }
+    if ((originalMaxHeight != Region.USE_COMPUTED_SIZE)
+        && (originalMaxHeight != Region.USE_PREF_SIZE)) {
+      sceneGraphObject.setMaxHeight(Math.max(h, originalMaxHeight));
+    }
+  }
+
+  @Override
+  public void revertToOriginalSize() {
+    sceneGraphObject.setMinWidth(originalMinWidth);
+    sceneGraphObject.setMinHeight(originalMinHeight);
+    sceneGraphObject.setPrefWidth(originalPrefWidth);
+    sceneGraphObject.setPrefHeight(originalPrefHeight);
+    sceneGraphObject.setMaxWidth(originalMaxWidth);
+    sceneGraphObject.setMaxHeight(originalMaxHeight);
+  }
+
+  @Override
+  public List<PropertyName> getPropertyNames() {
+    return propertyNames;
+  }
+
+  @Override
+  public Object getValue(PropertyName propertyName) {
+    assert propertyName != null;
+    assert propertyNames.contains(propertyName);
+
+    final Object result;
+    if (propertyName.equals(minWidthName)) {
+      result = makePrefSizeString(sceneGraphObject.getMinWidth());
+    } else if (propertyName.equals(minHeightName)) {
+      result = makePrefSizeString(sceneGraphObject.getMinHeight());
+    } else if (propertyName.equals(prefWidthName)) {
+      result = makeComputedSizeString(sceneGraphObject.getPrefWidth());
+    } else if (propertyName.equals(prefHeightName)) {
+      result = makeComputedSizeString(sceneGraphObject.getPrefHeight());
+    } else if (propertyName.equals(maxWidthName)) {
+      result = makePrefSizeString(sceneGraphObject.getMaxWidth());
+    } else if (propertyName.equals(maxHeightName)) {
+      result = makePrefSizeString(sceneGraphObject.getMaxHeight());
+    } else {
+      // Emergency code
+      result = null;
     }
 
-    /*
-     * AbstractResizer
-     */
-    
-    @Override
-    public final Bounds computeBounds(double width, double height) {
-        return new BoundingBox(0, 0, Math.round(width), Math.round(height));
-    }
+    return result;
+  }
 
-    
-    @Override
-    public Feature getFeature() {
-        return Feature.FREE;
+  @Override
+  public Map<PropertyName, Object> getChangeMap() {
+    final Map<PropertyName, Object> result = new HashMap<>();
+    if (MathUtils.equals(sceneGraphObject.getMinWidth(), originalMinWidth) == false) {
+      result.put(minWidthName, sceneGraphObject.getMinWidth());
     }
-
-    @Override
-    public void changeWidth(double weight) {
-        final double w = Math.round(weight);
-        
-        sceneGraphObject.setPrefWidth(w);
-        
-        if ((originalMinWidth != Region.USE_COMPUTED_SIZE) && (originalMinWidth != Region.USE_PREF_SIZE)) {
-            sceneGraphObject.setMinWidth(Math.min(w, originalMinWidth));
-        }
-        if ((originalMaxWidth != Region.USE_COMPUTED_SIZE) && (originalMaxWidth != Region.USE_PREF_SIZE)) {
-            sceneGraphObject.setMaxWidth(Math.max(w, originalMaxWidth));
-        }
+    if (MathUtils.equals(sceneGraphObject.getMinHeight(), originalMinHeight) == false) {
+      result.put(minHeightName, sceneGraphObject.getMinHeight());
     }
-
-    @Override
-    public void changeHeight(double height) {
-        final double h = Math.round(height);
-        
-        sceneGraphObject.setPrefHeight(h);
-        
-        if ((originalMinHeight != Region.USE_COMPUTED_SIZE) && (originalMinHeight != Region.USE_PREF_SIZE)) {
-            sceneGraphObject.setMinHeight(Math.min(h, originalMinHeight));
-        }
-        if ((originalMaxHeight != Region.USE_COMPUTED_SIZE) && (originalMaxHeight != Region.USE_PREF_SIZE)) {
-            sceneGraphObject.setMaxHeight(Math.max(h, originalMaxHeight));
-        }
+    if (MathUtils.equals(sceneGraphObject.getPrefWidth(), originalPrefWidth) == false) {
+      result.put(prefWidthName, sceneGraphObject.getPrefWidth());
     }
-
-    @Override
-    public void revertToOriginalSize() {
-        sceneGraphObject.setMinWidth(originalMinWidth);
-        sceneGraphObject.setMinHeight(originalMinHeight);
-        sceneGraphObject.setPrefWidth(originalPrefWidth);
-        sceneGraphObject.setPrefHeight(originalPrefHeight);
-        sceneGraphObject.setMaxWidth(originalMaxWidth);
-        sceneGraphObject.setMaxHeight(originalMaxHeight);
+    if (MathUtils.equals(sceneGraphObject.getPrefHeight(), originalPrefHeight) == false) {
+      result.put(prefHeightName, sceneGraphObject.getPrefHeight());
     }
-
-    @Override
-    public List<PropertyName> getPropertyNames() {
-        return propertyNames;
+    if (MathUtils.equals(sceneGraphObject.getMaxWidth(), originalMaxWidth) == false) {
+      result.put(maxWidthName, sceneGraphObject.getMaxWidth());
     }
-
-    @Override
-    public Object getValue(PropertyName propertyName) {
-        assert propertyName != null;
-        assert propertyNames.contains(propertyName);
-        
-        final Object result;
-        if (propertyName.equals(minWidthName)) {
-            result = makePrefSizeString(sceneGraphObject.getMinWidth());
-        } else if (propertyName.equals(minHeightName)) {
-            result = makePrefSizeString(sceneGraphObject.getMinHeight());
-        } else if (propertyName.equals(prefWidthName)) {
-            result = makeComputedSizeString(sceneGraphObject.getPrefWidth());
-        } else if (propertyName.equals(prefHeightName)) {
-            result = makeComputedSizeString(sceneGraphObject.getPrefHeight());
-        } else if (propertyName.equals(maxWidthName)) {
-            result = makePrefSizeString(sceneGraphObject.getMaxWidth());
-        } else if (propertyName.equals(maxHeightName)) {
-            result = makePrefSizeString(sceneGraphObject.getMaxHeight());
-        } else {
-            // Emergency code
-            result = null;
-        }
-        
-        return result;
+    if (MathUtils.equals(sceneGraphObject.getMaxHeight(), originalMaxHeight) == false) {
+      result.put(maxHeightName, sceneGraphObject.getMaxHeight());
     }
-
-    @Override
-    public Map<PropertyName, Object> getChangeMap() {
-        final Map<PropertyName, Object> result = new HashMap<>();
-        if (MathUtils.equals(sceneGraphObject.getMinWidth(), originalMinWidth) == false) {
-            result.put(minWidthName, sceneGraphObject.getMinWidth());
-        }
-        if (MathUtils.equals(sceneGraphObject.getMinHeight(), originalMinHeight) == false) {
-            result.put(minHeightName, sceneGraphObject.getMinHeight());
-        }
-        if (MathUtils.equals(sceneGraphObject.getPrefWidth(), originalPrefWidth) == false) {
-            result.put(prefWidthName, sceneGraphObject.getPrefWidth());
-        }
-        if (MathUtils.equals(sceneGraphObject.getPrefHeight(), originalPrefHeight) == false) {
-            result.put(prefHeightName, sceneGraphObject.getPrefHeight());
-        }
-        if (MathUtils.equals(sceneGraphObject.getMaxWidth(), originalMaxWidth) == false) {
-            result.put(maxWidthName, sceneGraphObject.getMaxWidth());
-        }
-        if (MathUtils.equals(sceneGraphObject.getMaxHeight(), originalMaxHeight) == false) {
-            result.put(maxHeightName, sceneGraphObject.getMaxHeight());
-        }
-        return result;
-    }
+    return result;
+  }
 }

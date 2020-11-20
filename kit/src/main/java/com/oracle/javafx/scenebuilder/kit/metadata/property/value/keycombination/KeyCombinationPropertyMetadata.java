@@ -40,36 +40,42 @@ import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 
-/**
- *
- */
+/** */
 public class KeyCombinationPropertyMetadata extends ComplexPropertyMetadata<KeyCombination> {
 
-    private final KeyCodeCombinationPropertyMetadata keyCodeCombinationMetadata;
-    private final KeyCharacterCombinationPropertyMetadata keyCharacterCombinationMetadata;
+  private final KeyCodeCombinationPropertyMetadata keyCodeCombinationMetadata;
+  private final KeyCharacterCombinationPropertyMetadata keyCharacterCombinationMetadata;
 
-    public KeyCombinationPropertyMetadata(PropertyName name, boolean readWrite, 
-            KeyCombination defaultValue, InspectorPath inspectorPath) {
-        super(name, KeyCombination.class, readWrite, defaultValue, inspectorPath);
-        keyCodeCombinationMetadata = new KeyCodeCombinationPropertyMetadata(name, readWrite, null, inspectorPath);
-        keyCharacterCombinationMetadata = new KeyCharacterCombinationPropertyMetadata(name, readWrite, null, inspectorPath);
+  public KeyCombinationPropertyMetadata(
+      PropertyName name,
+      boolean readWrite,
+      KeyCombination defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, KeyCombination.class, readWrite, defaultValue, inspectorPath);
+    keyCodeCombinationMetadata =
+        new KeyCodeCombinationPropertyMetadata(name, readWrite, null, inspectorPath);
+    keyCharacterCombinationMetadata =
+        new KeyCharacterCombinationPropertyMetadata(name, readWrite, null, inspectorPath);
+  }
+
+  /*
+   * ComplexPropertyMetadata
+   */
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(KeyCombination value, FXOMDocument fxomDocument) {
+    final FXOMInstance result;
+
+    if (value instanceof KeyCodeCombination) {
+      result =
+          keyCodeCombinationMetadata.makeFxomInstanceFromValue(
+              (KeyCodeCombination) value, fxomDocument);
+    } else {
+      assert value instanceof KeyCharacterCombination;
+      result =
+          keyCharacterCombinationMetadata.makeFxomInstanceFromValue(
+              (KeyCharacterCombination) value, fxomDocument);
     }
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(KeyCombination value, FXOMDocument fxomDocument) {
-        final FXOMInstance result;
-        
-        if (value instanceof KeyCodeCombination) {
-            result = keyCodeCombinationMetadata.makeFxomInstanceFromValue((KeyCodeCombination) value, fxomDocument);
-        } else {
-            assert value instanceof KeyCharacterCombination;
-            result = keyCharacterCombinationMetadata.makeFxomInstanceFromValue((KeyCharacterCombination) value, fxomDocument);
-        }
-
-        return result;
-    }
-
+    return result;
+  }
 }

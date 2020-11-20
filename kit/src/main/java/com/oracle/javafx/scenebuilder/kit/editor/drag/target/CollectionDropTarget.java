@@ -38,86 +38,87 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMCollection;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import java.util.Objects;
 
-/**
- *
- */
+/** */
 public class CollectionDropTarget extends AbstractDropTarget {
-    
-    private final FXOMCollection targetCollection;
-    private final int targetIndex;
 
-    public CollectionDropTarget(FXOMCollection targetCollection, int targetIndex) {
-        this.targetCollection = targetCollection;
-        this.targetIndex = targetIndex;
-    }
+  private final FXOMCollection targetCollection;
+  private final int targetIndex;
 
-    public FXOMCollection getTargetCollection() {
-        return targetCollection;
-    }
+  public CollectionDropTarget(FXOMCollection targetCollection, int targetIndex) {
+    this.targetCollection = targetCollection;
+    this.targetIndex = targetIndex;
+  }
 
-    public int getTargetIndex() {
-        return targetIndex;
-    }
-    
-    /*
-     * AbstractDropTarget
-     */
-    @Override
-    public FXOMObject getTargetObject() {
-        return targetCollection;
-    }
+  public FXOMCollection getTargetCollection() {
+    return targetCollection;
+  }
 
-    @Override
-    public boolean acceptDragSource(AbstractDragSource dragSource) {
-        assert dragSource != null;
-        
-        // TODO(elp) : can we really put any kind of FXOMObject in a collection ?
-        return dragSource.getDraggedObjects().isEmpty() == false;
-    }
+  public int getTargetIndex() {
+    return targetIndex;
+  }
 
-    @Override
-    public Job makeDropJob(AbstractDragSource dragSource, EditorController editorController) {
-        throw new UnsupportedOperationException("To be implemented"); //NOI18N
-    }
-    
-    @Override
-    public boolean isSelectRequiredAfterDrop() {
-        return true;
-    }
-    
-    /*
-     * Object
-     */
-    @Override
-    public int hashCode() {
-        int hash = 5;
-        hash = 37 * hash + Objects.hashCode(this.targetCollection);
-        hash = 37 * hash + this.targetIndex;
-        return hash;
-    }
+  /*
+   * AbstractDropTarget
+   */
+  @Override
+  public FXOMObject getTargetObject() {
+    return targetCollection;
+  }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final CollectionDropTarget other = (CollectionDropTarget) obj;
-        if (!Objects.equals(this.targetCollection, other.targetCollection)) {
-            return false;
-        }
-        if (this.targetIndex != other.targetIndex) {
-            return false;
-        }
-        return true;
-    }
+  @Override
+  public boolean acceptDragSource(AbstractDragSource dragSource) {
+    assert dragSource != null;
 
-    @Override
-    public String toString() {
-        return "CollectionDropTarget{" + "targetCollection=" + targetCollection + ", targetIndex=" + targetIndex + '}'; //NOI18N
+    // TODO(elp) : can we really put any kind of FXOMObject in a collection ?
+    return dragSource.getDraggedObjects().isEmpty() == false;
+  }
+
+  @Override
+  public Job makeDropJob(AbstractDragSource dragSource, EditorController editorController) {
+    throw new UnsupportedOperationException("To be implemented"); // NOI18N
+  }
+
+  @Override
+  public boolean isSelectRequiredAfterDrop() {
+    return true;
+  }
+
+  /*
+   * Object
+   */
+  @Override
+  public int hashCode() {
+    int hash = 5;
+    hash = 37 * hash + Objects.hashCode(this.targetCollection);
+    hash = 37 * hash + this.targetIndex;
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
     }
-    
-    
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final CollectionDropTarget other = (CollectionDropTarget) obj;
+    if (!Objects.equals(this.targetCollection, other.targetCollection)) {
+      return false;
+    }
+    if (this.targetIndex != other.targetIndex) {
+      return false;
+    }
+    return true;
+  }
+
+  @Override
+  public String toString() {
+    return "CollectionDropTarget{"
+        + "targetCollection="
+        + targetCollection
+        + ", targetIndex="
+        + targetIndex
+        + '}'; // NOI18N
+  }
 }

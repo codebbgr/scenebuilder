@@ -15,6 +15,7 @@
         <maven.compiler.target>15</maven.compiler.target>
         <!-- plugins  -->
         <maven-compiler>3.8.1</maven-compiler>
+        <fmt-maven-plugin>2.10</fmt-maven-plugin>
         <!-- dependencies  -->
         <javafx.version>16-ea+4</javafx.version>
     </properties>
@@ -71,6 +72,18 @@
                 <configuration>
                     <release>${java.version}</release>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.coveo</groupId>
+                <artifactId>fmt-maven-plugin</artifactId>
+                <version>${fmt-maven-plugin}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

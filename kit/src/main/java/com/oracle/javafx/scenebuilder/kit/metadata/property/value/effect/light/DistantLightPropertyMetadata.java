@@ -41,39 +41,50 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.effect.Light;
 import javafx.scene.paint.Color;
 
-/**
- *
- */
+/** */
 public class DistantLightPropertyMetadata extends ComplexPropertyMetadata<Light.Distant> {
-    
-    private final ColorPropertyMetadata colorMetadata
-            = new ColorPropertyMetadata(new PropertyName("color"), //NOI18N
-            true, Color.WHITE, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata azimuthMetadata
-            = new DoublePropertyMetadata(new PropertyName("azimuth"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.ANGLE, true, 45.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata elevationMetadata
-            = new DoublePropertyMetadata(new PropertyName("elevation"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.ANGLE, true, 45.0, InspectorPath.UNUSED);
-    
-    public DistantLightPropertyMetadata(PropertyName name, boolean readWrite, 
-            Light.Distant defaultValue, InspectorPath inspectorPath) {
-        super(name, Light.Distant.class, readWrite, defaultValue, inspectorPath);
-    }
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Light.Distant value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, getValueClass());
-        
-        colorMetadata.setValue(result, value.getColor());
-        azimuthMetadata.setValue(result, value.getAzimuth());
-        elevationMetadata.setValue(result, value.getElevation());
+  private final ColorPropertyMetadata colorMetadata =
+      new ColorPropertyMetadata(
+          new PropertyName("color"), // NOI18N
+          true,
+          Color.WHITE,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata azimuthMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("azimuth"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.ANGLE,
+          true,
+          45.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata elevationMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("elevation"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.ANGLE,
+          true,
+          45.0,
+          InspectorPath.UNUSED);
 
-        return result;
-    }
-    
+  public DistantLightPropertyMetadata(
+      PropertyName name,
+      boolean readWrite,
+      Light.Distant defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, Light.Distant.class, readWrite, defaultValue, inspectorPath);
+  }
+
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Light.Distant value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, getValueClass());
+
+    colorMetadata.setValue(result, value.getColor());
+    azimuthMetadata.setValue(result, value.getAzimuth());
+    elevationMetadata.setValue(result, value.getElevation());
+
+    return result;
+  }
 }

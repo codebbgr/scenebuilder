@@ -40,43 +40,40 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Region;
 
-/**
- *
- */
+/** */
 public class TabPaneDriver extends AbstractNodeDriver {
 
-    public TabPaneDriver(ContentPanelController contentPanelController) {
-        super(contentPanelController);
+  public TabPaneDriver(ContentPanelController contentPanelController) {
+    super(contentPanelController);
+  }
+
+  /*
+   * AbstractDriver
+   */
+
+  @Override
+  public AbstractResizer<?> makeResizer(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof TabPane;
+    return new RegionResizer((Region) fxomObject.getSceneGraphObject());
+  }
+
+  @Override
+  public FXOMObject refinePick(Node hitNode, double sceneX, double sceneY, FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof TabPane;
+
+    final TabPane tabPane = (TabPane) fxomObject.getSceneGraphObject();
+    final TabPaneDesignInfoX di = new TabPaneDesignInfoX();
+    final Tab tab = di.lookupTab(tabPane, sceneX, sceneY);
+
+    final FXOMObject result;
+    if (tab == null) {
+      result = fxomObject;
+    } else {
+      result = fxomObject.searchWithSceneGraphObject(tab);
+      assert result != null;
+      assert result.getSceneGraphObject() == tab;
     }
 
-    /*
-     * AbstractDriver
-     */
-    
-    @Override
-    public AbstractResizer<?> makeResizer(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof TabPane;
-        return new RegionResizer((Region) fxomObject.getSceneGraphObject());
-    }
-    
-    @Override
-    public FXOMObject refinePick(Node hitNode, double sceneX, double sceneY, FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof TabPane;
-        
-        final TabPane tabPane = (TabPane) fxomObject.getSceneGraphObject();
-        final TabPaneDesignInfoX di = new TabPaneDesignInfoX();
-        final Tab tab = di.lookupTab(tabPane, sceneX, sceneY);
-        
-        final FXOMObject result;
-        if (tab == null) {
-            result = fxomObject;
-        } else {
-            result = fxomObject.searchWithSceneGraphObject(tab);
-            assert result != null;
-            assert result.getSceneGraphObject() == tab;
-        }
-        
-        return result;
-    }
-    
+    return result;
+  }
 }

@@ -34,13 +34,11 @@ package com.oracle.javafx.scenebuilder.kit.editor.job.wrap;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import javafx.scene.layout.FlowPane;
 
-/**
- * Job used to wrap selection in a FlowPane.
- */
+/** Job used to wrap selection in a FlowPane. */
 public class WrapInFlowPaneJob extends AbstractWrapInSubComponentJob {
 
-    public WrapInFlowPaneJob(EditorController editorController) {
-        super(editorController);
-        newContainerClass = FlowPane.class;
-    }
+  public WrapInFlowPaneJob(EditorController editorController) {
+    super(editorController);
+    newContainerClass = FlowPane.class;
+  }
 }

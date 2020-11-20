@@ -34,15 +34,13 @@ package com.oracle.javafx.scenebuilder.kit.metadata.util;
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
 import java.util.Comparator;
 
-/**
- *
- */
+/** */
 public class ValuePropertyMetadataNameComparator implements Comparator<ValuePropertyMetadata> {
 
-    @Override
-    public int compare(ValuePropertyMetadata propMeta1, ValuePropertyMetadata propMeta2) {
-        String name1 = propMeta1.getName().getName();
-        String name2 = propMeta2.getName().getName();
-        return name1.compareTo(name2);
-    }
+  @Override
+  public int compare(ValuePropertyMetadata propMeta1, ValuePropertyMetadata propMeta2) {
+    String name1 = propMeta1.getName().getName();
+    String name2 = propMeta2.getName().getName();
+    return name1.compareTo(name2);
+  }
 }

@@ -31,28 +31,23 @@
  */
 package com.oracle.javafx.scenebuilder.kit.fxom.glue;
 
-/**
- *
- * 
- */
+/** */
 public class GlueInstruction extends GlueAuxiliary {
-    
-    private final String target;
-    private final String data;
 
-    public GlueInstruction(GlueDocument document, String target, String data) {
-        super(document);
-        this.target = target;
-        this.data = data;
-    }
+  private final String target;
+  private final String data;
 
-    public String getTarget() {
-        return target;
-    }
+  public GlueInstruction(GlueDocument document, String target, String data) {
+    super(document);
+    this.target = target;
+    this.data = data;
+  }
 
-    public String getData() {
-        return data;
-    }
-    
+  public String getTarget() {
+    return target;
+  }
 
+  public String getData() {
+    return data;
+  }
 }

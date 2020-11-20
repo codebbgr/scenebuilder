@@ -32,121 +32,117 @@
 
 package com.oracle.javafx.scenebuilder.kit.editor.panel.content;
 
+import com.oracle.javafx.scenebuilder.kit.editor.panel.content.driver.handles.AbstractGenericHandles;
+import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import javafx.geometry.Point2D;
 import javafx.scene.transform.Transform;
 
-import com.oracle.javafx.scenebuilder.kit.editor.panel.content.driver.handles.AbstractGenericHandles;
-import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
-
-/**
- *
- */
+/** */
 public abstract class AbstractResilientHandles<T> extends AbstractGenericHandles<T> {
 
-    private boolean ready;
-    
-    public AbstractResilientHandles(ContentPanelController contentPanelController, 
-            FXOMObject fxomObject, Class<T> sceneGraphClass) {
-        super(contentPanelController, fxomObject, sceneGraphClass);
+  private boolean ready;
+
+  public AbstractResilientHandles(
+      ContentPanelController contentPanelController,
+      FXOMObject fxomObject,
+      Class<T> sceneGraphClass) {
+    super(contentPanelController, fxomObject, sceneGraphClass);
+    getRootNode().setVisible(false);
+  }
+
+  public void setReady(boolean ready) {
+    if (this.ready != ready) {
+      this.ready = ready;
+      readyDidChange();
+    }
+  }
+
+  public boolean isReady() {
+    return ready;
+  }
+
+  /*
+   * AbstractDecoration
+   */
+
+  @Override
+  public void reconcile() {
+    assert getState() == State.NEEDS_RECONCILE;
+
+    if (ready) {
+      stopListeningToSceneGraphObject();
+    }
+    updateSceneGraphObject();
+    if (ready) {
+      startListeningToSceneGraphObject();
+      layoutDecoration();
+    }
+  }
+
+  @Override
+  public Point2D sceneGraphObjectToDecoration(double x, double y, boolean snapToPixel) {
+    assert ready;
+    return super.sceneGraphObjectToDecoration(x, y, snapToPixel);
+  }
+
+  @Override
+  public Transform getSceneGraphObjectToDecorationTransform() {
+    assert ready;
+    return super.getSceneGraphObjectToDecorationTransform();
+  }
+
+  @Override
+  protected void rootNodeSceneDidChange() {
+    if (ready) {
+      if (getRootNode().getScene() == null) {
+        // Transition  D -> C
         getRootNode().setVisible(false);
-    }
-    
-    public void setReady(boolean ready) {
-        if (this.ready != ready) {
-            this.ready = ready;
-            readyDidChange();
-        }
-    }
-    
-    public boolean isReady() {
-        return ready;
-    }
-    
-    /*
-     * AbstractDecoration
-     */
-    
-    
-    @Override
-    public void reconcile() {
-        assert getState() == State.NEEDS_RECONCILE;
-        
-        if (ready) {
-            stopListeningToSceneGraphObject();
-        }
-        updateSceneGraphObject();
-        if (ready) {
-            startListeningToSceneGraphObject();
-            layoutDecoration();
-        }
-    }
-    
-    @Override
-    public Point2D sceneGraphObjectToDecoration(double x, double y, boolean snapToPixel) {
-        assert ready;
-        return super.sceneGraphObjectToDecoration(x, y, snapToPixel);
-    }
-    
-    @Override
-    public Transform getSceneGraphObjectToDecorationTransform() {
-        assert ready;
-        return super.getSceneGraphObjectToDecorationTransform();
-    }
-    
-    @Override
-    protected void rootNodeSceneDidChange() {
-        if (ready) {
-            if (getRootNode().getScene() == null) {
-                // Transition  D -> C
-                getRootNode().setVisible(false);
-                stopListeningToSceneGraphObject();
-            } else {
-                // Transition C -> D
-                layoutDecoration();
-                startListeningToSceneGraphObject();
-                getRootNode().setVisible(true);
-            }
-        } // else transitions A -> B or B -> A
-    }
-    
-    
-    /*
-     * Private
-     */
-    
-    /*
-     * 
-     *      \ rootNode.getScene() |      null      |   not null    |
-     *   ready                    |                |               |
-     *   -------------------------+----------------+---------------+
-     *   false                    |        A       |       B       |
-     *   -------------------------+----------------+---------------+
-     *   true                     |        C       |       D       |
-     *   -------------------------+----------------+---------------+
-     * 
-     *   On transitions A -> D, B -> D, C -> D
-     *      => layoutDecoration()
-     *      => startListeningToSceneGraphObject()
-     *      => rootNode.setVisible(true)
-     * 
-     *   On transitions D -> A, D -> B, D -> C
-     *      => rootNode.setVisible(false)
-     *      => stopListeningToSceneGraphObject()
-     */
-    
-    private void readyDidChange() {
-        if (getRootNode().getScene() != null) {
-            if (ready) {
-                // Transition B -> D
-                layoutDecoration();
-                startListeningToSceneGraphObject();
-                getRootNode().setVisible(true);
-            } else {
-                // Transition D -> B
-                getRootNode().setVisible(false);
-                stopListeningToSceneGraphObject();
-            }
-        } // Transitions A -> C or C -> A
-    }
-    
+        stopListeningToSceneGraphObject();
+      } else {
+        // Transition C -> D
+        layoutDecoration();
+        startListeningToSceneGraphObject();
+        getRootNode().setVisible(true);
+      }
+    } // else transitions A -> B or B -> A
+  }
+
+  /*
+   * Private
+   */
+
+  /*
+   *
+   *      \ rootNode.getScene() |      null      |   not null    |
+   *   ready                    |                |               |
+   *   -------------------------+----------------+---------------+
+   *   false                    |        A       |       B       |
+   *   -------------------------+----------------+---------------+
+   *   true                     |        C       |       D       |
+   *   -------------------------+----------------+---------------+
+   *
+   *   On transitions A -> D, B -> D, C -> D
+   *      => layoutDecoration()
+   *      => startListeningToSceneGraphObject()
+   *      => rootNode.setVisible(true)
+   *
+   *   On transitions D -> A, D -> B, D -> C
+   *      => rootNode.setVisible(false)
+   *      => stopListeningToSceneGraphObject()
+   */
+
+  private void readyDidChange() {
+    if (getRootNode().getScene() != null) {
+      if (ready) {
+        // Transition B -> D
+        layoutDecoration();
+        startListeningToSceneGraphObject();
+        getRootNode().setVisible(true);
+      } else {
+        // Transition D -> B
+        getRootNode().setVisible(false);
+        stopListeningToSceneGraphObject();
+      }
+    } // Transitions A -> C or C -> A
+  }
 }

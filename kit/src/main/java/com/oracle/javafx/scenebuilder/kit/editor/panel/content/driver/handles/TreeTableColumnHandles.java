@@ -31,8 +31,15 @@
  */
 package com.oracle.javafx.scenebuilder.kit.editor.panel.content.driver.handles;
 
+import com.oracle.javafx.scenebuilder.kit.editor.panel.content.AbstractResilientHandles;
+import com.oracle.javafx.scenebuilder.kit.editor.panel.content.ContentPanelController;
+import com.oracle.javafx.scenebuilder.kit.editor.panel.content.driver.TreeTableViewDesignInfoX;
+import com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.AbstractGesture;
+import com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.mouse.ResizeTreeTableColumnGesture;
+import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
+import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
+import com.oracle.javafx.scenebuilder.kit.metadata.util.DesignHierarchyMask;
 import java.util.List;
-
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
@@ -44,227 +51,212 @@ import javafx.scene.control.TreeTableView;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
-import com.oracle.javafx.scenebuilder.kit.editor.panel.content.AbstractResilientHandles;
-import com.oracle.javafx.scenebuilder.kit.editor.panel.content.ContentPanelController;
-import com.oracle.javafx.scenebuilder.kit.editor.panel.content.driver.TreeTableViewDesignInfoX;
-import com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.AbstractGesture;
-import com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.mouse.ResizeTreeTableColumnGesture;
-import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
-import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
-import com.oracle.javafx.scenebuilder.kit.metadata.util.DesignHierarchyMask;
-
-/**
- *
- * 
- */
-
+/** */
 public class TreeTableColumnHandles extends AbstractResilientHandles<Object> {
-    
-    /*
-     * Handles for TreeTableColumn need a special treatment.
-     * 
-     * A TreeTableColumn instance can be transiently disconnected from its parent TreeTableView:
-     *  - TreeTableColumn.getTableView() returns null
-     *  - TreeTableView.getColumns().contains() returns false
-     * 
-     * When the TreeTableColumn is disconnected, handles cannot be drawn.
-     * This Handles class inherits from AbstractResilientHandles to take
-     * care of this singularity.
-     */
-    
-    private final Group grips = new Group();
-    private final TreeTableViewDesignInfoX tableViewDesignInfo
-            = new TreeTableViewDesignInfoX();
-    private TreeTableView<?> treeTableView;
-    private Node columnHeaderNode;
-    
-    public TreeTableColumnHandles(ContentPanelController contentPanelController,
-            FXOMInstance fxomInstance) {
-        super(contentPanelController, fxomInstance, Object.class);
-        assert fxomInstance.getSceneGraphObject() instanceof TreeTableColumn;
-        
-        getRootNode().getChildren().add(grips); // Above handles
-        
-        getTreeTableColumn().treeTableViewProperty().addListener(
-                (ChangeListener<Object>) (ov, v1, v2) -> treeTableViewOrVisibilityDidChange());
-        getTreeTableColumn().visibleProperty().addListener(
-                (ChangeListener<Object>) (ov, v1, v2) -> treeTableViewOrVisibilityDidChange());
-        
-        treeTableViewOrVisibilityDidChange();
+
+  /*
+   * Handles for TreeTableColumn need a special treatment.
+   *
+   * A TreeTableColumn instance can be transiently disconnected from its parent TreeTableView:
+   *  - TreeTableColumn.getTableView() returns null
+   *  - TreeTableView.getColumns().contains() returns false
+   *
+   * When the TreeTableColumn is disconnected, handles cannot be drawn.
+   * This Handles class inherits from AbstractResilientHandles to take
+   * care of this singularity.
+   */
+
+  private final Group grips = new Group();
+  private final TreeTableViewDesignInfoX tableViewDesignInfo = new TreeTableViewDesignInfoX();
+  private TreeTableView<?> treeTableView;
+  private Node columnHeaderNode;
+
+  public TreeTableColumnHandles(
+      ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
+    super(contentPanelController, fxomInstance, Object.class);
+    assert fxomInstance.getSceneGraphObject() instanceof TreeTableColumn;
+
+    getRootNode().getChildren().add(grips); // Above handles
+
+    getTreeTableColumn()
+        .treeTableViewProperty()
+        .addListener((ChangeListener<Object>) (ov, v1, v2) -> treeTableViewOrVisibilityDidChange());
+    getTreeTableColumn()
+        .visibleProperty()
+        .addListener((ChangeListener<Object>) (ov, v1, v2) -> treeTableViewOrVisibilityDidChange());
+
+    treeTableViewOrVisibilityDidChange();
+  }
+
+  public FXOMInstance getFxomInstance() {
+    return (FXOMInstance) getFxomObject();
+  }
+
+  /*
+   * AbstractGenericHandles
+   */
+  @Override
+  public Bounds getSceneGraphObjectBounds() {
+    assert isReady();
+    assert treeTableView != null;
+    assert getTreeTableColumn().isVisible();
+    return tableViewDesignInfo.getColumnBounds(getTreeTableColumn());
+  }
+
+  @Override
+  public Node getSceneGraphObjectProxy() {
+    assert treeTableView != null;
+    return treeTableView;
+  }
+
+  @Override
+  protected void startListeningToSceneGraphObject() {
+    assert isReady();
+    assert treeTableView != null;
+    startListeningToLayoutBounds(treeTableView);
+    startListeningToLocalToSceneTransform(treeTableView);
+
+    assert columnHeaderNode == null;
+    columnHeaderNode = tableViewDesignInfo.getColumnNode(getTreeTableColumn());
+    startListeningToBoundsInParent(columnHeaderNode);
+  }
+
+  @Override
+  protected void stopListeningToSceneGraphObject() {
+    assert isReady();
+    assert treeTableView != null;
+    stopListeningToLayoutBounds(treeTableView);
+    stopListeningToLocalToSceneTransform(treeTableView);
+
+    assert columnHeaderNode != null;
+    stopListeningToBoundsInParent(columnHeaderNode);
+    columnHeaderNode = null;
+  }
+
+  @Override
+  protected void layoutDecoration() {
+    assert treeTableView != null;
+
+    super.layoutDecoration();
+
+    // Adjusts the number of grip lines to the number of dividers
+    adjustGripCount();
+
+    // Updates grip positions
+    for (int i = 0, count = getTreeTableColumns().size(); i < count; i++) {
+      layoutGrip(i);
     }
-    
-    public FXOMInstance getFxomInstance() {
-        return (FXOMInstance) getFxomObject();
+  }
+
+  @Override
+  public AbstractGesture findGesture(Node node) {
+    final AbstractGesture result;
+
+    final int gripIndex = grips.getChildren().indexOf(node);
+    if (gripIndex != -1) {
+      final FXOMObject parentObject = getFxomInstance().getParentObject();
+      final DesignHierarchyMask m = new DesignHierarchyMask(parentObject);
+      final FXOMObject columnObject = m.getSubComponentAtIndex(gripIndex);
+      assert columnObject instanceof FXOMInstance;
+      result =
+          new ResizeTreeTableColumnGesture(
+              getContentPanelController(), (FXOMInstance) columnObject);
+    } else {
+      result = super.findGesture(node);
     }
 
-    /*
-     * AbstractGenericHandles
-     */
-    @Override
-    public Bounds getSceneGraphObjectBounds() {
-        assert isReady();
-        assert treeTableView != null;
-        assert getTreeTableColumn().isVisible();
-        return tableViewDesignInfo.getColumnBounds(getTreeTableColumn());
+    return result;
+  }
+
+  /*
+   * Private
+   */
+
+  private TreeTableColumn<?, ?> getTreeTableColumn() {
+    assert getSceneGraphObject() instanceof TreeTableColumn;
+    return (TreeTableColumn<?, ?>) getSceneGraphObject();
+  }
+
+  private void treeTableViewOrVisibilityDidChange() {
+    treeTableView = getTreeTableColumn().getTreeTableView();
+    setReady((treeTableView != null) && getTreeTableColumn().isVisible());
+  }
+
+  private List<?> getTreeTableColumns() {
+    final List<?> result;
+
+    final TreeTableColumn<?, ?> treeTableColumn = getTreeTableColumn();
+    if (treeTableColumn.getParentColumn() == null) {
+      result = treeTableView.getColumns();
+    } else {
+      result = treeTableColumn.getParentColumn().getColumns();
     }
 
-    @Override
-    public Node getSceneGraphObjectProxy() {
-        assert treeTableView != null;
-        return treeTableView;
-    }
+    return result;
+  }
 
-    @Override
-    protected void startListeningToSceneGraphObject() {
-        assert isReady();
-        assert treeTableView != null;
-        startListeningToLayoutBounds(treeTableView);
-        startListeningToLocalToSceneTransform(treeTableView);
-        
-        assert columnHeaderNode == null;
-        columnHeaderNode = tableViewDesignInfo.getColumnNode(getTreeTableColumn());
-        startListeningToBoundsInParent(columnHeaderNode);
-    }
+  /*
+   * Private (grips)
+   */
 
-    @Override
-    protected void stopListeningToSceneGraphObject() {
-        assert isReady();
-        assert treeTableView != null;
-        stopListeningToLayoutBounds(treeTableView);
-        stopListeningToLocalToSceneTransform(treeTableView);
-        
-        assert columnHeaderNode != null;
-        stopListeningToBoundsInParent(columnHeaderNode);
-        columnHeaderNode = null;
-    }
+  private void adjustGripCount() {
+    assert treeTableView != null;
 
-    @Override
-    protected void layoutDecoration() {
-        assert treeTableView != null;
-        
-        super.layoutDecoration();
-             
-        // Adjusts the number of grip lines to the number of dividers
-        adjustGripCount();
-        
-        // Updates grip positions
-        for (int i = 0, count = getTreeTableColumns().size(); i < count; i++) {
-            layoutGrip(i);
-        }
-    }
+    final int columnCount = getTreeTableColumns().size();
+    final List<Node> gripChildren = grips.getChildren();
 
-    @Override
-    public AbstractGesture findGesture(Node node) {
-        final AbstractGesture result;
-        
-        final int gripIndex = grips.getChildren().indexOf(node);
-        if (gripIndex != -1) {
-            final FXOMObject parentObject = getFxomInstance().getParentObject();
-            final DesignHierarchyMask m = new DesignHierarchyMask(parentObject);
-            final FXOMObject columnObject = m.getSubComponentAtIndex(gripIndex);
-            assert columnObject instanceof FXOMInstance;
-            result = new ResizeTreeTableColumnGesture(getContentPanelController(), 
-                    (FXOMInstance)columnObject);
-        } else {
-            result = super.findGesture(node);
-        }
-        
-        return result;
+    while (gripChildren.size() < columnCount) {
+      gripChildren.add(makeGripLine());
     }
+    while (gripChildren.size() > columnCount) {
+      gripChildren.remove(gripChildren.size() - 1);
+    }
+  }
 
+  private Line makeGripLine() {
+    final Line result = new Line();
+    result.setStrokeWidth(SELECTION_HANDLES_SIZE);
+    result.setStroke(Color.TRANSPARENT);
+    result.setCursor(Cursor.H_RESIZE);
+    attachHandles(result);
+    return result;
+  }
 
-    /*
-     * Private
-     */
-    
-    private TreeTableColumn<?,?> getTreeTableColumn() {
-        assert getSceneGraphObject() instanceof TreeTableColumn;
-        return (TreeTableColumn<?,?>) getSceneGraphObject();
-    }
-    
-    private void treeTableViewOrVisibilityDidChange() {
-        treeTableView = getTreeTableColumn().getTreeTableView();
-        setReady((treeTableView != null) && getTreeTableColumn().isVisible());
-    }
-    
-    private List<?> getTreeTableColumns() {
-        final List<?> result;
+  private void layoutGrip(int gripIndex) {
+    assert grips.getChildren().get(gripIndex) instanceof Line;
+    assert getTreeTableColumns().get(gripIndex) instanceof TreeTableColumn<?, ?>;
 
-        final TreeTableColumn<?,?> treeTableColumn = getTreeTableColumn();
-        if (treeTableColumn.getParentColumn() == null) {
-            result = treeTableView.getColumns();
-        } else {
-            result = treeTableColumn.getParentColumn().getColumns();
-        }
-        
-        return result;
-    }
-    
-    
-    
-    /*
-     * Private (grips)
-     */
-    
-    private void adjustGripCount() {
-        assert treeTableView != null;
-        
-        final int columnCount = getTreeTableColumns().size();
-        final List<Node> gripChildren = grips.getChildren();
-        
-        while (gripChildren.size() < columnCount) {
-            gripChildren.add(makeGripLine());
-        }
-        while (gripChildren.size() > columnCount) {
-            gripChildren.remove(gripChildren.size()-1);
-        }
-    }
-    
-    private Line makeGripLine() {
-        final Line result = new Line();
-        result.setStrokeWidth(SELECTION_HANDLES_SIZE);
-        result.setStroke(Color.TRANSPARENT);
-        result.setCursor(Cursor.H_RESIZE);
-        attachHandles(result);
-        return result;
-    }
-    
-    private void layoutGrip(int gripIndex) {
-        assert grips.getChildren().get(gripIndex) instanceof Line;
-        assert getTreeTableColumns().get(gripIndex) instanceof TreeTableColumn<?,?>;
-        
-        final List<?> columns = getTreeTableColumns();
-        final TreeTableColumn<?,?> ttc = (TreeTableColumn<?,?>)columns.get(gripIndex);
-        if (ttc.isVisible()) {
-            final TreeTableViewDesignInfoX di = new TreeTableViewDesignInfoX();
-            final Bounds b = di.getColumnHeaderBounds(ttc);
-            final double startX = b.getMaxX();
-            final double startY = b.getMinY();
-            final double endY = b.getMaxY();
+    final List<?> columns = getTreeTableColumns();
+    final TreeTableColumn<?, ?> ttc = (TreeTableColumn<?, ?>) columns.get(gripIndex);
+    if (ttc.isVisible()) {
+      final TreeTableViewDesignInfoX di = new TreeTableViewDesignInfoX();
+      final Bounds b = di.getColumnHeaderBounds(ttc);
+      final double startX = b.getMaxX();
+      final double startY = b.getMinY();
+      final double endY = b.getMaxY();
 
-            final boolean snapToPixel = true;
-            final Point2D startPoint = sceneGraphObjectToDecoration(startX, startY, snapToPixel);
-            final Point2D endPoint = sceneGraphObjectToDecoration(startX, endY, snapToPixel);
+      final boolean snapToPixel = true;
+      final Point2D startPoint = sceneGraphObjectToDecoration(startX, startY, snapToPixel);
+      final Point2D endPoint = sceneGraphObjectToDecoration(startX, endY, snapToPixel);
 
-            final Line gripLine = (Line) grips.getChildren().get(gripIndex);
-            gripLine.setVisible(true);
-            gripLine.setManaged(true);
-            gripLine.setStartX(startPoint.getX());
-            gripLine.setStartY(startPoint.getY());
-            gripLine.setEndX(endPoint.getX());
-            gripLine.setEndY(endPoint.getY());
-        } else {
-            final Line gripLine = (Line) grips.getChildren().get(gripIndex);
-            gripLine.setVisible(false);
-            gripLine.setManaged(false);
-        }
+      final Line gripLine = (Line) grips.getChildren().get(gripIndex);
+      gripLine.setVisible(true);
+      gripLine.setManaged(true);
+      gripLine.setStartX(startPoint.getX());
+      gripLine.setStartY(startPoint.getY());
+      gripLine.setEndX(endPoint.getX());
+      gripLine.setEndY(endPoint.getY());
+    } else {
+      final Line gripLine = (Line) grips.getChildren().get(gripIndex);
+      gripLine.setVisible(false);
+      gripLine.setManaged(false);
     }
-    
-    
-    /* 
-     * Wrapper to avoid the 'leaking this in constructor' warning emitted by NB.
-     */
-    private void attachHandles(Node node) {
-        attachHandles(node, this);
-    }
+  }
+
+  /*
+   * Wrapper to avoid the 'leaking this in constructor' warning emitted by NB.
+   */
+  private void attachHandles(Node node) {
+    attachHandles(node, this);
+  }
 }

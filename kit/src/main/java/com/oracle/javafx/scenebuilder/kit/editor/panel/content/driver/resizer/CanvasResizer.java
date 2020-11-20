@@ -41,92 +41,86 @@ import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.scene.canvas.Canvas;
 
-/**
- *
- * 
- */
+/** */
 public class CanvasResizer extends AbstractResizer<Canvas> {
 
-    private final double originalWidth;
-    private final double originalHeight;
-    private final PropertyName widthName = new PropertyName("width"); //NOI18N
-    private final PropertyName heightName = new PropertyName("height"); //NOI18N
-    private final List<PropertyName> propertyNames = new ArrayList<>();
-    
-    public CanvasResizer(Canvas sceneGraphObject) {
-        super(sceneGraphObject);
-        originalWidth   = sceneGraphObject.getWidth();
-        originalHeight  = sceneGraphObject.getHeight();
-        propertyNames.add(widthName);
-        propertyNames.add(heightName);
-        assert sceneGraphObject.getLayoutBounds().equals(
-                computeBounds(originalWidth, originalHeight));
+  private final double originalWidth;
+  private final double originalHeight;
+  private final PropertyName widthName = new PropertyName("width"); // NOI18N
+  private final PropertyName heightName = new PropertyName("height"); // NOI18N
+  private final List<PropertyName> propertyNames = new ArrayList<>();
+
+  public CanvasResizer(Canvas sceneGraphObject) {
+    super(sceneGraphObject);
+    originalWidth = sceneGraphObject.getWidth();
+    originalHeight = sceneGraphObject.getHeight();
+    propertyNames.add(widthName);
+    propertyNames.add(heightName);
+    assert sceneGraphObject.getLayoutBounds().equals(computeBounds(originalWidth, originalHeight));
+  }
+
+  /*
+   * AbstractResizer
+   */
+
+  @Override
+  public final Bounds computeBounds(double width, double height) {
+    return new BoundingBox(0, 0, Math.round(width), Math.round(height));
+  }
+
+  @Override
+  public Feature getFeature() {
+    return Feature.FREE;
+  }
+
+  @Override
+  public void changeWidth(double width) {
+    sceneGraphObject.setWidth(Math.round(width));
+  }
+
+  @Override
+  public void changeHeight(double height) {
+    sceneGraphObject.setHeight(Math.round(height));
+  }
+
+  @Override
+  public void revertToOriginalSize() {
+    sceneGraphObject.setWidth(originalWidth);
+    sceneGraphObject.setHeight(originalHeight);
+  }
+
+  @Override
+  public List<PropertyName> getPropertyNames() {
+    return propertyNames;
+  }
+
+  @Override
+  public Object getValue(PropertyName propertyName) {
+    assert propertyName != null;
+    assert propertyNames.contains(propertyName);
+
+    final Object result;
+    if (propertyName.equals(widthName)) {
+      result = sceneGraphObject.getWidth();
+    } else if (propertyName.equals(heightName)) {
+      result = sceneGraphObject.getHeight();
+    } else {
+      // Emergency code
+      result = null;
     }
 
-    /*
-     * AbstractResizer
-     */
-    
-    @Override
-    public final Bounds computeBounds(double width, double height) {
-        return new BoundingBox(0, 0, Math.round(width), Math.round(height));
-    }
+    return result;
+  }
 
-    
-    @Override
-    public Feature getFeature() {
-        return Feature.FREE;
+  @Override
+  public Map<PropertyName, Object> getChangeMap() {
+    final Map<PropertyName, Object> result = new HashMap<>();
+    if (MathUtils.equals(sceneGraphObject.getWidth(), originalWidth) == false) {
+      result.put(widthName, sceneGraphObject.getWidth());
     }
-
-    @Override
-    public void changeWidth(double width) {
-        sceneGraphObject.setWidth(Math.round(width));
+    if (MathUtils.equals(sceneGraphObject.getHeight(), originalHeight) == false) {
+      result.put(heightName, sceneGraphObject.getHeight());
     }
-
-    @Override
-    public void changeHeight(double height) {
-        sceneGraphObject.setHeight(Math.round(height));
-    }
-
-    @Override
-    public void revertToOriginalSize() {
-        sceneGraphObject.setWidth(originalWidth);
-        sceneGraphObject.setHeight(originalHeight);
-    }
-
-    @Override
-    public List<PropertyName> getPropertyNames() {
-        return propertyNames;
-    }
-
-    @Override
-    public Object getValue(PropertyName propertyName) {
-        assert propertyName != null;
-        assert propertyNames.contains(propertyName);
-        
-        final Object result;
-        if (propertyName.equals(widthName)) {
-            result = sceneGraphObject.getWidth();
-        } else if (propertyName.equals(heightName)) {
-            result = sceneGraphObject.getHeight();
-        } else {
-            // Emergency code
-            result = null;
-        }
-        
-        return result;
-    }
-
-    @Override
-    public Map<PropertyName, Object> getChangeMap() {
-        final Map<PropertyName, Object> result = new HashMap<>();
-        if (MathUtils.equals(sceneGraphObject.getWidth(), originalWidth) == false) {
-            result.put(widthName, sceneGraphObject.getWidth());
-        }
-        if (MathUtils.equals(sceneGraphObject.getHeight(), originalHeight) == false) {
-            result.put(heightName, sceneGraphObject.getHeight());
-        }
-        return result;
-    }
-
+    return result;
+  }
 }

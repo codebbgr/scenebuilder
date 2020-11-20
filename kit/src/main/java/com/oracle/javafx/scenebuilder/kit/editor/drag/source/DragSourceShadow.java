@@ -45,67 +45,62 @@ import javafx.scene.transform.Transform;
 /**
  * A shadow is the following construct:
  *
- *    Group
- *         ImageView        snapshot of a 'scene graph node'
- *         Region           glass area with css styling
+ * <p>Group ImageView snapshot of a 'scene graph node' Region glass area with css styling
  *
- * Layout bounds of the group must be equal to layout bounds
- * of the scene graph node. We ensure this by setting layoutX/Y
- * on the image view and the region (1).
+ * <p>Layout bounds of the group must be equal to layout bounds of the scene graph node. We ensure
+ * this by setting layoutX/Y on the image view and the region (1).
  */
 class DragSourceShadow extends Group {
-    
-    private final ImageView imageView = new ImageView();
-    private final Region glass = new Region();
-    private static final String NID_DRAG_SHADOW = "dragShadow"; //NOI18N
 
-    
-    public DragSourceShadow() {
-        this.setId(NID_DRAG_SHADOW);
-        this.getChildren().add(imageView);
-        this.getChildren().add(glass);
-        
-        this.getStyleClass().add("drag-shadow"); //NOI18N
-        this.glass.getStyleClass().add("drag-shadow-glass"); //NOI18N
-    }
-    
-    public void setupForNode(Node node) {
-        assert node != null;
-        assert node.getScene() != null;
-        
-        // Snapshot node
-        // Note : we setup snapshot view port with layout bounds.
-        final SnapshotParameters sp = new SnapshotParameters();
-        final Transform l2p = node.getLocalToParentTransform();
-        try {
-            sp.setTransform(l2p.createInverse());
-        } catch(NonInvertibleTransformException x) {
-            throw new RuntimeException(x);
-        }
-        final Bounds vp = node.getLayoutBounds();
-        if ((vp.getWidth() >= 0) && (vp.getHeight() >= 0)) {
-            sp.setViewport(new Rectangle2D(vp.getMinX(), vp.getMinY(), 
-                    vp.getWidth(), vp.getHeight()));
-        }
-        imageView.setImage(node.snapshot(sp, null));
-        
-        // Setup layoutX/layoutY on the image view and the region (1)
-        final Bounds inputBounds = vp;
-        imageView.setLayoutX(inputBounds.getMinX());
-        imageView.setLayoutY(inputBounds.getMinY());
-        glass.setLayoutX(inputBounds.getMinX());
-        glass.setLayoutY(inputBounds.getMinY());
-        glass.setPrefWidth(inputBounds.getWidth());
-        glass.setPrefHeight(inputBounds.getHeight());
+  private final ImageView imageView = new ImageView();
+  private final Region glass = new Region();
+  private static final String NID_DRAG_SHADOW = "dragShadow"; // NOI18N
 
-        final Bounds outputBounds = this.getLayoutBounds();
-        assert MathUtils.equals(inputBounds.getMinX(), outputBounds.getMinX())
-                : "inputBounds=" + inputBounds + ", outputBounds=" + outputBounds; //NOI18N
-        assert MathUtils.equals(inputBounds.getMinY(), outputBounds.getMinY())
-                : "inputBounds=" + inputBounds + ", outputBounds=" + outputBounds; //NOI18N
-        assert MathUtils.equals(inputBounds.getWidth(), outputBounds.getWidth(), 5.0)
-                : "inputBounds=" + inputBounds + ", outputBounds=" + outputBounds; //NOI18N
-        assert MathUtils.equals(inputBounds.getHeight(), outputBounds.getHeight(), 5.0)
-                : "inputBounds=" + inputBounds + ", outputBounds=" + outputBounds; //NOI18N
+  public DragSourceShadow() {
+    this.setId(NID_DRAG_SHADOW);
+    this.getChildren().add(imageView);
+    this.getChildren().add(glass);
+
+    this.getStyleClass().add("drag-shadow"); // NOI18N
+    this.glass.getStyleClass().add("drag-shadow-glass"); // NOI18N
+  }
+
+  public void setupForNode(Node node) {
+    assert node != null;
+    assert node.getScene() != null;
+
+    // Snapshot node
+    // Note : we setup snapshot view port with layout bounds.
+    final SnapshotParameters sp = new SnapshotParameters();
+    final Transform l2p = node.getLocalToParentTransform();
+    try {
+      sp.setTransform(l2p.createInverse());
+    } catch (NonInvertibleTransformException x) {
+      throw new RuntimeException(x);
     }
+    final Bounds vp = node.getLayoutBounds();
+    if ((vp.getWidth() >= 0) && (vp.getHeight() >= 0)) {
+      sp.setViewport(new Rectangle2D(vp.getMinX(), vp.getMinY(), vp.getWidth(), vp.getHeight()));
+    }
+    imageView.setImage(node.snapshot(sp, null));
+
+    // Setup layoutX/layoutY on the image view and the region (1)
+    final Bounds inputBounds = vp;
+    imageView.setLayoutX(inputBounds.getMinX());
+    imageView.setLayoutY(inputBounds.getMinY());
+    glass.setLayoutX(inputBounds.getMinX());
+    glass.setLayoutY(inputBounds.getMinY());
+    glass.setPrefWidth(inputBounds.getWidth());
+    glass.setPrefHeight(inputBounds.getHeight());
+
+    final Bounds outputBounds = this.getLayoutBounds();
+    assert MathUtils.equals(inputBounds.getMinX(), outputBounds.getMinX())
+        : "inputBounds=" + inputBounds + ", outputBounds=" + outputBounds; // NOI18N
+    assert MathUtils.equals(inputBounds.getMinY(), outputBounds.getMinY())
+        : "inputBounds=" + inputBounds + ", outputBounds=" + outputBounds; // NOI18N
+    assert MathUtils.equals(inputBounds.getWidth(), outputBounds.getWidth(), 5.0)
+        : "inputBounds=" + inputBounds + ", outputBounds=" + outputBounds; // NOI18N
+    assert MathUtils.equals(inputBounds.getHeight(), outputBounds.getHeight(), 5.0)
+        : "inputBounds=" + inputBounds + ", outputBounds=" + outputBounds; // NOI18N
+  }
 }

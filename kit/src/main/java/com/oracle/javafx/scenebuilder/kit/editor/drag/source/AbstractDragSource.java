@@ -38,33 +38,42 @@ import javafx.scene.image.Image;
 import javafx.scene.input.ClipboardContent;
 import javafx.stage.Window;
 
-/**
- *
- */
+/** */
 public abstract class AbstractDragSource {
-    
-    private final Window ownerWindow;
-    
-    public AbstractDragSource(Window ownerWindow) {
-        this.ownerWindow = ownerWindow;
-    }
-    
-    public Window getOwnerWindow() {
-        return ownerWindow;
-    }
-    
-    public abstract boolean isAcceptable();
-    public abstract List<FXOMObject> getDraggedObjects();
-    public abstract FXOMObject getHitObject();
-    public abstract double getHitX();
-    public abstract double getHitY();
-    public abstract ClipboardContent makeClipboardContent();
-    public abstract Image makeDragView();
-    public abstract Node makeShadow();
-    public abstract String makeDropJobDescription();
-    public abstract boolean isNodeOnly();
-    public abstract boolean isSingleImageViewOnly();
-    public abstract boolean isSingleTooltipOnly();
-    public abstract boolean isSingleContextMenuOnly();
-    
+
+  private final Window ownerWindow;
+
+  public AbstractDragSource(Window ownerWindow) {
+    this.ownerWindow = ownerWindow;
+  }
+
+  public Window getOwnerWindow() {
+    return ownerWindow;
+  }
+
+  public abstract boolean isAcceptable();
+
+  public abstract List<FXOMObject> getDraggedObjects();
+
+  public abstract FXOMObject getHitObject();
+
+  public abstract double getHitX();
+
+  public abstract double getHitY();
+
+  public abstract ClipboardContent makeClipboardContent();
+
+  public abstract Image makeDragView();
+
+  public abstract Node makeShadow();
+
+  public abstract String makeDropJobDescription();
+
+  public abstract boolean isNodeOnly();
+
+  public abstract boolean isSingleImageViewOnly();
+
+  public abstract boolean isSingleTooltipOnly();
+
+  public abstract boolean isSingleContextMenuOnly();
 }

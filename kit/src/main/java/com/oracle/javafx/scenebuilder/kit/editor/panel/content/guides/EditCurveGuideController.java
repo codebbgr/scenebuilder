@@ -32,116 +32,115 @@
 
 package com.oracle.javafx.scenebuilder.kit.editor.panel.content.guides;
 
+import java.util.ArrayList;
+import java.util.List;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class EditCurveGuideController {
 
-    private final double MATCH_DISTANCE = 6.0;
+  private final double MATCH_DISTANCE = 6.0;
 
-    private final List<Point2D> curvePoints = new ArrayList<>();
-    
-    private final PointIndex pointIndex = new PointIndex();
-    private final HorizontalLineIndex horizontalLineIndex = new HorizontalLineIndex();
-    private final VerticalLineIndex verticalLineIndex = new VerticalLineIndex();
-    
-    public EditCurveGuideController() {
+  private final List<Point2D> curvePoints = new ArrayList<>();
+
+  private final PointIndex pointIndex = new PointIndex();
+  private final HorizontalLineIndex horizontalLineIndex = new HorizontalLineIndex();
+  private final VerticalLineIndex verticalLineIndex = new VerticalLineIndex();
+
+  public EditCurveGuideController() {}
+
+  public void addCurvePoint(Point2D pointInScene) {
+    assert pointInScene != null;
+    curvePoints.add(pointInScene);
+    pointIndex.addPoint(pointInScene);
+  }
+
+  public void addSampleBounds(Node node) {
+    assert node != null;
+    assert node.getScene() != null;
+
+    final Bounds layoutBounds = node.getLayoutBounds();
+    final Bounds boundsInScene = node.localToScene(layoutBounds, true /* rootScene */);
+    addSampleBounds(boundsInScene, true);
+  }
+
+  public void addSampleBounds(Bounds boundsInScene, boolean addMiddle) {
+    final double minX = boundsInScene.getMinX();
+    final double minY = boundsInScene.getMinY();
+    final double maxX = boundsInScene.getMaxX();
+    final double maxY = boundsInScene.getMaxY();
+
+    pointIndex.addPoint(new Point2D(minX, minY));
+    pointIndex.addPoint(new Point2D(minX, maxY));
+    pointIndex.addPoint(new Point2D(maxX, minY));
+    pointIndex.addPoint(new Point2D(maxX, maxY));
+
+    if (addMiddle) {
+      final double midX = (minX + maxX) / 2.0;
+      final double midY = (minY + maxY) / 2.0;
+
+      pointIndex.addPoint(new Point2D(midX, midY));
+      pointIndex.addPoint(new Point2D(midX, minY));
+      pointIndex.addPoint(new Point2D(midX, maxY));
+      pointIndex.addPoint(new Point2D(minX, midY));
+      pointIndex.addPoint(new Point2D(maxX, midY));
     }
 
-    public void addCurvePoint(Point2D pointInScene) {
-        assert pointInScene != null;
-        curvePoints.add(pointInScene);
-        pointIndex.addPoint(pointInScene);
+    horizontalLineIndex.addLine(new HorizontalSegment(minX, maxX, minY));
+    horizontalLineIndex.addLine(new HorizontalSegment(minX, maxX, maxY));
+    verticalLineIndex.addLine(new VerticalSegment(minX, minY, maxY));
+    verticalLineIndex.addLine(new VerticalSegment(maxX, minY, maxY));
+  }
+
+  public Point2D correct(Point2D point) {
+    assert point != null;
+
+    double x = point.getX();
+    double y = point.getY();
+
+    final List<Point2D> matchedPoints = pointIndex.match(point, MATCH_DISTANCE);
+    final List<HorizontalSegment> horizontalMatchingLines =
+        horizontalLineIndex.matchPoint(point, MATCH_DISTANCE);
+    final List<VerticalSegment> verticalMatchedLines =
+        verticalLineIndex.matchPoint(point, MATCH_DISTANCE);
+
+    if (!matchedPoints.isEmpty()) {
+      return matchedPoints.get(0);
+    }
+    if (!horizontalMatchingLines.isEmpty()) {
+      final HorizontalSegment line = horizontalMatchingLines.get(0);
+      y = line.getY1();
+    }
+    if (!verticalMatchedLines.isEmpty()) {
+      final VerticalSegment line = verticalMatchedLines.get(0);
+      x = line.getX1();
     }
 
-    public void addSampleBounds(Node node) {
-        assert node != null;
-        assert node.getScene() != null;
-
-        final Bounds layoutBounds = node.getLayoutBounds();
-        final Bounds boundsInScene = node.localToScene(layoutBounds, true /* rootScene */);
-        addSampleBounds(boundsInScene, true);
+    for (Point2D curvePoint : curvePoints) {
+      if (Math.abs(point.getX() - curvePoint.getX()) < MATCH_DISTANCE) {
+        x = curvePoint.getX();
+      }
+      if (Math.abs(point.getY() - curvePoint.getY()) < MATCH_DISTANCE) {
+        y = curvePoint.getY();
+      }
     }
+    return new Point2D(x, y);
+  }
 
-    public void addSampleBounds(Bounds boundsInScene, boolean addMiddle) {
-        final double minX = boundsInScene.getMinX();
-        final double minY = boundsInScene.getMinY();
-        final double maxX = boundsInScene.getMaxX();
-        final double maxY = boundsInScene.getMaxY();
+  public Point2D makeStraightAngles(Point2D point) {
+    assert point != null;
 
-        pointIndex.addPoint(new Point2D(minX, minY));
-        pointIndex.addPoint(new Point2D(minX, maxY));
-        pointIndex.addPoint(new Point2D(maxX, minY));
-        pointIndex.addPoint(new Point2D(maxX, maxY));
-        
-        if (addMiddle) {
-            final double midX = (minX + maxX) / 2.0;
-            final double midY = (minY + maxY) / 2.0;
+    double x = point.getX();
+    double y = point.getY();
 
-            pointIndex.addPoint(new Point2D(midX, midY));
-            pointIndex.addPoint(new Point2D(midX, minY));
-            pointIndex.addPoint(new Point2D(midX, maxY));
-            pointIndex.addPoint(new Point2D(minX, midY));
-            pointIndex.addPoint(new Point2D(maxX, midY));
-        }
-
-        horizontalLineIndex.addLine(new HorizontalSegment(minX, maxX, minY));
-        horizontalLineIndex.addLine(new HorizontalSegment(minX, maxX, maxY));
-        verticalLineIndex.addLine(new VerticalSegment(minX, minY, maxY));
-        verticalLineIndex.addLine(new VerticalSegment(maxX, minY, maxY));
+    for (Point2D curvePoint : curvePoints) {
+      if (Math.abs(point.getX() - curvePoint.getX()) > Math.abs(point.getY() - curvePoint.getY())) {
+        y = curvePoint.getY();
+      } else {
+        x = curvePoint.getX();
+      }
     }
-
-    public Point2D correct(Point2D point) {
-        assert point != null;
-        
-        double x = point.getX();
-        double y = point.getY();
-
-        final List<Point2D> matchedPoints = pointIndex.match(point, MATCH_DISTANCE);
-        final List<HorizontalSegment> horizontalMatchingLines = horizontalLineIndex.matchPoint(point, MATCH_DISTANCE);
-        final List<VerticalSegment> verticalMatchedLines = verticalLineIndex.matchPoint(point, MATCH_DISTANCE);
-        
-        if (!matchedPoints.isEmpty()) {
-            return matchedPoints.get(0);
-        }
-        if (!horizontalMatchingLines.isEmpty()) {
-            final HorizontalSegment line = horizontalMatchingLines.get(0);
-            y = line.getY1();
-        }
-        if (!verticalMatchedLines.isEmpty()) {
-            final VerticalSegment line = verticalMatchedLines.get(0);
-            x = line.getX1();
-        }
-
-        for (Point2D curvePoint : curvePoints) {
-            if (Math.abs(point.getX() - curvePoint.getX()) < MATCH_DISTANCE) {
-                x = curvePoint.getX();
-            }
-            if (Math.abs(point.getY() - curvePoint.getY()) < MATCH_DISTANCE) {
-                y = curvePoint.getY();
-            }
-        }
-        return new Point2D(x, y);
-    }
-
-    public Point2D makeStraightAngles(Point2D point) {
-        assert point != null;
-
-        double x = point.getX();
-        double y = point.getY();
-
-        for (Point2D curvePoint : curvePoints) {
-            if (Math.abs(point.getX() - curvePoint.getX()) > Math.abs(point.getY() - curvePoint.getY())) {
-                y = curvePoint.getY();
-            } else {
-                x = curvePoint.getX();
-            }
-        }
-        return new Point2D(x, y);
-    }
-    
+    return new Point2D(x, y);
+  }
 }

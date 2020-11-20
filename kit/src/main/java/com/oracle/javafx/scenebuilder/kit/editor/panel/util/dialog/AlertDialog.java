@@ -38,103 +38,97 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.stage.Window;
 
-/**
- *
- * 
- */
+/** */
 public class AlertDialog extends AbstractModalDialog {
-    
-    @FXML protected Label messageLabel;
-    @FXML protected Label detailsLabel;
-    
-    private Runnable actionRunnable;
-    
-    public AlertDialog(Window owner) {
-        super(AlertDialog.class.getResource("AlertDialog.fxml"), null, owner); //NOI18N
-        getStage().setResizable(false);
-        setImageViewVisible(true);
-        setImageViewImage(getDialogImage());
-    }
-    
-    public String getMessage() {
-        return getMessageLabel().getText();
-    }
-    
-    public void setMessage(String message) {
-        getMessageLabel().setText(message);
-    }
-    
-    public String getDetails() {
-        return getDetailsLabel().getText();
-    }
-    
-    public void setDetails(String details) {
-        getDetailsLabel().setText(details);
-    }
-    
-    public void setActionRunnable(Runnable runnable) {
-        this.actionRunnable = runnable;
-    }
 
-    /*
-     * AbstractModalDialog
-     */
-    
-    @Override
-    public void controllerDidLoadContentFxml() {
-        
-        // Sanity checks
-        assert messageLabel != null;
-        assert detailsLabel != null;
-        
-        // Remove label text (inserted for design purpose)
-        messageLabel.setText(null);
-        detailsLabel.setText(null);
-    }
-    
-    @Override
-    public void okButtonPressed(ActionEvent e) {
-        getStage().close();
-    }
-    
-    @Override
-    public void cancelButtonPressed(ActionEvent e) {
-        getStage().close();
-    }
-    
-    @Override
-    public void actionButtonPressed(ActionEvent e) {
-        if (actionRunnable != null) {
-            actionRunnable.run();
-        } else {
-            getStage().close();
-        }
-    }
-    
-    
-    
-    /*
-     * Private
-     */
-    
-    private Label getMessageLabel() {
-        getContentRoot(); // Force content fxml loading
-        return messageLabel;
-    }
-    
+  @FXML protected Label messageLabel;
+  @FXML protected Label detailsLabel;
 
-    private Label getDetailsLabel() {
-        getContentRoot(); // Force content fxml loading
-        return detailsLabel;
+  private Runnable actionRunnable;
+
+  public AlertDialog(Window owner) {
+    super(AlertDialog.class.getResource("AlertDialog.fxml"), null, owner); // NOI18N
+    getStage().setResizable(false);
+    setImageViewVisible(true);
+    setImageViewImage(getDialogImage());
+  }
+
+  public String getMessage() {
+    return getMessageLabel().getText();
+  }
+
+  public void setMessage(String message) {
+    getMessageLabel().setText(message);
+  }
+
+  public String getDetails() {
+    return getDetailsLabel().getText();
+  }
+
+  public void setDetails(String details) {
+    getDetailsLabel().setText(details);
+  }
+
+  public void setActionRunnable(Runnable runnable) {
+    this.actionRunnable = runnable;
+  }
+
+  /*
+   * AbstractModalDialog
+   */
+
+  @Override
+  public void controllerDidLoadContentFxml() {
+
+    // Sanity checks
+    assert messageLabel != null;
+    assert detailsLabel != null;
+
+    // Remove label text (inserted for design purpose)
+    messageLabel.setText(null);
+    detailsLabel.setText(null);
+  }
+
+  @Override
+  public void okButtonPressed(ActionEvent e) {
+    getStage().close();
+  }
+
+  @Override
+  public void cancelButtonPressed(ActionEvent e) {
+    getStage().close();
+  }
+
+  @Override
+  public void actionButtonPressed(ActionEvent e) {
+    if (actionRunnable != null) {
+      actionRunnable.run();
+    } else {
+      getStage().close();
     }
-    
-    
-    private static Image dialogImage;
-    private static synchronized Image getDialogImage() {
-        if (dialogImage == null) {
-            final URL dialogImageURL = AlertDialog.class.getResource("alert-question-mark.png"); //NOI18N
-            dialogImage = new Image(dialogImageURL.toExternalForm());
-        }
-        return dialogImage;
+  }
+
+  /*
+   * Private
+   */
+
+  private Label getMessageLabel() {
+    getContentRoot(); // Force content fxml loading
+    return messageLabel;
+  }
+
+  private Label getDetailsLabel() {
+    getContentRoot(); // Force content fxml loading
+    return detailsLabel;
+  }
+
+  private static Image dialogImage;
+
+  private static synchronized Image getDialogImage() {
+    if (dialogImage == null) {
+      final URL dialogImageURL = AlertDialog.class.getResource("alert-question-mark.png"); // NOI18N
+      dialogImage = new Image(dialogImageURL.toExternalForm());
     }
+    return dialogImage;
+  }
 }

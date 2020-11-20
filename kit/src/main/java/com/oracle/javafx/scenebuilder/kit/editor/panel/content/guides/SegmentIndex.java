@@ -37,46 +37,43 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- *
- */
+/** */
 public class SegmentIndex {
-    
-    private final List<AbstractSegment> segments = new ArrayList<>();
-    private boolean sorted;
-    
 
-    public void addSegment(AbstractSegment s) {
-        segments.add(s);
-        sorted = false;
+  private final List<AbstractSegment> segments = new ArrayList<>();
+  private boolean sorted;
+
+  public void addSegment(AbstractSegment s) {
+    segments.add(s);
+    sorted = false;
+  }
+
+  public void clear() {
+    segments.clear();
+  }
+
+  public List<AbstractSegment> match(double targetLength, double threshold) {
+    assert targetLength >= 0;
+    assert threshold >= 0;
+
+    if (sorted == false) {
+      Collections.sort(segments);
     }
-    
-    public void clear() {
-        segments.clear();
-    }
-    
-    public List<AbstractSegment> match(double targetLength, double threshold) {
-        assert targetLength >= 0;
-        assert threshold >= 0;
-        
-        if (sorted == false) {
-            Collections.sort(segments);
+    double bestDelta = Double.MAX_VALUE;
+    final List<AbstractSegment> result = new ArrayList<>();
+    for (AbstractSegment s : segments) {
+      final double delta = Math.abs(s.getLength() - targetLength);
+      if (delta < threshold) {
+        if (MathUtils.equals(delta, bestDelta)) {
+          result.add(s);
+        } else if (delta < bestDelta) {
+          bestDelta = delta;
+          result.clear();
+          result.add(s);
         }
-        double bestDelta = Double.MAX_VALUE;
-        final List<AbstractSegment> result = new ArrayList<>();
-        for (AbstractSegment s : segments) {
-            final double delta = Math.abs(s.getLength() - targetLength);
-            if (delta < threshold) {
-                if (MathUtils.equals(delta, bestDelta)) {
-                    result.add(s);
-                } else if (delta < bestDelta) {
-                    bestDelta = delta;
-                    result.clear();
-                    result.add(s);
-                }
-            }
-        }
-        
-        return result;
+      }
     }
+
+    return result;
+  }
 }

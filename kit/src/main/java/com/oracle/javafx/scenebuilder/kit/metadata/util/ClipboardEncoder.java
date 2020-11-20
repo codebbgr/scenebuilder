@@ -39,53 +39,50 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 
-/**
- *
- */
+/** */
 public class ClipboardEncoder {
-    
-    // Internal SB2 data format
-    static final DataFormat SB_DATA_FORMAT 
-            = new DataFormat("com.oracle.javafx.scenebuilder2/internal"); //NOI18N
 
-    // FXML Format
-    static final DataFormat FXML_DATA_FORMAT 
-            = new DataFormat("com.oracle.javafx/fxml"); //NOI18N
-    
-    private final List<FXOMObject> fxomObjects;
+  // Internal SB2 data format
+  static final DataFormat SB_DATA_FORMAT =
+      new DataFormat("com.oracle.javafx.scenebuilder2/internal"); // NOI18N
 
-    public ClipboardEncoder(List<FXOMObject> fxomObjects) {
-        assert fxomObjects != null;
-        this.fxomObjects = fxomObjects;
+  // FXML Format
+  static final DataFormat FXML_DATA_FORMAT = new DataFormat("com.oracle.javafx/fxml"); // NOI18N
+
+  private final List<FXOMObject> fxomObjects;
+
+  public ClipboardEncoder(List<FXOMObject> fxomObjects) {
+    assert fxomObjects != null;
+    this.fxomObjects = fxomObjects;
+  }
+
+  public boolean isEncodable() {
+    return fxomObjects.isEmpty() == false;
+  }
+
+  public ClipboardContent makeEncoding() {
+    assert isEncodable();
+
+    final ClipboardContent result = new ClipboardContent();
+    final FXOMArchive fxomArchive = new FXOMArchive(fxomObjects);
+
+    // SB_DATA_FORMAT
+    result.put(SB_DATA_FORMAT, new FXOMArchive(fxomObjects));
+
+    // FXML_DATA_FORMAT
+    final FXOMArchive.Entry entry0 = fxomArchive.getEntries().get(0);
+    result.put(FXML_DATA_FORMAT, entry0.getFxmlText());
+    result.put(DataFormat.PLAIN_TEXT, entry0.getFxmlText());
+
+    // DataFormat.IMAGE
+    final FXOMObject fxomObject0 = fxomObjects.get(0);
+    if (fxomObject0.getSceneGraphObject() instanceof ImageView) {
+      final ImageView imageView = (ImageView) fxomObject0.getSceneGraphObject();
+      if (imageView.getImage() != null) {
+        result.put(DataFormat.IMAGE, imageView.getImage());
+      }
     }
-    
-    public boolean isEncodable() {
-        return fxomObjects.isEmpty() == false;
-    }
-    
-    public ClipboardContent makeEncoding() {
-        assert isEncodable();
-        
-        final ClipboardContent result = new ClipboardContent();
-        final FXOMArchive fxomArchive = new FXOMArchive(fxomObjects);
-        
-        // SB_DATA_FORMAT
-        result.put(SB_DATA_FORMAT, new FXOMArchive(fxomObjects));
-            
-        // FXML_DATA_FORMAT
-        final FXOMArchive.Entry entry0 = fxomArchive.getEntries().get(0);
-        result.put(FXML_DATA_FORMAT, entry0.getFxmlText());
-        result.put(DataFormat.PLAIN_TEXT, entry0.getFxmlText());
-        
-        // DataFormat.IMAGE
-        final FXOMObject fxomObject0 = fxomObjects.get(0);
-        if (fxomObject0.getSceneGraphObject() instanceof ImageView) {
-            final ImageView imageView = (ImageView) fxomObject0.getSceneGraphObject();
-            if (imageView.getImage() != null) {
-                result.put(DataFormat.IMAGE, imageView.getImage());
-            }
-        }
-        
-        return result;
-    }
+
+    return result;
+  }
 }

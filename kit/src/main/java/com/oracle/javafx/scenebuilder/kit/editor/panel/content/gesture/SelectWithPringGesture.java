@@ -36,78 +36,76 @@ import com.oracle.javafx.scenebuilder.kit.editor.panel.content.gesture.mouse.Abs
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
 import javafx.scene.input.MouseEvent;
 
-/**
- *
- * 
- */
+/** */
 public class SelectWithPringGesture extends AbstractMouseDragGesture {
-    
-    private final FXOMInstance fxomInstance;
 
-    public SelectWithPringGesture(ContentPanelController contentPanelController,
-            FXOMInstance fxomInstance) {
-        super(contentPanelController);
-        this.fxomInstance = fxomInstance;
-    }
-    
+  private final FXOMInstance fxomInstance;
+
+  public SelectWithPringGesture(
+      ContentPanelController contentPanelController, FXOMInstance fxomInstance) {
+    super(contentPanelController);
+    this.fxomInstance = fxomInstance;
+  }
+
+  /*
+   * AbstractMouseDragGesture
+   */
+
+  @Override
+  protected void mousePressed(MouseEvent e) {
+    contentPanelController.getEditorController().getSelection().select(fxomInstance);
+
     /*
-     * AbstractMouseDragGesture
+     * This selection operation will callback EditModeController
+     * which will remove the pring where mouse has been pressed.
+     * Thus mouseExited() will be called. But not mouseDragDetected()
+     * neither mouseReleased().
      */
+  }
 
-    @Override
-    protected void mousePressed(MouseEvent e) {
-        contentPanelController.getEditorController().getSelection().select(fxomInstance);
-        
-        /*
-         * This selection operation will callback EditModeController
-         * which will remove the pring where mouse has been pressed.
-         * Thus mouseExited() will be called. But not mouseDragDetected() 
-         * neither mouseReleased().
-         */
-    }
+  @Override
+  protected void mouseDragDetected(MouseEvent e) {
+    // Should not be called : see comment in mousePressed().
+    assert false;
+  }
 
-    @Override
-    protected void mouseDragDetected(MouseEvent e) {
-        // Should not be called : see comment in mousePressed().
-        assert false;
-    }
+  @Override
+  protected void mouseReleased(MouseEvent e) {
+    // Should not be called : see comment in mousePressed().
+    assert false;
+  }
 
-    @Override
-    protected void mouseReleased(MouseEvent e) {
-        // Should not be called : see comment in mousePressed().
-        assert false;
-    }
+  @Override
+  protected void mouseExited(MouseEvent e) {
+    // Mouse has exited pring because it has been removed from the
+    // scene graph by the selection operation in mousePressed().
 
-    @Override
-    protected void mouseExited(MouseEvent e) {
-        // Mouse has exited pring because it has been removed from the
-        // scene graph by the selection operation in mousePressed().
-
-//        final Selection selection 
-//                = contentPanelController.getEditorController().getSelection();
-//        
-//        if (selection.getAncestor() != null) {
-//            
-//            assert selection.isSelected(fxomInstance);
-//            assert selection.getGroup() instanceof ObjectSelectionGroup;
-//        
-//            final ObjectSelectionGroup 
-//                    osg = (ObjectSelectionGroup) selection.getGroup();
-//            
-//            assert osg.hasSingleParent();
-//            
-//            final EditorController editorController
-//                    = contentPanelController.getEditorController();
-//            final DocumentDragSource dragSource
-//                    = new DocumentDragSource(osg.getItems());
-//
-//            final Dragboard db 
-//                    = contentPanelController.getGlassLayer().startDragAndDrop(TransferMode.ANY);
-//            db.setContent(dragSource.makeClipboardContent());
-//            db.setDragView(dragSource.makeDragView());
-//
-////                assert editorController.getDragSource() == null;
-//            editorController.setDragSource(dragSource);
-//        }
-    }
+    //        final Selection selection
+    //                = contentPanelController.getEditorController().getSelection();
+    //
+    //        if (selection.getAncestor() != null) {
+    //
+    //            assert selection.isSelected(fxomInstance);
+    //            assert selection.getGroup() instanceof ObjectSelectionGroup;
+    //
+    //            final ObjectSelectionGroup
+    //                    osg = (ObjectSelectionGroup) selection.getGroup();
+    //
+    //            assert osg.hasSingleParent();
+    //
+    //            final EditorController editorController
+    //                    = contentPanelController.getEditorController();
+    //            final DocumentDragSource dragSource
+    //                    = new DocumentDragSource(osg.getItems());
+    //
+    //            final Dragboard db
+    //                    =
+    // contentPanelController.getGlassLayer().startDragAndDrop(TransferMode.ANY);
+    //            db.setContent(dragSource.makeClipboardContent());
+    //            db.setDragView(dragSource.makeDragView());
+    //
+    ////                assert editorController.getDragSource() == null;
+    //            editorController.setDragSource(dragSource);
+    //        }
+  }
 }

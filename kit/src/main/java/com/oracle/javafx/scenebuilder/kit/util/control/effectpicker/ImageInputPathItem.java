@@ -33,30 +33,29 @@ package com.oracle.javafx.scenebuilder.kit.util.control.effectpicker;
 
 import javafx.scene.effect.Effect;
 
-/**
- * Effect path item for the image input effect.
- */
+/** Effect path item for the image input effect. */
 public class ImageInputPathItem extends EffectPathItem {
 
-    public ImageInputPathItem(EffectPickerController epc, Effect effect, EffectPathItem hostPathItem) {
-        super(epc, effect, hostPathItem);
-        assert effect instanceof javafx.scene.effect.ImageInput;
-        initialize();
-    }
+  public ImageInputPathItem(
+      EffectPickerController epc, Effect effect, EffectPathItem hostPathItem) {
+    super(epc, effect, hostPathItem);
+    assert effect instanceof javafx.scene.effect.ImageInput;
+    initialize();
+  }
 
-    @Override
-    EffectPathItem getSelectedInputPathItem() {
-        return null;
-    }
+  @Override
+  EffectPathItem getSelectedInputPathItem() {
+    return null;
+  }
 
-    @Override
-    void setSelectedInputEffect(Effect input) {
-        // No input
-    }
+  @Override
+  void setSelectedInputEffect(Effect input) {
+    // No input
+  }
 
-    private void initialize() {
-        // Remove replace/delete input Menu
-        menu_button.getItems().remove(delete_input_menuitem);
-        menu_button.getItems().remove(replace_input_menu);
-    }
+  private void initialize() {
+    // Remove replace/delete input Menu
+    menu_button.getItems().remove(delete_input_menuitem);
+    menu_button.getItems().remove(replace_input_menu);
+  }
 }

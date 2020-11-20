@@ -34,7 +34,6 @@ package com.oracle.javafx.scenebuilder.kit.editor.search;
 
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.util.AbstractFxmlController;
-
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -43,66 +42,68 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.StackPane;
 
-/**
- *
- * 
- */
+/** */
 public class SearchController extends AbstractFxmlController {
 
-    @FXML
-    private TextField searchField;
-    
-    // This StackPane contains the searchImage.
-    @FXML
-    private StackPane searchIcon;
+  @FXML private TextField searchField;
 
-    public SearchController(EditorController c) {
-        super(SearchController.class.getResource("Search.fxml"), c); //NOI18N
+  // This StackPane contains the searchImage.
+  @FXML private StackPane searchIcon;
 
+  public SearchController(EditorController c) {
+    super(SearchController.class.getResource("Search.fxml"), c); // NOI18N
+  }
 
+  public final StringProperty textProperty() {
+    return searchField.textProperty();
+  }
+
+  public void requestFocus() {
+    searchField.requestFocus();
+  }
+
+  @Override
+  protected void controllerDidLoadFxml() {
+    if (searchField.getLength() == 0) {
+      searchIcon.getStyleClass().add("search-magnifying-glass"); // NOI18N
     }
 
-    public final StringProperty textProperty() {
-        return searchField.textProperty();
-    }
-    
-    public void requestFocus() {
-        searchField.requestFocus();
-    }
+    // For SQE tests
+    searchField.setId("Search Text"); // NOI18N
 
-    @Override
-    protected void controllerDidLoadFxml() {
-        if (searchField.getLength() == 0) {
-            searchIcon.getStyleClass().add("search-magnifying-glass"); //NOI18N
-        }
-        
-        // For SQE tests
-        searchField.setId("Search Text"); //NOI18N
+    searchField
+        .textProperty()
+        .addListener(
+            (ChangeListener<String>)
+                (ov, oldStr, newStr) -> {
+                  if (newStr.isEmpty()) {
+                    searchIcon.getStyleClass().clear();
+                    searchIcon.getStyleClass().add("search-magnifying-glass"); // NOI18N
+                  } else {
+                    searchIcon.getStyleClass().clear();
+                    searchIcon.getStyleClass().add("search-clear"); // NOI18N
+                  }
+                });
 
-        searchField.textProperty().addListener((ChangeListener<String>) (ov, oldStr, newStr) -> {
-            if (newStr.isEmpty()) {
-                searchIcon.getStyleClass().clear();
-                searchIcon.getStyleClass().add("search-magnifying-glass"); //NOI18N
-            } else {
-                searchIcon.getStyleClass().clear();
-                searchIcon.getStyleClass().add("search-clear"); //NOI18N
-            }
+    searchField.addEventHandler(
+        KeyEvent.KEY_PRESSED,
+        event -> {
+          if (event.getCode() == KeyCode.ESCAPE) {
+            searchField.clear();
+          }
         });
-        
-        searchField.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
-            if (event.getCode() == KeyCode.ESCAPE) {
-                searchField.clear();
-            }
-        });
 
-        // Select all text when this editor is selected
-        searchField.setOnMousePressed(event -> searchField.selectAll());
-        searchField.focusedProperty().addListener(((observable, oldValue, newValue) -> {
-            if (newValue) {
+    // Select all text when this editor is selected
+    searchField.setOnMousePressed(event -> searchField.selectAll());
+    searchField
+        .focusedProperty()
+        .addListener(
+            ((observable, oldValue, newValue) -> {
+              if (newValue) {
                 searchField.selectAll();
-            }
-        }));
-        
-        searchIcon.setOnMouseClicked(t -> searchField.clear());
-    }
+              }
+            }));
+
+    searchIcon.setOnMouseClicked(t -> searchField.clear());
+  }
 }

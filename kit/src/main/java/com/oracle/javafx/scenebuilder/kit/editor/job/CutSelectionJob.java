@@ -37,49 +37,47 @@ import com.oracle.javafx.scenebuilder.kit.editor.selection.AbstractSelectionGrou
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *
- */
+/** */
 public class CutSelectionJob extends InlineSelectionJob {
 
-    private DeleteSelectionJob deleteSelectionSubJob;
+  private DeleteSelectionJob deleteSelectionSubJob;
 
-    public CutSelectionJob(EditorController editorController) {
-        super(editorController);
+  public CutSelectionJob(EditorController editorController) {
+    super(editorController);
+  }
+
+  @Override
+  public boolean isExecutable() {
+    return getEditorController().canPerformControlAction(ControlAction.COPY);
+  }
+
+  @Override
+  protected AbstractSelectionGroup getNewSelectionGroup() {
+    // Selection emptied
+    return null;
+  }
+
+  @Override
+  protected List<Job> makeAndExecuteSubJobs() {
+
+    final List<Job> result = new ArrayList<>();
+    if (getEditorController().canPerformControlAction(ControlAction.COPY)) {
+      // Update clipboard with current selection BEFORE EXECUTING DELETE job
+      assert getEditorController().canPerformControlAction(ControlAction.COPY);
+      getEditorController().performControlAction(ControlAction.COPY);
+
+      deleteSelectionSubJob = new DeleteSelectionJob(getEditorController());
+      if (deleteSelectionSubJob.isExecutable()) {
+        deleteSelectionSubJob.execute();
+        result.add(deleteSelectionSubJob);
+      }
     }
+    return result;
+  }
 
-    @Override
-    public boolean isExecutable() {
-        return getEditorController().canPerformControlAction(ControlAction.COPY);
-    }
-
-    @Override
-    protected AbstractSelectionGroup getNewSelectionGroup() {
-        // Selection emptied
-        return null;
-    }
-
-    @Override
-    protected List<Job> makeAndExecuteSubJobs() {
-
-        final List<Job> result = new ArrayList<>();
-        if (getEditorController().canPerformControlAction(ControlAction.COPY)) {
-            // Update clipboard with current selection BEFORE EXECUTING DELETE job
-            assert getEditorController().canPerformControlAction(ControlAction.COPY);
-            getEditorController().performControlAction(ControlAction.COPY);
-
-            deleteSelectionSubJob = new DeleteSelectionJob(getEditorController());
-            if (deleteSelectionSubJob.isExecutable()) {
-                deleteSelectionSubJob.execute(); 
-                result.add(deleteSelectionSubJob);
-            }
-        }
-        return result;
-    }
-
-    @Override
-    protected String makeDescription() {
-        assert deleteSelectionSubJob != null;
-        return deleteSelectionSubJob.getDescription();
-    }
+  @Override
+  protected String makeDescription() {
+    assert deleteSelectionSubJob != null;
+    return deleteSelectionSubJob.getDescription();
+  }
 }

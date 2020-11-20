@@ -45,59 +45,79 @@ import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 
-/**
- *
- */
+/** */
 public class LinearGradientPropertyMetadata extends ComplexPropertyMetadata<LinearGradient> {
 
-    private static final List<Stop> DEFAULT_STOPS 
-            = new LinearGradient(0.0, 0.0, 1.0, 1.0,
-            true /* proportional */, CycleMethod.NO_CYCLE).getStops();
-    
-    private final DoublePropertyMetadata startXMetadata
-            = new DoublePropertyMetadata(new PropertyName("startX"), 
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata startYMetadata
-            = new DoublePropertyMetadata(new PropertyName("startY"), 
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata endXMetadata
-            = new DoublePropertyMetadata(new PropertyName("endX"), 
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata endYMetadata
-            = new DoublePropertyMetadata(new PropertyName("endY"), 
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final BooleanPropertyMetadata proportionalMetadata
-            = new BooleanPropertyMetadata(new PropertyName("proportional"), 
-            true, true, InspectorPath.UNUSED);
-    private final EnumerationPropertyMetadata cycleMethodMetadata
-            = new EnumerationPropertyMetadata(new PropertyName("cycleMethod"),
-            CycleMethod.class, true, CycleMethod.NO_CYCLE, InspectorPath.UNUSED);
-    private final StopListPropertyMetadata stopsMetadata
-            = new StopListPropertyMetadata(new PropertyName("stops"),
-            true, DEFAULT_STOPS, InspectorPath.UNUSED);
+  private static final List<Stop> DEFAULT_STOPS =
+      new LinearGradient(0.0, 0.0, 1.0, 1.0, true /* proportional */, CycleMethod.NO_CYCLE)
+          .getStops();
 
-    public LinearGradientPropertyMetadata(PropertyName name, boolean readWrite, 
-            LinearGradient defaultValue, InspectorPath inspectorPath) {
-        super(name, LinearGradient.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final DoublePropertyMetadata startXMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("startX"),
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata startYMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("startY"),
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata endXMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("endX"),
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata endYMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("endY"),
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final BooleanPropertyMetadata proportionalMetadata =
+      new BooleanPropertyMetadata(
+          new PropertyName("proportional"), true, true, InspectorPath.UNUSED);
+  private final EnumerationPropertyMetadata cycleMethodMetadata =
+      new EnumerationPropertyMetadata(
+          new PropertyName("cycleMethod"),
+          CycleMethod.class,
+          true,
+          CycleMethod.NO_CYCLE,
+          InspectorPath.UNUSED);
+  private final StopListPropertyMetadata stopsMetadata =
+      new StopListPropertyMetadata(
+          new PropertyName("stops"), true, DEFAULT_STOPS, InspectorPath.UNUSED);
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(LinearGradient value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        startXMetadata.setValue(result, value.getStartX());
-        startYMetadata.setValue(result, value.getStartY());
-        endXMetadata.setValue(result, value.getEndX());
-        endYMetadata.setValue(result, value.getEndY());
-        proportionalMetadata.setValue(result, value.isProportional());
-        cycleMethodMetadata.setValue(result, value.getCycleMethod().toString());
-        stopsMetadata.setValue(result, value.getStops());
-        
-        return result;
-    }
-    
+  public LinearGradientPropertyMetadata(
+      PropertyName name,
+      boolean readWrite,
+      LinearGradient defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, LinearGradient.class, readWrite, defaultValue, inspectorPath);
+  }
+
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(LinearGradient value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    startXMetadata.setValue(result, value.getStartX());
+    startYMetadata.setValue(result, value.getStartY());
+    endXMetadata.setValue(result, value.getEndX());
+    endYMetadata.setValue(result, value.getEndY());
+    proportionalMetadata.setValue(result, value.isProportional());
+    cycleMethodMetadata.setValue(result, value.getCycleMethod().toString());
+    stopsMetadata.setValue(result, value.getStops());
+
+    return result;
+  }
 }

@@ -36,52 +36,49 @@ import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import com.oracle.javafx.scenebuilder.kit.editor.job.Job;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 
-/**
- *
- */
+/** */
 public class RemoveFxControllerJob extends Job {
-    
-    private final FXOMObject fxomObject;
-    private String oldFxController;
 
-    public RemoveFxControllerJob(FXOMObject fxomObject, EditorController editorController) {
-        super(editorController);
-        assert fxomObject != null;
-        this.fxomObject = fxomObject;
-    }
+  private final FXOMObject fxomObject;
+  private String oldFxController;
 
-    /*
-     * Job
-     */
-    
-    @Override
-    public boolean isExecutable() {
-        return fxomObject.getFxController() != null;
-    }
+  public RemoveFxControllerJob(FXOMObject fxomObject, EditorController editorController) {
+    super(editorController);
+    assert fxomObject != null;
+    this.fxomObject = fxomObject;
+  }
 
-    @Override
-    public void execute() {
-        assert oldFxController == null;
-        oldFxController = fxomObject.getFxController();
-        // Now like redo()
-        redo();
-    }
+  /*
+   * Job
+   */
 
-    @Override
-    public void undo() {
-        assert oldFxController != null;
-        fxomObject.setFxController(oldFxController);
-    }
+  @Override
+  public boolean isExecutable() {
+    return fxomObject.getFxController() != null;
+  }
 
-    @Override
-    public void redo() {
-        assert oldFxController != null;
-        fxomObject.setFxController(null);
-    }
+  @Override
+  public void execute() {
+    assert oldFxController == null;
+    oldFxController = fxomObject.getFxController();
+    // Now like redo()
+    redo();
+  }
 
-    @Override
-    public String getDescription() {
-        return getClass().getSimpleName(); // Should not reach user
-    }
-    
+  @Override
+  public void undo() {
+    assert oldFxController != null;
+    fxomObject.setFxController(oldFxController);
+  }
+
+  @Override
+  public void redo() {
+    assert oldFxController != null;
+    fxomObject.setFxController(null);
+  }
+
+  @Override
+  public String getDescription() {
+    return getClass().getSimpleName(); // Should not reach user
+  }
 }

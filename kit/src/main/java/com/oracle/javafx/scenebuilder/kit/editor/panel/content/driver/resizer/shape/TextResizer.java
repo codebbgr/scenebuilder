@@ -42,83 +42,78 @@ import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.scene.text.Text;
 
-/**
- *
- * 
- */
+/** */
 public class TextResizer extends AbstractResizer<Text> {
 
-    private final double originalWrappingWidth;
-    private final PropertyName wrappingWidthName = new PropertyName("wrappingWidth"); //NOI18N
-    private final List<PropertyName> propertyNames = new ArrayList<>();
-    
-    public TextResizer(Text sceneGraphObject) {
-        super(sceneGraphObject);
-        originalWrappingWidth = sceneGraphObject.getWrappingWidth();
-        propertyNames.add(wrappingWidthName);
+  private final double originalWrappingWidth;
+  private final PropertyName wrappingWidthName = new PropertyName("wrappingWidth"); // NOI18N
+  private final List<PropertyName> propertyNames = new ArrayList<>();
+
+  public TextResizer(Text sceneGraphObject) {
+    super(sceneGraphObject);
+    originalWrappingWidth = sceneGraphObject.getWrappingWidth();
+    propertyNames.add(wrappingWidthName);
+  }
+
+  /*
+   * AbstractResizer
+   */
+
+  @Override
+  public final Bounds computeBounds(double width, double height) {
+    final double minX = sceneGraphObject.getX();
+    final double minY = sceneGraphObject.getY();
+    return new BoundingBox(minX, minY, width, height);
+  }
+
+  @Override
+  public Feature getFeature() {
+    return Feature.WIDTH_ONLY;
+  }
+
+  @Override
+  public void changeWidth(double width) {
+    // When wrappingWidth is set to 0, text will
+    // jump from a nearer zero column to a single line.
+    // Not nice : so we set a min of 1 to avoid this effect.
+    sceneGraphObject.setWrappingWidth(Math.max(1.0, width));
+  }
+
+  @Override
+  public void changeHeight(double height) {}
+
+  @Override
+  public void revertToOriginalSize() {
+    sceneGraphObject.setWrappingWidth(originalWrappingWidth);
+  }
+
+  @Override
+  public List<PropertyName> getPropertyNames() {
+    return propertyNames;
+  }
+
+  @Override
+  public Object getValue(PropertyName propertyName) {
+    assert propertyName != null;
+    assert propertyNames.contains(propertyName);
+
+    final Object result;
+    if (propertyName.equals(wrappingWidthName)) {
+      result = sceneGraphObject.getWrappingWidth();
+    } else {
+      // Emergency code
+      result = null;
     }
 
-    /*
-     * AbstractResizer
-     */
-    
-    @Override
-    public final Bounds computeBounds(double width, double height) {
-        final double minX = sceneGraphObject.getX();
-        final double minY = sceneGraphObject.getY();
-        return new BoundingBox(minX, minY, width, height);
-    }
- 
-    @Override
-    public Feature getFeature() {
-        return Feature.WIDTH_ONLY;
-    }
+    return result;
+  }
 
-    @Override
-    public void changeWidth(double width) {
-        // When wrappingWidth is set to 0, text will 
-        // jump from a nearer zero column to a single line.
-        // Not nice : so we set a min of 1 to avoid this effect.
-        sceneGraphObject.setWrappingWidth(Math.max(1.0, width));
+  @Override
+  public Map<PropertyName, Object> getChangeMap() {
+    final Map<PropertyName, Object> result = new HashMap<>();
+    if (MathUtils.equals(sceneGraphObject.getWrappingWidth(), originalWrappingWidth) == false) {
+      result.put(wrappingWidthName, sceneGraphObject.getWrappingWidth());
     }
-
-    @Override
-    public void changeHeight(double height) {
-    }
-
-    @Override
-    public void revertToOriginalSize() {
-        sceneGraphObject.setWrappingWidth(originalWrappingWidth);
-    }
-
-    @Override
-    public List<PropertyName> getPropertyNames() {
-        return propertyNames;
-    }
-
-    @Override
-    public Object getValue(PropertyName propertyName) {
-        assert propertyName != null;
-        assert propertyNames.contains(propertyName);
-        
-        final Object result;
-        if (propertyName.equals(wrappingWidthName)) {
-            result = sceneGraphObject.getWrappingWidth();
-        } else {
-            // Emergency code
-            result = null;
-        }
-        
-        return result;
-    }
-
-    @Override
-    public Map<PropertyName, Object> getChangeMap() {
-        final Map<PropertyName, Object> result = new HashMap<>();
-        if (MathUtils.equals(sceneGraphObject.getWrappingWidth(), originalWrappingWidth) == false) {
-            result.put(wrappingWidthName, sceneGraphObject.getWrappingWidth());
-        }
-        return result;
-    }
-
+    return result;
+  }
 }

@@ -32,9 +32,7 @@
 package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors;
 
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
-
 import java.util.Set;
-
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -42,101 +40,93 @@ import javafx.geometry.Point3D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 
-/**
- * Point3D editor (for x/y/z fields).
- * (used for instance by Transforms.rotationAxis property)
- *
- */
+/** Point3D editor (for x/y/z fields). (used for instance by Transforms.rotationAxis property) */
 public class Point3DEditor extends PropertyEditor {
 
-    private Parent root;
-    @FXML
-    private DoubleField xDf;
-    @FXML
-    private DoubleField yDf;
-    @FXML
-    private DoubleField zDf;
-    DoubleField[] doubleFields = new DoubleField[3];
+  private Parent root;
+  @FXML private DoubleField xDf;
+  @FXML private DoubleField yDf;
+  @FXML private DoubleField zDf;
+  DoubleField[] doubleFields = new DoubleField[3];
 
-    public Point3DEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super(propMeta, selectedClasses);
-        initialize();
+  public Point3DEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super(propMeta, selectedClasses);
+    initialize();
+  }
+
+  // Method to please FindBugs
+  private void initialize() {
+    root = EditorUtils.loadFxml("Point3DEditor.fxml", this); // NOI18N
+
+    doubleFields[0] = xDf;
+    doubleFields[1] = yDf;
+    doubleFields[2] = zDf;
+    for (DoubleField doubleField : doubleFields) {
+      EventHandler<ActionEvent> valueListener = event -> userUpdateValueProperty(getValue());
+      setNumericEditorBehavior(this, doubleField, valueListener, false);
     }
+    setLayoutFormat(PropertyEditor.LayoutFormat.SIMPLE_LINE_BOTTOM);
+  }
 
-    //Method to please FindBugs
-    private void initialize() {
-        root = EditorUtils.loadFxml("Point3DEditor.fxml", this);//NOI18N
+  @Override
+  public Node getValueEditor() {
+    return super.handleGenericModes(root);
+  }
 
-        doubleFields[0] = xDf;
-        doubleFields[1] = yDf;
-        doubleFields[2] = zDf;
-        for (DoubleField doubleField : doubleFields) {
-            EventHandler<ActionEvent> valueListener = event -> userUpdateValueProperty(getValue());
-            setNumericEditorBehavior(this, doubleField, valueListener, false);
+  @Override
+  public Object getValue() {
+    Double[] values = new Double[3];
+    int index = 0;
+    for (DoubleField doubleField : doubleFields) {
+      String val = doubleField.getText();
+      if (val.isEmpty()) {
+        val = "0"; // NOI18N
+        doubleField.setText(val);
+      } else {
+        try {
+          Double.parseDouble(val);
+        } catch (NumberFormatException e) {
+          // should not happen, DoubleField should prevent any error
+          return null;
         }
-        setLayoutFormat(PropertyEditor.LayoutFormat.SIMPLE_LINE_BOTTOM);
+      }
+      values[index] = Double.valueOf(val);
+      index++;
+    }
+    return new Point3D(values[0], values[1], values[2]);
+  }
+
+  @Override
+  public void setValue(Object value) {
+    assert value != null;
+    assert value instanceof Point3D;
+
+    setValueGeneric(value);
+    if (isSetValueDone()) {
+      return;
     }
 
-    @Override
-    public Node getValueEditor() {
-        return super.handleGenericModes(root);
+    Point3D point3D = (Point3D) value;
+    xDf.setText(EditorUtils.valAsStr(point3D.getX()));
+    yDf.setText(EditorUtils.valAsStr(point3D.getY()));
+    zDf.setText(EditorUtils.valAsStr(point3D.getZ()));
+  }
+
+  @Override
+  public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super.reset(propMeta, selectedClasses);
+    setLayoutFormat(PropertyEditor.LayoutFormat.SIMPLE_LINE_BOTTOM);
+  }
+
+  @Override
+  protected void valueIsIndeterminate() {
+    for (DoubleField doubleField : doubleFields) {
+      handleIndeterminate(doubleField);
     }
+  }
 
-    @Override
-    public Object getValue() {
-        Double[] values = new Double[3];
-        int index = 0;
-        for (DoubleField doubleField : doubleFields) {
-            String val = doubleField.getText();
-            if (val.isEmpty()) {
-                val = "0"; //NOI18N
-                doubleField.setText(val);
-            } else {
-                try {
-                    Double.parseDouble(val);
-                } catch (NumberFormatException e) {
-                    // should not happen, DoubleField should prevent any error
-                    return null;
-                }
-            }
-            values[index] = Double.valueOf(val);
-            index++;
-        }
-        return new Point3D(values[0], values[1], values[2]);
-    }
-
-    @Override
-    public void setValue(Object value) {
-        assert value != null;
-        assert value instanceof Point3D;
-
-        setValueGeneric(value);
-        if (isSetValueDone()) {
-            return;
-        }
-
-        Point3D point3D = (Point3D) value;
-        xDf.setText(EditorUtils.valAsStr(point3D.getX()));
-        yDf.setText(EditorUtils.valAsStr(point3D.getY()));
-        zDf.setText(EditorUtils.valAsStr(point3D.getZ()));
-    }
-
-    @Override
-    public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super.reset(propMeta, selectedClasses);
-        setLayoutFormat(PropertyEditor.LayoutFormat.SIMPLE_LINE_BOTTOM);
-    }
-
-    @Override
-    protected void valueIsIndeterminate() {
-        for (DoubleField doubleField : doubleFields) {
-            handleIndeterminate(doubleField);
-        }
-    }
-
-    @Override
-    public void requestFocus() {
-        EditorUtils.doNextFrame(() -> xDf.requestFocus());
-    }
-
+  @Override
+  public void requestFocus() {
+    EditorUtils.doNextFrame(() -> xDf.requestFocus());
+  }
 }

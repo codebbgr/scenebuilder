@@ -38,89 +38,84 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMCollection;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMPropertyC;
 
-/**
- *
- */
+/** */
 public class ReplaceObjectJob extends Job {
-    
-    private final FXOMObject original;
-    private final FXOMObject replacement;
-    private FXOMPropertyC parentProperty;
-    private FXOMCollection parentCollection;
-    private int indexInParentProperty;
-    private int indexInParentCollection;
 
-    public ReplaceObjectJob(FXOMObject original, FXOMObject replacement, EditorController editorController) {
-        super(editorController);
-        this.original = original;
-        this.replacement = replacement;
-    }
-    
-    /*
-     * Job
-     */
-    @Override
-    public boolean isExecutable() {
-        return ((original.getParentCollection() != null) || 
-                (original.getParentProperty() != null))
-              &&
-               ((replacement.getParentCollection() == null) &&
-                (replacement.getParentProperty() == null));
-    }
+  private final FXOMObject original;
+  private final FXOMObject replacement;
+  private FXOMPropertyC parentProperty;
+  private FXOMCollection parentCollection;
+  private int indexInParentProperty;
+  private int indexInParentCollection;
 
-    @Override
-    public void execute() {
-        parentProperty = original.getParentProperty();
-        parentCollection = original.getParentCollection();
-        indexInParentProperty = original.getIndexInParentProperty();
-        indexInParentCollection = original.getIndexInParentCollection();
-        
-        // Now same as redo()
-        redo();
-    }
+  public ReplaceObjectJob(
+      FXOMObject original, FXOMObject replacement, EditorController editorController) {
+    super(editorController);
+    this.original = original;
+    this.replacement = replacement;
+  }
 
-    @Override
-    public void undo() {
-        assert original.getParentProperty() == null;
-        assert original.getParentCollection() == null;
-        assert replacement.getParentProperty() == parentProperty;
-        assert replacement.getParentCollection() == parentCollection;
-        assert replacement.getIndexInParentProperty() == indexInParentProperty;
-        assert replacement.getIndexInParentCollection() == indexInParentCollection;
-        
-        if (parentProperty != null) {
-            original.addToParentProperty(indexInParentProperty, parentProperty);
-            replacement.removeFromParentProperty();
-        } else {
-            assert parentCollection != null;
-            original.addToParentCollection(indexInParentCollection, parentCollection);
-            replacement.removeFromParentCollection();
-        }
-    }
+  /*
+   * Job
+   */
+  @Override
+  public boolean isExecutable() {
+    return ((original.getParentCollection() != null) || (original.getParentProperty() != null))
+        && ((replacement.getParentCollection() == null)
+            && (replacement.getParentProperty() == null));
+  }
 
-    @Override
-    public void redo() {
-        assert original.getParentProperty() == parentProperty;
-        assert original.getParentCollection() == parentCollection;
-        assert original.getIndexInParentProperty() == indexInParentProperty;
-        assert original.getIndexInParentCollection() == indexInParentCollection;
-        assert replacement.getParentProperty() == null;
-        assert replacement.getParentCollection() == null;
-        
-        if (parentProperty != null) {
-            replacement.addToParentProperty(indexInParentProperty, parentProperty);
-            original.removeFromParentProperty();
-        } else {
-            assert parentCollection != null;
-            replacement.addToParentCollection(indexInParentCollection, parentCollection);
-            original.removeFromParentCollection();
-        }
-    }
+  @Override
+  public void execute() {
+    parentProperty = original.getParentProperty();
+    parentCollection = original.getParentCollection();
+    indexInParentProperty = original.getIndexInParentProperty();
+    indexInParentCollection = original.getIndexInParentCollection();
 
-    @Override
-    public String getDescription() {
-        return getClass().getSimpleName(); // Not intended for user
+    // Now same as redo()
+    redo();
+  }
+
+  @Override
+  public void undo() {
+    assert original.getParentProperty() == null;
+    assert original.getParentCollection() == null;
+    assert replacement.getParentProperty() == parentProperty;
+    assert replacement.getParentCollection() == parentCollection;
+    assert replacement.getIndexInParentProperty() == indexInParentProperty;
+    assert replacement.getIndexInParentCollection() == indexInParentCollection;
+
+    if (parentProperty != null) {
+      original.addToParentProperty(indexInParentProperty, parentProperty);
+      replacement.removeFromParentProperty();
+    } else {
+      assert parentCollection != null;
+      original.addToParentCollection(indexInParentCollection, parentCollection);
+      replacement.removeFromParentCollection();
     }
-    
-    
+  }
+
+  @Override
+  public void redo() {
+    assert original.getParentProperty() == parentProperty;
+    assert original.getParentCollection() == parentCollection;
+    assert original.getIndexInParentProperty() == indexInParentProperty;
+    assert original.getIndexInParentCollection() == indexInParentCollection;
+    assert replacement.getParentProperty() == null;
+    assert replacement.getParentCollection() == null;
+
+    if (parentProperty != null) {
+      replacement.addToParentProperty(indexInParentProperty, parentProperty);
+      original.removeFromParentProperty();
+    } else {
+      assert parentCollection != null;
+      replacement.addToParentCollection(indexInParentCollection, parentCollection);
+      original.removeFromParentCollection();
+    }
+  }
+
+  @Override
+  public String getDescription() {
+    return getClass().getSimpleName(); // Not intended for user
+  }
 }

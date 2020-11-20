@@ -33,9 +33,9 @@ package com.oracle.javafx.scenebuilder.kit.editor.drag.target;
 
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import com.oracle.javafx.scenebuilder.kit.editor.drag.source.AbstractDragSource;
-import com.oracle.javafx.scenebuilder.kit.editor.job.Job;
 import com.oracle.javafx.scenebuilder.kit.editor.job.BatchJob;
 import com.oracle.javafx.scenebuilder.kit.editor.job.InsertAsAccessoryJob;
+import com.oracle.javafx.scenebuilder.kit.editor.job.Job;
 import com.oracle.javafx.scenebuilder.kit.editor.job.atomic.ModifyObjectJob;
 import com.oracle.javafx.scenebuilder.kit.editor.job.atomic.RemoveObjectJob;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
@@ -49,133 +49,136 @@ import java.util.Objects;
 import javafx.geometry.Pos;
 import javafx.scene.layout.BorderPane;
 
-/**
- *
- */
+/** */
 public class AccessoryDropTarget extends AbstractDropTarget {
 
-    private final FXOMInstance targetContainer;
-    private final Accessory accessory;
+  private final FXOMInstance targetContainer;
+  private final Accessory accessory;
 
-    public AccessoryDropTarget(FXOMInstance targetContainer, Accessory accessory) {
-        assert targetContainer != null;
-        this.targetContainer = targetContainer;
-        this.accessory = accessory;
+  public AccessoryDropTarget(FXOMInstance targetContainer, Accessory accessory) {
+    assert targetContainer != null;
+    this.targetContainer = targetContainer;
+    this.accessory = accessory;
+  }
+
+  public Accessory getAccessory() {
+    return accessory;
+  }
+
+  /*
+   * AbstractDropTarget
+   */
+  @Override
+  public FXOMObject getTargetObject() {
+    return targetContainer;
+  }
+
+  @Override
+  public boolean acceptDragSource(AbstractDragSource dragSource) {
+    assert dragSource != null;
+
+    final boolean result;
+    if (dragSource.getDraggedObjects().size() != 1) {
+      result = false;
+    } else {
+      final DesignHierarchyMask m = new DesignHierarchyMask(targetContainer);
+      final FXOMObject draggedObject = dragSource.getDraggedObjects().get(0);
+      result =
+          m.isAcceptingAccessory(accessory, draggedObject) && m.getAccessory(accessory) == null;
     }
 
-    public Accessory getAccessory() {
-        return accessory;
+    return result;
+  }
+
+  @Override
+  public Job makeDropJob(AbstractDragSource dragSource, EditorController editorController) {
+    assert acceptDragSource(dragSource);
+    assert editorController != null;
+
+    final boolean shouldRefreshSceneGraph = true;
+    final BatchJob result =
+        new BatchJob(
+            editorController, shouldRefreshSceneGraph, dragSource.makeDropJobDescription());
+
+    final FXOMObject draggedObject = dragSource.getDraggedObjects().get(0);
+    final FXOMObject currentParent = draggedObject.getParentObject();
+
+    // Two steps :
+    //  - remove drag source object from its current parent (if any)
+    //  - set the drag source object as accessory of the drop target
+
+    if (currentParent != null) {
+      result.addSubJob(new RemoveObjectJob(draggedObject, editorController));
+    }
+    final Job j =
+        new InsertAsAccessoryJob(draggedObject, targetContainer, accessory, editorController);
+    result.addSubJob(j);
+
+    if ((targetContainer.getSceneGraphObject() instanceof BorderPane)
+        && (draggedObject instanceof FXOMInstance)) {
+
+      // We add a job which sets BorderPane.alignment=CENTER on draggedObject
+      final FXOMInstance draggedInstance = (FXOMInstance) draggedObject;
+      final PropertyName alignmentName = new PropertyName("alignment", BorderPane.class); // NOI18N
+      final EnumerationPropertyMetadata alignmentMeta =
+          new EnumerationPropertyMetadata(
+              alignmentName,
+              Pos.class,
+              "UNUSED",
+              true /* readWrite */,
+              InspectorPath.UNUSED); // NOI18N
+      final Job alignmentJob =
+          new ModifyObjectJob(
+              draggedInstance, alignmentMeta, Pos.CENTER.toString(), editorController);
+      result.addSubJob(alignmentJob);
     }
 
+    assert result.isExecutable();
 
-    /*
-     * AbstractDropTarget
-     */
-    @Override
-    public FXOMObject getTargetObject() {
-        return targetContainer;
-    }
+    return result;
+  }
 
-    @Override
-    public boolean acceptDragSource(AbstractDragSource dragSource) {
-        assert dragSource != null;
-        
-        final boolean result;
-        if (dragSource.getDraggedObjects().size() != 1) {
-            result = false;
-        } else {
-            final DesignHierarchyMask m = new DesignHierarchyMask(targetContainer);
-            final FXOMObject draggedObject = dragSource.getDraggedObjects().get(0);
-            result = m.isAcceptingAccessory(accessory, draggedObject)
-                    && m.getAccessory(accessory) == null;
-        }
-        
-        return result;
-    }
+  @Override
+  public boolean isSelectRequiredAfterDrop() {
+    return true;
+  }
 
-    @Override
-    public Job makeDropJob(AbstractDragSource dragSource, EditorController editorController) {
-        assert acceptDragSource(dragSource);
-        assert editorController != null;
-        
-        final boolean shouldRefreshSceneGraph = true;
-        final BatchJob result = new BatchJob(editorController,
-                shouldRefreshSceneGraph, dragSource.makeDropJobDescription());
-        
-        final FXOMObject draggedObject = dragSource.getDraggedObjects().get(0);
-        final FXOMObject currentParent = draggedObject.getParentObject();
-        
-        // Two steps :
-        //  - remove drag source object from its current parent (if any)
-        //  - set the drag source object as accessory of the drop target
+  /*
+   * Objects
+   */
+  @Override
+  public int hashCode() {
+    int hash = 3;
+    hash = 97 * hash + Objects.hashCode(this.targetContainer);
+    hash = 97 * hash + (this.accessory != null ? this.accessory.hashCode() : 0);
+    return hash;
+  }
 
-        if (currentParent != null) {
-            result.addSubJob(new RemoveObjectJob(draggedObject, editorController));
-        }
-        final Job j = new InsertAsAccessoryJob(draggedObject, 
-                targetContainer, accessory, editorController);
-        result.addSubJob(j);
-        
-        if ((targetContainer.getSceneGraphObject() instanceof BorderPane) 
-                && (draggedObject instanceof FXOMInstance)) {
-            
-            // We add a job which sets BorderPane.alignment=CENTER on draggedObject
-            final FXOMInstance draggedInstance
-                    = (FXOMInstance) draggedObject;
-            final PropertyName alignmentName
-                    = new PropertyName("alignment", BorderPane.class); //NOI18N
-            final EnumerationPropertyMetadata alignmentMeta
-                    = new EnumerationPropertyMetadata(alignmentName, Pos.class,
-                    "UNUSED", true /* readWrite */, InspectorPath.UNUSED); //NOI18N
-            final Job alignmentJob
-                    = new ModifyObjectJob(draggedInstance, alignmentMeta, 
-                            Pos.CENTER.toString(), editorController);
-            result.addSubJob(alignmentJob);
-        }
-        
-        assert result.isExecutable();
-        
-        return result;
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
     }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final AccessoryDropTarget other = (AccessoryDropTarget) obj;
+    if (!Objects.equals(this.targetContainer, other.targetContainer)) {
+      return false;
+    }
+    if (this.accessory != other.accessory) {
+      return false;
+    }
+    return true;
+  }
 
-    @Override
-    public boolean isSelectRequiredAfterDrop() {
-        return true;
-    }
-    
-    /*
-     * Objects
-     */
-    @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 97 * hash + Objects.hashCode(this.targetContainer);
-        hash = 97 * hash + (this.accessory != null ? this.accessory.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final AccessoryDropTarget other = (AccessoryDropTarget) obj;
-        if (!Objects.equals(this.targetContainer, other.targetContainer)) {
-            return false;
-        }
-        if (this.accessory != other.accessory) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "AccessoryDropTarget{" + "targetContainer=" + targetContainer + ", accessory=" + accessory + '}'; //NOI18N
-    }
-    
-    
+  @Override
+  public String toString() {
+    return "AccessoryDropTarget{"
+        + "targetContainer="
+        + targetContainer
+        + ", accessory="
+        + accessory
+        + '}'; // NOI18N
+  }
 }

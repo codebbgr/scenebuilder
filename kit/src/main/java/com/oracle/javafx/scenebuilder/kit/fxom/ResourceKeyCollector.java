@@ -38,70 +38,65 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import javafx.fxml.FXMLLoader;
 
-/**
- *
- * 
- */
+/** */
 class ResourceKeyCollector extends ResourceBundle {
-    
-    private final ResourceBundle backingResources;
-    
-    public ResourceKeyCollector(ResourceBundle backingResources) {
-        this.backingResources = backingResources;
+
+  private final ResourceBundle backingResources;
+
+  public ResourceKeyCollector(ResourceBundle backingResources) {
+    this.backingResources = backingResources;
+  }
+
+  /*
+   * ResourceBundle
+   */
+
+  @Override
+  protected Object handleGetObject(String key) {
+    Object result;
+
+    if (backingResources != null) {
+      try {
+        result = backingResources.getObject(key);
+      } catch (MissingResourceException x) {
+        result = null;
+      }
+    } else {
+      result = null;
     }
-            
-    /*
-     * ResourceBundle
-     */
-    
+    if (result == null) {
+      result = FXMLLoader.RESOURCE_KEY_PREFIX + key;
+    }
+
+    return result;
+  }
+
+  @Override
+  public Enumeration<String> getKeys() {
+    return new EnumerationFromIterator<>(Collections.emptyListIterator());
+  }
+
+  @Override
+  public boolean containsKey(String key) {
+    return true;
+  }
+
+  private static class EnumerationFromIterator<T> implements Enumeration<T> {
+
+    private final Iterator<T> iterator;
+
+    public EnumerationFromIterator(Iterator<T> iterator) {
+      this.iterator = iterator;
+    }
+
     @Override
-    protected Object handleGetObject(String key) {
-        Object result;
-        
-        if (backingResources != null) {
-            try {
-                result = backingResources.getObject(key);
-            } catch(MissingResourceException x) {
-                result = null;
-            }
-        } else {
-            result = null;
-        }
-        if (result == null) {
-            result = FXMLLoader.RESOURCE_KEY_PREFIX + key;
-        }
-        
-        return result;
+    public boolean hasMoreElements() {
+      return iterator.hasNext();
     }
 
     @Override
-    public Enumeration<String> getKeys() {
-        return new EnumerationFromIterator<>(Collections.emptyListIterator());
+    public T nextElement() {
+      return iterator.next();
     }
-
-    @Override
-    public boolean containsKey(String key) {
-        return true;
-    }
-
-
-    private static class EnumerationFromIterator<T> implements Enumeration<T> {
-        
-        private final Iterator<T> iterator;
-        
-        public EnumerationFromIterator(Iterator<T> iterator) {
-            this.iterator = iterator;
-        }
-
-        @Override
-        public boolean hasMoreElements() {
-            return iterator.hasNext();
-        }
-
-        @Override
-        public T nextElement() {
-            return iterator.next();
-        }
-        
-    }
+  }
 }

@@ -35,90 +35,94 @@ package com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.editors;
 
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
 import com.oracle.javafx.scenebuilder.kit.metadata.property.value.EnumerationPropertyMetadata;
+import java.util.Set;
 import javafx.beans.InvalidationListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 
-import java.util.Set;
-
 public class EnumEditor extends PropertyEditor {
-    private ComboBox<String> comboBox;
+  private ComboBox<String> comboBox;
 
-    public EnumEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super(propMeta, selectedClasses);
-        comboBox = new ComboBox<String>();
-        comboBox.disableProperty().bind(disableProperty());
-        EditorUtils.makeWidthStretchable(comboBox);
-        comboBox.getSelectionModel().selectedItemProperty().addListener((InvalidationListener) o -> {
-            if (!isUpdateFromModel()) {
-                userUpdateValueProperty(getValue());
-            }
-        });
-        initialize();
+  public EnumEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super(propMeta, selectedClasses);
+    comboBox = new ComboBox<String>();
+    comboBox.disableProperty().bind(disableProperty());
+    EditorUtils.makeWidthStretchable(comboBox);
+    comboBox
+        .getSelectionModel()
+        .selectedItemProperty()
+        .addListener(
+            (InvalidationListener)
+                o -> {
+                  if (!isUpdateFromModel()) {
+                    userUpdateValueProperty(getValue());
+                  }
+                });
+    initialize();
+  }
+
+  private void initialize() {
+    updateItems();
+  }
+
+  @Override
+  public Object getValue() {
+    return comboBox.getSelectionModel().getSelectedItem();
+  }
+
+  @Override
+  public void setValue(Object value) {
+    setValueGeneric(value);
+    if (isSetValueDone()) {
+      return;
     }
 
-    private void initialize() {
-        updateItems();
+    if (value != null) {
+      comboBox.getSelectionModel().select(value.toString());
+    } else {
+      comboBox.getSelectionModel().clearSelection();
     }
+  }
 
-    @Override
-    public Object getValue() {
-        return comboBox.getSelectionModel().getSelectedItem();
+  @Override
+  public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
+    super.reset(propMeta, selectedClasses);
+    // ComboBox items have to be updated, since this editor may have been used by a different
+    // Enum...
+    updateItems();
+  }
+
+  @Override
+  public Node getValueEditor() {
+    return super.handleGenericModes(comboBox);
+  }
+
+  @Override
+  protected void valueIsIndeterminate() {
+    handleIndeterminate(comboBox);
+  }
+
+  protected ComboBox<String> getComboBox() {
+    return comboBox;
+  }
+
+  protected void updateItems() {
+    updateItems(comboBox.getItems());
+  }
+
+  protected void updateItems(ObservableList<String> itemsList) {
+    assert getPropertyMeta() instanceof EnumerationPropertyMetadata;
+    final EnumerationPropertyMetadata enumPropMeta =
+        (EnumerationPropertyMetadata) getPropertyMeta();
+    itemsList.clear();
+    for (Object val : enumPropMeta.getValidValues()) {
+      itemsList.add(val.toString());
     }
+  }
 
-    @Override
-    public void setValue(Object value) {
-        setValueGeneric(value);
-        if (isSetValueDone()) {
-            return;
-        }
-
-        if (value != null) {
-            comboBox.getSelectionModel().select(value.toString());
-        } else {
-            comboBox.getSelectionModel().clearSelection();
-        }
-    }
-
-    @Override
-    public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses) {
-        super.reset(propMeta, selectedClasses);
-        // ComboBox items have to be updated, since this editor may have been used by a different Enum...
-        updateItems();
-    }
-
-    @Override
-    public Node getValueEditor() {
-        return super.handleGenericModes(comboBox);
-    }
-
-    @Override
-    protected void valueIsIndeterminate() {
-        handleIndeterminate(comboBox);
-    }
-
-    protected ComboBox<String> getComboBox() {
-        return comboBox;
-    }
-
-    protected void updateItems() {
-        updateItems(comboBox.getItems());
-    }
-
-    protected void updateItems(ObservableList<String> itemsList) {
-        assert getPropertyMeta() instanceof EnumerationPropertyMetadata;
-        final EnumerationPropertyMetadata enumPropMeta
-                = (EnumerationPropertyMetadata) getPropertyMeta();
-        itemsList.clear();
-        for (Object val : enumPropMeta.getValidValues()) {
-            itemsList.add(val.toString());
-        }
-    }
-
-    @Override
-    public void requestFocus() {
-        EditorUtils.doNextFrame(() -> comboBox.requestFocus());
-    }
-
+  @Override
+  public void requestFocus() {
+    EditorUtils.doNextFrame(() -> comboBox.requestFocus());
+  }
 }

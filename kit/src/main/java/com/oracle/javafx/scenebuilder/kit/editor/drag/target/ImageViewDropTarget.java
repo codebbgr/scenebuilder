@@ -36,8 +36,8 @@ import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import com.oracle.javafx.scenebuilder.kit.editor.drag.source.AbstractDragSource;
 import com.oracle.javafx.scenebuilder.kit.editor.job.BatchJob;
 import com.oracle.javafx.scenebuilder.kit.editor.job.Job;
-import com.oracle.javafx.scenebuilder.kit.editor.job.atomic.ModifyObjectJob;
 import com.oracle.javafx.scenebuilder.kit.editor.job.atomic.BackupSelectionJob;
+import com.oracle.javafx.scenebuilder.kit.editor.job.atomic.ModifyObjectJob;
 import com.oracle.javafx.scenebuilder.kit.editor.job.atomic.UpdateSelectionJob;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
@@ -48,75 +48,66 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.DesignImage;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.image.ImageView;
 
-/**
- *
- */
+/** */
 public class ImageViewDropTarget extends AbstractDropTarget {
-    
-    private final FXOMInstance targetImageView;
 
-    public ImageViewDropTarget(FXOMObject targetImageView) {
-        assert targetImageView instanceof FXOMInstance;
-        assert targetImageView.getSceneGraphObject() instanceof ImageView;
-        
-        this.targetImageView = (FXOMInstance) targetImageView;
-    }
-    
-    
+  private final FXOMInstance targetImageView;
+
+  public ImageViewDropTarget(FXOMObject targetImageView) {
+    assert targetImageView instanceof FXOMInstance;
+    assert targetImageView.getSceneGraphObject() instanceof ImageView;
+
+    this.targetImageView = (FXOMInstance) targetImageView;
+  }
+
+  /*
+   * ImageViewDropTarget
+   */
+
+  @Override
+  public FXOMObject getTargetObject() {
+    return targetImageView;
+  }
+
+  @Override
+  public boolean acceptDragSource(AbstractDragSource dragSource) {
+    assert dragSource != null;
+    return dragSource.isSingleImageViewOnly();
+  }
+
+  @Override
+  public Job makeDropJob(AbstractDragSource dragSource, EditorController editorController) {
+
+    assert dragSource != null;
+    assert dragSource.isSingleImageViewOnly(); // (1)
+
+    final FXOMObject draggedObject = dragSource.getDraggedObjects().get(0);
+    assert draggedObject instanceof FXOMInstance; // because (1)
+    final FXOMInstance draggedInstance = (FXOMInstance) draggedObject;
+    final PropertyName imageName = new PropertyName("image"); // NOI18N
+    final ValuePropertyMetadata vpm =
+        Metadata.getMetadata().queryValueProperty(draggedInstance, imageName);
+    assert vpm instanceof ImagePropertyMetadata;
+    final ImagePropertyMetadata imageVPM = (ImagePropertyMetadata) vpm;
+    final DesignImage image = imageVPM.getValue(draggedInstance);
+
+    final BatchJob result = new BatchJob(editorController);
+    result.addSubJob(new BackupSelectionJob(editorController));
+    result.addSubJob(new ModifyObjectJob(targetImageView, imageVPM, image, editorController));
+    result.addSubJob(new UpdateSelectionJob(targetImageView, editorController));
+
+    return result;
+  }
+
+  @Override
+  public boolean isSelectRequiredAfterDrop() {
     /*
-     * ImageViewDropTarget
+     * Unlike for other drop targets, AbstractDragSource.draggedObjects
+     * should not be selected after drop operation.
+     * It's targetImageView that must be selected.
+     * AbstractDragSource.draggedObjects() are not inserted in the scene
+     * graph.
      */
-    
-    @Override
-    public FXOMObject getTargetObject() {
-        return targetImageView;
-    }
-
-    @Override
-    public boolean acceptDragSource(AbstractDragSource dragSource) {
-        assert dragSource != null;
-        return dragSource.isSingleImageViewOnly();
-    }
-
-    @Override
-    public Job makeDropJob(AbstractDragSource dragSource, EditorController editorController) {
-        
-        assert dragSource != null;
-        assert dragSource.isSingleImageViewOnly(); // (1)
-        
-        final FXOMObject draggedObject 
-                = dragSource.getDraggedObjects().get(0);
-        assert draggedObject instanceof FXOMInstance; // because (1)
-        final FXOMInstance draggedInstance 
-                = (FXOMInstance) draggedObject;
-        final PropertyName imageName 
-                = new PropertyName("image"); //NOI18N
-        final ValuePropertyMetadata vpm 
-                = Metadata.getMetadata().queryValueProperty(draggedInstance, imageName);
-        assert vpm instanceof ImagePropertyMetadata;
-        final ImagePropertyMetadata imageVPM
-                = (ImagePropertyMetadata) vpm;
-        final DesignImage image
-                = imageVPM.getValue(draggedInstance);
-        
-        final BatchJob result = new BatchJob(editorController);
-        result.addSubJob(new BackupSelectionJob(editorController));
-        result.addSubJob(new ModifyObjectJob(targetImageView, imageVPM, image, editorController));
-        result.addSubJob(new UpdateSelectionJob(targetImageView, editorController));
-        
-        return result;
-    }
-    
-    @Override
-    public boolean isSelectRequiredAfterDrop() {
-        /*
-         * Unlike for other drop targets, AbstractDragSource.draggedObjects
-         * should not be selected after drop operation.
-         * It's targetImageView that must be selected.
-         * AbstractDragSource.draggedObjects() are not inserted in the scene
-         * graph.
-         */
-        return false;
-    }
-    
+    return false;
+  }
 }

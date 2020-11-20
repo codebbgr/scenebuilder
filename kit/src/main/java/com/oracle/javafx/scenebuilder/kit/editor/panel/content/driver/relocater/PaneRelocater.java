@@ -41,80 +41,76 @@ import javafx.geometry.Bounds;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 
-/**
- *
- * 
- */
+/** */
 public class PaneRelocater extends AbstractRelocater<Pane> {
 
-    private final double originalLayoutX;
-    private final double originalLayoutY;
-    private final PropertyName layoutXName = new PropertyName("layoutX"); //NOI18N
-    private final PropertyName layoutYName = new PropertyName("layoutY"); //NOI18N
-    private final List<PropertyName> propertyNames = new ArrayList<>();
-    
-    public PaneRelocater(Node sceneGraphObject) {
-        super(sceneGraphObject, Pane.class);
-        this.originalLayoutX = sceneGraphObject.getLayoutX();
-        this.originalLayoutY = sceneGraphObject.getLayoutY();
-        propertyNames.add(layoutXName);
-        propertyNames.add(layoutYName);
-    }
-    
-    
-    /*
-     * AbstractRelocater
-     */
-    @Override
-    public void moveToLayoutX(double newLayoutX, Bounds newLayoutBounds) {
-        sceneGraphObject.setLayoutX(Math.round(newLayoutX));
-        // newLayoutBounds is no use for this subclass
+  private final double originalLayoutX;
+  private final double originalLayoutY;
+  private final PropertyName layoutXName = new PropertyName("layoutX"); // NOI18N
+  private final PropertyName layoutYName = new PropertyName("layoutY"); // NOI18N
+  private final List<PropertyName> propertyNames = new ArrayList<>();
+
+  public PaneRelocater(Node sceneGraphObject) {
+    super(sceneGraphObject, Pane.class);
+    this.originalLayoutX = sceneGraphObject.getLayoutX();
+    this.originalLayoutY = sceneGraphObject.getLayoutY();
+    propertyNames.add(layoutXName);
+    propertyNames.add(layoutYName);
+  }
+
+  /*
+   * AbstractRelocater
+   */
+  @Override
+  public void moveToLayoutX(double newLayoutX, Bounds newLayoutBounds) {
+    sceneGraphObject.setLayoutX(Math.round(newLayoutX));
+    // newLayoutBounds is no use for this subclass
+  }
+
+  @Override
+  public void moveToLayoutY(double newLayoutY, Bounds newLayoutBounds) {
+    sceneGraphObject.setLayoutY(Math.round(newLayoutY));
+    // newLayoutBounds is no use for this subclass
+  }
+
+  @Override
+  public void revertToOriginalLocation() {
+    sceneGraphObject.setLayoutX(originalLayoutX);
+    sceneGraphObject.setLayoutY(originalLayoutY);
+  }
+
+  @Override
+  public List<PropertyName> getPropertyNames() {
+    return propertyNames;
+  }
+
+  @Override
+  public Object getValue(PropertyName propertyName) {
+    assert propertyName != null;
+    assert propertyNames.contains(propertyName);
+
+    final Object result;
+    if (propertyName.equals(layoutXName)) {
+      result = sceneGraphObject.getLayoutX();
+    } else if (propertyName.equals(layoutYName)) {
+      result = sceneGraphObject.getLayoutY();
+    } else {
+      // Emergency code
+      result = null;
     }
 
-    @Override
-    public void moveToLayoutY(double newLayoutY, Bounds newLayoutBounds) {
-        sceneGraphObject.setLayoutY(Math.round(newLayoutY));
-        // newLayoutBounds is no use for this subclass
-    }
+    return result;
+  }
 
-    @Override
-    public void revertToOriginalLocation() {
-        sceneGraphObject.setLayoutX(originalLayoutX);
-        sceneGraphObject.setLayoutY(originalLayoutY);
+  @Override
+  public Map<PropertyName, Object> getChangeMap() {
+    final Map<PropertyName, Object> result = new HashMap<>();
+    if (MathUtils.equals(sceneGraphObject.getLayoutX(), originalLayoutX) == false) {
+      result.put(layoutXName, sceneGraphObject.getLayoutX());
     }
-
-    @Override
-    public List<PropertyName> getPropertyNames() {
-        return propertyNames;
+    if (MathUtils.equals(sceneGraphObject.getLayoutY(), originalLayoutY) == false) {
+      result.put(layoutYName, sceneGraphObject.getLayoutY());
     }
-
-    @Override
-    public Object getValue(PropertyName propertyName) {
-        assert propertyName != null;
-        assert propertyNames.contains(propertyName);
-        
-        final Object result;
-        if (propertyName.equals(layoutXName)) {
-            result = sceneGraphObject.getLayoutX();
-        } else if (propertyName.equals(layoutYName)) {
-            result = sceneGraphObject.getLayoutY();
-        } else {
-            // Emergency code
-            result = null;
-        }
-        
-        return result;
-    }
-
-    @Override
-    public Map<PropertyName, Object> getChangeMap() {
-        final Map<PropertyName, Object> result = new HashMap<>();
-        if (MathUtils.equals(sceneGraphObject.getLayoutX(), originalLayoutX) == false) {
-            result.put(layoutXName, sceneGraphObject.getLayoutX());
-        }
-        if (MathUtils.equals(sceneGraphObject.getLayoutY(), originalLayoutY) == false) {
-            result.put(layoutYName, sceneGraphObject.getLayoutY());
-        }
-        return result;
-    }
+    return result;
+  }
 }

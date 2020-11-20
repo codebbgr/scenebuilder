@@ -33,8 +33,7 @@ package com.oracle.javafx.scenebuilder.kit.fxom;
 
 class TransientIgnored extends TransientNode {
 
-        public TransientIgnored(TransientNode parentNode) {
-            super(parentNode);
-        }
-
+  public TransientIgnored(TransientNode parentNode) {
+    super(parentNode);
+  }
 }

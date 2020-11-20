@@ -41,73 +41,70 @@ import javafx.geometry.Point2D;
 import javafx.scene.Group;
 import javafx.scene.paint.Paint;
 
-/**
- *
- */
+/** */
 public class ResizingGuideRenderer {
-    
-    private static final String NID_RESIZING_GUIDE = "resizingGuide"; //NOI18N
 
-    private final Group guideGroup = new Group();
-    private final Map<AbstractSegment, ResizingGuideChrome> chromeMap = new HashMap<>();
-    private final Set<ResizingGuideChrome> reusableChromes = new HashSet<>();
-    private final Paint chromeColor;
-    private final double chromeSideLength;
-    
-    public ResizingGuideRenderer(Paint chromeColor, double chromeSideLength) {
-        this.chromeColor = chromeColor;
-        this.chromeSideLength = chromeSideLength;
-        guideGroup.setMouseTransparent(true);
+  private static final String NID_RESIZING_GUIDE = "resizingGuide"; // NOI18N
+
+  private final Group guideGroup = new Group();
+  private final Map<AbstractSegment, ResizingGuideChrome> chromeMap = new HashMap<>();
+  private final Set<ResizingGuideChrome> reusableChromes = new HashSet<>();
+  private final Paint chromeColor;
+  private final double chromeSideLength;
+
+  public ResizingGuideRenderer(Paint chromeColor, double chromeSideLength) {
+    this.chromeColor = chromeColor;
+    this.chromeSideLength = chromeSideLength;
+    guideGroup.setMouseTransparent(true);
+  }
+
+  public void setSegments(List<AbstractSegment> segments) {
+    assert segments != null;
+    assert guideGroup.getScene() != null;
+
+    final Set<AbstractSegment> currentSegments = chromeMap.keySet();
+
+    final Set<AbstractSegment> newSegments = new HashSet<>();
+    newSegments.addAll(segments);
+    newSegments.removeAll(currentSegments);
+
+    final Set<AbstractSegment> obsoleteSegments = new HashSet<>();
+    obsoleteSegments.addAll(currentSegments);
+    obsoleteSegments.removeAll(segments);
+
+    for (AbstractSegment s : obsoleteSegments) {
+      final ResizingGuideChrome chrome = chromeMap.get(s);
+      assert chrome != null;
+      reusableChromes.add(chrome);
+      chromeMap.remove(s);
+      chrome.setVisible(false);
     }
-    
-    public void setSegments(List<AbstractSegment> segments) {
-        assert segments != null;
-        assert guideGroup.getScene() != null;
-        
-        final Set<AbstractSegment> currentSegments = chromeMap.keySet();
-        
-        final Set<AbstractSegment> newSegments = new HashSet<>();
-        newSegments.addAll(segments);
-        newSegments.removeAll(currentSegments);
-        
-        final Set<AbstractSegment> obsoleteSegments = new HashSet<>();
-        obsoleteSegments.addAll(currentSegments);
-        obsoleteSegments.removeAll(segments);
-        
-        for (AbstractSegment s : obsoleteSegments) {
-            final ResizingGuideChrome chrome = chromeMap.get(s);
-            assert chrome != null;
-            reusableChromes.add(chrome);
-            chromeMap.remove(s);
-            chrome.setVisible(false);
-        }
-        
-        for (AbstractSegment s : newSegments) {
-            final ResizingGuideChrome chrome;
-            if (reusableChromes.isEmpty()) {
-                chrome = new ResizingGuideChrome(chromeSideLength);
-                chrome.setId(NID_RESIZING_GUIDE);
-                chrome.setStroke(chromeColor);
-                guideGroup.getChildren().add(chrome);
-            } else {
-                chrome = reusableChromes.iterator().next();
-                reusableChromes.remove(chrome);
-                chrome.setVisible(true);
-            }
-            final Point2D p1 = guideGroup.sceneToLocal(s.getX1(), s.getY1(), true /* rootScene */);
-            final Point2D p2 = guideGroup.sceneToLocal(s.getX2(), s.getY2(), true /* rootScene */);
-            chrome.setup(p1.getX(), p1.getY(), p2.getX(), p2.getY());
-            chromeMap.put(s, chrome);
-        }
-        
-//        assert chromeMap.keySet().size() == segments.size()
-//                : "chromeMap.keySet().size()=" + chromeMap.keySet().size()
-//                + ", segments.size()=" + segments.size();
-//        assert chromeMap.size() + reusableChromes.size() == guideGroup.getChildren().size();
+
+    for (AbstractSegment s : newSegments) {
+      final ResizingGuideChrome chrome;
+      if (reusableChromes.isEmpty()) {
+        chrome = new ResizingGuideChrome(chromeSideLength);
+        chrome.setId(NID_RESIZING_GUIDE);
+        chrome.setStroke(chromeColor);
+        guideGroup.getChildren().add(chrome);
+      } else {
+        chrome = reusableChromes.iterator().next();
+        reusableChromes.remove(chrome);
+        chrome.setVisible(true);
+      }
+      final Point2D p1 = guideGroup.sceneToLocal(s.getX1(), s.getY1(), true /* rootScene */);
+      final Point2D p2 = guideGroup.sceneToLocal(s.getX2(), s.getY2(), true /* rootScene */);
+      chrome.setup(p1.getX(), p1.getY(), p2.getX(), p2.getY());
+      chromeMap.put(s, chrome);
     }
-    
-    
-    public Group getGuideGroup() {
-        return guideGroup;
-    }
+
+    //        assert chromeMap.keySet().size() == segments.size()
+    //                : "chromeMap.keySet().size()=" + chromeMap.keySet().size()
+    //                + ", segments.size()=" + segments.size();
+    //        assert chromeMap.size() + reusableChromes.size() == guideGroup.getChildren().size();
+  }
+
+  public Group getGuideGroup() {
+    return guideGroup;
+  }
 }

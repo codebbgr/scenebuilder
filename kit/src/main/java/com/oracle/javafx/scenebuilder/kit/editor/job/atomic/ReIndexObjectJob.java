@@ -38,87 +38,80 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMDocument;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 
-/**
- *
- */
+/** */
 public class ReIndexObjectJob extends Job {
 
-    private final FXOMObject reindexedObject;
-    private final FXOMObject beforeObject;
-    private final FXOMObject oldBeforeObject;
-    private String description;
-    
+  private final FXOMObject reindexedObject;
+  private final FXOMObject beforeObject;
+  private final FXOMObject oldBeforeObject;
+  private String description;
 
-    public ReIndexObjectJob(
-            FXOMObject reindexedObject, 
-            FXOMObject beforeObject, 
-            EditorController editorController) {
-        super(editorController);
-        assert reindexedObject != null;
-        
-        this.reindexedObject = reindexedObject;
-        this.beforeObject = beforeObject;
-        this.oldBeforeObject = reindexedObject.getNextSlibing();
-    }
-    
-    
-    /*
-     * Job
-     */
-    
-    @Override
-    public boolean isExecutable() {
-        return (beforeObject != oldBeforeObject);
-    }
+  public ReIndexObjectJob(
+      FXOMObject reindexedObject, FXOMObject beforeObject, EditorController editorController) {
+    super(editorController);
+    assert reindexedObject != null;
 
-    @Override
-    public void execute() {
-        redo();
-    }
+    this.reindexedObject = reindexedObject;
+    this.beforeObject = beforeObject;
+    this.oldBeforeObject = reindexedObject.getNextSlibing();
+  }
 
-    @Override
-    public void undo() {
-        assert isExecutable();
+  /*
+   * Job
+   */
 
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        fxomDocument.beginUpdate();
-        reindexedObject.moveBeforeSibling(oldBeforeObject);
-        fxomDocument.endUpdate();
-    }
+  @Override
+  public boolean isExecutable() {
+    return (beforeObject != oldBeforeObject);
+  }
 
-    @Override
-    public void redo() {
-        assert isExecutable();
+  @Override
+  public void execute() {
+    redo();
+  }
 
-        final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-        fxomDocument.beginUpdate();
-        reindexedObject.moveBeforeSibling(beforeObject);
-        fxomDocument.endUpdate();
-    }
+  @Override
+  public void undo() {
+    assert isExecutable();
 
-    @Override
-    public String getDescription() {
-        if (description == null) {
-            final StringBuilder sb = new StringBuilder();
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    fxomDocument.beginUpdate();
+    reindexedObject.moveBeforeSibling(oldBeforeObject);
+    fxomDocument.endUpdate();
+  }
 
-            sb.append("Move ");
+  @Override
+  public void redo() {
+    assert isExecutable();
 
-            if (reindexedObject instanceof FXOMInstance) {
-                final Object sceneGraphObject = reindexedObject.getSceneGraphObject();
-                if (sceneGraphObject != null) {
-                    sb.append(sceneGraphObject.getClass().getSimpleName());
-                } else {
-                    sb.append("Unresolved Object");
-                }
-            } else if (reindexedObject instanceof FXOMCollection) {
-                sb.append("Collection");
-            } else {
-                assert false;
-                sb.append(reindexedObject.getClass().getSimpleName());
-            }
-            description = sb.toString();
+    final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+    fxomDocument.beginUpdate();
+    reindexedObject.moveBeforeSibling(beforeObject);
+    fxomDocument.endUpdate();
+  }
+
+  @Override
+  public String getDescription() {
+    if (description == null) {
+      final StringBuilder sb = new StringBuilder();
+
+      sb.append("Move ");
+
+      if (reindexedObject instanceof FXOMInstance) {
+        final Object sceneGraphObject = reindexedObject.getSceneGraphObject();
+        if (sceneGraphObject != null) {
+          sb.append(sceneGraphObject.getClass().getSimpleName());
+        } else {
+          sb.append("Unresolved Object");
         }
-        return description;
+      } else if (reindexedObject instanceof FXOMCollection) {
+        sb.append("Collection");
+      } else {
+        assert false;
+        sb.append(reindexedObject.getClass().getSimpleName());
+      }
+      description = sb.toString();
     }
-    
+    return description;
+  }
 }

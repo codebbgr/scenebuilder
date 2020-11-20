@@ -42,56 +42,71 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.paint.Color;
 
 /**
- * ColorPropertyMetadata helps resolve Color as a combination of red, green, blue, opacity using
- * the constructor {@link Color#Color(double, double, double, double)}.
- * 
- * The FXML representation of the same is:
- * 
- * <pre>
- * {@code
+ * ColorPropertyMetadata helps resolve Color as a combination of red, green, blue, opacity using the
+ * constructor {@link Color#Color(double, double, double, double)}.
+ *
+ * <p>The FXML representation of the same is:
+ *
+ * <pre>{@code
  * <Color blue="0.5" green="0.3" opacity="0.8" red="0.6" />
  * }</pre>
  */
 public class ColorPropertyMetadata extends ComplexPropertyMetadata<Color> {
 
-    private final DoublePropertyMetadata redMetadata
-            = new DoublePropertyMetadata(new PropertyName("red"),
-            DoublePropertyMetadata.DoubleKind.OPACITY, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata greenMetadata
-            = new DoublePropertyMetadata(new PropertyName("green"),
-            DoublePropertyMetadata.DoubleKind.OPACITY, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata blueMetadata
-            = new DoublePropertyMetadata(new PropertyName("blue"),
-            DoublePropertyMetadata.DoubleKind.OPACITY, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata opacityMetadata
-            = new DoublePropertyMetadata(new PropertyName("opacity"),
-            DoublePropertyMetadata.DoubleKind.OPACITY, true, 1.0, InspectorPath.UNUSED);
+  private final DoublePropertyMetadata redMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("red"),
+          DoublePropertyMetadata.DoubleKind.OPACITY,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata greenMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("green"),
+          DoublePropertyMetadata.DoubleKind.OPACITY,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata blueMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("blue"),
+          DoublePropertyMetadata.DoubleKind.OPACITY,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata opacityMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("opacity"),
+          DoublePropertyMetadata.DoubleKind.OPACITY,
+          true,
+          1.0,
+          InspectorPath.UNUSED);
 
-    public ColorPropertyMetadata(PropertyName name, boolean readWrite, 
-            Color defaultValue, InspectorPath inspectorPath) {
-        super(name, Color.class, readWrite, defaultValue, inspectorPath);
-    }
+  public ColorPropertyMetadata(
+      PropertyName name, boolean readWrite, Color defaultValue, InspectorPath inspectorPath) {
+    super(name, Color.class, readWrite, defaultValue, inspectorPath);
+  }
 
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Color value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, Color.class);
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Color value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, Color.class);
 
-        redMetadata.setValue(result, value.getRed());
-        greenMetadata.setValue(result, value.getGreen());
-        blueMetadata.setValue(result, value.getBlue());
-        opacityMetadata.setValue(result, value.getOpacity());
+    redMetadata.setValue(result, value.getRed());
+    greenMetadata.setValue(result, value.getGreen());
+    blueMetadata.setValue(result, value.getBlue());
+    opacityMetadata.setValue(result, value.getOpacity());
 
-        return result;
-    }
+    return result;
+  }
 
-    @Override
-    public Color makeValueFromString(String string) {
-        return Color.valueOf(string);
-    }
+  @Override
+  public Color makeValueFromString(String string) {
+    return Color.valueOf(string);
+  }
 
-    @Override
-    public String makeStringFromValue(Color value) {
-        assert value != null;
-        return ColorEncoder.encodeColor(value);
-    }
+  @Override
+  public String makeStringFromValue(Color value) {
+    assert value != null;
+    return ColorEncoder.encodeColor(value);
+  }
 }

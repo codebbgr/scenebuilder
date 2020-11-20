@@ -38,46 +38,46 @@ import java.util.Set;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 
-/**
- * Toggle Group editor.
- *
- *
- */
+/** Toggle Group editor. */
 public class ToggleGroupEditor extends AutoSuggestEditor {
 
-    List<String> suggestedTgs;
+  List<String> suggestedTgs;
 
-    public ToggleGroupEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses, List<String> suggestedTgs) {
-        super(propMeta, selectedClasses, suggestedTgs);
-        initialize(suggestedTgs);
-    }
-    
-    private void initialize(List<String> suggestedTgs) {
-        this.suggestedTgs = suggestedTgs;
+  public ToggleGroupEditor(
+      ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses, List<String> suggestedTgs) {
+    super(propMeta, selectedClasses, suggestedTgs);
+    initialize(suggestedTgs);
+  }
 
-        // text field events handling
-        EventHandler<ActionEvent> onActionListener = event -> {
-            if (isHandlingError()) {
-                // Event received because of focus lost due to error dialog
-                return;
+  private void initialize(List<String> suggestedTgs) {
+    this.suggestedTgs = suggestedTgs;
+
+    // text field events handling
+    EventHandler<ActionEvent> onActionListener =
+        event -> {
+          if (isHandlingError()) {
+            // Event received because of focus lost due to error dialog
+            return;
+          }
+          String value = textField.getText();
+          if (value != null && !value.isEmpty()) {
+
+            if (!JavaLanguage.isIdentifier(value)) {
+              //
+              // System.err.println(I18N.getString("inspector.fxml.invalid.id", value));
+              handleInvalidValue(value);
+              return;
             }
-            String value = textField.getText();
-            if (value != null && !value.isEmpty()) {
-
-                if (!JavaLanguage.isIdentifier(value)) {
-//                        System.err.println(I18N.getString("inspector.fxml.invalid.id", value));
-                    handleInvalidValue(value);
-                    return;
-                }
-            }
-            userUpdateValueProperty((value == null || value.isEmpty()) ? null : value);
-            textField.selectAll();
+          }
+          userUpdateValueProperty((value == null || value.isEmpty()) ? null : value);
+          textField.selectAll();
         };
-        setTextEditorBehavior(this, textField, onActionListener);
-    }
+    setTextEditorBehavior(this, textField, onActionListener);
+  }
 
-    @Override
-    public void reset(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses, List<String> suggestedTgs) {
-        super.reset(propMeta, selectedClasses, suggestedTgs);
-    }
+  @Override
+  public void reset(
+      ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses, List<String> suggestedTgs) {
+    super.reset(propMeta, selectedClasses, suggestedTgs);
+  }
 }

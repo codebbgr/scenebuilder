@@ -36,77 +36,78 @@ import java.util.Comparator;
 import java.util.Map;
 
 /**
- * A Comparator for comparing the indices of the attributes of an element.
- * These indices decides the location of each attribute in the FXML document.
+ * A Comparator for comparing the indices of the attributes of an element. These indices decides the
+ * location of each attribute in the FXML document.
  *
- * This class can be extended to create a customized comparator for each attribute.
+ * <p>This class can be extended to create a customized comparator for each attribute.
  */
-class XMLAttrComparator implements Comparator<Map.Entry<String,String>> {
+class XMLAttrComparator implements Comparator<Map.Entry<String, String>> {
 
-    @Override
-    public int compare(Map.Entry<String,String> attr1, Map.Entry<String,String> attr2) {
-        assert attr1 != null;
-        assert attr2 != null;
-        
-        final int aoi1 = getAttrOrderIndex(attr1);
-        final int aoi2 = getAttrOrderIndex(attr2);
-        final int result;
-        
-        if ((aoi1 == 2) && (aoi2 == 2)) {
-            final QualifiedName qn1 = new QualifiedName(attr1.getKey());
-            final QualifiedName qn2 = new QualifiedName(attr2.getKey());
-            result = qn1.compareTo(qn2);
-        } else {
-            result = Integer.compare(aoi1, aoi2);
-        }
-        
-        return result;
+  @Override
+  public int compare(Map.Entry<String, String> attr1, Map.Entry<String, String> attr2) {
+    assert attr1 != null;
+    assert attr2 != null;
+
+    final int aoi1 = getAttrOrderIndex(attr1);
+    final int aoi2 = getAttrOrderIndex(attr2);
+    final int result;
+
+    if ((aoi1 == 2) && (aoi2 == 2)) {
+      final QualifiedName qn1 = new QualifiedName(attr1.getKey());
+      final QualifiedName qn2 = new QualifiedName(attr2.getKey());
+      result = qn1.compareTo(qn2);
+    } else {
+      result = Integer.compare(aoi1, aoi2);
     }
 
-    /**
-     * Returns attribute index for a particular attribute
-     * @param attr Attribute of an element whose index is to be found out
-     * @return The index of the attribute in the FXML attribute list
+    return result;
+  }
+
+  /**
+   * Returns attribute index for a particular attribute
+   *
+   * @param attr Attribute of an element whose index is to be found out
+   * @return The index of the attribute in the FXML attribute list
+   */
+  protected int getAttrOrderIndex(Map.Entry<String, String> attr) {
+    assert attr != null;
+
+    /*
+     * fx:id < id < other-attr < fx:controller
      */
-    protected int getAttrOrderIndex(Map.Entry<String,String> attr) {
-        assert attr != null;
-        
-        /*
-         * fx:id < id < other-attr < fx:controller
-         */
-        final int result;
-        switch(attr.getKey()) {
-            case "id": //NOI18N
-                result = 0;
-                break;
-            case "fx:id": //NOI18N
-                if (attr.getValue().startsWith("x")) { //NOI18N
-                    // Auto-generated fx:id goes at the end
-                    result = 10000;
-                } else {
-                    result = 1;
-                }
-                break;
-            default:
-                result = 2;
-                break;
-            case "fx:value": //NOI18N
-                result = 3;
-                break;
-            case "fx:factory": //NOI18N
-                result = 4;
-                break;
-            case "xmlns": //NOI18N
-                result = 5;
-                break;
-            case "xmlns:fx": //NOI18N
-                result = 5;
-                break;
-            case "fx:controller": //NOI18N
-                result = 6;
-                break;
+    final int result;
+    switch (attr.getKey()) {
+      case "id": // NOI18N
+        result = 0;
+        break;
+      case "fx:id": // NOI18N
+        if (attr.getValue().startsWith("x")) { // NOI18N
+          // Auto-generated fx:id goes at the end
+          result = 10000;
+        } else {
+          result = 1;
         }
-        
-        return result;
+        break;
+      default:
+        result = 2;
+        break;
+      case "fx:value": // NOI18N
+        result = 3;
+        break;
+      case "fx:factory": // NOI18N
+        result = 4;
+        break;
+      case "xmlns": // NOI18N
+        result = 5;
+        break;
+      case "xmlns:fx": // NOI18N
+        result = 5;
+        break;
+      case "fx:controller": // NOI18N
+        result = 6;
+        break;
     }
+
+    return result;
+  }
 }

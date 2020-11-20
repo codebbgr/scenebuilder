@@ -45,64 +45,63 @@ import java.util.ArrayList;
 import java.util.List;
 import javafx.scene.layout.GridPane;
 
-/**
- *
- */
+/** */
 public class MoveRowContentJob extends BatchDocumentJob {
-    
-    private final IntegerPropertyMetadata rowIndexMeta =
-            new IntegerPropertyMetadata(
-                new PropertyName("rowIndex", GridPane.class), //NOI18N
-                true, /* readWrite */
-                0, /* defaultValue */
-                InspectorPath.UNUSED);
 
-    private final FXOMInstance gridPaneObject;
-    private final int movingRowIndex;
-    private final int rowIndexDelta;
+  private final IntegerPropertyMetadata rowIndexMeta =
+      new IntegerPropertyMetadata(
+          new PropertyName("rowIndex", GridPane.class), // NOI18N
+          true, /* readWrite */
+          0, /* defaultValue */
+          InspectorPath.UNUSED);
 
-    public MoveRowContentJob(FXOMObject gridPaneObject, int movingRowIndex, int rowIndexDelta, EditorController editorController) {
-        super(editorController);
-        assert gridPaneObject instanceof FXOMInstance;
-        assert gridPaneObject.getSceneGraphObject() instanceof GridPane;
-        assert movingRowIndex >= 0;
-        
-        this.gridPaneObject = (FXOMInstance)gridPaneObject;
-        this.movingRowIndex = movingRowIndex;
-        this.rowIndexDelta = rowIndexDelta;
+  private final FXOMInstance gridPaneObject;
+  private final int movingRowIndex;
+  private final int rowIndexDelta;
+
+  public MoveRowContentJob(
+      FXOMObject gridPaneObject,
+      int movingRowIndex,
+      int rowIndexDelta,
+      EditorController editorController) {
+    super(editorController);
+    assert gridPaneObject instanceof FXOMInstance;
+    assert gridPaneObject.getSceneGraphObject() instanceof GridPane;
+    assert movingRowIndex >= 0;
+
+    this.gridPaneObject = (FXOMInstance) gridPaneObject;
+    this.movingRowIndex = movingRowIndex;
+    this.rowIndexDelta = rowIndexDelta;
+  }
+
+  /*
+   * CompositeJob
+   */
+
+  @Override
+  protected List<Job> makeSubJobs() {
+    final List<Job> result = new ArrayList<>();
+
+    final DesignHierarchyMask m = new DesignHierarchyMask(gridPaneObject);
+    assert m.isAcceptingSubComponent();
+
+    for (int i = 0, count = m.getSubComponentCount(); i < count; i++) {
+      assert m.getSubComponentAtIndex(i)
+          instanceof FXOMInstance; // Because children of GridPane are nodes
+      final FXOMInstance child = (FXOMInstance) m.getSubComponentAtIndex(i);
+      if (rowIndexMeta.getValue(child) == movingRowIndex) {
+        // child belongs to column at movingRowIndex
+        final MoveCellContentJob subJob =
+            new MoveCellContentJob(child, 0, rowIndexDelta, getEditorController());
+        result.add(subJob);
+      }
     }
 
+    return result;
+  }
 
-    
-    
-    /*
-     * CompositeJob
-     */
-    
-    @Override
-    protected List<Job> makeSubJobs() {
-        final List<Job> result = new ArrayList<>();
-        
-        final DesignHierarchyMask m = new DesignHierarchyMask(gridPaneObject);
-        assert m.isAcceptingSubComponent();
-        
-        for (int i = 0, count = m.getSubComponentCount(); i <  count; i++) {
-            assert m.getSubComponentAtIndex(i) instanceof FXOMInstance; // Because children of GridPane are nodes
-            final FXOMInstance child = (FXOMInstance) m.getSubComponentAtIndex(i);
-            if (rowIndexMeta.getValue(child) == movingRowIndex) {
-                // child belongs to column at movingRowIndex
-                final MoveCellContentJob subJob 
-                        = new MoveCellContentJob(child, 0, rowIndexDelta, getEditorController());
-                result.add(subJob);
-            }
-        }
-        
-        return result;
-    }
-
-    @Override
-    protected String makeDescription() {
-        return getClass().getSimpleName();
-    }
-    
+  @Override
+  protected String makeDescription() {
+    return getClass().getSimpleName();
+  }
 }

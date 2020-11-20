@@ -38,88 +38,88 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.effect.Blend;
 import javafx.scene.effect.Effect;
 
-/**
- * Effect path item for the blend effect.
- */
+/** Effect path item for the blend effect. */
 public class BlendPathItem extends EffectPathItem {
 
-    private final RadioMenuItem topMenuItem = new RadioMenuItem("TopInput"); //NOI18N
-    private final RadioMenuItem bottomMenuItem = new RadioMenuItem("BottomInput"); //NOI18N
-    private final ToggleGroup inputToggleGroup = new ToggleGroup();
-    private EffectPathItem topInputPathItem;
-    private EffectPathItem bottomInputPathItem;
+  private final RadioMenuItem topMenuItem = new RadioMenuItem("TopInput"); // NOI18N
+  private final RadioMenuItem bottomMenuItem = new RadioMenuItem("BottomInput"); // NOI18N
+  private final ToggleGroup inputToggleGroup = new ToggleGroup();
+  private EffectPathItem topInputPathItem;
+  private EffectPathItem bottomInputPathItem;
 
-    public BlendPathItem(EffectPickerController epc, Effect effect, EffectPathItem hostPathItem) {
-        super(epc, effect, hostPathItem);
-        assert effect instanceof javafx.scene.effect.Blend;
-        initialize();
+  public BlendPathItem(EffectPickerController epc, Effect effect, EffectPathItem hostPathItem) {
+    super(epc, effect, hostPathItem);
+    assert effect instanceof javafx.scene.effect.Blend;
+    initialize();
+  }
+
+  @Override
+  EffectPathItem getSelectedInputPathItem() {
+    if (topMenuItem.isSelected()) {
+      return topInputPathItem;
+    } else {
+      assert bottomMenuItem.isSelected() == true;
+      return bottomInputPathItem;
     }
+  }
 
-    @Override
-    EffectPathItem getSelectedInputPathItem() {
-        if (topMenuItem.isSelected()) {
-            return topInputPathItem;
-        } else {
-            assert bottomMenuItem.isSelected() == true;
-            return bottomInputPathItem;
-        }
+  @Override
+  void setSelectedInputEffect(Effect input) {
+    if (topMenuItem.isSelected()) {
+      setTopInput(input);
+    } else {
+      assert bottomMenuItem.isSelected() == true;
+      setBottomInput(input);
     }
+  }
 
-    @Override
-    void setSelectedInputEffect(Effect input) {
-        if (topMenuItem.isSelected()) {
-            setTopInput(input);
-        } else {
-            assert bottomMenuItem.isSelected() == true;
-            setBottomInput(input);
-        }
-    }
+  void setTopInputPathItem(EffectPathItem epi) {
+    topInputPathItem = epi;
+  }
 
-    void setTopInputPathItem(EffectPathItem epi) {
-        topInputPathItem = epi;
-    }
+  void setBottomInputPathItem(EffectPathItem epi) {
+    bottomInputPathItem = epi;
+  }
 
-    void setBottomInputPathItem(EffectPathItem epi) {
-        bottomInputPathItem = epi;
-    }
+  Effect getTopInput() {
+    return ((Blend) effect).getTopInput();
+  }
 
-    Effect getTopInput() {
-        return ((Blend) effect).getTopInput();
-    }
+  void setTopInput(Effect input) {
+    ((Blend) effect).setTopInput(input);
+  }
 
-    void setTopInput(Effect input) {
-        ((Blend) effect).setTopInput(input);
-    }
+  Effect getBottomInput() {
+    return ((Blend) effect).getBottomInput();
+  }
 
-    Effect getBottomInput() {
-        return ((Blend) effect).getBottomInput();
-    }
+  void setBottomInput(Effect input) {
+    ((Blend) effect).setBottomInput(input);
+  }
 
-    void setBottomInput(Effect input) {
-        ((Blend) effect).setBottomInput(input);
-    }
-
-    private void initialize() {
-        // Add Select Input Menu
-        final Menu inputMenu = new Menu("Select Input"); //NOI18N
-        topMenuItem.setToggleGroup(inputToggleGroup);
-        topMenuItem.setOnAction(event -> {
-            toggle_button.setText(getSimpleName() + " (TopInput)"); //NOI18N
-            effectPickerController.updateUI(BlendPathItem.this);
+  private void initialize() {
+    // Add Select Input Menu
+    final Menu inputMenu = new Menu("Select Input"); // NOI18N
+    topMenuItem.setToggleGroup(inputToggleGroup);
+    topMenuItem.setOnAction(
+        event -> {
+          toggle_button.setText(getSimpleName() + " (TopInput)"); // NOI18N
+          effectPickerController.updateUI(BlendPathItem.this);
         });
-        bottomMenuItem.setToggleGroup(inputToggleGroup);
-        bottomMenuItem.setOnAction(event -> {
-            toggle_button.setText(getSimpleName() + " (BottomInput)"); //NOI18N
-            effectPickerController.updateUI(BlendPathItem.this);
+    bottomMenuItem.setToggleGroup(inputToggleGroup);
+    bottomMenuItem.setOnAction(
+        event -> {
+          toggle_button.setText(getSimpleName() + " (BottomInput)"); // NOI18N
+          effectPickerController.updateUI(BlendPathItem.this);
         });
 
-        inputMenu.getItems().addAll(topMenuItem, bottomMenuItem);
-        menu_button.getItems().add(0, inputMenu);
-        menu_button.getItems().add(1, new SeparatorMenuItem());
+    inputMenu.getItems().addAll(topMenuItem, bottomMenuItem);
+    menu_button.getItems().add(0, inputMenu);
+    menu_button.getItems().add(1, new SeparatorMenuItem());
 
-        // TopInput selected at init time
-        toggle_button.setText(getSimpleName() + " (TopInput)"); //NOI18N
-        topMenuItem.setSelected(true);
-        bottomMenuItem.setSelected(false);
-    }
+    // TopInput selected at init time
+    toggle_button.setText(getSimpleName() + " (TopInput)"); // NOI18N
+    topMenuItem.setSelected(true);
+    bottomMenuItem.setSelected(false);
+  }
 }

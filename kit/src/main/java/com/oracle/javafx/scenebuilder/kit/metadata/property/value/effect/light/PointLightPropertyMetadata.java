@@ -41,43 +41,55 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.effect.Light;
 import javafx.scene.paint.Color;
 
-/**
- *
- */
+/** */
 public class PointLightPropertyMetadata extends ComplexPropertyMetadata<Light.Point> {
-    
-    private final ColorPropertyMetadata colorMetadata
-            = new ColorPropertyMetadata(new PropertyName("color"), //NOI18N
-            true, Color.WHITE, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata xMetadata
-            = new DoublePropertyMetadata(new PropertyName("x"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata yMetadata
-            = new DoublePropertyMetadata(new PropertyName("y"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata zMetadata
-            = new DoublePropertyMetadata(new PropertyName("z"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true, 0.0, InspectorPath.UNUSED);
-    
-    public PointLightPropertyMetadata(PropertyName name, boolean readWrite, 
-            Light.Point defaultValue, InspectorPath inspectorPath) {
-        super(name, Light.Point.class, readWrite, defaultValue, inspectorPath);
-    }
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(Light.Point value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, getValueClass());
-        
-        colorMetadata.setValue(result, value.getColor());
-        xMetadata.setValue(result, value.getX());
-        yMetadata.setValue(result, value.getY());
-        zMetadata.setValue(result, value.getZ());
+  private final ColorPropertyMetadata colorMetadata =
+      new ColorPropertyMetadata(
+          new PropertyName("color"), // NOI18N
+          true,
+          Color.WHITE,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata xMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("x"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata yMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("y"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata zMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("z"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true,
+          0.0,
+          InspectorPath.UNUSED);
 
-        return result;
-    }
-    
+  public PointLightPropertyMetadata(
+      PropertyName name, boolean readWrite, Light.Point defaultValue, InspectorPath inspectorPath) {
+    super(name, Light.Point.class, readWrite, defaultValue, inspectorPath);
+  }
+
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(Light.Point value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, getValueClass());
+
+    colorMetadata.setValue(result, value.getColor());
+    xMetadata.setValue(result, value.getX());
+    yMetadata.setValue(result, value.getY());
+    zMetadata.setValue(result, value.getZ());
+
+    return result;
+  }
 }

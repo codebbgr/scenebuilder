@@ -41,73 +41,93 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 
-/**
- *
- */
-public class KeyCodeCombinationPropertyMetadata extends ComplexPropertyMetadata<KeyCodeCombination> {
+/** */
+public class KeyCodeCombinationPropertyMetadata
+    extends ComplexPropertyMetadata<KeyCodeCombination> {
 
-    /*
-     * NOTE : KeyCodeCombination singularity
-     * 
-     * Default value for 'alt', 'control', 'meta', 'shift' and 'shortcut' is 'UP'. 
-     * However FXMLLoader refuses to load:
-     * 
-     *     <KeyCombinationCode code='PASTE' />
-     * 
-     * Properties must be explicitely specified even when they have the default value.
-     * 
-     *     <KeyCombinationCode code='PASTE' alt='UP' control='UP' meta='UP' shift='UP' shortcut='UP' />
-     * 
-     * To force this behavior, the EnumerationPropertyMetadata below are all
-     * set with a dummy default value.
-     */
-    private static final String DUMMY = "dummy"; //NOI18N
-    
-    private final EnumerationPropertyMetadata altMetadata
-            = new EnumerationPropertyMetadata(new PropertyName("alt"), //NOI18N
-            KeyCombination.ModifierValue.class, DUMMY, true, 
-            InspectorPath.UNUSED);
-    private final EnumerationPropertyMetadata controlMetadata
-            = new EnumerationPropertyMetadata(new PropertyName("control"), //NOI18N
-            KeyCombination.ModifierValue.class, DUMMY, true, 
-            InspectorPath.UNUSED);
-    private final EnumerationPropertyMetadata metaMetadata
-            = new EnumerationPropertyMetadata(new PropertyName("meta"), //NOI18N
-            KeyCombination.ModifierValue.class, DUMMY, true, 
-            InspectorPath.UNUSED);
-    private final EnumerationPropertyMetadata shiftMetadata
-            = new EnumerationPropertyMetadata(new PropertyName("shift"), //NOI18N
-            KeyCombination.ModifierValue.class, DUMMY, true, 
-            InspectorPath.UNUSED);
-    private final EnumerationPropertyMetadata shortcutMetadata
-            = new EnumerationPropertyMetadata(new PropertyName("shortcut"), //NOI18N
-            KeyCombination.ModifierValue.class, DUMMY, true, 
-            InspectorPath.UNUSED);
-    private final EnumerationPropertyMetadata codeMetadata
-            = new EnumerationPropertyMetadata(new PropertyName("code"), //NOI18N
-            KeyCode.class, DUMMY, true, 
-            InspectorPath.UNUSED);
+  /*
+   * NOTE : KeyCodeCombination singularity
+   *
+   * Default value for 'alt', 'control', 'meta', 'shift' and 'shortcut' is 'UP'.
+   * However FXMLLoader refuses to load:
+   *
+   *     <KeyCombinationCode code='PASTE' />
+   *
+   * Properties must be explicitely specified even when they have the default value.
+   *
+   *     <KeyCombinationCode code='PASTE' alt='UP' control='UP' meta='UP' shift='UP' shortcut='UP' />
+   *
+   * To force this behavior, the EnumerationPropertyMetadata below are all
+   * set with a dummy default value.
+   */
+  private static final String DUMMY = "dummy"; // NOI18N
 
-    public KeyCodeCombinationPropertyMetadata(PropertyName name, boolean readWrite, 
-            KeyCodeCombination defaultValue, InspectorPath inspectorPath) {
-        super(name, KeyCodeCombination.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final EnumerationPropertyMetadata altMetadata =
+      new EnumerationPropertyMetadata(
+          new PropertyName("alt"), // NOI18N
+          KeyCombination.ModifierValue.class,
+          DUMMY,
+          true,
+          InspectorPath.UNUSED);
+  private final EnumerationPropertyMetadata controlMetadata =
+      new EnumerationPropertyMetadata(
+          new PropertyName("control"), // NOI18N
+          KeyCombination.ModifierValue.class,
+          DUMMY,
+          true,
+          InspectorPath.UNUSED);
+  private final EnumerationPropertyMetadata metaMetadata =
+      new EnumerationPropertyMetadata(
+          new PropertyName("meta"), // NOI18N
+          KeyCombination.ModifierValue.class,
+          DUMMY,
+          true,
+          InspectorPath.UNUSED);
+  private final EnumerationPropertyMetadata shiftMetadata =
+      new EnumerationPropertyMetadata(
+          new PropertyName("shift"), // NOI18N
+          KeyCombination.ModifierValue.class,
+          DUMMY,
+          true,
+          InspectorPath.UNUSED);
+  private final EnumerationPropertyMetadata shortcutMetadata =
+      new EnumerationPropertyMetadata(
+          new PropertyName("shortcut"), // NOI18N
+          KeyCombination.ModifierValue.class,
+          DUMMY,
+          true,
+          InspectorPath.UNUSED);
+  private final EnumerationPropertyMetadata codeMetadata =
+      new EnumerationPropertyMetadata(
+          new PropertyName("code"), // NOI18N
+          KeyCode.class,
+          DUMMY,
+          true,
+          InspectorPath.UNUSED);
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(KeyCodeCombination value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        altMetadata.setValue(result, value.getAlt().toString());
-        controlMetadata.setValue(result, value.getControl().toString());
-        metaMetadata.setValue(result, value.getMeta().toString());
-        shiftMetadata.setValue(result, value.getShift().toString());
-        shortcutMetadata.setValue(result, value.getShortcut().toString());
-        codeMetadata.setValue(result, value.getCode().toString());
+  public KeyCodeCombinationPropertyMetadata(
+      PropertyName name,
+      boolean readWrite,
+      KeyCodeCombination defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, KeyCodeCombination.class, readWrite, defaultValue, inspectorPath);
+  }
 
-        return result;
-    }
-    
+  /*
+   * ComplexPropertyMetadata
+   */
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(
+      KeyCodeCombination value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    altMetadata.setValue(result, value.getAlt().toString());
+    controlMetadata.setValue(result, value.getControl().toString());
+    metaMetadata.setValue(result, value.getMeta().toString());
+    shiftMetadata.setValue(result, value.getShift().toString());
+    shortcutMetadata.setValue(result, value.getShortcut().toString());
+    codeMetadata.setValue(result, value.getCode().toString());
+
+    return result;
+  }
 }

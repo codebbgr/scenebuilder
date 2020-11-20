@@ -31,6 +31,6 @@
  */
 
 public class ControllerWithoutPackage {
- 
-    // no-op
+
+  // no-op
 }

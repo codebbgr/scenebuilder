@@ -33,102 +33,98 @@ package com.oracle.javafx.scenebuilder.kit.metadata.util;
 
 import java.util.Objects;
 
-/**
- *
- */
+/** */
 public class InspectorPath implements Comparable<InspectorPath> {
-    
-    private final String sectionTag;
-    private final String subSectionTag;
-    private final int subSectionIndex;
 
-    public static final String CUSTOM_SECTION = "Properties";
-    public static final String CUSTOM_SUB_SECTION = "Custom";
-    
-    public static final InspectorPath UNUSED = new InspectorPath("", "", 0);
-    
-    public InspectorPath(String sectionTag, String subSectionTag, int subSectionIndex) {
-        assert sectionTag != null;
-        assert subSectionTag != null;
-        assert subSectionIndex >= 0;
-        
-        this.sectionTag = sectionTag;
-        this.subSectionTag = subSectionTag;
-        this.subSectionIndex = subSectionIndex;
+  private final String sectionTag;
+  private final String subSectionTag;
+  private final int subSectionIndex;
+
+  public static final String CUSTOM_SECTION = "Properties";
+  public static final String CUSTOM_SUB_SECTION = "Custom";
+
+  public static final InspectorPath UNUSED = new InspectorPath("", "", 0);
+
+  public InspectorPath(String sectionTag, String subSectionTag, int subSectionIndex) {
+    assert sectionTag != null;
+    assert subSectionTag != null;
+    assert subSectionIndex >= 0;
+
+    this.sectionTag = sectionTag;
+    this.subSectionTag = subSectionTag;
+    this.subSectionIndex = subSectionIndex;
+  }
+
+  public String getSectionTag() {
+    return sectionTag;
+  }
+
+  public String getSubSectionTag() {
+    return subSectionTag;
+  }
+
+  public int getSubSectionIndex() {
+    return subSectionIndex;
+  }
+
+  /*
+   * Object
+   */
+
+  @Override
+  public int hashCode() {
+    int hash = 7;
+    hash = 97 * hash + Objects.hashCode(this.sectionTag);
+    hash = 97 * hash + Objects.hashCode(this.subSectionTag);
+    hash = 97 * hash + this.subSectionIndex;
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final InspectorPath other = (InspectorPath) obj;
+    if (!Objects.equals(this.sectionTag, other.sectionTag)) {
+      return false;
+    }
+    if (!Objects.equals(this.subSectionTag, other.subSectionTag)) {
+      return false;
+    }
+    if (this.subSectionIndex != other.subSectionIndex) {
+      return false;
+    }
+    return true;
+  }
+
+  /*
+   * Comparable
+   */
+  @Override
+  public int compareTo(InspectorPath o) {
+    int result;
+
+    result = this.sectionTag.compareTo(o.sectionTag);
+
+    if (result == 0) {
+      result = this.subSectionTag.compareTo(o.subSectionTag);
     }
 
-    public String getSectionTag() {
-        return sectionTag;
+    if (result == 0) {
+      if (this.subSectionIndex < o.subSectionIndex) {
+        result = -1;
+      } else if (this.subSectionIndex > o.subSectionIndex) {
+        result = +1;
+      } else {
+        assert this.subSectionIndex == o.subSectionIndex;
+        assert result == 0;
+      }
     }
 
-    public String getSubSectionTag() {
-        return subSectionTag;
-    }
-
-    public int getSubSectionIndex() {
-        return subSectionIndex;
-    }
-    
-    
-    /*
-     * Object
-     */
-
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 97 * hash + Objects.hashCode(this.sectionTag);
-        hash = 97 * hash + Objects.hashCode(this.subSectionTag);
-        hash = 97 * hash + this.subSectionIndex;
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final InspectorPath other = (InspectorPath) obj;
-        if (!Objects.equals(this.sectionTag, other.sectionTag)) {
-            return false;
-        }
-        if (!Objects.equals(this.subSectionTag, other.subSectionTag)) {
-            return false;
-        }
-        if (this.subSectionIndex != other.subSectionIndex) {
-            return false;
-        }
-        return true;
-    }
-    
-    
-    /*
-     * Comparable
-     */
-    @Override
-    public int compareTo(InspectorPath o) {
-        int result;
-        
-        result = this.sectionTag.compareTo(o.sectionTag);
-        
-        if (result == 0) {
-            result = this.subSectionTag.compareTo(o.subSectionTag);
-        }
-        
-        if (result == 0) {
-            if (this.subSectionIndex < o.subSectionIndex) {
-                result = -1;
-            } else if (this.subSectionIndex > o.subSectionIndex) {
-                result = +1;
-            } else {
-                assert this.subSectionIndex == o.subSectionIndex;
-                assert result == 0;
-            }
-        }
-        
-        return result;
-    }
+    return result;
+  }
 }

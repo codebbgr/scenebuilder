@@ -43,52 +43,48 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.Region;
 
-/**
- *
- */
+/** */
 public class TableViewDriver extends AbstractNodeDriver {
 
-    public TableViewDriver(ContentPanelController contentPanelController) {
-        super(contentPanelController);
+  public TableViewDriver(ContentPanelController contentPanelController) {
+    super(contentPanelController);
+  }
+
+  /*
+   * AbstractDriver
+   */
+
+  @Override
+  public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
+    assert fxomObject != null;
+    assert fxomObject instanceof FXOMInstance;
+    assert fxomObject.getSceneGraphObject() instanceof TableView;
+    return new TableViewHandles(contentPanelController, (FXOMInstance) fxomObject);
+  }
+
+  @Override
+  public AbstractResizer<?> makeResizer(FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof TableView;
+    return new RegionResizer((Region) fxomObject.getSceneGraphObject());
+  }
+
+  @Override
+  public FXOMObject refinePick(Node hitNode, double sceneX, double sceneY, FXOMObject fxomObject) {
+    assert fxomObject.getSceneGraphObject() instanceof TableView;
+
+    final TableViewDesignInfoX di = new TableViewDesignInfoX();
+    final TableView<?> tv = (TableView<?>) fxomObject.getSceneGraphObject();
+    final TableColumn<?, ?> tc = di.lookupColumn(tv, sceneX, sceneY);
+    final FXOMObject result;
+
+    if (tc == null) {
+      result = fxomObject;
+    } else {
+      result = fxomObject.searchWithSceneGraphObject(tc);
+      assert result != null;
+      assert result.getSceneGraphObject() == tc;
     }
 
-    /*
-     * AbstractDriver
-     */
-    
-    @Override
-    public AbstractHandles<?> makeHandles(FXOMObject fxomObject) {
-        assert fxomObject != null;
-        assert fxomObject instanceof FXOMInstance;
-        assert fxomObject.getSceneGraphObject() instanceof TableView;
-        return new TableViewHandles(contentPanelController, (FXOMInstance) fxomObject);
-    }
-
-    
-    @Override
-    public AbstractResizer<?> makeResizer(FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof TableView;
-        return new RegionResizer((Region) fxomObject.getSceneGraphObject());
-    }
-    
-    @Override
-    public FXOMObject refinePick(Node hitNode, double sceneX, double sceneY, FXOMObject fxomObject) {
-        assert fxomObject.getSceneGraphObject() instanceof TableView;
-        
-        final TableViewDesignInfoX di = new TableViewDesignInfoX();
-        final TableView<?> tv = (TableView<?>) fxomObject.getSceneGraphObject();
-        final TableColumn<?,?> tc = di.lookupColumn(tv, sceneX, sceneY);
-        final FXOMObject result;
-        
-        if (tc == null) {
-            result = fxomObject;
-        } else {
-            result = fxomObject.searchWithSceneGraphObject(tc);
-            assert result != null;
-            assert result.getSceneGraphObject() == tc;
-        }
-        
-        return result;
-    }
-    
+    return result;
+  }
 }

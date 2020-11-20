@@ -38,32 +38,27 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-/**
- *
- * 
- */
+/** */
 public abstract class Library {
-    
-    protected final ObservableList<LibraryItem> itemsProperty
-            = FXCollections.observableArrayList();
-    protected final ObjectProperty<ClassLoader> classLoaderProperty 
-            = new SimpleObjectProperty<>();
 
-    /*
-     * Public
-     */
-    
-    public ObservableList<LibraryItem> getItems() {
-        return itemsProperty;
-    }
-    
-    public ReadOnlyProperty<ClassLoader> classLoaderProperty() {
-        return classLoaderProperty;
-    }
-    
-    public ClassLoader getClassLoader() {
-        return classLoaderProperty.getValue();
-    }
-    
-    public abstract Comparator<String> getSectionComparator();
+  protected final ObservableList<LibraryItem> itemsProperty = FXCollections.observableArrayList();
+  protected final ObjectProperty<ClassLoader> classLoaderProperty = new SimpleObjectProperty<>();
+
+  /*
+   * Public
+   */
+
+  public ObservableList<LibraryItem> getItems() {
+    return itemsProperty;
+  }
+
+  public ReadOnlyProperty<ClassLoader> classLoaderProperty() {
+    return classLoaderProperty;
+  }
+
+  public ClassLoader getClassLoader() {
+    return classLoaderProperty.getValue();
+  }
+
+  public abstract Comparator<String> getSectionComparator();
 }

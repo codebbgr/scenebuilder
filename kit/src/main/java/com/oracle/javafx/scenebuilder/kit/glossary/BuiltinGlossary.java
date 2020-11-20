@@ -38,102 +38,98 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- *
- * 
- */
+/** */
 public class BuiltinGlossary extends Glossary {
-    
-    public BuiltinGlossary() {
-    }
 
-    /*
-     * Glossary
-     */
-    
-    @Override
-    public List<String> queryControllerClasses(URL fxmlLocation) {
-        if (fxmlLocation == null ) {
-            return Collections.emptyList();
-        } else {
-            File fxmlFile = getFileFromURL(fxmlLocation);
-            if (! fxmlFile.exists()) {
-                // Suspicious ! May I print some warning ? or assert the file exists ?
-                return Collections.emptyList();
-            } else {
-                List<String> res = new ArrayList<>();
-                for (ControllerClass cc : ControllerClass.discoverFXMLControllerClasses(fxmlFile)) {
-                    if (! res.contains(cc.getClassName())) {
-                        res.add(cc.getClassName());
-                    }
-                }
-                Collections.sort(res);
-                return res;
-            }
-        }
-    }
+  public BuiltinGlossary() {}
 
-    @Override
-    public List<String> queryFxIds(URL fxmlLocation, String controllerClass, Class<?> targetType) {
-        // TODO fix DTL-5878
-        assert controllerClass != null;
-        if (fxmlLocation == null ) {
-            return Collections.emptyList();
-        } else {
-            File fxmlFile = getFileFromURL(fxmlLocation);
-            if (! fxmlFile.exists()) {
-                // Suspicious ! May I print some warning ? or assert the file exists ?
-                return Collections.emptyList();
-            } else {
-                List<String> res = new ArrayList<>();
-                for (ControllerClass cc : ControllerClass.discoverFXMLControllerClasses(fxmlFile)) {
-                    if (controllerClass.equals(cc.getClassName())) {
-                        res.addAll(cc.getFxIds());
-                        break;  // discoverFXMLControllerClasses may return duplicates.
-                                // The first matching class name is good enough for now.
-                    }
-                }
-                Collections.sort(res);
-                return res;
-            }
+  /*
+   * Glossary
+   */
+
+  @Override
+  public List<String> queryControllerClasses(URL fxmlLocation) {
+    if (fxmlLocation == null) {
+      return Collections.emptyList();
+    } else {
+      File fxmlFile = getFileFromURL(fxmlLocation);
+      if (!fxmlFile.exists()) {
+        // Suspicious ! May I print some warning ? or assert the file exists ?
+        return Collections.emptyList();
+      } else {
+        List<String> res = new ArrayList<>();
+        for (ControllerClass cc : ControllerClass.discoverFXMLControllerClasses(fxmlFile)) {
+          if (!res.contains(cc.getClassName())) {
+            res.add(cc.getClassName());
+          }
         }
-    }
-    
-    @Override
-    public List<String> queryEventHandlers(URL fxmlLocation, String controllerClass) {
-        assert controllerClass != null;
-        if (fxmlLocation == null ) {
-            return Collections.emptyList();
-        } else {
-            File fxmlFile = getFileFromURL(fxmlLocation);
-            if (! fxmlFile.exists()) {
-                // Suspicious ! May I print some warning ? or assert the file exists ?
-                return Collections.emptyList();
-            } else {
-                List<String> res = new ArrayList<>();
-                for (ControllerClass cc : ControllerClass.discoverFXMLControllerClasses(fxmlFile)) {
-                    if (controllerClass.equals(cc.getClassName())) {
-                        res.addAll(cc.getEventHandlers());
-                        break;  // discoverFXMLControllerClasses may return duplicates.
-                                // The first matching class name is good enough for now.
-                    }
-                }
-                Collections.sort(res);
-                return res;
-            }
-        }
-    }
-    
-    // It's better to use URL.toURI than URL.getPath to feed File constructor.
-    private File getFileFromURL(URL location) {
-        File res;
-        
-        try {
-            res= new File(location.toURI());
-        } catch (URISyntaxException ex) {
-            throw new RuntimeException("Bug", ex); //NOI18N
-        }
-        
+        Collections.sort(res);
         return res;
+      }
     }
+  }
+
+  @Override
+  public List<String> queryFxIds(URL fxmlLocation, String controllerClass, Class<?> targetType) {
+    // TODO fix DTL-5878
+    assert controllerClass != null;
+    if (fxmlLocation == null) {
+      return Collections.emptyList();
+    } else {
+      File fxmlFile = getFileFromURL(fxmlLocation);
+      if (!fxmlFile.exists()) {
+        // Suspicious ! May I print some warning ? or assert the file exists ?
+        return Collections.emptyList();
+      } else {
+        List<String> res = new ArrayList<>();
+        for (ControllerClass cc : ControllerClass.discoverFXMLControllerClasses(fxmlFile)) {
+          if (controllerClass.equals(cc.getClassName())) {
+            res.addAll(cc.getFxIds());
+            break; // discoverFXMLControllerClasses may return duplicates.
+            // The first matching class name is good enough for now.
+          }
+        }
+        Collections.sort(res);
+        return res;
+      }
+    }
+  }
+
+  @Override
+  public List<String> queryEventHandlers(URL fxmlLocation, String controllerClass) {
+    assert controllerClass != null;
+    if (fxmlLocation == null) {
+      return Collections.emptyList();
+    } else {
+      File fxmlFile = getFileFromURL(fxmlLocation);
+      if (!fxmlFile.exists()) {
+        // Suspicious ! May I print some warning ? or assert the file exists ?
+        return Collections.emptyList();
+      } else {
+        List<String> res = new ArrayList<>();
+        for (ControllerClass cc : ControllerClass.discoverFXMLControllerClasses(fxmlFile)) {
+          if (controllerClass.equals(cc.getClassName())) {
+            res.addAll(cc.getEventHandlers());
+            break; // discoverFXMLControllerClasses may return duplicates.
+            // The first matching class name is good enough for now.
+          }
+        }
+        Collections.sort(res);
+        return res;
+      }
+    }
+  }
+
+  // It's better to use URL.toURI than URL.getPath to feed File constructor.
+  private File getFileFromURL(URL location) {
+    File res;
+
+    try {
+      res = new File(location.toURI());
+    } catch (URISyntaxException ex) {
+      throw new RuntimeException("Bug", ex); // NOI18N
+    }
+
+    return res;
+  }
 }

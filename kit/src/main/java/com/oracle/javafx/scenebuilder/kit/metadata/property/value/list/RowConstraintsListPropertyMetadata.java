@@ -40,72 +40,78 @@ import java.util.Collections;
 import java.util.List;
 import javafx.scene.layout.RowConstraints;
 
-/**
- *
- */
+/** */
 public class RowConstraintsListPropertyMetadata extends ListValuePropertyMetadata<RowConstraints> {
 
-    private static final RowConstraintsPropertyMetadata itemMetadata
-            = new RowConstraintsPropertyMetadata(new PropertyName("unused"), //NOI18N
-            true /* readWrite */, null, InspectorPath.UNUSED);
-    
-    public RowConstraintsListPropertyMetadata(PropertyName name, boolean readWrite, 
-            List<RowConstraints> defaultValue, InspectorPath inspectorPath) {
-        super(name, RowConstraints.class, itemMetadata, readWrite, defaultValue, inspectorPath);
-    }
+  private static final RowConstraintsPropertyMetadata itemMetadata =
+      new RowConstraintsPropertyMetadata(
+          new PropertyName("unused"), // NOI18N
+          true /* readWrite */,
+          null,
+          InspectorPath.UNUSED);
 
-    public RowConstraintsListPropertyMetadata() {
-        this(new PropertyName("rowConstraints"), true /* readWrite */,  //NOI18N
-                Collections.emptyList(), InspectorPath.UNUSED);
-    }
-    
-    public void pack(FXOMInstance fxomInstance) {
-        final RowConstraints def = new RowConstraints();
-        final List<RowConstraints> v = new ArrayList<>(getValue(fxomInstance));
-        if (v.isEmpty() == false) {
-            RowConstraints last = v.get(v.size()-1);
-            while ((last != null) && RowConstraintsPropertyMetadata.equals(last, def)) {
-                v.remove(v.size()-1);
-                if (v.isEmpty()) {
-                    last = null;
-                } else {
-                    last = v.get(v.size()-1);
-                }
-            }
-            setValue(fxomInstance, v);
-        }
-    }
-    
-    public void unpack(FXOMInstance fxomInstance, int rowCount) {
-        final List<RowConstraints> value = new ArrayList<>(getValue(fxomInstance));
-        if (value.size() < rowCount) {
-            final List<RowConstraints> newValue = new ArrayList<>();
-            newValue.addAll(value);
-            while (newValue.size() < rowCount) {
-                newValue.add(new RowConstraints());
-            }
-            setValue(fxomInstance, newValue);
-        }
-    }
-    
-    public static boolean equals(List<RowConstraints> l1, List<RowConstraints> l2) {
-        
-        assert l1 != null;
-        assert l2 != null;
-        
-        boolean result;
-        if (l1.size() != l2.size()) {
-            result = false;
+  public RowConstraintsListPropertyMetadata(
+      PropertyName name,
+      boolean readWrite,
+      List<RowConstraints> defaultValue,
+      InspectorPath inspectorPath) {
+    super(name, RowConstraints.class, itemMetadata, readWrite, defaultValue, inspectorPath);
+  }
+
+  public RowConstraintsListPropertyMetadata() {
+    this(
+        new PropertyName("rowConstraints"),
+        true /* readWrite */, // NOI18N
+        Collections.emptyList(),
+        InspectorPath.UNUSED);
+  }
+
+  public void pack(FXOMInstance fxomInstance) {
+    final RowConstraints def = new RowConstraints();
+    final List<RowConstraints> v = new ArrayList<>(getValue(fxomInstance));
+    if (v.isEmpty() == false) {
+      RowConstraints last = v.get(v.size() - 1);
+      while ((last != null) && RowConstraintsPropertyMetadata.equals(last, def)) {
+        v.remove(v.size() - 1);
+        if (v.isEmpty()) {
+          last = null;
         } else {
-            result = true;
-            for (int i = 0, count = l1.size(); (i < count) && result; i++) {
-                final RowConstraints c1 = l1.get(i);
-                final RowConstraints c2 = l2.get(i);
-                result = RowConstraintsPropertyMetadata.equals(c1, c2);
-            }
+          last = v.get(v.size() - 1);
         }
-        
-        return result;
+      }
+      setValue(fxomInstance, v);
+    }
+  }
+
+  public void unpack(FXOMInstance fxomInstance, int rowCount) {
+    final List<RowConstraints> value = new ArrayList<>(getValue(fxomInstance));
+    if (value.size() < rowCount) {
+      final List<RowConstraints> newValue = new ArrayList<>();
+      newValue.addAll(value);
+      while (newValue.size() < rowCount) {
+        newValue.add(new RowConstraints());
+      }
+      setValue(fxomInstance, newValue);
+    }
+  }
+
+  public static boolean equals(List<RowConstraints> l1, List<RowConstraints> l2) {
+
+    assert l1 != null;
+    assert l2 != null;
+
+    boolean result;
+    if (l1.size() != l2.size()) {
+      result = false;
+    } else {
+      result = true;
+      for (int i = 0, count = l1.size(); (i < count) && result; i++) {
+        final RowConstraints c1 = l1.get(i);
+        final RowConstraints c2 = l2.get(i);
+        result = RowConstraintsPropertyMetadata.equals(c1, c2);
+      }
     }
 
+    return result;
+  }
 }

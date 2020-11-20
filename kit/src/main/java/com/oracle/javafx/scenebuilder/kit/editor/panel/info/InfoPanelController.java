@@ -32,7 +32,6 @@
  */
 package com.oracle.javafx.scenebuilder.kit.editor.panel.info;
 
-import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import com.oracle.javafx.scenebuilder.kit.editor.job.atomic.ModifyFxControllerJob;
 import com.oracle.javafx.scenebuilder.kit.editor.job.atomic.ToggleFxRootJob;
@@ -45,14 +44,13 @@ import com.oracle.javafx.scenebuilder.kit.fxom.FXOMDocument;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMInstance;
 import com.oracle.javafx.scenebuilder.kit.fxom.FXOMObject;
 import com.oracle.javafx.scenebuilder.kit.glossary.Glossary;
-
+import com.oracle.javafx.scenebuilder.kit.i18n.I18N;
 import java.net.URL;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -68,416 +66,433 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-/**
- * 
- */
+/** */
 public class InfoPanelController extends AbstractFxmlPanelController {
 
-    @FXML private TableColumn<IndexEntry,String> leftTableColumn;
-    @FXML private TableColumn<IndexEntry,FXOMObject> rightTableColumn;
-    @FXML private Label bottomLabel;
-    @FXML private VBox controllerClassVBox;
-    @FXML CheckBox fxrootCheckBox;
-    @FXML HBox controllerAndCogHBox;
-    
-    private IndexEntry.Type entryType = IndexEntry.Type.FX_ID;
-    private ControllerClassEditor controllerClassEditor;
-    private boolean controllerDidLoadFxmlOver = false;
-    
-    public InfoPanelController(EditorController editorController) {
-        super(InfoPanelController.class.getResource("InfoPanel.fxml"), I18N.getBundle(), editorController); //NOI18N
+  @FXML private TableColumn<IndexEntry, String> leftTableColumn;
+  @FXML private TableColumn<IndexEntry, FXOMObject> rightTableColumn;
+  @FXML private Label bottomLabel;
+  @FXML private VBox controllerClassVBox;
+  @FXML CheckBox fxrootCheckBox;
+  @FXML HBox controllerAndCogHBox;
+
+  private IndexEntry.Type entryType = IndexEntry.Type.FX_ID;
+  private ControllerClassEditor controllerClassEditor;
+  private boolean controllerDidLoadFxmlOver = false;
+
+  public InfoPanelController(EditorController editorController) {
+    super(
+        InfoPanelController.class.getResource("InfoPanel.fxml"),
+        I18N.getBundle(),
+        editorController); // NOI18N
+  }
+
+  public IndexEntry.Type getEntryType() {
+    return entryType;
+  }
+
+  public void setEntryType(IndexEntry.Type entryType) {
+    this.entryType = entryType;
+    updateEntriesNow();
+  }
+
+  /*
+   * AbstractPanelController
+   */
+
+  @Override
+  protected void fxomDocumentDidChange(FXOMDocument oldDocument) {
+    requestEntriesUpdate();
+    updateAsPerRootNodeStatus();
+    updateControllerAndControllerClassEditor();
+
+    if (fxrootCheckBox != null) {
+      fxrootCheckBox.selectedProperty().removeListener(checkBoxListener);
+      fxrootCheckBox.setSelected(isFxRoot());
+      fxrootCheckBox.selectedProperty().addListener(checkBoxListener);
+    }
+  }
+
+  @Override
+  protected void sceneGraphRevisionDidChange() {
+    requestEntriesUpdate();
+    updateAsPerRootNodeStatus();
+  }
+
+  @Override
+  protected void cssRevisionDidChange() {
+    // Nothing to do
+  }
+
+  @Override
+  protected void jobManagerRevisionDidChange() {
+    requestEntriesUpdate();
+    updateAsPerRootNodeStatus();
+    updateControllerClassEditor();
+    fxrootCheckBox.selectedProperty().removeListener(checkBoxListener);
+    fxrootCheckBox.setSelected(isFxRoot());
+    fxrootCheckBox.selectedProperty().addListener(checkBoxListener);
+  }
+
+  @Override
+  protected void editorSelectionDidChange() {
+    final Selection selection = getEditorController().getSelection();
+
+    final Set<IndexEntry> selectedEntries = new HashSet<>();
+    if (selection.getGroup() instanceof ObjectSelectionGroup) {
+      final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
+      selectedEntries.addAll(searchIndexEntries(osg.getItems()));
+    } else if (selection.getGroup() instanceof GridSelectionGroup) {
+      final GridSelectionGroup gsg = (GridSelectionGroup) selection.getGroup();
+      selectedEntries.addAll(searchIndexEntries(Collections.singleton(gsg.getParentObject())));
     }
 
-    public IndexEntry.Type getEntryType() {
-        return entryType;
+    final TableView<IndexEntry> tableView = leftTableColumn.getTableView();
+    stopListeningToTableViewSelection();
+    tableView.getSelectionModel().clearSelection();
+    for (IndexEntry e : selectedEntries) {
+      tableView.getSelectionModel().select(e);
+    }
+    startListeningToTableViewSelection();
+  }
+
+  /*
+   * AbstractFxmlPanelController
+   */
+  @Override
+  protected void controllerDidLoadFxml() {
+
+    // Sanity checks
+    assert leftTableColumn != null;
+    assert rightTableColumn != null;
+    assert leftTableColumn.getTableView() == rightTableColumn.getTableView();
+    assert bottomLabel != null;
+    assert controllerClassVBox != null;
+    assert fxrootCheckBox != null;
+    assert controllerAndCogHBox != null;
+
+    performInitialization();
+  }
+
+  // This method is a step to a lazy initialization, to reduce startup time.
+  // We didn't find a smart way to detect when the TitledPane containing
+  // the InfoPanel is opened for the first time, except by putting a listener
+  // on the expandedProperty: this approach means DocumentWindowController
+  // has to call performInitialization (turned public), a path we do not want
+  // to take.
+  private void performInitialization() {
+    if (controllerClassEditor != null) {
+      controllerClassEditor.reset(getSuggestedControllerClasses(null));
+    } else {
+      controllerClassEditor = new ControllerClassEditor(getSuggestedControllerClasses(null));
     }
 
-    public void setEntryType(IndexEntry.Type entryType) {
-        this.entryType = entryType;
-        updateEntriesNow();
-    }
+    HBox propNameNode = controllerClassEditor.getPropNameNode();
 
-    /*
-     * AbstractPanelController
-     */
+    // Make so that the property name appears left justified in the VBox
+    propNameNode.setAlignment(Pos.CENTER_LEFT);
+    controllerClassVBox.getChildren().add(0, propNameNode);
 
-    @Override
-    protected void fxomDocumentDidChange(FXOMDocument oldDocument) {
-        requestEntriesUpdate();
-        updateAsPerRootNodeStatus();
-        updateControllerAndControllerClassEditor();
-        
-        if (fxrootCheckBox != null) {
-            fxrootCheckBox.selectedProperty().removeListener(checkBoxListener);
-            fxrootCheckBox.setSelected(isFxRoot());
-            fxrootCheckBox.selectedProperty().addListener(checkBoxListener);
+    // Initialize field with current value, if defined.
+    controllerAndCogHBox.getChildren().add(controllerClassEditor.getValueEditor());
+    controllerAndCogHBox.getChildren().add(controllerClassEditor.getMenu());
+
+    // Need to react each time value of fx controller is changed (direct user input)
+    controllerClassEditor
+        .valueProperty()
+        .addListener(
+            (ChangeListener<Object>)
+                (ov, t, t1) ->
+                    InfoPanelController.this.updateControllerAndControllerClassEditor((String) t1));
+
+    // We e.g. an Untitled document is saved we need to trigger a scan for
+    // potential controller classes.
+    getEditorController()
+        .fxmlLocationProperty()
+        .addListener(
+            (ChangeListener<URL>)
+                (ov, t, t1) -> {
+                  if (t1 != null) {
+                    resetSuggestedControllerClasses(t1);
+                  }
+                });
+
+    // DTL-6626
+    controllerClassEditor
+        .getTextField()
+        .focusedProperty()
+        .addListener(
+            (ChangeListener<Boolean>)
+                (ov, t, t1) -> {
+                  if (!t1) {
+                    // Focus loss triggers an update. The text field can be empty.
+                    updateControllerAndControllerClassEditor(
+                        controllerClassEditor.getTextField().getText());
+                  }
+                });
+
+    leftTableColumn.setCellValueFactory(new PropertyValueFactory<>("key")); // NOI18N
+    rightTableColumn.setCellValueFactory(new PropertyValueFactory<>("fxomObject")); // NOI18N
+    leftTableColumn.setCellFactory(new LeftCell.Factory());
+    rightTableColumn.setCellFactory(new RightCell.Factory());
+
+    fxrootCheckBox.setSelected(isFxRoot());
+    fxrootCheckBox.selectedProperty().addListener(checkBoxListener);
+
+    controllerDidLoadFxmlOver = true; // Must be called before updateAsPerRootNodeStatus()
+    requestEntriesUpdate();
+    updateAsPerRootNodeStatus();
+    updateControllerAndControllerClassEditor();
+  }
+
+  /*
+   * Private
+   */
+  private static final String IGNORED = "ignored"; // NOI18N
+
+  private synchronized void updateControllerAndControllerClassEditor() {
+    updateControllerAndControllerClassEditor(IGNORED);
+  }
+
+  private synchronized void updateControllerAndControllerClassEditor(String className) {
+    if (getEditorController().getFxomDocument() != null) {
+      FXOMObject root = getEditorController().getFxomDocument().getFxomRoot();
+      if (root != null) {
+        String zeClassName = computeProperClassName(className, root);
+
+        final ModifyFxControllerJob job =
+            new ModifyFxControllerJob(root, zeClassName, getEditorController());
+
+        if (job.isExecutable()) {
+          getEditorController().getJobManager().push(job);
         }
-    }
 
-    @Override
-    protected void sceneGraphRevisionDidChange() {
-        requestEntriesUpdate();
-        updateAsPerRootNodeStatus();
+        updateControllerClassEditor(zeClassName);
+      }
     }
+  }
 
-    @Override
-    protected void cssRevisionDidChange() {
-        // Nothing to do 
-    }
+  private void updateControllerClassEditor() {
+    updateControllerClassEditor(IGNORED);
+  }
 
-    @Override
-    protected void jobManagerRevisionDidChange() {
-        requestEntriesUpdate();
-        updateAsPerRootNodeStatus();
-        updateControllerClassEditor();
-        fxrootCheckBox.selectedProperty().removeListener(checkBoxListener);
-        fxrootCheckBox.setSelected(isFxRoot());
-        fxrootCheckBox.selectedProperty().addListener(checkBoxListener);
-    }
-    
-    @Override
-    protected void editorSelectionDidChange() {
-        final Selection selection = getEditorController().getSelection();
-        
-        final Set<IndexEntry> selectedEntries = new HashSet<>();
-        if (selection.getGroup() instanceof ObjectSelectionGroup) {
-            final ObjectSelectionGroup osg = (ObjectSelectionGroup) selection.getGroup();
-            selectedEntries.addAll(searchIndexEntries(osg.getItems()));
-        } else if (selection.getGroup() instanceof GridSelectionGroup) {
-            final GridSelectionGroup gsg = (GridSelectionGroup) selection.getGroup();
-            selectedEntries.addAll(searchIndexEntries(Collections.singleton(gsg.getParentObject())));
-        }
-        
-        final TableView<IndexEntry> tableView = leftTableColumn.getTableView();
-        stopListeningToTableViewSelection();
-        tableView.getSelectionModel().clearSelection();
-        for (IndexEntry e : selectedEntries) {
-            tableView.getSelectionModel().select(e);
-        }
-        startListeningToTableViewSelection();
-    }
-    
-    /*
-     * AbstractFxmlPanelController
-     */
-    @Override
-    protected void controllerDidLoadFxml() {
-        
-        // Sanity checks
-        assert leftTableColumn != null;
-        assert rightTableColumn != null;
-        assert leftTableColumn.getTableView() == rightTableColumn.getTableView();
-        assert bottomLabel != null;
-        assert controllerClassVBox != null;
-        assert fxrootCheckBox != null;
-        assert controllerAndCogHBox != null;
+  private void updateControllerClassEditor(String className) {
+    if (getEditorController().getFxomDocument() != null) {
+      FXOMObject root = getEditorController().getFxomDocument().getFxomRoot();
+      if (root != null) {
+        String zeClassName = computeProperClassName(className, root);
 
-        performInitialization();
-    }
-    
-    // This method is a step to a lazy initialization, to reduce startup time.
-    // We didn't find a smart way to detect when the TitledPane containing
-    // the InfoPanel is opened for the first time, except by putting a listener
-    // on the expandedProperty: this approach means DocumentWindowController
-    // has to call performInitialization (turned public), a path we do not want
-    // to take.
-    private void performInitialization() {
         if (controllerClassEditor != null) {
-            controllerClassEditor.reset(getSuggestedControllerClasses(null));
-        } else {
-            controllerClassEditor = new ControllerClassEditor(getSuggestedControllerClasses(null));
+          controllerClassEditor.setUpdateFromModel(true);
+          controllerClassEditor.setValue(zeClassName);
+          controllerClassEditor.setUpdateFromModel(false);
         }
-
-        HBox propNameNode = controllerClassEditor.getPropNameNode();
-
-        // Make so that the property name appears left justified in the VBox
-        propNameNode.setAlignment(Pos.CENTER_LEFT);
-        controllerClassVBox.getChildren().add(0, propNameNode);
-
-        // Initialize field with current value, if defined.
-        controllerAndCogHBox.getChildren().add(controllerClassEditor.getValueEditor());
-        controllerAndCogHBox.getChildren().add(controllerClassEditor.getMenu());
-
-        // Need to react each time value of fx controller is changed (direct user input)
-        controllerClassEditor.valueProperty().addListener((ChangeListener<Object>) (ov, t, t1) -> InfoPanelController.this.updateControllerAndControllerClassEditor((String)t1));
-
-        // We e.g. an Untitled document is saved we need to trigger a scan for
-        // potential controller classes.
-        getEditorController().fxmlLocationProperty().addListener((ChangeListener<URL>) (ov, t, t1) -> {
-            if (t1 != null) {
-                resetSuggestedControllerClasses(t1);
-            }
-        });
-        
-        // DTL-6626
-        controllerClassEditor.getTextField().focusedProperty().addListener((ChangeListener<Boolean>) (ov, t, t1) -> {
-            if (!t1) {
-                // Focus loss triggers an update. The text field can be empty.
-                updateControllerAndControllerClassEditor(controllerClassEditor.getTextField().getText());
-            }
-        });
-
-        leftTableColumn.setCellValueFactory(new PropertyValueFactory<>("key")); //NOI18N
-        rightTableColumn.setCellValueFactory(new PropertyValueFactory<>("fxomObject")); //NOI18N
-        leftTableColumn.setCellFactory(new LeftCell.Factory());
-        rightTableColumn.setCellFactory(new RightCell.Factory());
-
-        fxrootCheckBox.setSelected(isFxRoot());
-        fxrootCheckBox.selectedProperty().addListener(checkBoxListener);
-
-        controllerDidLoadFxmlOver = true; // Must be called before updateAsPerRootNodeStatus()
-        requestEntriesUpdate();
-        updateAsPerRootNodeStatus();
-        updateControllerAndControllerClassEditor();
+      }
     }
-    
+  }
 
-    /*
-     * Private
-     */
-    private final static String IGNORED = "ignored"; //NOI18N
-    
-    private synchronized void updateControllerAndControllerClassEditor() {
-        updateControllerAndControllerClassEditor(IGNORED);
+  private String computeProperClassName(String className, FXOMObject root) {
+    String res = className;
+
+    if (className != null && className.equals(IGNORED)) {
+      res = root.getFxController();
     }
-    
-    private synchronized void updateControllerAndControllerClassEditor(String className) {
-        if (getEditorController().getFxomDocument() != null) {
-            FXOMObject root = getEditorController().getFxomDocument().getFxomRoot();
-            if (root != null) {
-                String zeClassName = computeProperClassName(className, root);
 
-                final ModifyFxControllerJob job
-                        = new ModifyFxControllerJob(root, zeClassName, getEditorController());
-
-                if (job.isExecutable()) {
-                    getEditorController().getJobManager().push(job);
-                }
-                
-                updateControllerClassEditor(zeClassName);
-            }
-        }
+    // When the user set an empty string we consider it means
+    // no controller value needs to be set.
+    if (className != null && className.isEmpty()) {
+      res = null;
     }
-    
-    private void updateControllerClassEditor() {
-        updateControllerClassEditor(IGNORED);
-    }
-    
-    private void updateControllerClassEditor(String className) {
-        if (getEditorController().getFxomDocument() != null) {
-            FXOMObject root = getEditorController().getFxomDocument().getFxomRoot();
-            if (root != null) {
-                String zeClassName = computeProperClassName(className, root);
-                
-                if (controllerClassEditor != null) {
-                    controllerClassEditor.setUpdateFromModel(true);
-                    controllerClassEditor.setValue(zeClassName);
-                    controllerClassEditor.setUpdateFromModel(false);
-                }
-            }
-        }
-    }
-    
-    private String computeProperClassName(String className, FXOMObject root) {
-        String res = className;
-        
-        if (className != null && className.equals(IGNORED)) {
-            res = root.getFxController();
-        }
 
-        // When the user set an empty string we consider it means
-        // no controller value needs to be set.
-        if (className != null && className.isEmpty()) {
-            res = null;
-        }
+    return res;
+  }
 
-        return res;
-    }
-    
-    private void requestEntriesUpdate() {
-        updateEntriesNow();
-    }
-    
-    
-    private void updateEntriesNow() {
-        
-        if (leftTableColumn != null) {
-            final List<IndexEntry> newEntries = FXCollections.observableArrayList();
+  private void requestEntriesUpdate() {
+    updateEntriesNow();
+  }
 
-            final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
-            if (fxomDocument != null) {
-                switch(entryType) {
-                    case FX_ID: {
-                        final Map<String, FXOMObject> fxIds
-                                = fxomDocument.collectFxIds();
-                        for (Map.Entry<String, FXOMObject> e : fxIds.entrySet()) {
-                            final String fxId = e.getKey();
-                            final FXOMObject fxomObject = e.getValue();
-                            newEntries.add(new IndexEntry(fxId, entryType, fxomObject));
-                        }
-                        break;
-                    }
+  private void updateEntriesNow() {
 
-                    case HANDLER: {
-                        break;
-                    }
+    if (leftTableColumn != null) {
+      final List<IndexEntry> newEntries = FXCollections.observableArrayList();
 
-                    case RESOURCE_KEY: {
-                        break;
-                    }
-                    
-                    case STYLECLASS:
-                        break;
-                        
-                    default:
-                        break;
-                }
+      final FXOMDocument fxomDocument = getEditorController().getFxomDocument();
+      if (fxomDocument != null) {
+        switch (entryType) {
+          case FX_ID:
+            {
+              final Map<String, FXOMObject> fxIds = fxomDocument.collectFxIds();
+              for (Map.Entry<String, FXOMObject> e : fxIds.entrySet()) {
+                final String fxId = e.getKey();
+                final FXOMObject fxomObject = e.getValue();
+                newEntries.add(new IndexEntry(fxId, entryType, fxomObject));
+              }
+              break;
             }
 
-
-            // Update items in table view
-            final TableView<IndexEntry> tableView = leftTableColumn.getTableView();
-            stopListeningToTableViewSelection();
-            tableView.getItems().clear();
-            tableView.getItems().addAll(newEntries);
-            startListeningToTableViewSelection();
-            
-            // Update bottom label
-            final int count = newEntries.size();
-            final String labelText;
-            switch(count) {
-                case 0:
-                    labelText = ""; //NOI18N
-                    break;
-                case 1:
-                    labelText = "1 " //NOI18N
-                            + I18N.getString("info.label.item");
-                    break;
-                default:
-                    labelText = count + " " //NOI18N
-                            + I18N.getString("info.label.items");
-                    break;
+          case HANDLER:
+            {
+              break;
             }
-            bottomLabel.setText(labelText);
-            
-            // Setup selection again
-            editorSelectionDidChange();
-        }
-    }
-    
-    
-    private void startListeningToTableViewSelection() {
-        assert leftTableColumn != null;
-        final TableView<IndexEntry> tableView = leftTableColumn.getTableView();
-        tableView.getSelectionModel().getSelectedItems().addListener(tableViewSelectionListener);
-    }
-    
-    private void stopListeningToTableViewSelection() {
-        assert leftTableColumn != null;
-        final TableView<IndexEntry> tableView = leftTableColumn.getTableView();
-        tableView.getSelectionModel().getSelectedItems().removeListener(tableViewSelectionListener);
-    }
-    
-    private final ListChangeListener<IndexEntry> tableViewSelectionListener
-        = change -> tableSelectionDidChange();
-    
-    private void tableSelectionDidChange() {
-        final TableView<IndexEntry> tableView = leftTableColumn.getTableView();
-        final List<IndexEntry> selectedItems =
-                tableView.getSelectionModel().getSelectedItems();
-        Set<FXOMObject> selectedFxomObjects = new HashSet<>();
 
-        for (IndexEntry i : selectedItems) {
-            selectedFxomObjects.add(i.getFxomObject());
-        }
-
-        stopListeningToEditorSelection();
-        getEditorController().getSelection().select(selectedFxomObjects);
-        startListeningToEditorSelection();
-    }
-    
-    
-    private Set<IndexEntry> searchIndexEntries(Set<FXOMObject> fxomObjects) {
-        assert fxomObjects != null;
-        
-        final TableView<IndexEntry> tableView = leftTableColumn.getTableView();
-        final Set<IndexEntry> result = new HashSet<>();
-        for (IndexEntry e : tableView.getItems()) {
-            if (fxomObjects.contains(e.getFxomObject())) {
-                result.add(e);
+          case RESOURCE_KEY:
+            {
+              break;
             }
+
+          case STYLECLASS:
+            break;
+
+          default:
+            break;
         }
-        
-        return result;
+      }
+
+      // Update items in table view
+      final TableView<IndexEntry> tableView = leftTableColumn.getTableView();
+      stopListeningToTableViewSelection();
+      tableView.getItems().clear();
+      tableView.getItems().addAll(newEntries);
+      startListeningToTableViewSelection();
+
+      // Update bottom label
+      final int count = newEntries.size();
+      final String labelText;
+      switch (count) {
+        case 0:
+          labelText = ""; // NOI18N
+          break;
+        case 1:
+          labelText =
+              "1 " // NOI18N
+                  + I18N.getString("info.label.item");
+          break;
+        default:
+          labelText =
+              count
+                  + " " // NOI18N
+                  + I18N.getString("info.label.items");
+          break;
+      }
+      bottomLabel.setText(labelText);
+
+      // Setup selection again
+      editorSelectionDidChange();
     }
-    
-    
-    private List<String> getSuggestedControllerClasses(URL location) {
-        Glossary glossary = getEditorController().getGlossary();
-        
-        if (location == null && getEditorController().getFxomDocument() != null) {
-            location = getEditorController().getFxomDocument().getLocation();
-        }
-        
-        return glossary.queryControllerClasses(location);
+  }
+
+  private void startListeningToTableViewSelection() {
+    assert leftTableColumn != null;
+    final TableView<IndexEntry> tableView = leftTableColumn.getTableView();
+    tableView.getSelectionModel().getSelectedItems().addListener(tableViewSelectionListener);
+  }
+
+  private void stopListeningToTableViewSelection() {
+    assert leftTableColumn != null;
+    final TableView<IndexEntry> tableView = leftTableColumn.getTableView();
+    tableView.getSelectionModel().getSelectedItems().removeListener(tableViewSelectionListener);
+  }
+
+  private final ListChangeListener<IndexEntry> tableViewSelectionListener =
+      change -> tableSelectionDidChange();
+
+  private void tableSelectionDidChange() {
+    final TableView<IndexEntry> tableView = leftTableColumn.getTableView();
+    final List<IndexEntry> selectedItems = tableView.getSelectionModel().getSelectedItems();
+    Set<FXOMObject> selectedFxomObjects = new HashSet<>();
+
+    for (IndexEntry i : selectedItems) {
+      selectedFxomObjects.add(i.getFxomObject());
     }
 
-    // When there is no defined root node we reset and disable the class field
-    // and the fx:root check box.
-    private void updateAsPerRootNodeStatus() {
-        if (controllerDidLoadFxmlOver && getEditorController().getFxomDocument() != null) {
+    stopListeningToEditorSelection();
+    getEditorController().getSelection().select(selectedFxomObjects);
+    startListeningToEditorSelection();
+  }
 
-            if (getEditorController().getFxomDocument().getFxomRoot() == null) {
-                fxrootCheckBox.setDisable(true);
-                controllerClassEditor.setDisable(true);
-                controllerClassEditor.setUpdateFromModel(true);
-                controllerClassEditor.setValue(null); //NOI18N
-                controllerClassEditor.setUpdateFromModel(false);
-            } else {
-                fxrootCheckBox.setDisable(false);
-                String topClassName = getEditorController().getFxomDocument().getGlue().getRootElement().getTagName();
-                fxrootCheckBox.setTooltip(new Tooltip(I18N.getString("info.tooltip.controller", topClassName)));
-                controllerClassEditor.setDisable(false);
-            }
-        }
-    }
-    
-    private void toggleFxRoot() {
-        if (getEditorController().getFxomDocument() != null) {
-            final FXOMObject root = getEditorController().getFxomDocument().getFxomRoot();
-            if (root instanceof FXOMInstance) {
-                final ToggleFxRootJob job = new ToggleFxRootJob(getEditorController());
-                if (job.isExecutable()) {
-                    stopListeningToJobManagerRevision();
-                    getEditorController().getJobManager().push(job);
-                    startListeningToJobManagerRevision();
-                }
-            }
-        }
-    }
-    
-    private boolean isFxRoot() {
-        if (getEditorController().getFxomDocument() != null) {
-            final FXOMObject root = getEditorController().getFxomDocument().getFxomRoot();
-            if (root instanceof FXOMInstance) {
-                return ((FXOMInstance)root).isFxRoot();
-            }
-        }
-        
-        return false;
-    }
-    
-    private final ChangeListener<Boolean> checkBoxListener = (ov, t, t1) -> toggleFxRoot();
+  private Set<IndexEntry> searchIndexEntries(Set<FXOMObject> fxomObjects) {
+    assert fxomObjects != null;
 
-    private void resetSuggestedControllerClasses(URL location) {
-        if (controllerClassEditor != null) {
-            // The listener on fxmlLocationProperty is called before the file
-            // denoted by the location is created on disk, hence the runLater.
-            Platform.runLater(() -> {
-                controllerClassEditor.setUpdateFromModel(true);
-                controllerClassEditor.reset(getSuggestedControllerClasses(location));
-                controllerClassEditor.setUpdateFromModel(false);
-            });
-        }
+    final TableView<IndexEntry> tableView = leftTableColumn.getTableView();
+    final Set<IndexEntry> result = new HashSet<>();
+    for (IndexEntry e : tableView.getItems()) {
+      if (fxomObjects.contains(e.getFxomObject())) {
+        result.add(e);
+      }
     }
+
+    return result;
+  }
+
+  private List<String> getSuggestedControllerClasses(URL location) {
+    Glossary glossary = getEditorController().getGlossary();
+
+    if (location == null && getEditorController().getFxomDocument() != null) {
+      location = getEditorController().getFxomDocument().getLocation();
+    }
+
+    return glossary.queryControllerClasses(location);
+  }
+
+  // When there is no defined root node we reset and disable the class field
+  // and the fx:root check box.
+  private void updateAsPerRootNodeStatus() {
+    if (controllerDidLoadFxmlOver && getEditorController().getFxomDocument() != null) {
+
+      if (getEditorController().getFxomDocument().getFxomRoot() == null) {
+        fxrootCheckBox.setDisable(true);
+        controllerClassEditor.setDisable(true);
+        controllerClassEditor.setUpdateFromModel(true);
+        controllerClassEditor.setValue(null); // NOI18N
+        controllerClassEditor.setUpdateFromModel(false);
+      } else {
+        fxrootCheckBox.setDisable(false);
+        String topClassName =
+            getEditorController().getFxomDocument().getGlue().getRootElement().getTagName();
+        fxrootCheckBox.setTooltip(
+            new Tooltip(I18N.getString("info.tooltip.controller", topClassName)));
+        controllerClassEditor.setDisable(false);
+      }
+    }
+  }
+
+  private void toggleFxRoot() {
+    if (getEditorController().getFxomDocument() != null) {
+      final FXOMObject root = getEditorController().getFxomDocument().getFxomRoot();
+      if (root instanceof FXOMInstance) {
+        final ToggleFxRootJob job = new ToggleFxRootJob(getEditorController());
+        if (job.isExecutable()) {
+          stopListeningToJobManagerRevision();
+          getEditorController().getJobManager().push(job);
+          startListeningToJobManagerRevision();
+        }
+      }
+    }
+  }
+
+  private boolean isFxRoot() {
+    if (getEditorController().getFxomDocument() != null) {
+      final FXOMObject root = getEditorController().getFxomDocument().getFxomRoot();
+      if (root instanceof FXOMInstance) {
+        return ((FXOMInstance) root).isFxRoot();
+      }
+    }
+
+    return false;
+  }
+
+  private final ChangeListener<Boolean> checkBoxListener = (ov, t, t1) -> toggleFxRoot();
+
+  private void resetSuggestedControllerClasses(URL location) {
+    if (controllerClassEditor != null) {
+      // The listener on fxmlLocationProperty is called before the file
+      // denoted by the location is created on disk, hence the runLater.
+      Platform.runLater(
+          () -> {
+            controllerClassEditor.setUpdateFromModel(true);
+            controllerClassEditor.reset(getSuggestedControllerClasses(location));
+            controllerClassEditor.setUpdateFromModel(false);
+          });
+    }
+  }
 }

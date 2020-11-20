@@ -38,45 +38,44 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
 
-/**
- *
- */
+/** */
 public class TableViewResizePolicyPropertyMetadata extends CallbackPropertyMetadata {
-    
-    public TableViewResizePolicyPropertyMetadata(PropertyName name, boolean readWrite, Object defaultValue, InspectorPath inspectorPath) {
-        super(name, readWrite, defaultValue, inspectorPath);
-        assert (defaultValue == TableView.CONSTRAINED_RESIZE_POLICY)
-                || (defaultValue == TableView.UNCONSTRAINED_RESIZE_POLICY);
+
+  public TableViewResizePolicyPropertyMetadata(
+      PropertyName name, boolean readWrite, Object defaultValue, InspectorPath inspectorPath) {
+    super(name, readWrite, defaultValue, inspectorPath);
+    assert (defaultValue == TableView.CONSTRAINED_RESIZE_POLICY)
+        || (defaultValue == TableView.UNCONSTRAINED_RESIZE_POLICY);
+  }
+
+  /*
+   * CallbackPropertyMetadata
+   */
+  @Override
+  protected Object castValue(Object value) {
+    assert value instanceof Callback<?, ?>;
+    return value;
+  }
+
+  @Override
+  protected Class<?> getFxConstantClass() {
+    return TableView.class;
+  }
+
+  @Override
+  protected void updateFxomInstanceWithValue(FXOMInstance valueInstance, Object value) {
+    final String fxConstant;
+
+    if (value == TableView.CONSTRAINED_RESIZE_POLICY) {
+      fxConstant = "CONSTRAINED_RESIZE_POLICY"; // NOI18N
+    } else if (value == TableView.UNCONSTRAINED_RESIZE_POLICY) {
+      fxConstant = "UNCONSTRAINED_RESIZE_POLICY"; // NOI18N
+    } else {
+      // Emergency code
+      assert false;
+      fxConstant = "CONSTRAINED_RESIZE_POLICY"; // NOI18N
     }
 
-    /*
-     * CallbackPropertyMetadata
-     */
-    @Override
-    protected Object castValue(Object value) {
-        assert value instanceof Callback<?,?>;
-        return value;
-    }
-
-    @Override
-    protected Class<?> getFxConstantClass() {
-        return TableView.class;
-    }
-    
-    @Override
-    protected void updateFxomInstanceWithValue(FXOMInstance valueInstance, Object value) {
-        final String fxConstant;
-        
-        if (value == TableView.CONSTRAINED_RESIZE_POLICY) {
-            fxConstant = "CONSTRAINED_RESIZE_POLICY"; //NOI18N
-        } else if (value == TableView.UNCONSTRAINED_RESIZE_POLICY) {
-            fxConstant = "UNCONSTRAINED_RESIZE_POLICY"; //NOI18N
-        } else {
-            // Emergency code
-            assert false;
-            fxConstant = "CONSTRAINED_RESIZE_POLICY"; //NOI18N
-        }
-        
-        valueInstance.setFxConstant(fxConstant);
-    }
+    valueInstance.setFxConstant(fxConstant);
+  }
 }

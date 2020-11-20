@@ -34,13 +34,11 @@ package com.oracle.javafx.scenebuilder.kit.editor.job.wrap;
 import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import javafx.scene.control.TitledPane;
 
-/**
- * Job used to wrap selection in a TitledPane.
- */
+/** Job used to wrap selection in a TitledPane. */
 public class WrapInTitledPaneJob extends AbstractWrapInContentJob {
 
-    public WrapInTitledPaneJob(EditorController editorController) {
-        super(editorController);
-        newContainerClass = TitledPane.class;
-    }
+  public WrapInTitledPaneJob(EditorController editorController) {
+    super(editorController);
+    newContainerClass = TitledPane.class;
+  }
 }

@@ -33,32 +33,27 @@ package com.oracle.javafx.scenebuilder.kit.fxom;
 
 import java.net.URL;
 
-/**
- *
- * 
- */
+/** */
 public abstract class FXOMNode {
-    
-    private FXOMDocument fxomDocument;
-    
-    FXOMNode(FXOMDocument fxomDocument) {
-        assert fxomDocument != null;
-        this.fxomDocument = fxomDocument;
-    }
 
-    public FXOMDocument getFxomDocument() {
-        return fxomDocument;
-    }
-    
-    public abstract void moveToFxomDocument(FXOMDocument destination);
-    
-    public abstract void documentLocationWillChange(URL newLocation);
-    
-    protected void changeFxomDocument(FXOMDocument destination) {
-        assert destination != null;
-        assert destination != fxomDocument;
-        fxomDocument = destination;
-    }
-    
-    
+  private FXOMDocument fxomDocument;
+
+  FXOMNode(FXOMDocument fxomDocument) {
+    assert fxomDocument != null;
+    this.fxomDocument = fxomDocument;
+  }
+
+  public FXOMDocument getFxomDocument() {
+    return fxomDocument;
+  }
+
+  public abstract void moveToFxomDocument(FXOMDocument destination);
+
+  public abstract void documentLocationWillChange(URL newLocation);
+
+  protected void changeFxomDocument(FXOMDocument destination) {
+    assert destination != null;
+    assert destination != fxomDocument;
+    fxomDocument = destination;
+  }
 }

@@ -36,9 +36,7 @@ import com.oracle.javafx.scenebuilder.kit.editor.EditorController;
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.ColorEncoder;
 import com.oracle.javafx.scenebuilder.kit.util.control.paintpicker.PaintPicker;
-
 import java.util.Set;
-
 import javafx.beans.value.ChangeListener;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
@@ -48,94 +46,99 @@ import javafx.scene.paint.Paint;
 import javafx.scene.paint.RadialGradient;
 import javafx.scene.shape.Rectangle;
 
-/**
- * Popup editor for the Paint property.
- */
+/** Popup editor for the Paint property. */
 public class PaintPopupEditor extends PopupEditor {
 
-    private final Rectangle graphic = new Rectangle(20, 10);
-    private EditorController editorController;
-    protected PaintPicker paintPicker;
+  private final Rectangle graphic = new Rectangle(20, 10);
+  private EditorController editorController;
+  protected PaintPicker paintPicker;
 
-    private final ChangeListener<Paint> paintChangeListener = (ov, oldValue, newValue) -> {
+  private final ChangeListener<Paint> paintChangeListener =
+      (ov, oldValue, newValue) -> {
         // If live update, do not commit the value
         if (paintPicker.isLiveUpdate()) {
-            userUpdateTransientValueProperty(newValue);
-            popupMb.setText(getPreviewString(newValue));
+          userUpdateTransientValueProperty(newValue);
+          popupMb.setText(getPreviewString(newValue));
         } else {
-            commitValue(newValue);
+          commitValue(newValue);
         }
         graphic.setFill(newValue);
-    };
+      };
 
-    private final ChangeListener<Boolean> liveUpdateListener = (ov, oldValue, newValue) -> {
+  private final ChangeListener<Boolean> liveUpdateListener =
+      (ov, oldValue, newValue) -> {
         if (!paintPicker.isLiveUpdate()) {
-            commitValue(paintPicker.getPaintProperty());
+          commitValue(paintPicker.getPaintProperty());
         }
-    };
+      };
 
-    public PaintPopupEditor(ValuePropertyMetadata propMeta, Set<Class<?>> selectedClasses, EditorController editorController) {
-        super(propMeta, selectedClasses);
-        initialize(editorController);
-    }
-    
-    private void initialize(EditorController editorController) {
-        this.editorController = editorController;
-    }
+  public PaintPopupEditor(
+      ValuePropertyMetadata propMeta,
+      Set<Class<?>> selectedClasses,
+      EditorController editorController) {
+    super(propMeta, selectedClasses);
+    initialize(editorController);
+  }
 
-    //
-    // Interface from PopupEditor.
-    // Methods called by PopupEditor.
-    //
-    @Override
-    public void initializePopupContent() {
-        final PaintPicker.Delegate delegate = (warningKey, arguments) -> editorController.getMessageLog().logWarningMessage(warningKey, arguments);
-        paintPicker = new PaintPicker(delegate);
-    }
+  private void initialize(EditorController editorController) {
+    this.editorController = editorController;
+  }
 
-    @Override
-    public String getPreviewString(Object value) {
-        if (value == null) {
-            return null;
-        }
-        assert value instanceof Paint;
-        if (value instanceof LinearGradient
-                || value instanceof RadialGradient
-                || value instanceof ImagePattern) {
-            return value.getClass().getSimpleName();
-        }
-        assert value instanceof Color;
-        return ColorEncoder.encodeColor((Color) value);
-    }
+  //
+  // Interface from PopupEditor.
+  // Methods called by PopupEditor.
+  //
+  @Override
+  public void initializePopupContent() {
+    final PaintPicker.Delegate delegate =
+        (warningKey, arguments) ->
+            editorController.getMessageLog().logWarningMessage(warningKey, arguments);
+    paintPicker = new PaintPicker(delegate);
+  }
 
-    @Override
-    public void setPopupContentValue(Object value) {
-        assert value == null || value instanceof Paint;
-        paintPicker.paintProperty().removeListener(paintChangeListener);
-        paintPicker.liveUpdateProperty().removeListener(liveUpdateListener);
-        if (value != null) {
-            final Paint paint = (Paint) value;
-            paintPicker.setPaintProperty(paint);
-        }
-        paintPicker.paintProperty().addListener(paintChangeListener);
-        paintPicker.liveUpdateProperty().addListener(liveUpdateListener);
-        // !! exception in case of null
-        graphic.setFill((Paint) value);
+  @Override
+  public String getPreviewString(Object value) {
+    if (value == null) {
+      return null;
     }
+    assert value instanceof Paint;
+    if (value instanceof LinearGradient
+        || value instanceof RadialGradient
+        || value instanceof ImagePattern) {
+      return value.getClass().getSimpleName();
+    }
+    assert value instanceof Color;
+    return ColorEncoder.encodeColor((Color) value);
+  }
 
-    @Override
-    public Node getPopupContentNode() {
-        return paintPicker;
+  @Override
+  public void setPopupContentValue(Object value) {
+    assert value == null || value instanceof Paint;
+    paintPicker.paintProperty().removeListener(paintChangeListener);
+    paintPicker.liveUpdateProperty().removeListener(liveUpdateListener);
+    if (value != null) {
+      final Paint paint = (Paint) value;
+      paintPicker.setPaintProperty(paint);
     }
+    paintPicker.paintProperty().addListener(paintChangeListener);
+    paintPicker.liveUpdateProperty().addListener(liveUpdateListener);
+    // !! exception in case of null
+    graphic.setFill((Paint) value);
+  }
 
-    public Node getPreviewGraphic(Object value) {
-        Paint paintVal;
-        if (value == null) {
-            paintVal = null;
-        } else {
-            paintVal = (Paint) value;
-        }
-        graphic.setFill(paintVal);
-        return graphic;
+  @Override
+  public Node getPopupContentNode() {
+    return paintPicker;
+  }
+
+  public Node getPreviewGraphic(Object value) {
+    Paint paintVal;
+    if (value == null) {
+      paintVal = null;
+    } else {
+      paintVal = (Paint) value;
     }
+    graphic.setFill(paintVal);
+    return graphic;
+  }
 }

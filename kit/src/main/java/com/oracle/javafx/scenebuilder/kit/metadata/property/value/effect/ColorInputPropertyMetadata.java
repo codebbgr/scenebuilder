@@ -42,46 +42,63 @@ import com.oracle.javafx.scenebuilder.kit.metadata.util.PropertyName;
 import javafx.scene.effect.ColorInput;
 import javafx.scene.paint.Color;
 
-/**
- *
- */
+/** */
 public class ColorInputPropertyMetadata extends ComplexPropertyMetadata<ColorInput> {
-    
-    private final DoublePropertyMetadata heightMetadata
-            = new DoublePropertyMetadata(new PropertyName("height"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata widthMetadata
-            = new DoublePropertyMetadata(new PropertyName("width"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata xMetadata
-            = new DoublePropertyMetadata(new PropertyName("x"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, 0.0, InspectorPath.UNUSED);
-    private final DoublePropertyMetadata yMetadata
-            = new DoublePropertyMetadata(new PropertyName("y"), //NOI18N
-            DoublePropertyMetadata.DoubleKind.COORDINATE, true /* readWrite */, 0.0, InspectorPath.UNUSED);
-    private final PaintPropertyMetadata paintMetadata
-            = new PaintPropertyMetadata(new PropertyName("paint"), //NOI18N
-            true /* readWrite */, Color.RED, InspectorPath.UNUSED);
 
-    public ColorInputPropertyMetadata(PropertyName name, boolean readWrite, 
-            ColorInput defaultValue, InspectorPath inspectorPath) {
-        super(name, ColorInput.class, readWrite, defaultValue, inspectorPath);
-    }
+  private final DoublePropertyMetadata heightMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("height"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata widthMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("width"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata xMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("x"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          0.0,
+          InspectorPath.UNUSED);
+  private final DoublePropertyMetadata yMetadata =
+      new DoublePropertyMetadata(
+          new PropertyName("y"), // NOI18N
+          DoublePropertyMetadata.DoubleKind.COORDINATE,
+          true /* readWrite */,
+          0.0,
+          InspectorPath.UNUSED);
+  private final PaintPropertyMetadata paintMetadata =
+      new PaintPropertyMetadata(
+          new PropertyName("paint"), // NOI18N
+          true /* readWrite */,
+          Color.RED,
+          InspectorPath.UNUSED);
 
-    /*
-     * ComplexPropertyMetadata
-     */
-    
-    @Override
-    public FXOMInstance makeFxomInstanceFromValue(ColorInput value, FXOMDocument fxomDocument) {
-        final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
-        
-        paintMetadata.setValue(result, value.getPaint());
-        heightMetadata.setValue(result, value.getHeight());
-        widthMetadata.setValue(result, value.getWidth());
-        xMetadata.setValue(result, value.getX());
-        yMetadata.setValue(result, value.getY());
+  public ColorInputPropertyMetadata(
+      PropertyName name, boolean readWrite, ColorInput defaultValue, InspectorPath inspectorPath) {
+    super(name, ColorInput.class, readWrite, defaultValue, inspectorPath);
+  }
 
-        return result;
-    }
+  /*
+   * ComplexPropertyMetadata
+   */
+
+  @Override
+  public FXOMInstance makeFxomInstanceFromValue(ColorInput value, FXOMDocument fxomDocument) {
+    final FXOMInstance result = new FXOMInstance(fxomDocument, value.getClass());
+
+    paintMetadata.setValue(result, value.getPaint());
+    heightMetadata.setValue(result, value.getHeight());
+    widthMetadata.setValue(result, value.getWidth());
+    xMetadata.setValue(result, value.getX());
+    yMetadata.setValue(result, value.getY());
+
+    return result;
+  }
 }
