@@ -41,96 +41,94 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * This class implements a mutex using FileLock.
- * Two processes which want to be in mutual exclusion should:
- *      1) create an instance of FileMutex using the same file
- *      2) call FileMutex.lock() or FileMutex.tryLock()
+ * This class implements a mutex using FileLock. Two processes which want to be in mutual exclusion
+ * should: 1) create an instance of FileMutex using the same file 2) call FileMutex.lock() or
+ * FileMutex.tryLock()
  */
 class FileMutex {
-    
-    private final Path lockFile;
-    private RandomAccessFile lockRAF;
-    private FileLock lock;
-    
-    public FileMutex(Path lockFile) {
-        assert lockFile != null;
-        this.lockFile = lockFile;
+
+  private final Path lockFile;
+  private RandomAccessFile lockRAF;
+  private FileLock lock;
+
+  public FileMutex(Path lockFile) {
+    assert lockFile != null;
+    this.lockFile = lockFile;
+  }
+
+  public Path getLockFile() {
+    return lockFile;
+  }
+
+  public void lock(long timeout) throws IOException {
+    assert lockRAF == null;
+    assert lock == null;
+
+    createFileChannel();
+    assert lockRAF != null;
+    final Timer timer = new Timer();
+    timer.schedule(new InterruptTask(), timeout);
+    lock = lockRAF.getChannel().lock();
+    timer.cancel();
+    assert lock != null;
+  }
+
+  public boolean tryLock() throws IOException {
+    assert lockRAF == null;
+    assert lock == null;
+
+    createFileChannel();
+    assert lockRAF != null;
+    lock = lockRAF.getChannel().tryLock();
+    if (lock == null) {
+      lockRAF.close();
+      lockRAF = null;
     }
 
-    public Path getLockFile() {
-        return lockFile;
-    }
-    
-    public void lock(long timeout) throws IOException {
-        assert lockRAF == null;
-        assert lock == null;
-        
-        createFileChannel();
-        assert lockRAF != null;
-        final Timer timer = new Timer();
-        timer.schedule(new InterruptTask(), timeout);
-        lock = lockRAF.getChannel().lock();
-        timer.cancel();
-        assert lock != null;
-    }
-    
-    public boolean tryLock() throws IOException {
-        assert lockRAF == null;
-        assert lock == null;
+    return lock != null;
+  }
 
-        createFileChannel();
-        assert lockRAF != null;
-        lock = lockRAF.getChannel().tryLock();
-        if (lock == null) {
-            lockRAF.close();
-            lockRAF = null;
-        }
-        
-        return lock != null;
-    }
-    
-    public void unlock() throws IOException {
-        assert lockRAF != null;
-        assert lock != null;
-        assert lock.channel() == lockRAF.getChannel();
-        
-        lock.release();
-        lock = null;
-        lockRAF.close();
-        lockRAF = null;
-    }
-    
-    public boolean isLocked() {
-        return lock != null;
-    }
+  public void unlock() throws IOException {
+    assert lockRAF != null;
+    assert lock != null;
+    assert lock.channel() == lockRAF.getChannel();
 
-    
-    /*
-     * Private
-     */
-    
-    private void createFileChannel() throws IOException {
-        try {
-            Files.createFile(lockFile);
-        } catch(FileAlreadyExistsException x) {
-            // Someone else already created it
-        }
-        lockRAF = new RandomAccessFile(lockFile.toFile(), "rw"); //NOI18N
+    lock.release();
+    lock = null;
+    lockRAF.close();
+    lockRAF = null;
+  }
+
+  public boolean isLocked() {
+    return lock != null;
+  }
+
+  /*
+   * Private
+   */
+
+  private void createFileChannel() throws IOException {
+    try {
+      Files.createFile(lockFile);
+    } catch (FileAlreadyExistsException x) {
+      // Someone else already created it
     }
-    
-    private static class InterruptTask extends TimerTask {
-        @Override 
-        public void run() {
-            Thread.currentThread().interrupt();
-        }
+    lockRAF = new RandomAccessFile(lockFile.toFile(), "rw"); // NOI18N
+  }
+
+  private static class InterruptTask extends TimerTask {
+    @Override
+    public void run() {
+      Thread.currentThread().interrupt();
     }
-    
-//    public static void main(String[] args) throws IOException {
-//        final Path mutexPath = Paths.get(System.getProperty("user.home"), "test.mtx");
-//        final FileMutex fm = new FileMutex(mutexPath);
-//        for (int i = 0; i < 100000; i++) {
-//            fm.lock();
-//            fm.unlock();
-//        }
-//    }
+  }
+
+  //    public static void main(String[] args) throws IOException {
+  //        final Path mutexPath = Paths.get(System.getProperty("user.home"), "test.mtx");
+  //        final FileMutex fm = new FileMutex(mutexPath);
+  //        for (int i = 0; i < 100000; i++) {
+  //            fm.lock();
+  //            fm.unlock();
+  //        }
+  //    }
 }

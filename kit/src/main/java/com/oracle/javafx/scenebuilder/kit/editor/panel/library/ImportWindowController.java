@@ -617,7 +617,7 @@ public class ImportWindowController extends AbstractModalDialog {
                     if (zeNode
                         instanceof
                         Region) { // must check instanceof: custom components are not necessarily
-                                  // regions..
+                      // regions..
                       ((Region) zeNode).setPrefSize(200, 200);
                       setSizeLabel(PrefSize.TWO_HUNDRED_BY_TWO_HUNDRED);
                       defSizeChoice.getSelectionModel().select(2);

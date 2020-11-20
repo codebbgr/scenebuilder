@@ -34,18 +34,16 @@ package com.oracle.javafx.scenebuilder.app;
 
 import javafx.scene.Scene;
 
-/**
- * @treatAsPrivate
- */
+/** @treatAsPrivate */
 public class ScenicViewStarter implements Runnable {
-        private final Scene targetScene;
-        
-        public ScenicViewStarter(Scene targetScene) {
-            this.targetScene = targetScene;
-        }
-        
-        @Override
-        public void run() {
-//                org.scenicview.ScenicView.show(targetScene);
-        }
+  private final Scene targetScene;
+
+  public ScenicViewStarter(Scene targetScene) {
+    this.targetScene = targetScene;
+  }
+
+  @Override
+  public void run() {
+    //                org.scenicview.ScenicView.show(targetScene);
+  }
 }

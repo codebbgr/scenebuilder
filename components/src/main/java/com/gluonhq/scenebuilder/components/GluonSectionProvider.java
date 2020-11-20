@@ -32,68 +32,66 @@
 package com.gluonhq.scenebuilder.components;
 
 import com.oracle.javafx.scenebuilder.kit.library.ExternalSectionProvider;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class GluonSectionProvider implements ExternalSectionProvider {
 
-	private static final String TAG_GLUON = "Gluon";
+  private static final String TAG_GLUON = "Gluon";
 
-	private static final String GLUON_PACKAGE = "com.gluonhq.charm.glisten";
+  private static final String GLUON_PACKAGE = "com.gluonhq.charm.glisten";
 
-	@Override
-	public int getSectionPosition() {
-		return 2;
-	}
+  @Override
+  public int getSectionPosition() {
+    return 2;
+  }
 
-	@Override
-	public String getSectionName() {
-		return TAG_GLUON;
-	}
+  @Override
+  public String getSectionName() {
+    return TAG_GLUON;
+  }
 
-	@Override
-	public String getSectionPackageName() {
-		return GLUON_PACKAGE;
-	}
+  @Override
+  public String getSectionPackageName() {
+    return GLUON_PACKAGE;
+  }
 
-	@Override
-	public List<Class<?>> getItems() {
-		List<Class<?>> items = new ArrayList<>();
-		items.add(com.gluonhq.charm.glisten.control.AppBar.class);
-		items.add(com.gluonhq.charm.glisten.control.AutoCompleteTextField.class);
-		items.add(com.gluonhq.charm.glisten.control.Avatar.class);
-		items.add(com.gluonhq.charm.glisten.control.BottomNavigation.class);
-		items.add(com.gluonhq.charm.glisten.control.BottomNavigationButton.class);
-		items.add(com.gluonhq.charm.glisten.control.CardPane.class);
-		items.add(com.gluonhq.charm.glisten.control.CharmListView.class);
-		items.add(com.gluonhq.charm.glisten.control.Chip.class);
-		items.add(com.gluonhq.charm.glisten.control.ExpansionPanel.CollapsedPanel.class);
-//		items.add(com.gluonhq.charm.glisten.control.Dialog.class);
-		items.add(com.gluonhq.charm.glisten.control.DropdownButton.class);
-		items.add(com.gluonhq.charm.glisten.control.ExpansionPanel.class);
-		items.add(com.gluonhq.charm.glisten.control.ExpansionPanel.ExpandedPanel.class);
-		items.add(com.gluonhq.charm.glisten.control.ExpansionPanelContainer.class);
-//		items.add(com.gluonhq.charm.glisten.layout.layer.FloatingActionButton.class);
-//		items.add(com.gluonhq.charm.glisten.layout.responsive.grid.GridLayout.class);
-//		items.add(com.gluonhq.charm.glisten.layout.responsive.grid.GridRow.class);
-//		items.add(com.gluonhq.charm.glisten.layout.responsive.grid.GridSpan.class);
-		items.add(com.gluonhq.charm.glisten.control.Icon.class);
-		items.add(com.gluonhq.charm.glisten.layout.Layer.class);
-//		items.add(com.gluonhq.charm.glisten.control.ListTile.class);
-//		items.add(com.gluonhq.charm.glisten.layout.layer.MenuPopupView.class);
-//		items.add(com.gluonhq.charm.glisten.layout.layer.MenuSidePopupView.class);
-		items.add(com.gluonhq.charm.glisten.control.NavigationDrawer.class);
-//		items.add(com.gluonhq.charm.glisten.layout.layer.PopupView.class);
-		items.add(com.gluonhq.charm.glisten.control.ProgressBar.class);
-		items.add(com.gluonhq.charm.glisten.control.ProgressIndicator.class);
-		items.add(com.gluonhq.charm.glisten.control.SettingsPane.class);
-//		items.add(com.gluonhq.charm.glisten.layout.layer.SidePopupView.class);
-		items.add(com.gluonhq.charm.glisten.mvc.SplashView.class);
-		items.add(com.gluonhq.charm.glisten.control.TextField.class);
-		items.add(com.gluonhq.charm.glisten.control.ToggleButtonGroup.class);
-		items.add(com.gluonhq.charm.glisten.mvc.View.class);
-		return items;
-	}
-
+  @Override
+  public List<Class<?>> getItems() {
+    List<Class<?>> items = new ArrayList<>();
+    items.add(com.gluonhq.charm.glisten.control.AppBar.class);
+    items.add(com.gluonhq.charm.glisten.control.AutoCompleteTextField.class);
+    items.add(com.gluonhq.charm.glisten.control.Avatar.class);
+    items.add(com.gluonhq.charm.glisten.control.BottomNavigation.class);
+    items.add(com.gluonhq.charm.glisten.control.BottomNavigationButton.class);
+    items.add(com.gluonhq.charm.glisten.control.CardPane.class);
+    items.add(com.gluonhq.charm.glisten.control.CharmListView.class);
+    items.add(com.gluonhq.charm.glisten.control.Chip.class);
+    items.add(com.gluonhq.charm.glisten.control.ExpansionPanel.CollapsedPanel.class);
+    //		items.add(com.gluonhq.charm.glisten.control.Dialog.class);
+    items.add(com.gluonhq.charm.glisten.control.DropdownButton.class);
+    items.add(com.gluonhq.charm.glisten.control.ExpansionPanel.class);
+    items.add(com.gluonhq.charm.glisten.control.ExpansionPanel.ExpandedPanel.class);
+    items.add(com.gluonhq.charm.glisten.control.ExpansionPanelContainer.class);
+    //		items.add(com.gluonhq.charm.glisten.layout.layer.FloatingActionButton.class);
+    //		items.add(com.gluonhq.charm.glisten.layout.responsive.grid.GridLayout.class);
+    //		items.add(com.gluonhq.charm.glisten.layout.responsive.grid.GridRow.class);
+    //		items.add(com.gluonhq.charm.glisten.layout.responsive.grid.GridSpan.class);
+    items.add(com.gluonhq.charm.glisten.control.Icon.class);
+    items.add(com.gluonhq.charm.glisten.layout.Layer.class);
+    //		items.add(com.gluonhq.charm.glisten.control.ListTile.class);
+    //		items.add(com.gluonhq.charm.glisten.layout.layer.MenuPopupView.class);
+    //		items.add(com.gluonhq.charm.glisten.layout.layer.MenuSidePopupView.class);
+    items.add(com.gluonhq.charm.glisten.control.NavigationDrawer.class);
+    //		items.add(com.gluonhq.charm.glisten.layout.layer.PopupView.class);
+    items.add(com.gluonhq.charm.glisten.control.ProgressBar.class);
+    items.add(com.gluonhq.charm.glisten.control.ProgressIndicator.class);
+    items.add(com.gluonhq.charm.glisten.control.SettingsPane.class);
+    //		items.add(com.gluonhq.charm.glisten.layout.layer.SidePopupView.class);
+    items.add(com.gluonhq.charm.glisten.mvc.SplashView.class);
+    items.add(com.gluonhq.charm.glisten.control.TextField.class);
+    items.add(com.gluonhq.charm.glisten.control.ToggleButtonGroup.class);
+    items.add(com.gluonhq.charm.glisten.mvc.View.class);
+    return items;
+  }
 }

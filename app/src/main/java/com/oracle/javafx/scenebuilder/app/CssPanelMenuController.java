@@ -35,53 +35,49 @@ import com.oracle.javafx.scenebuilder.app.i18n.I18N;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.css.CssPanelController;
 import javafx.scene.control.MenuItem;
 
-
-/**
- *
- */
+/** */
 class CssPanelMenuController {
-     private boolean showStyledOnly = false;
-    private boolean splitDefaults = false;
-    private final CssPanelController cssPanelController;
+  private boolean showStyledOnly = false;
+  private boolean splitDefaults = false;
+  private final CssPanelController cssPanelController;
 
-    public CssPanelMenuController(CssPanelController cssPanelController) {
-        this.cssPanelController = cssPanelController;
+  public CssPanelMenuController(CssPanelController cssPanelController) {
+    this.cssPanelController = cssPanelController;
+  }
+
+  public void viewRules() {
+    cssPanelController.changeView(CssPanelController.View.RULES);
+  }
+
+  public void viewTable() {
+    cssPanelController.changeView(CssPanelController.View.TABLE);
+  }
+
+  public void viewText() {
+    cssPanelController.changeView(CssPanelController.View.TEXT);
+  }
+
+  public void copyStyleablePath() {
+    cssPanelController.copyStyleablePath();
+  }
+
+  public void splitDefaultsAction(MenuItem cssPanelSplitDefaultsMi) {
+    cssPanelController.splitDefaultsAction();
+    splitDefaults = !splitDefaults;
+    if (splitDefaults) {
+      cssPanelSplitDefaultsMi.setText(I18N.getString("csspanel.defaults.join"));
+    } else {
+      cssPanelSplitDefaultsMi.setText(I18N.getString("csspanel.defaults.split"));
     }
+  }
 
-    public void viewRules() {
-        cssPanelController.changeView(CssPanelController.View.RULES);
+  public void showStyledOnly(MenuItem cssPanelShowStyledOnlyMi) {
+    cssPanelController.showStyledOnly();
+    showStyledOnly = !showStyledOnly;
+    if (showStyledOnly) {
+      cssPanelShowStyledOnlyMi.setText(I18N.getString("csspanel.show.default.values"));
+    } else {
+      cssPanelShowStyledOnlyMi.setText(I18N.getString("csspanel.hide.default.values"));
     }
-
-    public void viewTable() {
-        cssPanelController.changeView(CssPanelController.View.TABLE);
-    }
-
-    public void viewText() {
-        cssPanelController.changeView(CssPanelController.View.TEXT);
-    }
-
-    public void copyStyleablePath() {
-        cssPanelController.copyStyleablePath();
-    }
-
-    public void splitDefaultsAction(MenuItem cssPanelSplitDefaultsMi) {
-        cssPanelController.splitDefaultsAction();
-        splitDefaults = !splitDefaults;
-        if (splitDefaults) {
-            cssPanelSplitDefaultsMi.setText(I18N.getString("csspanel.defaults.join"));
-        } else {
-            cssPanelSplitDefaultsMi.setText(I18N.getString("csspanel.defaults.split"));
-        }
-    }
-
-    public void showStyledOnly(MenuItem cssPanelShowStyledOnlyMi) {
-        cssPanelController.showStyledOnly();
-        showStyledOnly = !showStyledOnly;
-        if (showStyledOnly) {
-            cssPanelShowStyledOnlyMi.setText(I18N.getString("csspanel.show.default.values"));
-        } else {
-            cssPanelShowStyledOnlyMi.setText(I18N.getString("csspanel.hide.default.values"));
-        }
-    }
-
+  }
 }

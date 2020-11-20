@@ -36,19 +36,18 @@ import com.gluonhq.charm.glisten.control.DropdownButton;
 import com.gluonhq.charm.glisten.control.ExpansionPanel;
 import com.gluonhq.charm.glisten.control.ToggleButtonGroup;
 import com.oracle.javafx.scenebuilder.kit.metadata.util.ExternalDesignHierarchyMaskProvider;
-
 import java.util.Arrays;
 import java.util.List;
 
 public class GluonDesignHierarchyMaskProvider implements ExternalDesignHierarchyMaskProvider {
 
-    @Override
-    public List<Class<?>> getResizableItems() {
-        return Arrays.asList(
-                ExpansionPanel.ExpandedPanel.class,
-                DropdownButton.class,
-                BottomNavigation.class,
-                ExpansionPanel.CollapsedPanel.class,
-                ToggleButtonGroup.class);
-    }
+  @Override
+  public List<Class<?>> getResizableItems() {
+    return Arrays.asList(
+        ExpansionPanel.ExpandedPanel.class,
+        DropdownButton.class,
+        BottomNavigation.class,
+        ExpansionPanel.CollapsedPanel.class,
+        ToggleButtonGroup.class);
+  }
 }

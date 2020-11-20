@@ -38,42 +38,42 @@ import com.oracle.javafx.scenebuilder.kit.editor.panel.inspector.InspectorPanelC
 import com.oracle.javafx.scenebuilder.kit.metadata.property.ValuePropertyMetadata;
 import javafx.application.Platform;
 
-/**
- * Implements the interface with the css panel.
- */
+/** Implements the interface with the css panel. */
 public class CssPanelDelegate extends CssPanelController.Delegate {
 
-    private final InspectorPanelController inspectorController;
-    private final DocumentWindowController documentWindowController;
+  private final InspectorPanelController inspectorController;
+  private final DocumentWindowController documentWindowController;
 
-    public CssPanelDelegate(InspectorPanelController inspectorController, DocumentWindowController documentWindowController) {
-        this.inspectorController = inspectorController;
-        this.documentWindowController = documentWindowController;
+  public CssPanelDelegate(
+      InspectorPanelController inspectorController,
+      DocumentWindowController documentWindowController) {
+    this.inspectorController = inspectorController;
+    this.documentWindowController = documentWindowController;
+  }
+
+  @Override
+  public void revealInspectorEditor(ValuePropertyMetadata propMeta) {
+    if (inspectorController == null || documentWindowController == null || propMeta == null) {
+      return;
     }
 
-    @Override
-    public void revealInspectorEditor(ValuePropertyMetadata propMeta) {
-        if (inspectorController == null || documentWindowController == null
-                || propMeta == null) {
-            return;
-        }
-
-        // Show the inspector if it is hidden
-        if (!documentWindowController.isRightPanelVisible()) {
-            documentWindowController.performControlAction(DocumentWindowController.DocumentControlAction.TOGGLE_RIGHT_PANEL);
-        }
-        // Expand the inspector section
-        String inspectorSection = propMeta.getInspectorPath().getSectionTag();
-        if (inspectorSection.equalsIgnoreCase("properties")) { //NOI18N
-            inspectorController.setExpandedSection(SectionId.PROPERTIES);
-        } else if (inspectorSection.equalsIgnoreCase("layout")) {//NOI18N
-            inspectorController.setExpandedSection(SectionId.LAYOUT);
-        } else if (inspectorSection.equalsIgnoreCase("code")) {//NOI18N
-            inspectorController.setExpandedSection(SectionId.CODE);
-        }
-
-        // Need to delay the focus to the editor, so that the section is actually expanded first.
-        Platform.runLater(() -> Platform.runLater(() -> inspectorController.setFocusToEditor(propMeta.getName())));
+    // Show the inspector if it is hidden
+    if (!documentWindowController.isRightPanelVisible()) {
+      documentWindowController.performControlAction(
+          DocumentWindowController.DocumentControlAction.TOGGLE_RIGHT_PANEL);
+    }
+    // Expand the inspector section
+    String inspectorSection = propMeta.getInspectorPath().getSectionTag();
+    if (inspectorSection.equalsIgnoreCase("properties")) { // NOI18N
+      inspectorController.setExpandedSection(SectionId.PROPERTIES);
+    } else if (inspectorSection.equalsIgnoreCase("layout")) { // NOI18N
+      inspectorController.setExpandedSection(SectionId.LAYOUT);
+    } else if (inspectorSection.equalsIgnoreCase("code")) { // NOI18N
+      inspectorController.setExpandedSection(SectionId.CODE);
     }
 
+    // Need to delay the focus to the editor, so that the section is actually expanded first.
+    Platform.runLater(
+        () -> Platform.runLater(() -> inspectorController.setFocusToEditor(propMeta.getName())));
+  }
 }

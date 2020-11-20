@@ -37,78 +37,72 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.stage.WindowEvent;
 
-/**
- *
- */
+/** */
 public class MessagePopupController extends AbstractPopupController {
-    
-    private final MessagePanelController messagePanelController;
-    
-    public MessagePopupController(EditorController editorController) {
-        this.messagePanelController = new MessagePanelController(editorController);
-    }
-    
-    
-    /*
-     * AbstractPopupController
-     */
 
-    @Override
-    protected void makeRoot() {
-        setRoot(messagePanelController.getPanelRoot());
-    }
+  private final MessagePanelController messagePanelController;
 
-    @Override
-    protected void onHidden(WindowEvent event) {
-    }
+  public MessagePopupController(EditorController editorController) {
+    this.messagePanelController = new MessagePanelController(editorController);
+  }
 
-    @Override
-    protected void anchorBoundsDidChange() {
-        final Bounds lb = getAnchor().getLayoutBounds();
-        messagePanelController.setPanelWidth(lb.getWidth());
-        // This callback should not be needed for auto hiding popups
-        // See RT-31292 : Popup does not auto hide when resizing the window
-        updatePopupLocation();
+  /*
+   * AbstractPopupController
+   */
+
+  @Override
+  protected void makeRoot() {
+    setRoot(messagePanelController.getPanelRoot());
+  }
+
+  @Override
+  protected void onHidden(WindowEvent event) {}
+
+  @Override
+  protected void anchorBoundsDidChange() {
+    final Bounds lb = getAnchor().getLayoutBounds();
+    messagePanelController.setPanelWidth(lb.getWidth());
+    // This callback should not be needed for auto hiding popups
+    // See RT-31292 : Popup does not auto hide when resizing the window
+    updatePopupLocation();
+  }
+
+  @Override
+  protected void anchorTransformDidChange() {
+    // This callback should not be needed for auto hiding popups
+    // See RT-31292 : Popup does not auto hide when resizing the window
+    updatePopupLocation();
+  }
+
+  @Override
+  protected void anchorXYDidChange() {
+    // This callback should not be needed for auto hiding popups
+    // See RT-31292 : Popup does not auto hide when resizing the window
+    updatePopupLocation();
+  }
+
+  @Override
+  protected void controllerDidCreatePopup() {
+    getPopup().setAutoFix(false);
+    getPopup().setAutoHide(true);
+  }
+
+  /** Update the popup location below the anchor node. */
+  @Override
+  protected void updatePopupLocation() {
+    final Bounds anchorBounds = getAnchor().getLayoutBounds();
+    Point2D popupLocation;
+
+    assert anchorBounds != null;
+
+    // At exit time, closeRequestHandler() is not always called.
+    // So this method can be invoked after the anchor has been removed the
+    // scene. This looks like a bug in FX...
+    // Anway we protect ourself by checking.
+    if (getAnchor().getScene() != null) {
+      popupLocation = getAnchor().localToScreen(anchorBounds.getMinX(), anchorBounds.getMaxY());
+      getPopup().setX(popupLocation.getX());
+      getPopup().setY(popupLocation.getY());
     }
-    
-    @Override
-    protected void anchorTransformDidChange() {
-        // This callback should not be needed for auto hiding popups
-        // See RT-31292 : Popup does not auto hide when resizing the window
-        updatePopupLocation();
-    }
-    
-    @Override
-    protected void anchorXYDidChange() {
-        // This callback should not be needed for auto hiding popups
-        // See RT-31292 : Popup does not auto hide when resizing the window
-        updatePopupLocation();
-    }
-    
-    @Override
-    protected void controllerDidCreatePopup() {
-        getPopup().setAutoFix(false);
-        getPopup().setAutoHide(true);
-    }
-    
-    /**
-     * Update the popup location below the anchor node.
-     */
-    @Override
-    protected void updatePopupLocation() {
-        final Bounds anchorBounds = getAnchor().getLayoutBounds();
-        Point2D popupLocation;
-        
-        assert anchorBounds != null;
-        
-        // At exit time, closeRequestHandler() is not always called.
-        // So this method can be invoked after the anchor has been removed the
-        // scene. This looks like a bug in FX...
-        // Anway we protect ourself by checking.
-        if (getAnchor().getScene() != null) {
-            popupLocation = getAnchor().localToScreen(anchorBounds.getMinX(), anchorBounds.getMaxY());
-            getPopup().setX(popupLocation.getX());
-            getPopup().setY(popupLocation.getY());
-        }
-    }
+  }
 }

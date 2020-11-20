@@ -36,6 +36,7 @@ import com.oracle.javafx.scenebuilder.app.i18n.I18N;
 import com.oracle.javafx.scenebuilder.app.preferences.PreferencesController;
 import com.oracle.javafx.scenebuilder.app.preferences.PreferencesRecordGlobal;
 import com.oracle.javafx.scenebuilder.app.util.AppSettings;
+import java.time.LocalDate;
 import javafx.application.HostServices;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
@@ -49,71 +50,87 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-import java.time.LocalDate;
-
 public class UpdateSceneBuilderDialog extends Dialog {
 
-    public UpdateSceneBuilderDialog(String latestVersion, String latestVersionTextString, String announcementURL, Window owner) {
-        initOwner(owner);
-        setTitle(I18N.getString("download.scene.builder.title"));
-        Label header = new Label(I18N.getString("download.scene.builder.header.label"));
-        Label currentVersionTextLabel = new Label(I18N.getString("download.scene.builder.current.version.label"));
-        Label latestVersionTextLabel = new Label(I18N.getString("download.scene.builder.last.version.number.label"));
-        Label currentVersionLabel = new Label(AppSettings.getSceneBuilderVersion());
-        Label latestVersionLabel = new Label(latestVersion);
-        GridPane gridPane = new GridPane();
-        gridPane.add(currentVersionTextLabel, 0, 0);
-        gridPane.add(currentVersionLabel, 1, 0);
-        gridPane.add(latestVersionTextLabel, 0, 1);
-        gridPane.add(latestVersionLabel, 1, 1);
+  public UpdateSceneBuilderDialog(
+      String latestVersion, String latestVersionTextString, String announcementURL, Window owner) {
+    initOwner(owner);
+    setTitle(I18N.getString("download.scene.builder.title"));
+    Label header = new Label(I18N.getString("download.scene.builder.header.label"));
+    Label currentVersionTextLabel =
+        new Label(I18N.getString("download.scene.builder.current.version.label"));
+    Label latestVersionTextLabel =
+        new Label(I18N.getString("download.scene.builder.last.version.number.label"));
+    Label currentVersionLabel = new Label(AppSettings.getSceneBuilderVersion());
+    Label latestVersionLabel = new Label(latestVersion);
+    GridPane gridPane = new GridPane();
+    gridPane.add(currentVersionTextLabel, 0, 0);
+    gridPane.add(currentVersionLabel, 1, 0);
+    gridPane.add(latestVersionTextLabel, 0, 1);
+    gridPane.add(latestVersionLabel, 1, 1);
 
-        Label latestVersionText = new Label(latestVersionTextString);
+    Label latestVersionText = new Label(latestVersionTextString);
 
-        gridPane.getColumnConstraints().add(new ColumnConstraints(100));
+    gridPane.getColumnConstraints().add(new ColumnConstraints(100));
 
-        VBox contentContainer = new VBox();
-        contentContainer.getChildren().addAll(header, gridPane);
-        BorderPane mainContainer = new BorderPane();
-        mainContainer.setCenter(contentContainer);
-        ImageView imageView = new ImageView(UpdateSceneBuilderDialog.class.getResource("computerDownload.png").toExternalForm());
-        mainContainer.setRight(imageView);
-        mainContainer.setBottom(latestVersionText);
+    VBox contentContainer = new VBox();
+    contentContainer.getChildren().addAll(header, gridPane);
+    BorderPane mainContainer = new BorderPane();
+    mainContainer.setCenter(contentContainer);
+    ImageView imageView =
+        new ImageView(
+            UpdateSceneBuilderDialog.class.getResource("computerDownload.png").toExternalForm());
+    mainContainer.setRight(imageView);
+    mainContainer.setBottom(latestVersionText);
 
-        getDialogPane().setContent(mainContainer);
+    getDialogPane().setContent(mainContainer);
 
-        mainContainer.getStyleClass().add("main-container");
-        contentContainer.getStyleClass().add("content-container");
-        getDialogPane().getStyleClass().add("download_scenebuilder-dialog");
-        header.getStyleClass().add("header");
-        latestVersionText.getStyleClass().add("latest-version-text");
+    mainContainer.getStyleClass().add("main-container");
+    contentContainer.getStyleClass().add("content-container");
+    getDialogPane().getStyleClass().add("download_scenebuilder-dialog");
+    header.getStyleClass().add("header");
+    latestVersionText.getStyleClass().add("latest-version-text");
 
-        ButtonType downloadButton = new ButtonType(I18N.getString("download.scene.builder.download.label"), ButtonBar.ButtonData.OK_DONE);
-        ButtonType ignoreThisUpdate = new ButtonType(I18N.getString("download.scene.builder.ignore.label"));
-        ButtonType remindLater = new ButtonType(I18N.getString("download.scene.builder.remind.later.label"), ButtonBar.ButtonData.CANCEL_CLOSE);
-        ButtonType learnMore = new ButtonType(I18N.getString("download.scene.builder.learn.mode.label"));
-        getDialogPane().getButtonTypes().addAll(learnMore, downloadButton, ignoreThisUpdate, remindLater);
+    ButtonType downloadButton =
+        new ButtonType(
+            I18N.getString("download.scene.builder.download.label"), ButtonBar.ButtonData.OK_DONE);
+    ButtonType ignoreThisUpdate =
+        new ButtonType(I18N.getString("download.scene.builder.ignore.label"));
+    ButtonType remindLater =
+        new ButtonType(
+            I18N.getString("download.scene.builder.remind.later.label"),
+            ButtonBar.ButtonData.CANCEL_CLOSE);
+    ButtonType learnMore =
+        new ButtonType(I18N.getString("download.scene.builder.learn.mode.label"));
+    getDialogPane()
+        .getButtonTypes()
+        .addAll(learnMore, downloadButton, ignoreThisUpdate, remindLater);
 
-        getDialogPane().getStylesheets().add(SceneBuilderApp.class.getResource("css/UpdateSceneBuilderDialog.css").toString());
+    getDialogPane()
+        .getStylesheets()
+        .add(SceneBuilderApp.class.getResource("css/UpdateSceneBuilderDialog.css").toString());
 
-        resultProperty().addListener((observable, oldValue, newValue) -> {
-            HostServices hostServices = SceneBuilderApp.getSingleton().getHostServices();
-            if (newValue == downloadButton) {
+    resultProperty()
+        .addListener(
+            (observable, oldValue, newValue) -> {
+              HostServices hostServices = SceneBuilderApp.getSingleton().getHostServices();
+              if (newValue == downloadButton) {
                 hostServices.showDocument(AppSettings.DOWNLOAD_URL);
-            } else if (newValue == remindLater) {
+              } else if (newValue == remindLater) {
                 LocalDate now = LocalDate.now();
                 LocalDate futureDate = now.plusWeeks(1);
                 PreferencesController pc = PreferencesController.getSingleton();
                 PreferencesRecordGlobal recordGlobal = pc.getRecordGlobal();
                 recordGlobal.setShowUpdateDialogAfter(futureDate);
-            } else if (newValue == ignoreThisUpdate) {
+              } else if (newValue == ignoreThisUpdate) {
                 PreferencesController pc = PreferencesController.getSingleton();
                 PreferencesRecordGlobal recordGlobal = pc.getRecordGlobal();
                 recordGlobal.setIgnoreVersion(latestVersion);
-            } else if (newValue == learnMore) {
+              } else if (newValue == learnMore) {
                 hostServices.showDocument(announcementURL);
-            }
-        });
+              }
+            });
 
-        AppSettings.setWindowIcon((Stage)getDialogPane().getScene().getWindow());
-    }
+    AppSettings.setWindowIcon((Stage) getDialogPane().getScene().getWindow());
+  }
 }

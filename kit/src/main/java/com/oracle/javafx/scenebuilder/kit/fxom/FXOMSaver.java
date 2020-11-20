@@ -139,7 +139,7 @@ class FXOMSaver {
             prop ->
                 prop.getResidenceClass()
                     != null) // filter for ResidenceClass (used for static methods example:
-                             // HBox.hgrow="..")
+        // HBox.hgrow="..")
         .map(
             prop ->
                 wildcardImports

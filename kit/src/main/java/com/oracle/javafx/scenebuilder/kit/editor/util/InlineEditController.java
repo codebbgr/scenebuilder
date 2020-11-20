@@ -329,7 +329,7 @@ public class InlineEditController {
                     // need to commit inline editing on focus change
                     if (getEditorController()
                             .isTextEditingSessionOnGoing() // Editing session has not been ended by
-                                                           // ENTER key
+                        // ENTER key
                         && newValue == false) {
                       requestCommitAndClose(requestCommit, editor.getText());
                     }

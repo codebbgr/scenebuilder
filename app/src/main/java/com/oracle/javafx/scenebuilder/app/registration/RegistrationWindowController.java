@@ -37,6 +37,11 @@ import com.oracle.javafx.scenebuilder.app.preferences.PreferencesController;
 import com.oracle.javafx.scenebuilder.app.preferences.PreferencesRecordGlobal;
 import com.oracle.javafx.scenebuilder.app.tracking.Tracking;
 import com.oracle.javafx.scenebuilder.kit.editor.panel.util.AbstractFxmlWindowController;
+import java.net.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
+import java.util.regex.Pattern;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -46,150 +51,143 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
 
-import java.net.*;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.UUID;
-import java.util.regex.Pattern;
-
-/**
- *
- */
+/** */
 public class RegistrationWindowController extends AbstractFxmlWindowController {
 
-    private static final Pattern emailPattern = Pattern.compile("[a-zA-Z0-9[!#$%&'()*+,/\\-_\\.\"]]+@[a-zA-Z0-9[!#$%&'()*+,/\\-_\"]]+\\.[a-zA-Z0-9[!#$%&'()*+,/\\-_\"\\.]]+"); //NOI18N
+  private static final Pattern emailPattern =
+      Pattern.compile(
+          "[a-zA-Z0-9[!#$%&'()*+,/\\-_\\.\"]]+@[a-zA-Z0-9[!#$%&'()*+,/\\-_\"]]+\\.[a-zA-Z0-9[!#$%&'()*+,/\\-_\"\\.]]+"); // NOI18N
 
-    @FXML
-    private Label lbAlert;
-    @FXML
-    private TextField tfEmail;
-    @FXML
-    private CheckBox cbOptIn;
+  @FXML private Label lbAlert;
+  @FXML private TextField tfEmail;
+  @FXML private CheckBox cbOptIn;
 
-    final private Window owner;
+  private final Window owner;
 
-    public RegistrationWindowController(Stage owner) {
-        super(RegistrationWindowController.class.getResource("Registration.fxml"), //NOI18N
-                I18N.getBundle(), owner);
-        this.owner = owner;
+  public RegistrationWindowController(Stage owner) {
+    super(
+        RegistrationWindowController.class.getResource("Registration.fxml"), // NOI18N
+        I18N.getBundle(),
+        owner);
+    this.owner = owner;
+  }
+
+  @Override
+  public void onCloseRequest(WindowEvent event) {
+    cancelUserRegistration();
+
+    event.consume();
+  }
+
+  /*
+   * AbstractWindowController
+   */
+  @Override
+  protected void controllerDidCreateStage() {
+    assert getRoot() != null;
+    assert getRoot().getScene() != null;
+    assert getRoot().getScene().getWindow() != null;
+
+    getStage().setTitle(I18N.getString("registration.title"));
+
+    if (this.owner == null) {
+      // Window will be application modal
+      getStage().initModality(Modality.APPLICATION_MODAL);
+    } else {
+      // Window will be window modal
+      getStage().initOwner(this.owner);
+      getStage().initModality(Modality.WINDOW_MODAL);
+    }
+  }
+
+  @Override
+  protected void controllerDidLoadFxml() {
+    super.controllerDidLoadFxml();
+    assert lbAlert != null;
+    assert tfEmail != null;
+    assert cbOptIn != null;
+  }
+
+  private boolean isEmailAddressValid() {
+    String email = tfEmail.getText();
+    return email != null && !email.isEmpty() && emailPattern.matcher(email).matches();
+  }
+
+  @FXML
+  public void cancelUserRegistration() {
+    PreferencesController pc = PreferencesController.getSingleton();
+    PreferencesRecordGlobal recordGlobal = pc.getRecordGlobal();
+    if (recordGlobal.getRegistrationHash() == null) {
+      String hash = getUniqueId();
+      recordGlobal.updateRegistrationFields(hash, null, null);
+      Tracking.sendTrackingInfo(Tracking.SCENEBUILDER_TYPE, hash, "", false, false);
     }
 
-    @Override
-    public void onCloseRequest(WindowEvent event) {
-        cancelUserRegistration();
+    closeWindow();
+  }
 
-        event.consume();
+  @FXML
+  public void trackUserRegistration() {
+    if (!isEmailAddressValid()) {
+      lbAlert.setVisible(true);
+      return;
     }
 
-    /*
-     * AbstractWindowController
-     */
-    @Override
-    protected void controllerDidCreateStage() {
-        assert getRoot() != null;
-        assert getRoot().getScene() != null;
-        assert getRoot().getScene().getWindow() != null;
+    PreferencesController pc = PreferencesController.getSingleton();
+    PreferencesRecordGlobal recordGlobal = pc.getRecordGlobal();
 
-        getStage().setTitle(I18N.getString("registration.title"));
+    boolean update = recordGlobal.getRegistrationHash() != null;
+    String hash = update ? recordGlobal.getRegistrationHash() : getUniqueId();
+    String email = tfEmail.getText();
+    boolean optIn = cbOptIn.isSelected();
 
-        if (this.owner == null) {
-            // Window will be application modal
-            getStage().initModality(Modality.APPLICATION_MODAL);
-        } else {
-            // Window will be window modal
-            getStage().initOwner(this.owner);
-            getStage().initModality(Modality.WINDOW_MODAL);
+    // Update preferences
+    recordGlobal.updateRegistrationFields(hash, email, optIn);
+
+    Tracking.sendTrackingInfo(Tracking.SCENEBUILDER_TYPE, hash, email, optIn, update);
+
+    closeWindow();
+  }
+
+  private String getUniqueId() {
+    String uniqueId = "";
+    try {
+      InetAddress address = InetAddress.getLocalHost();
+      NetworkInterface ni = NetworkInterface.getByInetAddress(address);
+      if (ni != null) {
+        byte[] macAddress = ni.getHardwareAddress();
+        if (macAddress != null) {
+          uniqueId = computeHash(macAddress);
         }
+      }
+    } catch (UnknownHostException | SocketException e) {
     }
 
-    @Override
-    protected void controllerDidLoadFxml() {
-        super.controllerDidLoadFxml();
-        assert lbAlert != null;
-        assert tfEmail != null;
-        assert cbOptIn != null;
+    if (uniqueId.isEmpty()) {
+      uniqueId = UUID.randomUUID().toString();
     }
 
-    private boolean isEmailAddressValid() {
-        String email = tfEmail.getText();
-        return email != null && !email.isEmpty() && emailPattern.matcher(email).matches();
+    return uniqueId;
+  }
+
+  private String computeHash(byte[] buffer) {
+    try {
+      final MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
+
+      messageDigest.reset();
+      messageDigest.update(buffer);
+      byte[] digest = messageDigest.digest();
+
+      // Convert the byte to hex format
+      String hexStr = "";
+      for (int i = 0; i < digest.length; i++) {
+        hexStr += Integer.toString((digest[i] & 0xff) + 0x100, 16).substring(1);
+      }
+
+      return hexStr;
+    } catch (NoSuchAlgorithmException e) {
     }
 
-    @FXML
-    public void cancelUserRegistration() {
-        PreferencesController pc = PreferencesController.getSingleton();
-        PreferencesRecordGlobal recordGlobal = pc.getRecordGlobal();
-        if (recordGlobal.getRegistrationHash() == null) {
-            String hash = getUniqueId();
-            recordGlobal.updateRegistrationFields(hash, null, null);
-            Tracking.sendTrackingInfo(Tracking.SCENEBUILDER_TYPE, hash, "", false, false);
-        }
-
-        closeWindow();
-    }
-    
-    @FXML
-    public void trackUserRegistration() {
-        if (!isEmailAddressValid()) {
-            lbAlert.setVisible(true);
-            return;
-        }
-
-        PreferencesController pc = PreferencesController.getSingleton();
-        PreferencesRecordGlobal recordGlobal = pc.getRecordGlobal();
-        
-        boolean update = recordGlobal.getRegistrationHash() != null;
-        String hash = update ? recordGlobal.getRegistrationHash() : getUniqueId();
-        String email = tfEmail.getText();
-        boolean optIn = cbOptIn.isSelected();
-                
-        // Update preferences
-        recordGlobal.updateRegistrationFields(hash, email, optIn);
-
-        Tracking.sendTrackingInfo(Tracking.SCENEBUILDER_TYPE, hash, email, optIn, update);
-
-        closeWindow();
-    }
-
-    private String getUniqueId(){
-        String uniqueId = "";
-        try {
-            InetAddress address = InetAddress.getLocalHost();
-            NetworkInterface ni = NetworkInterface.getByInetAddress(address);
-            if (ni != null) {
-                byte[] macAddress = ni.getHardwareAddress();
-                if (macAddress != null) {
-                    uniqueId = computeHash(macAddress);
-                }
-            }
-        } catch (UnknownHostException | SocketException e) {
-        }
-
-        if (uniqueId.isEmpty()) {
-            uniqueId = UUID.randomUUID().toString();
-        }
-
-        return uniqueId;
-    }
-
-    private String computeHash(byte[] buffer) {
-        try {
-            final MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
-
-            messageDigest.reset();
-            messageDigest.update(buffer);
-            byte[] digest = messageDigest.digest();
-
-            // Convert the byte to hex format
-            String hexStr = "";
-            for (int i = 0; i < digest.length; i++) {
-                hexStr +=  Integer.toString((digest[i] & 0xff) + 0x100, 16).substring(1);
-            }
-
-            return hexStr;
-        } catch (NoSuchAlgorithmException e) {
-        }
-
-        return "";
-    }
+    return "";
+  }
 }

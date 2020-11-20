@@ -105,7 +105,7 @@ abstract class ExplorerBase {
         entryClass =
             classLoader.loadClass(
                 className); // Note: static intializers of entryClass are not run, this doesn't seem
-                            // to be an issue
+        // to be an issue
 
         if (Modifier.isAbstract(entryClass.getModifiers())
             || !Node.class.isAssignableFrom(entryClass)) {

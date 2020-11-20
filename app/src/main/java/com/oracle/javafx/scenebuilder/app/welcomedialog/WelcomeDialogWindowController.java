@@ -37,9 +37,12 @@ import com.oracle.javafx.scenebuilder.app.SceneBuilderApp;
 import com.oracle.javafx.scenebuilder.app.i18n.I18N;
 import com.oracle.javafx.scenebuilder.app.preferences.PreferencesController;
 import com.oracle.javafx.scenebuilder.app.preferences.PreferencesRecordGlobal;
+import com.oracle.javafx.scenebuilder.app.util.AppSettings;
 import com.oracle.javafx.scenebuilder.kit.template.Template;
 import com.oracle.javafx.scenebuilder.kit.template.TemplatesBaseWindowController;
-import com.oracle.javafx.scenebuilder.app.util.AppSettings;
+import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -51,107 +54,99 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.List;
-
-
 public class WelcomeDialogWindowController extends TemplatesBaseWindowController {
 
-    @FXML
-    private VBox recentDocuments;
+  @FXML private VBox recentDocuments;
 
-    @FXML
-    private Button emptyApp;
+  @FXML private Button emptyApp;
 
+  private static WelcomeDialogWindowController instance;
 
-    private static WelcomeDialogWindowController instance;
+  private SceneBuilderApp sceneBuilderApp;
 
-    private SceneBuilderApp sceneBuilderApp;
+  private WelcomeDialogWindowController() {
+    super(
+        WelcomeDialogWindowController.class.getResource("WelcomeWindow.fxml"), // NOI18N
+        I18N.getBundle(),
+        null); // We want it to be a top level window so we're setting the owner to null.
 
-    private WelcomeDialogWindowController() {
-        super(WelcomeDialogWindowController.class.getResource("WelcomeWindow.fxml"), //NOI18N
-                I18N.getBundle(),
-                null); // We want it to be a top level window so we're setting the owner to null.
+    sceneBuilderApp = SceneBuilderApp.getSingleton();
+  }
 
-        sceneBuilderApp = SceneBuilderApp.getSingleton();
+  @Override
+  public void onCloseRequest(WindowEvent event) {
+    getStage().hide();
+  }
+
+  /*
+   * AbstractWindowController
+   */
+  @Override
+  protected void controllerDidCreateStage() {
+    assert getRoot() != null;
+    assert getRoot().getScene() != null;
+    assert getRoot().getScene().getWindow() != null;
+
+    getStage().setTitle(I18N.getString("welcome.title"));
+    getStage().initModality(Modality.APPLICATION_MODAL);
+  }
+
+  @Override
+  protected void controllerDidLoadFxml() {
+    super.controllerDidLoadFxml();
+    assert recentDocuments != null;
+
+    PreferencesRecordGlobal preferencesRecordGlobal =
+        PreferencesController.getSingleton().getRecordGlobal();
+    List<String> recentItems = preferencesRecordGlobal.getRecentItems();
+    if (recentItems.size() == 0) {
+      Label noRecentItems = new Label(I18N.getString("welcome.recent.items.no.recent.items"));
+      noRecentItems.getStyleClass().add("no-recent-items-label");
+      recentDocuments.getChildren().add(noRecentItems);
+    }
+    for (int row = 0; row < preferencesRecordGlobal.getRecentItemsSize(); ++row) {
+      if (recentItems.size() < row + 1) {
+        break;
+      }
+
+      String recentItem = recentItems.get(row);
+      File recentItemFile = new File(recentItems.get(row));
+      String recentItemTitle = recentItemFile.getName();
+      Button recentDocument = new Button(recentItemTitle);
+      recentDocument.getStyleClass().add("recent-document");
+      recentDocument.setMaxWidth(Double.MAX_VALUE);
+      recentDocument.setAlignment(Pos.BASELINE_LEFT);
+      recentDocuments.getChildren().add(recentDocument);
+
+      recentDocument.setOnAction(event -> fireOpenRecentProject(event, recentItem));
+      recentDocument.setTooltip(new Tooltip(recentItem));
     }
 
+    emptyApp.setUserData(Template.EMPTY_APP);
 
-    @Override
-    public void onCloseRequest(WindowEvent event) {
-        getStage().hide();
+    setOnTemplateChosen(sceneBuilderApp::performNewTemplate);
+    setupTemplateButtonHandlers();
+  }
+
+  public static WelcomeDialogWindowController getInstance() {
+    if (instance == null) {
+      instance = new WelcomeDialogWindowController();
+      AppSettings.setWindowIcon((Stage) instance.getStage());
     }
+    return instance;
+  }
 
-    /*
-     * AbstractWindowController
-     */
-    @Override
-    protected void controllerDidCreateStage() {
-        assert getRoot() != null;
-        assert getRoot().getScene() != null;
-        assert getRoot().getScene().getWindow() != null;
+  private void fireOpenRecentProject(ActionEvent event, String projectPath) {
+    sceneBuilderApp.handleOpenFilesAction(Arrays.asList(projectPath));
+    getStage().hide();
+  }
 
-        getStage().setTitle(I18N.getString("welcome.title"));
-        getStage().initModality(Modality.APPLICATION_MODAL);
-    }
-
-    @Override
-    protected void controllerDidLoadFxml() {
-        super.controllerDidLoadFxml();
-        assert recentDocuments != null;
-
-        PreferencesRecordGlobal preferencesRecordGlobal = PreferencesController
-                .getSingleton().getRecordGlobal();
-        List<String> recentItems = preferencesRecordGlobal.getRecentItems();
-        if (recentItems.size() == 0) {
-            Label noRecentItems = new Label(I18N.getString("welcome.recent.items.no.recent.items"));
-            noRecentItems.getStyleClass().add("no-recent-items-label");
-            recentDocuments.getChildren().add(noRecentItems);
-        }
-        for (int row = 0; row < preferencesRecordGlobal.getRecentItemsSize(); ++row) {
-            if (recentItems.size() < row + 1) {
-                break;
-            }
-
-            String recentItem = recentItems.get(row);
-            File recentItemFile = new File(recentItems.get(row));
-            String recentItemTitle = recentItemFile.getName();
-            Button recentDocument = new Button(recentItemTitle);
-            recentDocument.getStyleClass().add("recent-document");
-            recentDocument.setMaxWidth(Double.MAX_VALUE);
-            recentDocument.setAlignment(Pos.BASELINE_LEFT);
-            recentDocuments.getChildren().add(recentDocument);
-
-            recentDocument.setOnAction(event -> fireOpenRecentProject(event, recentItem));
-            recentDocument.setTooltip(new Tooltip(recentItem));
-        }
-
-        emptyApp.setUserData(Template.EMPTY_APP);
-
-        setOnTemplateChosen(sceneBuilderApp::performNewTemplate);
-        setupTemplateButtonHandlers();
-    }
-
-    public static WelcomeDialogWindowController getInstance() {
-        if (instance == null){
-            instance = new WelcomeDialogWindowController();
-            AppSettings.setWindowIcon((Stage)instance.getStage());
-        }
-        return instance;
-    }
-
-    private void fireOpenRecentProject(ActionEvent event, String projectPath) {
-        sceneBuilderApp.handleOpenFilesAction(Arrays.asList(projectPath));
-        getStage().hide();
-    }
-
-    @FXML
-    private void openDocument() {
-        // Right now there is only one window open by default
-        DocumentWindowController documentWC = sceneBuilderApp.getDocumentWindowControllers().get(0);
-        sceneBuilderApp.performControlAction(SceneBuilderApp.ApplicationControlAction.OPEN_FILE, documentWC);
-        getStage().hide();
-    }
+  @FXML
+  private void openDocument() {
+    // Right now there is only one window open by default
+    DocumentWindowController documentWC = sceneBuilderApp.getDocumentWindowControllers().get(0);
+    sceneBuilderApp.performControlAction(
+        SceneBuilderApp.ApplicationControlAction.OPEN_FILE, documentWC);
+    getStage().hide();
+  }
 }
-

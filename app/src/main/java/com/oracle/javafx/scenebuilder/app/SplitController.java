@@ -38,147 +38,145 @@ import javafx.scene.Node;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.SplitPane.Divider;
 
-/**
- *
- */
+/** */
 public class SplitController {
 
-    public enum Target {
+  public enum Target {
+    FIRST,
+    LAST
+  };
 
-        FIRST, LAST
-    };
+  private final SplitPane splitPane;
+  private final Target target;
+  private final Node targetNode;
+  private double dividerPosition = -1.0;
 
-    private final SplitPane splitPane;
-    private final Target target;
-    private final Node targetNode;
-    private double dividerPosition = -1.0;
+  public SplitController(SplitPane splitPane, Target target) {
+    assert splitPane != null;
+    assert splitPane.getItems().size() >= 1;
 
-    public SplitController(SplitPane splitPane, Target target) {
-        assert splitPane != null;
-        assert splitPane.getItems().size() >= 1;
+    this.splitPane = splitPane;
+    this.target = target;
 
-        this.splitPane = splitPane;
-        this.target = target;
+    final List<Node> children = splitPane.getItems();
+    final int targetIndex = (target == Target.FIRST) ? 0 : children.size() - 1;
+    this.targetNode = children.get(targetIndex);
+  }
 
-        final List<Node> children = splitPane.getItems();
-        final int targetIndex = (target == Target.FIRST) ? 0 : children.size() - 1;
-        this.targetNode = children.get(targetIndex);
+  public DoubleProperty position() {
+    final Divider divider = getTargetDivider();
+    return divider == null ? null : divider.positionProperty();
+  }
+
+  public double getPosition() {
+    final Divider divider = getTargetDivider();
+    return divider == null ? -1.0 : divider.getPosition();
+  }
+
+  public void setPosition(double value) {
+    final Divider divider = getTargetDivider();
+    if (divider != null) {
+      divider.setPosition(value);
     }
+    dividerPosition = value;
+  }
 
-    public DoubleProperty position() {
+  public void showTarget() {
+    if (isTargetVisible() == false) {
+      // Put the target node back in the split pane items
+      if (target == Target.FIRST) {
+        splitPane.getItems().add(0, targetNode);
+      } else {
+        splitPane.getItems().add(targetNode);
+      }
+
+      // Restore the target divider position (if any)
+      final List<Divider> dividers = splitPane.getDividers();
+      if ((dividers.isEmpty() == false) && (dividerPosition != -1)) { // (1)
         final Divider divider = getTargetDivider();
-        return divider == null ? null : divider.positionProperty();
+        assert divider != null; // Because of (1)
+        divider.setPosition(dividerPosition);
+      }
     }
+  }
 
-    public double getPosition() {
-        final Divider divider = getTargetDivider();
-        return divider == null ? -1.0 : divider.getPosition();
+  public void hideTarget() {
+
+    if (isTargetVisible()) {
+
+      final List<Divider> dividers = splitPane.getDividers();
+      final List<Double> positionsList = asList(splitPane.getDividerPositions());
+
+      // Backup the target divider positions (if any)
+      // so we can restore it on showing
+      final Divider targetDivider = getTargetDivider();
+      if (targetDivider != null) {
+        dividerPosition = targetDivider.getPosition();
+        int targetDividerIndex = target == Target.FIRST ? 0 : dividers.size() - 1;
+        positionsList.remove(targetDividerIndex);
+      }
+
+      // Removes the target node from the split pane items
+      splitPane.getItems().remove(targetNode);
+
+      // Set back remaining dividers positions if any
+      if (positionsList.isEmpty() == false) {
+        double[] positionsArray = toArray(positionsList);
+        splitPane.setDividerPositions(positionsArray);
+      }
     }
+  }
 
-    public void setPosition(double value) {
-        final Divider divider = getTargetDivider();
-        if (divider != null) {
-            divider.setPosition(value);
-        }
-        dividerPosition = value;
+  public void toggleTarget() {
+    if (isTargetVisible()) {
+      hideTarget();
+    } else {
+      showTarget();
     }
+  }
 
-    public void showTarget() {
-        if (isTargetVisible() == false) {
-            // Put the target node back in the split pane items
-            if (target == Target.FIRST) {
-                splitPane.getItems().add(0, targetNode);
-            } else {
-                splitPane.getItems().add(targetNode);
-            }
-
-            // Restore the target divider position (if any)
-            final List<Divider> dividers = splitPane.getDividers();
-            if ((dividers.isEmpty() == false) && (dividerPosition != -1)) { // (1)
-                final Divider divider = getTargetDivider();
-                assert divider != null; // Because of (1)
-                divider.setPosition(dividerPosition);
-            }
-        }
+  public void setTargetVisible(boolean visible) {
+    if (visible) {
+      showTarget();
+    } else {
+      hideTarget();
     }
+  }
 
-    public void hideTarget() {
+  public boolean isTargetVisible() {
+    return splitPane.getItems().contains(targetNode);
+  }
 
-        if (isTargetVisible()) {
-
-            final List<Divider> dividers = splitPane.getDividers();
-            final List<Double> positionsList = asList(splitPane.getDividerPositions());
-
-            // Backup the target divider positions (if any)
-            // so we can restore it on showing
-            final Divider targetDivider = getTargetDivider();
-            if (targetDivider != null) {
-                dividerPosition = targetDivider.getPosition();
-                int targetDividerIndex = target == Target.FIRST ? 0 : dividers.size() - 1;
-                positionsList.remove(targetDividerIndex);
-            }
-
-            // Removes the target node from the split pane items
-            splitPane.getItems().remove(targetNode);
-
-            // Set back remaining dividers positions if any
-            if (positionsList.isEmpty() == false) {
-                double[] positionsArray = toArray(positionsList);
-                splitPane.setDividerPositions(positionsArray);
-            }
-        }
+  private Divider getTargetDivider() {
+    final Divider divider;
+    final List<Divider> dividers = splitPane.getDividers();
+    if (dividers.isEmpty() == false) {
+      if (target == Target.FIRST) {
+        divider = dividers.get(0);
+      } else {
+        divider = dividers.get(dividers.size() - 1);
+      }
+    } else {
+      divider = null;
     }
+    return divider;
+  }
 
-    public void toggleTarget() {
-        if (isTargetVisible()) {
-            hideTarget();
-        } else {
-            showTarget();
-        }
+  // Arrays.asList does not work with primitive types
+  private static List<Double> asList(double[] array) {
+    final List<Double> list = new ArrayList<>(array.length);
+    for (double d : array) {
+      list.add(d);
     }
+    return list;
+  }
 
-    public void setTargetVisible(boolean visible) {
-        if (visible) {
-            showTarget();
-        } else {
-            hideTarget();
-        }
+  // List.toArray does not work with primitive types
+  private static double[] toArray(List<Double> list) {
+    final double[] array = new double[list.size()];
+    for (int i = 0; i < list.size(); i++) {
+      array[i] = list.get(i);
     }
-
-    public boolean isTargetVisible() {
-        return splitPane.getItems().contains(targetNode);
-    }
-
-    private Divider getTargetDivider() {
-        final Divider divider;
-        final List<Divider> dividers = splitPane.getDividers();
-        if (dividers.isEmpty() == false) {
-            if (target == Target.FIRST) {
-                divider = dividers.get(0);
-            } else {
-                divider = dividers.get(dividers.size() - 1);
-            }
-        } else {
-            divider = null;
-        }
-        return divider;
-    }
-
-    // Arrays.asList does not work with primitive types
-    private static List<Double> asList(double[] array) {
-        final List<Double> list = new ArrayList<>(array.length);
-        for (double d : array) {
-            list.add(d);
-        }
-        return list;
-    }
-
-    // List.toArray does not work with primitive types
-    private static double[] toArray(List<Double> list) {
-        final double[] array = new double[list.size()];
-        for (int i = 0; i < list.size(); i++) {
-            array[i] = list.get(i);
-        }
-        return array;
-    }
+    return array;
+  }
 }
