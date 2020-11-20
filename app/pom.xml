@@ -8,6 +8,17 @@
 
     <artifactId>app</artifactId>
 
+    <properties>
+        <!--plugins versions !-->
+        <exec.maven.plugin.version>3.0.0</exec.maven.plugin.version>
+        <javafx-maven-plugin>0.0.5</javafx-maven-plugin>
+        <maven-dependency-plugin>3.1.2</maven-dependency-plugin>
+        <!--depedencies !-->
+        <jakarta.json>2.0.0</jakarta.json>
+        <!--own depedencies !-->
+        <kit>15.0.1</kit>
+        <components>15.0.1</components>
+    </properties>
     <parent>
         <groupId>gr.codebb.scenebuilder</groupId>
         <artifactId>parent</artifactId>
@@ -15,12 +26,12 @@
         <relativePath>..</relativePath>
     </parent>
     
-        <build>
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
-                <version>0.0.5</version>
+                <version>${javafx-maven-plugin}</version>
                 <configuration>
                     <mainClass>com.oracle.javafx.scenebuilder.app.SceneBuilderApp</mainClass>
                 </configuration>
@@ -28,7 +39,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.1.2</version>
+                <version>${maven-dependency-plugin}</version>
                 <executions>
                     <execution>
                         <id>copy-dependencies</id>
@@ -49,27 +60,61 @@
             </plugin>
         </plugins>
     </build>
-    
+    <profiles>
+        <profile>
+            <id>build-windows</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <version>${exec.maven.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>Build Native Windows App</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <workingDirectory>${project.basedir}</workingDirectory>
+                            <executable>build_app.bat</executable>
+                            <environmentVariables>
+                                <APP_VERSION>
+                                    ${project.version}
+                                </APP_VERSION>
+                                <PROJECT_VERSION>
+                                    ${project.version}
+                                </PROJECT_VERSION>
+                            </environmentVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     <dependencies> 
         <dependency>
             <groupId>gr.codebb.scenebuilder</groupId>
             <artifactId>kit</artifactId>
-            <version>15.0.1</version>          
+            <version>${kit}</version>          
         </dependency>
         <dependency>
             <groupId>gr.codebb.scenebuilder</groupId>
             <artifactId>components</artifactId>
-            <version>15.0.1</version>          
+            <version>${components}</version>          
         </dependency>
         <dependency>
             <groupId>jakarta.json</groupId>
             <artifactId>jakarta.json-api</artifactId>
-            <version>2.0.0</version>
+            <version>${jakarta.json}</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>jakarta.json</artifactId>
-            <version>2.0.0</version>
+            <version>${jakarta.json}</version>
         </dependency>
     </dependencies>
 </project>
