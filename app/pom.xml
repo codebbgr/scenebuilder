@@ -8,7 +8,7 @@
 
     <artifactId>app</artifactId>
 
-    <properties>
+    <properties>     
         <!--plugins versions !-->
         <exec.maven.plugin.version>3.0.0</exec.maven.plugin.version>
         <javafx-maven-plugin>0.0.5</javafx-maven-plugin>
@@ -17,7 +17,7 @@
         <jakarta.json>2.0.0</jakarta.json>
         <!--own depedencies !-->
         <kit>15.0.1</kit>
-        <components>15.0.1</components>
+        <components>15.0.1</components>        
     </properties>
     <parent>
         <groupId>gr.codebb.scenebuilder</groupId>
@@ -27,6 +27,12 @@
     </parent>
     
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.openjfx</groupId>
