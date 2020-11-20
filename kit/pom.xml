@@ -25,7 +25,7 @@
         <dependency>
             <groupId>com.gluonhq</groupId>
             <artifactId>charm-glisten</artifactId>
-            <version>6.0.5</version>          
+            <version>6.0.6</version>          
         </dependency>
         <dependency>
             <groupId>org.apache.maven.resolver</groupId>
