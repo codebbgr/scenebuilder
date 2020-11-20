@@ -6,24 +6,6 @@
 version: 2
 updates:
 - package-ecosystem: maven
-  directory: "/components"
-  schedule:
-    interval: daily
-    time: "03:00"
-  open-pull-requests-limit: 10
-- package-ecosystem: maven
-  directory: "/app"
-  schedule:
-    interval: daily
-    time: "03:00"
-  open-pull-requests-limit: 10
-- package-ecosystem: maven
-  directory: "/kit"
-  schedule:
-    interval: daily
-    time: "03:00"
-  open-pull-requests-limit: 10
-- package-ecosystem: maven
   directory: "/"
   schedule:
     interval: daily
