@@ -20,6 +20,11 @@
             <name>gluon</name>
             <url>https://nexus.gluonhq.com/nexus/content/repositories/releases/</url>
         </repository>
+        <repository>
+            <id>maven-codebb</id>
+            <name>maven-codebb</name>
+            <url>http://maven.codebb.gr/</url>
+        </repository>
     </repositories>
     <dependencies>
         <dependency>
@@ -83,6 +88,11 @@
             <artifactId>assertj-core</artifactId>
             <version>3.18.1</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>gr.codebb.maven</groupId>
+            <artifactId>maven-resolver-provider</artifactId>
+            <version>15.0.1</version>
         </dependency>
     </dependencies>
 </project>

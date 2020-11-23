@@ -21,6 +21,7 @@ module com.oracle.javafx.scenebuilder.kit {
   requires org.apache.httpcomponents.httpcore;
   requires org.apache.commons.codec;
   requires org.apache.commons.lang3;
+  requires org.apache.maven.resolver.provider;
   requires jakarta.json;
   requires org.apache.commons.io;
 
