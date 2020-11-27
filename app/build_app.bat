@@ -12,6 +12,10 @@ rem APP_VERSION: the application version, e.g. 1.0.0, shown in "about" dialog
 set JAVA_VERSION=15
 set MAIN_JAR=app-%PROJECT_VERSION%.jar
 
+rem Set desired installer type: "app-image" "msi" "exe".
+set INSTALLER_TYPE=app-image
+
+
 rem ------ SETUP DIRECTORIES AND FILES ----------------------------------------
 rem Remove previously generated java runtime and installers. Copy all required
 rem jar files into the input/libs folder.
@@ -30,6 +34,7 @@ rem application.
 echo detecting required modules
 
 "%JAVA_HOME%\bin\jdeps" ^
+  -q ^
   --multi-release %JAVA_VERSION% ^
   --ignore-missing-deps ^
   --class-path "target\installer\input\libs\*" ^
@@ -57,6 +62,7 @@ rem works with dependencies that are not fully modularized, yet.
 echo creating java runtime image
 
 call "%JAVA_HOME%\bin\jlink" ^
+  --strip-native-commands ^
   --no-header-files ^
   --no-man-pages ^
   --compress=2 ^
@@ -69,11 +75,11 @@ rem ------ PACKAGING ----------------------------------------------------------
 rem A loop iterates over the various packaging types supported by jpackage. In
 rem the end we will find all packages inside the target/installer directory.
 
-for %%s in ("app-image") do call "%JAVA_HOME%\bin\jpackage" ^
-  --type %%s ^
+call "%JAVA_HOME%\bin\jpackage" ^
+  --type %INSTALLER_TYPE% ^
   --dest target/installer ^
   --input target/installer/input/libs ^
-  --name cbbSceneBuilder ^
+  --name CbbSceneBuilder ^
   --main-class gr.codebb.cbbSceneBuilder.AppLauncher ^
   --main-jar %MAIN_JAR% ^
   --java-options -Xmx2048m ^
